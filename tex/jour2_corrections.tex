@@ -1,0 +1,749 @@
+% ============================================================================
+% (c) 2025 Mohamed EL AFRIT -- IPSSI
+% Licence CC BY-NC-SA 4.0
+% https://creativecommons.org/licenses/by-nc-sa/4.0/deed.fr
+%
+% FICHE DE CORRECTIONS DETAILLEES -- Jour 2 : Optimisation
+% ============================================================================
+\input{template_ipssi}
+
+\jourNumero{2}
+\jourTheme{Optimisation}
+
+\begin{document}
+
+\pagegarde{Corrections d\'{e}taill\'{e}es}{2}{Optimisation}
+
+\setstretch{1.06}
+\setlength{\parskip}{2pt}
+\setlength{\abovedisplayskip}{5pt}
+\setlength{\belowdisplayskip}{5pt}
+
+% ======================================================================
+% RAPPELS
+% ======================================================================
+\begin{tcolorbox}[
+    enhanced, colback=ipssiCyan!5, colframe=ipssiCyan!50,
+    boxrule=0.8pt, arc=4pt,
+    title={\sffamily\bfseries Rappels --- Formules utilis\'{e}es},
+    coltitle=white, colbacktitle=ipssiCyan!70,
+]
+\small
+$J = \frac{1}{n}\sum(y_i - \yhat_i)^2$ \hfill
+$w \leftarrow w - \alpha \cdot J'(w)$ \hfill
+$(ax^2)' = 2ax$ \hfill
+$((x{-}a)^2)' = 2(x{-}a)$
+
+\smallskip
+$\frac{\partial J}{\partial w_1} = \frac{-2}{n}\sum x_i(y_i{-}\yhat_i)$ \hfill
+$\frac{\partial J}{\partial w_0} = \frac{-2}{n}\sum (y_i{-}\yhat_i)$
+\end{tcolorbox}
+
+% ======================================================================
+% EXERCICE 1
+% ======================================================================
+\section*{Exercice 1 \hfill \exofondamental}
+\addcontentsline{toc}{section}{Exercice 1 --- Calculer le MSE}
+\textit{Rappel : $\text{MSE} = \frac{1}{n}\sum_{i=1}^{n}(y_i - \yhat_i)^2$.}
+
+\separateur
+
+\textbf{a-b) Erreurs et erreurs au carr\'{e} :}
+
+\begin{center}
+\renewcommand{\arraystretch}{1.2}
+\begin{tabular}{c|c|c|c|c}
+    \toprule
+    $i$ & $y_i$ & $\yhat_i$ & $e_i = y_i - \yhat_i$ & $e_i^2$ \\
+    \midrule
+    1 & 30 & 33 & $-3$  & $9$ \\
+    2 & 42 & 40 & $+2$  & $4$ \\
+    3 & 55 & 52 & $+3$  & $9$ \\
+    4 & 38 & 44 & $-6$  & $36$ \\
+    \midrule
+    & & & \textbf{Somme} & $\mathbf{58}$ \\
+    \bottomrule
+\end{tabular}
+\end{center}
+
+\textbf{c) MSE :}
+\formule{\text{MSE} = \frac{1}{4} \times 58 = \boxed{14{,}5 \;\text{(k\texteuro)}^2}}
+
+\textbf{d) Nouveau MSE si $\yhat_4 = 38$ :}
+L'erreur de l'observation 4 devient $e_4 = 0$, donc $e_4^2 = 0$.
+Nouvelle somme : $9 + 4 + 9 + 0 = 22$.
+\[
+    \text{MSE}_{\text{nouveau}} = \frac{22}{4} = \boxed{5{,}5}
+    \qquad \text{Diminution : } 14{,}5 - 5{,}5 = 9{,}0 \text{ soit } -62\%
+\]
+
+\begin{attentionbox}[Erreurs fr\'{e}quentes]
+    \begin{itemize}
+        \item Oublier le carr\'{e} : sans le carr\'{e}, $\sum e_i = -3+2+3-6 = -4$ cache la vraie ampleur des erreurs.
+        \item Le MSE est en \textbf{(k\texteuro)$^2$}, pas en k\texteuro. L'erreur typique est $\sqrt{\text{MSE}}$.
+    \end{itemize}
+\end{attentionbox}
+
+% ======================================================================
+% EXERCICE 2
+% ======================================================================
+\section*{Exercice 2 \hfill \exofondamental}
+\addcontentsline{toc}{section}{Exercice 2 --- Calculer des d\'{e}riv\'{e}es}
+
+\separateur
+
+\textbf{a)} $f(x) = 3x^2 \;\Longrightarrow\; f'(x) = \boxed{6x}$
+\quad (r\`{e}gle $(ax^2)' = 2ax$ avec $a = 3$).
+
+Minimum : $6x = 0 \Rightarrow \boxed{x = 0}$.
+
+\medskip
+\textbf{b)} $f(x) = x^2 - 6x + 9 = (x - 3)^2 \;\Longrightarrow\; f'(x) = \boxed{2x - 6}$
+
+On peut d\'{e}river terme \`{a} terme : $(x^2)' = 2x$, $(-6x)' = -6$, $(9)' = 0$.
+
+Minimum : $2x - 6 = 0 \Rightarrow \boxed{x = 3}$.
+
+\medskip
+\textbf{c)} $f(x) = 2x + 5 \;\Longrightarrow\; f'(x) = \boxed{2}$
+\quad (r\`{e}gle $(ax+b)' = a$). Pas de minimum (droite).
+
+\medskip
+\textbf{d)} $f(x) = (x - 7)^2 \;\Longrightarrow\; f'(x) = \boxed{2(x - 7)}$
+\quad (r\`{e}gle $((x{-}a)^2)' = 2(x{-}a)$).
+
+Minimum : $2(x-7) = 0 \Rightarrow \boxed{x = 7}$.
+
+\medskip
+\textbf{e)} $f(x) = 5(x-2)^2 + 3$.
+
+Par la r\`{e}gle de la cha\^{i}ne : $f'(x) = 5 \cdot 2(x-2) = \boxed{10(x-2)}$.
+
+La constante $+3$ dispara\^{i}t (d\'{e}riv\'{e}e d'une constante = 0).
+
+\begin{retenirbox}
+    Le point o\`{u} $f'(x) = 0$ est le \textbf{minimum} pour les fonctions en U (convexes).
+    C'est le ``fond de la vall\'{e}e'' --- l'objectif de la descente de gradient.
+\end{retenirbox}
+
+% ======================================================================
+% EXERCICE 3
+% ======================================================================
+\section*{Exercice 3 \hfill \exofondamental}
+\addcontentsline{toc}{section}{Exercice 3 --- Une it\'{e}ration de GD}
+\textit{$J(w) = (w - 4)^2$, $w_0 = 0$, $\alpha = 0{,}2$.}
+
+\separateur
+
+\textbf{a)} $J'(w) = \boxed{2(w - 4)}$
+
+\textbf{b)} $J'(0) = 2(0 - 4) = \boxed{-8}$
+\quad (pente n\'{e}gative : la fonction descend vers la droite)
+
+\textbf{c)} Mise \`{a} jour :
+\[
+    w_1 = w_0 - \alpha \cdot J'(w_0) = 0 - 0{,}2 \times (-8) = 0 + 1{,}6 = \boxed{1{,}6}
+\]
+Le signe moins dans la formule, combin\'{e} \`{a} la d\'{e}riv\'{e}e n\'{e}gative, fait \textbf{augmenter} $w$ --- on va vers la droite, dans la bonne direction.
+
+\textbf{d)} Co\^{u}ts :
+$J(w_0) = J(0) = (0-4)^2 = \boxed{16}$,\quad
+$J(w_1) = J(1{,}6) = (1{,}6-4)^2 = (2{,}4)^2 = \boxed{5{,}76}$.
+
+Oui, le co\^{u}t a diminu\'{e} : $16 \to 5{,}76$ ($-64\%$). \checkmark
+
+\textbf{e)} Chemin parcouru : $w$ est pass\'{e} de 0 \`{a} 1{,}6 (sur un total de 4).
+Pourcentage : $1{,}6 / 4 = \boxed{40\%}$ du chemin en une seule it\'{e}ration.
+
+\begin{attentionbox}[Erreurs fr\'{e}quentes]
+    \begin{itemize}
+        \item Oublier le signe moins : $w_1 = w_0 \mathbf{-} \alpha J'(w_0)$, pas $+$.
+        \item Se tromper dans le signe de la d\'{e}riv\'{e}e : $2(0-4) = -8$, pas $+8$.
+    \end{itemize}
+\end{attentionbox}
+
+% ======================================================================
+% EXERCICE 4
+% ======================================================================
+\section*{Exercice 4 \hfill \exofondamental}
+\addcontentsline{toc}{section}{Exercice 4 --- Trois it\'{e}rations}
+\textit{$J(w) = w^2$, $w_0 = 5$, $\alpha = 0{,}1$.}
+
+\separateur
+
+\textbf{a)} $J'(w) = \boxed{2w}$
+
+\textbf{b)} Tableau compl\'{e}t\'{e} :
+
+\begin{center}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{c|c|c|c|c}
+    \toprule
+    It. & $w$ & $J'(w) = 2w$ & $w_{\text{new}} = w - 0{,}1 \times 2w$ & $J(w)$ \\
+    \midrule
+    0 & $5{,}000$ & $10{,}0$ & $5 - 1{,}0 = 4{,}000$ & $25{,}00$ \\
+    1 & $4{,}000$ & $8{,}0$  & $4 - 0{,}8 = 3{,}200$ & $16{,}00$ \\
+    2 & $3{,}200$ & $6{,}4$  & $3{,}2 - 0{,}64 = 2{,}560$ & $10{,}24$ \\
+    \bottomrule
+\end{tabular}
+\end{center}
+
+Apr\`{e}s 3 it\'{e}rations : $w_3 = 2{,}560$.
+
+\textbf{c)} Ratio : $w_3 / w_0 = 2{,}560 / 5 = \boxed{0{,}512}$.
+
+Le poids a parcouru $5 - 2{,}56 = 2{,}44$ vers $w^* = 0$, soit $48{,}8\%$ du chemin.
+
+\textbf{d) Bonus :} $w_{\text{new}} = w - \alpha \cdot 2w = w(1 - 2\alpha)$.
+Donc $w_k = w_0 \cdot (1 - 2\alpha)^k = 5 \times (1 - 0{,}2)^k = 5 \times 0{,}8^k$.
+
+V\'{e}rification : $w_3 = 5 \times 0{,}8^3 = 5 \times 0{,}512 = 2{,}560$. \checkmark
+
+\begin{retenirbox}
+    Le facteur $(1 - 2\alpha)$ doit \^{e}tre en valeur absolue $< 1$ pour converger.
+    Donc $0 < \alpha < 1$ pour $J(w) = w^2$. Si $\alpha \geq 1$, on diverge.
+\end{retenirbox}
+
+% ======================================================================
+% EXERCICE 5
+% ======================================================================
+\section*{Exercice 5 \hfill \exointermediaire}
+\addcontentsline{toc}{section}{Exercice 5 --- D\'{e}riv\'{e}es partielles}
+\textit{3 observations, $w_1 = 3$, $w_0 = 25$.}
+
+\separateur
+
+\textbf{a) Pr\'{e}dictions et erreurs :}
+
+\begin{center}
+\renewcommand{\arraystretch}{1.2}
+\begin{tabular}{c|c|c|c|c|c}
+    \toprule
+    $i$ & $x_i$ & $y_i$ & $\yhat_i = 3x_i + 25$ & $e_i = y_i - \yhat_i$ & $x_i \cdot e_i$ \\
+    \midrule
+    1 & 2  & 32 & $6 + 25 = 31$  & $+1$ & $2$ \\
+    2 & 5  & 44 & $15 + 25 = 40$ & $+4$ & $20$ \\
+    3 & 10 & 55 & $30 + 25 = 55$ & $0$  & $0$ \\
+    \midrule
+    & & & & $\sum e_i = 5$ & $\sum x_i e_i = 22$ \\
+    \bottomrule
+\end{tabular}
+\end{center}
+
+\textbf{b) Gradient par rapport \`{a} $w_1$ :}
+\[
+    \frac{\partial J}{\partial w_1} = \frac{-2}{3} \times 22 = \boxed{-14{,}67}
+\]
+
+\textbf{c) Gradient par rapport \`{a} $w_0$ :}
+\[
+    \frac{\partial J}{\partial w_0} = \frac{-2}{3} \times 5 = \boxed{-3{,}33}
+\]
+
+\textbf{d) Nouveaux poids} ($\alpha = 0{,}01$) :
+\begin{align*}
+    w_1' &= 3 - 0{,}01 \times (-14{,}67) = 3 + 0{,}1467 = \boxed{3{,}147} \\
+    w_0' &= 25 - 0{,}01 \times (-3{,}33) = 25 + 0{,}0333 = \boxed{25{,}033}
+\end{align*}
+
+\textbf{e)} Les deux poids ont \textbf{augment\'{e}}, ce qui est coh\'{e}rent : les erreurs sont positives
+(le mod\`{e}le sous-estime), donc il doit pr\'{e}dire \textbf{plus haut} --- d'o\`{u} l'augmentation de $w_0$ (biais)
+et $w_1$ (pente).
+
+\begin{attentionbox}[Erreurs fr\'{e}quentes]
+    \begin{itemize}
+        \item Oublier le $\frac{-2}{n}$ devant la somme --- attention au signe !
+        \item Confondre $\sum e_i$ et $\sum x_i e_i$ : le gradient de $w_1$ utilise $x_i e_i$, celui de $w_0$ utilise $e_i$ seul.
+    \end{itemize}
+\end{attentionbox}
+
+% ======================================================================
+% EXERCICE 6
+% ======================================================================
+\section*{Exercice 6 \hfill \exointermediaire}
+\addcontentsline{toc}{section}{Exercice 6 --- Diagnostiquer une divergence}
+\textit{$J(w) = (w-3)^2$, $\alpha = 1{,}5$, donn\'{e}es divergentes.}
+
+\separateur
+
+\textbf{a) V\'{e}rification it\'{e}ration $0 \to 1$ :}
+
+$J'(w) = 2(w - 3)$. En $w_0 = 0$ : $J'(0) = 2(0-3) = -6$.
+\[
+    w_1 = 0 - 1{,}5 \times (-6) = 0 + 9 = \boxed{9{,}0} \quad \checkmark
+\]
+
+\textbf{b)} Le co\^{u}t \textbf{explose} : $9 \to 36 \to 324 \to 2304 \to 9216$.
+Le probl\`{e}me : $\alpha = 1{,}5$ est \textbf{trop grand}. On saute par-dessus le minimum
+et on s'\'{e}loigne de plus en plus (divergence).
+
+\textbf{c)} Pour $J(w) = (w - a)^2$, on a $J'(w) = 2(w-a)$ et
+$w_{\text{new}} = w - 2\alpha(w - a) = (1 - 2\alpha)w + 2\alpha a$.
+Convergence si $|1 - 2\alpha| < 1$, soit $\boxed{0 < \alpha < 1}$.
+Ici $\alpha = 1{,}5 > 1$ : divergence.
+
+\textbf{d) Avec $\alpha = 0{,}1$ :}
+\begin{center}
+\renewcommand{\arraystretch}{1.2}
+\begin{tabular}{c|c|c|c}
+    \toprule
+    It. & $w$ & $J'(w) = 2(w{-}3)$ & $J(w)$ \\
+    \midrule
+    0 & $0{,}00$ & $-6{,}0$ & $9{,}00$ \\
+    1 & $0{,}60$ & $-4{,}8$ & $5{,}76$ \\
+    2 & $1{,}08$ & $-3{,}84$ & $3{,}69$ \\
+    3 & $1{,}46$ & $-3{,}07$ & $2{,}36$ \\
+    \bottomrule
+\end{tabular}
+\end{center}
+
+Oui, le co\^{u}t diminue r\'{e}guli\`{e}rement cette fois. \checkmark
+
+\begin{retenirbox}
+    Si le co\^{u}t \textbf{augmente} au fil des it\'{e}rations $\Rightarrow$ $\alpha$ est trop grand.
+    Solution : \textbf{diviser $\alpha$ par 10} et r\'{e}essayer.
+\end{retenirbox}
+
+% ======================================================================
+% EXERCICE 7
+% ======================================================================
+\section*{Exercice 7 \hfill \exointermediaire}
+\addcontentsline{toc}{section}{Exercice 7 --- Comparer deux taux d'apprentissage}
+\textit{$J(w) = (w - 5)^2$, $w_0 = 0$, $J'(w) = 2(w-5)$.}
+
+\separateur
+
+\textbf{a) \'{E}tudiant A} ($\alpha = 0{,}05$) :
+
+\begin{center}
+\renewcommand{\arraystretch}{1.2}
+\begin{tabular}{c|c|c|c|c}
+    \toprule
+    It. & $w$ & $J'(w)$ & $w_{\text{new}}$ & $J(w)$ \\
+    \midrule
+    0 & $0{,}000$ & $-10{,}0$ & $0 + 0{,}5 = 0{,}500$ & $25{,}00$ \\
+    1 & $0{,}500$ & $-9{,}0$  & $0{,}5 + 0{,}45 = 0{,}950$ & $20{,}25$ \\
+    2 & $0{,}950$ & $-8{,}1$  & $0{,}95 + 0{,}405 = 1{,}355$ & $16{,}40$ \\
+    \bottomrule
+\end{tabular}
+\end{center}
+
+$w_3 = 1{,}355$, $J(w_3) = (1{,}355-5)^2 = \boxed{13{,}30}$.
+
+\textbf{b) \'{E}tudiant B} ($\alpha = 0{,}3$) :
+
+\begin{center}
+\renewcommand{\arraystretch}{1.2}
+\begin{tabular}{c|c|c|c|c}
+    \toprule
+    It. & $w$ & $J'(w)$ & $w_{\text{new}}$ & $J(w)$ \\
+    \midrule
+    0 & $0{,}000$ & $-10{,}0$ & $0 + 3{,}0 = 3{,}000$ & $25{,}00$ \\
+    1 & $3{,}000$ & $-4{,}0$  & $3 + 1{,}2 = 4{,}200$ & $4{,}00$ \\
+    2 & $4{,}200$ & $-1{,}6$  & $4{,}2 + 0{,}48 = 4{,}680$ & $0{,}64$ \\
+    \bottomrule
+\end{tabular}
+\end{center}
+
+$w_3 = 4{,}680$, $J(w_3) = (4{,}68-5)^2 = \boxed{0{,}102}$.
+
+\textbf{c) Tableau comparatif :}
+\begin{center}
+\renewcommand{\arraystretch}{1.2}
+\begin{tabular}{c|c|c|c|c}
+    \toprule
+    & $w_1$ & $w_2$ & $w_3$ & $J(w_3)$ \\
+    \midrule
+    $\alpha = 0{,}05$ & 0{,}500 & 0{,}950 & 1{,}355 & 13{,}30 \\
+    $\alpha = 0{,}3$  & 3{,}000 & 4{,}200 & 4{,}680 & 0{,}10 \\
+    \bottomrule
+\end{tabular}
+\end{center}
+
+\textbf{d)} L'\'{e}tudiant B converge \textbf{130 fois plus vite} ($J = 0{,}10$ vs $13{,}3$).
+Avec $\alpha$ encore plus grand (ex : $0{,}8$), B risquerait d'osciller autour du minimum.
+La limite de convergence est $\alpha < 1$.
+
+% ======================================================================
+% EXERCICE 8
+% ======================================================================
+\section*{Exercice 8 \hfill \exointermediaire}
+\addcontentsline{toc}{section}{Exercice 8 --- Descente de gradient 1D (Python)}
+
+\separateur
+
+\begin{pythonbox}[Correction compl\`{e}te]
+\begin{lstlisting}
+import numpy as np
+
+# Fonction de cout et sa derivee
+def J(w):
+    return (w - 3) ** 2
+
+def dJ(w):
+    return 2 * (w - 3)
+
+# Parametres
+w = 0.0         # point de depart
+alpha = 0.1     # taux d'apprentissage
+n_iter = 20
+
+# Boucle de descente de gradient
+for i in range(n_iter):
+    grad = dJ(w)              # calculer la derivee
+    w = w - alpha * grad      # mise a jour
+    if i < 5 or i == n_iter - 1:
+        print(f"Iter {i+1:2d} : w = {w:.4f}, J = {J(w):.4f}")
+
+print(f"\nResultat : w = {w:.4f} (optimal : 3.0)")
+print(f"Erreur : |w - 3| = {abs(w - 3):.6f}")
+\end{lstlisting}
+\end{pythonbox}
+
+\textbf{Sortie attendue :}
+\begin{verbatim}
+Iter  1 : w = 0.6000, J = 5.7600
+Iter  2 : w = 1.0800, J = 3.6864
+Iter  3 : w = 1.4640, J = 2.3593
+Iter  4 : w = 1.7712, J = 1.5100
+Iter  5 : w = 2.0170, J = 0.9664
+Iter 20 : w = 2.9885, J = 0.0001
+\end{verbatim}
+
+Apr\`{e}s 20 it\'{e}rations, $w \approx 2{,}99$ --- tr\`{e}s proche du minimum $w^* = 3$.
+
+\begin{intuitionbox}[Variante]
+    Essayez $\alpha = 0{,}01$ (plus lent, 20 it\'{e}rations ne suffisent pas) ou $\alpha = 0{,}5$ (tr\`{e}s rapide, convergence en ${\sim}5$ it\'{e}rations).
+\end{intuitionbox}
+
+\begin{attentionbox}[Erreurs fr\'{e}quentes]
+    \begin{itemize}
+        \item \'{E}crire \texttt{w = w + alpha * grad} au lieu de \texttt{w - alpha * grad} --- le signe moins est crucial.
+        \item D\'{e}finir \texttt{dJ} comme $2(w + 3)$ au lieu de $2(w - 3)$ --- attention au signe dans la parenth\`{e}se.
+    \end{itemize}
+\end{attentionbox}
+
+% ======================================================================
+% EXERCICE 9
+% ======================================================================
+\section*{Exercice 9 \hfill \exointermediaire}
+\addcontentsline{toc}{section}{Exercice 9 --- Visualiser la convergence (Python)}
+
+\separateur
+
+\begin{pythonbox}[Correction compl\`{e}te]
+\begin{lstlisting}
+import numpy as np
+import matplotlib.pyplot as plt
+
+def J(w): return (w - 3) ** 2
+def dJ(w): return 2 * (w - 3)
+
+w = -2.0
+alpha = 0.15
+n_iter = 25
+
+hist_w = [w]
+hist_J = [J(w)]
+
+for i in range(n_iter):
+    w = w - alpha * dJ(w)
+    hist_w.append(w)       # sauvegarder w
+    hist_J.append(J(w))    # sauvegarder J(w)
+
+# --- Graphique 1 : trajectoire ---
+fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(13, 5))
+
+w_range = np.linspace(-3, 8, 200)
+ax1.plot(w_range, J(w_range), 'b-', lw=2)
+ax1.plot(hist_w, hist_J, 'ro-', markersize=5,
+         label='Iterations')
+ax1.set_xlabel('w'); ax1.set_ylabel('J(w)')
+ax1.set_title('Trajectoire sur la courbe')
+ax1.legend(); ax1.grid(True, alpha=0.3)
+
+# --- Graphique 2 : convergence ---
+ax2.plot(range(len(hist_J)), hist_J, 'g-o',
+         markersize=4)
+ax2.set_xlabel('Iteration')
+ax2.set_ylabel('J(w)')
+ax2.set_title('Courbe de convergence')
+ax2.grid(True, alpha=0.3)
+
+plt.tight_layout(); plt.show()
+\end{lstlisting}
+\end{pythonbox}
+
+\textbf{Description des graphiques :}
+\begin{itemize}
+    \item \textbf{Gauche} : points rouges ``glissant'' le long de la parabole bleue, de $w = -2$ vers $w = 3$.
+    \item \textbf{Droite} : courbe verte qui d\'{e}cro\^{i}t rapidement puis se stabilise pr\`{e}s de 0.
+\end{itemize}
+
+\begin{attentionbox}[Erreurs fr\'{e}quentes]
+    \begin{itemize}
+        \item Oublier d'initialiser \texttt{hist\_w} et \texttt{hist\_J} avec la valeur \textbf{avant} la boucle.
+        \item Mettre \texttt{hist\_J.append(J(w))} \textbf{avant} la mise \`{a} jour --- on obtiendrait l'ancien co\^{u}t, pas le nouveau.
+    \end{itemize}
+\end{attentionbox}
+
+% ======================================================================
+% EXERCICE 10
+% ======================================================================
+\section*{Exercice 10 \hfill \exointermediaire}
+\addcontentsline{toc}{section}{Exercice 10 --- GD sur le dataset salaire (Python)}
+
+\separateur
+
+\begin{pythonbox}[Correction compl\`{e}te]
+\begin{lstlisting}
+import numpy as np
+import matplotlib.pyplot as plt
+
+x = np.array([0,1,1,2,2,0,3,1,4,5,5,6,6,7,7,4,
+    8,5,9,10,10,11,12,9,13,11,15,17,20,18], dtype=float)
+y = np.array([28.0,26.5,35.0,32.0,38.0,25.0,34.5,42.0,
+    38.5,44.0,41.0,48.0,43.5,50.0,39.0,47.0,51.0,40.0,
+    52.0,55.0,48.5,58.0,60.0,42.0,62.0,54.0,65.0,68.0,
+    72.0,58.0])
+n = len(x)
+
+w1, w0 = 0.0, 0.0
+alpha = 0.001
+n_iter = 5000
+hist_mse = []
+
+for it in range(n_iter):
+    y_pred = w1 * x + w0             # predictions
+    errors = y - y_pred               # erreurs
+    dw1 = -2/n * np.sum(x * errors)   # gradient w1
+    dw0 = -2/n * np.sum(errors)       # gradient w0
+    w1 = w1 - alpha * dw1             # mise a jour
+    w0 = w0 - alpha * dw0
+    hist_mse.append(np.mean(errors ** 2))
+
+print(f"Resultat : y = {w1:.4f} * x + {w0:.4f}")
+print(f"Attendu  : y = 2.0672 * x + 31.2830")
+print(f"MSE final = {hist_mse[-1]:.2f}")
+
+fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(13, 5))
+ax1.plot(hist_mse); ax1.set_xlabel('Iteration')
+ax1.set_ylabel('MSE'); ax1.set_title('Convergence')
+ax1.grid(True, alpha=0.3)
+
+ax2.scatter(x, y, c='blue', s=30)
+xl = np.linspace(0, 21, 100)
+ax2.plot(xl, w1 * xl + w0, 'r-', lw=2,
+         label=f'GD: y={w1:.2f}x+{w0:.2f}')
+ax2.set_xlabel('Experience'); ax2.set_ylabel('Salaire')
+ax2.set_title('Regression'); ax2.legend()
+ax2.grid(True, alpha=0.3)
+plt.tight_layout(); plt.show()
+\end{lstlisting}
+\end{pythonbox}
+
+\textbf{Sortie attendue :}
+\begin{verbatim}
+Resultat : y = 2.0666 * x + 31.2560
+Attendu  : y = 2.0672 * x + 31.2830
+MSE final = 20.46
+\end{verbatim}
+
+Les valeurs sont tr\`{e}s proches de la solution analytique. Avec plus d'it\'{e}rations (10\,000+), l'\'{e}cart serait encore plus petit.
+
+\begin{retenirbox}
+    La descente de gradient retrouve le m\^{e}me r\'{e}sultat que la formule analytique,
+    mais de mani\`{e}re \textbf{it\'{e}rative}. C'est plus lent ici, mais c'est la \textbf{seule}
+    m\'{e}thode possible pour les mod\`{e}les non lin\'{e}aires (r\'{e}seaux de neurones).
+\end{retenirbox}
+
+% ======================================================================
+% EXERCICE 11
+% ======================================================================
+\section*{Exercice 11 \hfill \exoavance}
+\addcontentsline{toc}{section}{Exercice 11 --- Comparer 4 taux d'apprentissage (Python)}
+
+\separateur
+
+\begin{pythonbox}[Correction compl\`{e}te]
+\begin{lstlisting}
+import numpy as np
+import matplotlib.pyplot as plt
+
+def J(w): return (w - 5) ** 2
+def dJ(w): return 2 * (w - 5)
+
+alphas = [0.001, 0.01, 0.1, 0.9]
+colors = ['#e74c3c', '#f39c12', '#2ecc71', '#9b59b6']
+n_iter = 50
+w0 = -3.0
+
+fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 5))
+w_range = np.linspace(-5, 12, 200)
+
+print(f"{'alpha':>8} | {'w_final':>10} | {'J_final':>10}")
+print("-" * 35)
+
+for alpha, color in zip(alphas, colors):
+    w = w0
+    hist_w, hist_J = [w], [J(w)]
+    for _ in range(n_iter):
+        w = w - alpha * dJ(w)
+        hist_w.append(w)
+        hist_J.append(J(w))
+
+    print(f"{alpha:>8.3f} | {w:>10.4f} | {J(w):>10.4f}")
+
+    # Trajectoire (15 premiers points)
+    ax1.plot(w_range, J(w_range), 'b-', lw=0.5, alpha=0.2)
+    ax1.plot(hist_w[:15], hist_J[:15], 'o-', color=color,
+             ms=4, label=f'a={alpha}')
+    # Convergence
+    ax2.plot(hist_J, '-', color=color, lw=2,
+             label=f'a={alpha}')
+
+ax1.set_xlabel('w'); ax1.set_ylabel('J(w)')
+ax1.set_title('Trajectoire'); ax1.legend()
+ax1.set_ylim(-2, 70); ax1.grid(True, alpha=0.3)
+
+ax2.set_xlabel('Iteration'); ax2.set_ylabel('J(w)')
+ax2.set_title('Convergence'); ax2.legend()
+ax2.set_ylim(-2, 70); ax2.grid(True, alpha=0.3)
+
+plt.tight_layout(); plt.show()
+
+# alpha=0.001 : tres lent, encore loin apres 50 iter
+# alpha=0.01  : converge en ~30 iterations
+# alpha=0.1   : converge en ~5 iterations (ideal)
+# alpha=0.9   : oscille mais converge (limite)
+\end{lstlisting}
+\end{pythonbox}
+
+\textbf{Sortie attendue :}
+\begin{verbatim}
+   alpha |    w_final |    J_final
+-----------------------------------
+   0.001 |     3.8587 |     1.3020
+   0.010 |     4.9632 |     0.0014
+   0.100 |     5.0000 |     0.0000
+   0.900 |     5.0000 |     0.0000
+\end{verbatim}
+
+\begin{attentionbox}[Erreurs fr\'{e}quentes]
+    \begin{itemize}
+        \item Ne pas utiliser de boucle sur \texttt{alphas} et copier-coller le code 4 fois --- c'est une mauvaise pratique.
+        \item Oublier de r\'{e}initialiser \texttt{w = w0} au d\'{e}but de chaque boucle sur $\alpha$.
+    \end{itemize}
+\end{attentionbox}
+
+% ======================================================================
+% EXERCICE 12
+% ======================================================================
+\section*{Exercice 12 \hfill \exoavance}
+\addcontentsline{toc}{section}{Exercice 12 --- GD vs scikit-learn (Python)}
+
+\separateur
+
+\begin{pythonbox}[Correction compl\`{e}te]
+\begin{lstlisting}
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.linear_model import LinearRegression
+
+# --- Donnees ---
+x = np.array([0,1,1,2,2,0,3,1,4,5,5,6,6,7,7,4,
+    8,5,9,10,10,11,12,9,13,11,15,17,20,18], dtype=float)
+y = np.array([28.0,26.5,35.0,32.0,38.0,25.0,34.5,42.0,
+    38.5,44.0,41.0,48.0,43.5,50.0,39.0,47.0,51.0,40.0,
+    52.0,55.0,48.5,58.0,60.0,42.0,62.0,54.0,65.0,68.0,
+    72.0,58.0])
+n = len(x)
+
+# --- Methode 1 : Descente de gradient ---
+w1, w0 = 0.0, 0.0
+alpha = 0.001
+n_iter = 10000
+hist_mse = []
+
+for _ in range(n_iter):
+    err = y - (w1 * x + w0)
+    w1 -= alpha * (-2/n * np.sum(x * err))
+    w0 -= alpha * (-2/n * np.sum(err))
+    hist_mse.append(np.mean(err ** 2))
+
+mse_gd = hist_mse[-1]
+
+# --- Methode 2 : scikit-learn ---
+model = LinearRegression()
+model.fit(x.reshape(-1, 1), y)
+w1_sk = model.coef_[0]
+w0_sk = model.intercept_
+mse_sk = np.mean((y - model.predict(x.reshape(-1,1)))**2)
+
+# --- Tableau comparatif ---
+print("Methode           |   w1     |   w0     |   MSE")
+print("-" * 52)
+print(f"Gradient (10k)    | {w1:8.4f} | {w0:8.4f} | {mse_gd:.4f}")
+print(f"scikit-learn      | {w1_sk:8.4f} | {w0_sk:8.4f} | {mse_sk:.4f}")
+
+# --- Graphiques ---
+fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 5))
+
+xl = np.linspace(0, 21, 100)
+ax1.scatter(x, y, c='gray', s=30, zorder=3)
+ax1.plot(xl, w1*xl+w0, 'r-', lw=2,
+         label=f'GD: y={w1:.2f}x+{w0:.2f}')
+ax1.plot(xl, w1_sk*xl+w0_sk, 'g--', lw=2,
+         label=f'sklearn: y={w1_sk:.2f}x+{w0_sk:.2f}')
+ax1.set_xlabel('Experience'); ax1.set_ylabel('Salaire')
+ax1.legend(); ax1.grid(True, alpha=0.3)
+ax1.set_title('Droites de regression')
+
+ax2.plot(hist_mse, 'b-', lw=1, label='GD')
+ax2.axhline(mse_sk, color='green', ls='--', lw=2,
+            label=f'sklearn MSE={mse_sk:.2f}')
+ax2.set_xlabel('Iteration'); ax2.set_ylabel('MSE')
+ax2.set_title('Convergence'); ax2.legend()
+ax2.grid(True, alpha=0.3)
+
+plt.tight_layout(); plt.show()
+
+# Les deux methodes trouvent quasi le meme resultat.
+# Apres ~3000 iterations, GD atteint 99% de sklearn.
+\end{lstlisting}
+\end{pythonbox}
+
+\textbf{Sortie attendue :}
+\begin{verbatim}
+Methode           |   w1     |   w0     |   MSE
+----------------------------------------------------
+Gradient (10k)    |   2.0672 |  31.2819 | 20.4607
+scikit-learn      |   2.0672 |  31.2830 | 20.4607
+\end{verbatim}
+
+Les droites sont quasi identiques. La courbe de convergence montre que le MSE atteint le plateau de scikit-learn apr\`{e}s environ 3\,000 it\'{e}rations.
+
+\begin{retenirbox}[Conclusion g\'{e}n\'{e}rale du Jour 2]
+    La descente de gradient est un algorithme \textbf{universel} : il fonctionne pour tout
+    mod\`{e}le diff\'{e}rentiable. Pour la r\'{e}gression lin\'{e}aire, on obtient le m\^{e}me r\'{e}sultat
+    qu'avec la formule analytique. Au \textbf{Jour 3}, nous l'utiliserons pour entra\^{i}ner
+    un \textbf{perceptron} --- un mod\`{e}le de classification o\`{u} aucune formule analytique n'existe.
+\end{retenirbox}
+
+\begin{intuitionbox}[Variante : normaliser les features]
+    Avec des features d'\'{e}chelles diff\'{e}rentes (ex : exp\'{e}rience 0--20 vs taille entreprise 15--5000),
+    la descente de gradient converge mieux si on \textbf{normalise} les donn\'{e}es :
+    $x' = (x - \bar{x}) / \sigma_x$. C'est une bonne pratique g\'{e}n\'{e}rale.
+\end{intuitionbox}
+
+% ======================================================================
+\vfill
+\begin{center}
+    {\footnotesize\sffamily\textcolor{gray}{%
+        \textcopyright\ 2025 Mohamed EL AFRIT --- IPSSI \enspace\textbullet\enspace
+        \url{www.mohamedelafrit.com} \enspace\textbullet\enspace
+        CC BY-NC-SA 4.0
+    }}
+\end{center}
+
+\end{document}

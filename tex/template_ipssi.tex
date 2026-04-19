@@ -1,0 +1,424 @@
+% ============================================================================
+% © 2025 Mohamed EL AFRIT — IPSSI
+% Ce contenu est distribué sous licence Creative Commons BY-NC-SA 4.0
+% https://creativecommons.org/licenses/by-nc-sa/4.0/deed.fr
+% ============================================================================
+%
+% TEMPLATE COMMUN — Mathématiques appliquées à l'Intelligence Artificielle
+% Ce fichier est le préambule partagé de TOUS les documents LaTeX du projet.
+%
+% Utilisation :
+%   \input{template_ipssi}          % Importer ce préambule
+%   \jourNumero{1}                  % Définir le numéro du jour (1, 2, 3 ou 4)
+%   \jourTheme{Données et représentation mathématique}
+%   \begin{document}
+%   \pagegarde{Fiche de synthèse}{1}{Données et représentation mathématique}
+%   ...
+%   \end{document}
+% ============================================================================
+
+% --- Classe de document ---
+\documentclass[11pt,a4paper]{article}
+
+% ============================================================================
+% ENCODAGE ET LANGUE
+% ============================================================================
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french]{babel}
+
+% ============================================================================
+% MATHÉMATIQUES
+% ============================================================================
+\usepackage{amsmath,amssymb,amsfonts,mathtools}
+
+% Commandes mathématiques personnalisées (conventions du cours)
+\newcommand{\vx}{\mathbf{x}}          % vecteur x
+\newcommand{\vw}{\mathbf{w}}          % vecteur w (poids)
+\newcommand{\vy}{\mathbf{y}}          % vecteur y
+\newcommand{\mX}{\mathbf{X}}          % matrice X
+\newcommand{\mW}{\mathbf{W}}          % matrice W
+\newcommand{\yhat}{\hat{y}}           % prédiction
+\newcommand{\pscal}[2]{\langle #1, #2 \rangle} % produit scalaire
+\newcommand{\gradJ}{\nabla J(\boldsymbol{\theta})} % gradient de J
+
+% ============================================================================
+% MISE EN PAGE
+% ============================================================================
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{setspace}
+\setstretch{1.15}                      % interligne légèrement aéré
+
+% ============================================================================
+% COULEURS
+% ============================================================================
+\usepackage[dvipsnames,svgnames,x11names]{xcolor}
+
+% Palette principale du projet
+\definecolor{ipssiBleu}{HTML}{3B82F6}       % Définitions
+\definecolor{ipssiVert}{HTML}{22C55E}       % À retenir
+\definecolor{ipssiOrange}{HTML}{F97316}     % Attention / Piège
+\definecolor{ipssiViolet}{HTML}{A855F7}     % Intuition
+\definecolor{ipssiCyan}{HTML}{06B6D4}       % Exemples
+\definecolor{ipssiGrisClair}{HTML}{F3F4F6}  % Fond code
+\definecolor{ipssiGrisFonce}{HTML}{1F2937}  % Texte code
+\definecolor{ipssiFondPage}{HTML}{FAFAFA}   % Fond léger page de garde
+\definecolor{ipssiRouge}{HTML}{E74C3C}      % Classe 0 (salaire ≤ 45k€)
+\definecolor{ipssiVertData}{HTML}{2ECC71}   % Classe 1 (salaire > 45k€)
+\definecolor{ipssiBleuDroite}{HTML}{3498DB} % Droite de régression
+
+% ============================================================================
+% ENCADRÉS PÉDAGOGIQUES (tcolorbox)
+% ============================================================================
+\usepackage[most]{tcolorbox}
+
+% Style de base partagé
+\tcbset{
+    ipssibase/.style={
+        enhanced,
+        breakable,
+        left=4mm,
+        right=4mm,
+        top=3mm,
+        bottom=3mm,
+        boxrule=0pt,
+        frame hidden,
+        borderline west={3pt}{0pt}{#1},
+        colback=#1!5,
+        colframe=#1,
+        fonttitle=\bfseries\sffamily,
+        coltitle=#1!80!black,
+        attach boxed title to top left={yshift=-2mm, xshift=4mm},
+        boxed title style={
+            colback=#1!15,
+            colframe=#1,
+            boxrule=0.5pt,
+            arc=2pt,
+        },
+        arc=2pt,
+        outer arc=2pt,
+    }
+}
+
+% Icônes TikZ pour les encadrés (compatible pdflatex, pas d'emoji Unicode)
+\newcommand{\icoDefinition}{%
+    \tikz[baseline=-0.3em]{\draw[ipssiBleu, thick] (0,0) -- (0.3,0) -- (0.3,0.35) -- (0,0.35) -- cycle;
+    \draw[ipssiBleu, thick] (0.05,0.1) -- (0.25,0.1); \draw[ipssiBleu, thick] (0.05,0.2) -- (0.2,0.2);}%
+}
+\newcommand{\icoRetenir}{%
+    \tikz[baseline=-0.2em]{\draw[ipssiVert, thick, fill=ipssiVert!20] (0.15,0) -- (0.3,0.3) -- (0,0.3) -- cycle;}%
+}
+\newcommand{\icoAttention}{%
+    \tikz[baseline=-0.2em]{\draw[ipssiOrange, thick] (0.15,0.35) -- (0,0) -- (0.3,0) -- cycle;
+    \node[ipssiOrange, font=\tiny\bfseries] at (0.15,0.12) {!};}%
+}
+\newcommand{\icoIntuition}{%
+    \tikz[baseline=-0.2em]{\draw[ipssiViolet, thick, fill=ipssiViolet!15]
+    (0.15,0.35) -- (0.08,0.2) -- (0.08,0.15) -- (0.22,0.15) -- (0.22,0.2) -- cycle;
+    \draw[ipssiViolet, thick] (0.11,0.12) -- (0.11,0.05); \draw[ipssiViolet, thick] (0.19,0.12) -- (0.19,0.05);}%
+}
+\newcommand{\icoExemple}{%
+    \tikz[baseline=-0.2em]{\draw[ipssiCyan, thick] (0,0) rectangle (0.3,0.3);
+    \draw[ipssiCyan, thick] (0,0.15) -- (0.3,0.15); \draw[ipssiCyan, thick] (0.15,0) -- (0.15,0.3);}%
+}
+\newcommand{\icoPython}{%
+    \tikz[baseline=-0.2em]{\node[font=\small\bfseries\ttfamily, ipssiVert!70!black] at (0,0) {\textgreater\textgreater};}%
+}
+
+% Définition (bleu)
+\newtcolorbox{definitionbox}[1][D\'{e}finition]{
+    ipssibase=ipssiBleu,
+    title={\icoDefinition\; #1},
+}
+
+% À retenir (vert)
+\newtcolorbox{retenirbox}[1][\`{A} retenir]{
+    ipssibase=ipssiVert,
+    title={\icoRetenir\; #1},
+}
+
+% Attention / Piège (orange)
+\newtcolorbox{attentionbox}[1][Attention]{
+    ipssibase=ipssiOrange,
+    title={\icoAttention\; #1},
+}
+
+% Intuition (violet)
+\newtcolorbox{intuitionbox}[1][Intuition]{
+    ipssibase=ipssiViolet,
+    title={\icoIntuition\; #1},
+}
+
+% Exemple (cyan)
+\newtcolorbox{exemplebox}[1][Exemple]{
+    ipssibase=ipssiCyan,
+    title={\icoExemple\; #1},
+}
+
+% Code Python (style terminal)
+\newtcolorbox{pythonbox}[1][Code Python]{
+    enhanced,
+    breakable,
+    left=4mm, right=4mm, top=3mm, bottom=3mm,
+    boxrule=0.5pt,
+    colback=ipssiGrisClair,
+    colframe=ipssiGrisFonce!40,
+    fonttitle=\bfseries\ttfamily\small,
+    coltitle=ipssiGrisFonce,
+    title={\icoPython\; #1},
+    attach boxed title to top left={yshift=-2mm, xshift=4mm},
+    boxed title style={colback=ipssiGrisClair, colframe=ipssiGrisFonce!40, boxrule=0.5pt, arc=2pt},
+    arc=2pt, outer arc=2pt,
+}
+
+% ============================================================================
+% CODE PYTHON (listings)
+% ============================================================================
+\usepackage{listings}
+
+\lstdefinestyle{python}{
+    language=Python,
+    basicstyle=\ttfamily\small,
+    keywordstyle=\color{ipssiBleu}\bfseries,
+    stringstyle=\color{ipssiVert!70!black},
+    commentstyle=\color{gray}\itshape,
+    numberstyle=\tiny\color{gray},
+    numbers=left,
+    numbersep=8pt,
+    backgroundcolor=\color{ipssiGrisClair},
+    frame=none,
+    rulecolor=\color{ipssiGrisFonce!20},
+    breaklines=true,
+    breakatwhitespace=true,
+    tabsize=4,
+    showstringspaces=false,
+    captionpos=b,
+    aboveskip=8pt,
+    belowskip=8pt,
+    xleftmargin=10pt,
+    framexleftmargin=10pt,
+    morekeywords={as, with, True, False, None, self, np, plt, import, from},
+    literate=
+        {é}{{\'e}}1 {è}{{\`e}}1 {ê}{{\^e}}1 {ë}{{\"e}}1
+        {à}{{\`a}}1 {â}{{\^a}}1
+        {ù}{{\`u}}1 {û}{{\^u}}1
+        {ô}{{\^o}}1
+        {î}{{\^i}}1 {ï}{{\"i}}1
+        {ç}{{\c{c}}}1
+        {É}{{\'E}}1 {È}{{\`E}}1
+        {→}{{$\rightarrow$}}1
+        {≈}{{$\approx$}}1
+        {≤}{{$\leq$}}1
+        {≥}{{$\geq$}}1
+        {★}{{$\bigstar$}}1
+        {ŷ}{{$\hat{y}$}}1
+        {·}{{$\cdot$}}1,
+}
+
+\lstset{style=python}
+
+% Style pour le code inline
+\newcommand{\pyinline}[1]{\lstinline[style=python,basicstyle=\ttfamily\small]{#1}}
+
+% ============================================================================
+% GRAPHIQUES
+% ============================================================================
+\usepackage{tikz}
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.18}
+\usetikzlibrary{arrows.meta, calc, positioning, shapes.geometric, decorations.pathreplacing}
+
+% ============================================================================
+% TABLEAUX
+% ============================================================================
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{multirow}
+
+% ============================================================================
+% LISTES
+% ============================================================================
+\usepackage{enumitem}
+\setlist[itemize]{itemsep=2pt, parsep=0pt, topsep=4pt}
+\setlist[enumerate]{itemsep=2pt, parsep=0pt, topsep=4pt}
+
+% ============================================================================
+% HYPERLIENS
+% ============================================================================
+\usepackage[
+    colorlinks=true,
+    linkcolor=ipssiBleu!80!black,
+    urlcolor=ipssiBleu!80!black,
+    citecolor=ipssiVert!80!black,
+    bookmarks=true,
+    bookmarksopen=true,
+    pdfauthor={Mohamed EL AFRIT},
+    pdftitle={Mathématiques appliquées à l'IA — IPSSI},
+    pdfsubject={Formation Bachelor 2 — IPSSI 2025-2026},
+]{hyperref}
+
+% ============================================================================
+% IMAGES
+% ============================================================================
+\usepackage{graphicx}
+
+% ============================================================================
+% VARIABLES PARAMÉTRABLES (jour et thème)
+% ============================================================================
+\newcommand{\leJour}{X}
+\newcommand{\leTheme}{Thème}
+\newcommand{\jourNumero}[1]{\renewcommand{\leJour}{#1}}
+\newcommand{\jourTheme}[1]{\renewcommand{\leTheme}{#1}}
+
+% ============================================================================
+% EN-TÊTE ET PIED DE PAGE (fancyhdr)
+% ============================================================================
+\usepackage{fancyhdr}
+
+\pagestyle{fancy}
+\fancyhf{}
+
+% En-tête
+\fancyhead[L]{\small\sffamily\textcolor{gray}{IPSSI — Maths appliquées à l'IA}}
+\fancyhead[R]{\small\sffamily\textcolor{gray}{Jour \leJour\ — \leTheme}}
+\renewcommand{\headrulewidth}{0.4pt}
+
+% Pied de page
+\fancyfoot[L]{\footnotesize\textcolor{gray}{Mohamed EL AFRIT\enspace\textbullet\enspace\url{www.mohamedelafrit.com}\enspace\textbullet\enspace CC BY-NC-SA 4.0}}
+\fancyfoot[C]{\footnotesize\textcolor{gray}{\thepage}}
+\fancyfoot[R]{\footnotesize\textcolor{gray}{2025–2026}}
+\renewcommand{\footrulewidth}{0.2pt}
+
+% Style pour la page de garde (pas d'en-tête)
+\fancypagestyle{pagegarde}{
+    \fancyhf{}
+    \renewcommand{\headrulewidth}{0pt}
+    \fancyfoot[C]{\footnotesize\textcolor{gray}{\thepage}}
+    \renewcommand{\footrulewidth}{0pt}
+}
+
+% ============================================================================
+% PAGE DE GARDE — \pagegarde{titre}{jour}{theme}
+% ============================================================================
+\newcommand{\pagegarde}[3]{%
+    \thispagestyle{pagegarde}
+    \begin{center}
+        \vspace*{1.5cm}
+
+        % Logo / Bandeau institution
+        {\Large\sffamily\bfseries\textcolor{ipssiBleu}{IPSSI}}\par
+        \vspace{2pt}
+        {\normalsize\sffamily 2\textsuperscript{e} année Bachelor Informatique}\par
+
+        \vspace{0.8cm}
+        {\color{ipssiBleu}\rule{0.6\textwidth}{1.5pt}}\par
+        \vspace{0.8cm}
+
+        % Titre du module
+        {\LARGE\sffamily\bfseries Mathématiques appliquées\\[4pt] à l'Intelligence Artificielle}\par
+
+        \vspace{1cm}
+
+        % Titre du document
+        \begin{tcolorbox}[
+            enhanced,
+            colback=ipssiBleu!5,
+            colframe=ipssiBleu!50,
+            boxrule=1pt,
+            arc=4pt,
+            width=0.85\textwidth,
+            halign=center,
+            top=10pt, bottom=10pt,
+        ]
+            {\huge\sffamily\bfseries\textcolor{ipssiBleu!80!black}{#1}}\par
+            \vspace{6pt}
+            {\Large\sffamily Jour #2 — #3}
+        \end{tcolorbox}
+
+        \vspace{1.5cm}
+
+        % Informations auteur
+        {\large\sffamily
+            \textbf{Auteur :} Mohamed EL AFRIT\\[4pt]
+            \url{www.mohamedelafrit.com}\\[8pt]
+            \textbf{Année académique :} 2025–2026
+        }\par
+
+        \vspace{1.5cm}
+
+        % Licence Creative Commons
+        {\color{ipssiBleu}\rule{0.4\textwidth}{0.5pt}}\par
+        \vspace{8pt}
+        {\small\sffamily
+            \textcopyright\ 2025 Mohamed EL AFRIT — IPSSI\\[2pt]
+            Ce contenu est distribué sous licence\\[2pt]
+            \textbf{Creative Commons BY-NC-SA 4.0}\\[2pt]
+            \url{https://creativecommons.org/licenses/by-nc-sa/4.0/deed.fr}
+        }\par
+    \end{center}
+    \newpage
+}
+
+% ============================================================================
+% NIVEAUX D'EXERCICES
+% ============================================================================
+
+% Étoile compatible pdflatex
+\newcommand{\starfull}[1]{\textcolor{#1}{$\bigstar$}}
+\newcommand{\starempty}{\textcolor{gray!40}{$\bigstar$}}
+
+% Fondamental (1 étoile)
+\newcommand{\exofondamental}{%
+    \starfull{ipssiVert}\starempty\starempty\enspace%
+    {\small\sffamily\textcolor{ipssiVert}{\textbf{Fondamental}}}%
+}
+
+% Intermédiaire (2 étoiles)
+\newcommand{\exointermediaire}{%
+    \starfull{ipssiOrange}\starfull{ipssiOrange}\starempty\enspace%
+    {\small\sffamily\textcolor{ipssiOrange}{\textbf{Interm\'{e}diaire}}}%
+}
+
+% Avancé (3 étoiles)
+\newcommand{\exoavance}{%
+    \starfull{ipssiRouge}\starfull{ipssiRouge}\starfull{ipssiRouge}\enspace%
+    {\small\sffamily\textcolor{ipssiRouge}{\textbf{Avanc\'{e}}}}%
+}
+
+% Commande d'exercice numéroté
+\newcounter{exocount}[section]
+\newcommand{\exercice}[1]{%
+    \stepcounter{exocount}%
+    \vspace{8pt}%
+    \noindent\textbf{\sffamily Exercice \theexocount}\enspace — \enspace #1\par
+    \vspace{4pt}%
+}
+
+% ============================================================================
+% COMMANDES UTILITAIRES
+% ============================================================================
+
+% Séparateur visuel entre sections
+\newcommand{\separateur}{%
+    \vspace{6pt}
+    \begin{center}
+        {\color{ipssiBleu!30}\rule{0.3\textwidth}{0.5pt}}
+    \end{center}
+    \vspace{6pt}
+}
+
+% Mot-clé en gras coloré
+\newcommand{\motcle}[1]{\textbf{\textcolor{ipssiBleu!80!black}{#1}}}
+
+% Formule encadrée importante
+\newcommand{\formule}[1]{%
+    \begin{center}
+        \fcolorbox{ipssiBleu!50}{ipssiBleu!5}{%
+            \quad$\displaystyle #1$\quad%
+        }
+    \end{center}
+}
+
+% ============================================================================
+% FIN DU PRÉAMBULE
+% ============================================================================

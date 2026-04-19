@@ -1,0 +1,520 @@
+% ============================================================================
+% (c) 2025 Mohamed EL AFRIT -- IPSSI
+% Licence CC BY-NC-SA 4.0
+% https://creativecommons.org/licenses/by-nc-sa/4.0/deed.fr
+%
+% FICHE D'EXERCICES (enonces) -- Jour 2 : Optimisation
+% ============================================================================
+\input{template_ipssi}
+
+\jourNumero{2}
+\jourTheme{Optimisation}
+
+\begin{document}
+
+\pagegarde{Fiche d'exercices}{2}{Optimisation}
+
+\setstretch{1.08}
+\setlength{\parskip}{3pt}
+\setlength{\abovedisplayskip}{6pt}
+\setlength{\belowdisplayskip}{6pt}
+
+% ======================================================================
+% RAPPELS
+% ======================================================================
+\begin{tcolorbox}[
+    enhanced, colback=ipssiCyan!5, colframe=ipssiCyan!50,
+    boxrule=0.8pt, arc=4pt,
+    title={\sffamily\bfseries Rappels --- Formules du Jour 2},
+    coltitle=white, colbacktitle=ipssiCyan!70,
+]
+\small
+\textbf{Fonction de co\^{u}t :}
+$J(\vw) = \frac{1}{n}\sum_{i=1}^{n}(y_i - \yhat_i)^2$
+\hfill
+\textbf{Mise \`{a} jour :}
+$w \leftarrow w - \alpha \cdot \frac{\partial J}{\partial w}$
+
+\medskip
+\textbf{D\'{e}riv\'{e}es utiles :}
+$(c)' = 0$,\quad
+$(ax+b)' = a$,\quad
+$(x^2)' = 2x$,\quad
+$(ax^2)' = 2ax$,\quad
+$((x{-}a)^2)' = 2(x{-}a)$
+
+\medskip
+\textbf{Gradients r\'{e}gression} ($\yhat_i = w_1 x_i + w_0$) :
+$\frac{\partial J}{\partial w_1} = \frac{-2}{n}\sum x_i(y_i - \yhat_i)$
+\hfill
+$\frac{\partial J}{\partial w_0} = \frac{-2}{n}\sum (y_i - \yhat_i)$
+
+\medskip
+\textbf{Dataset salaire} (30 dev, r\'{e}gression exp\'{e}rience $\to$ salaire) :
+$\yhat = 2{,}07x + 31{,}27$, MSE $= 20{,}46$.
+\end{tcolorbox}
+
+% ======================================================================
+\section*{Exercices crayon-papier --- Niveau fondamental}
+% ======================================================================
+
+% ----------------------------------------------------------------------
+\exercice{\exofondamental\quad --- Calculer le MSE}
+
+Un mod\`{e}le a produit les pr\'{e}dictions suivantes :
+
+\begin{center}
+\renewcommand{\arraystretch}{1.2}
+\begin{tabular}{c|c|c}
+    \toprule
+    $i$ & Salaire r\'{e}el $y_i$ (k\texteuro) & Pr\'{e}diction $\yhat_i$ (k\texteuro) \\
+    \midrule
+    1 & 30 & 33 \\
+    2 & 42 & 40 \\
+    3 & 55 & 52 \\
+    4 & 38 & 44 \\
+    \bottomrule
+\end{tabular}
+\end{center}
+
+\begin{enumerate}[label=\alph*)]
+    \item Calculez l'erreur $e_i = y_i - \yhat_i$ pour chaque observation.
+    \item Calculez l'erreur au carr\'{e} $e_i^2$ pour chaque observation.
+    \item Calculez le MSE : $J = \frac{1}{n}\sum e_i^2$.
+    \item L'observation $i = 4$ a la plus grande erreur.
+        Si on corrigeait cette seule pr\'{e}diction pour qu'elle soit parfaite ($\yhat_4 = 38$),
+        quel serait le nouveau MSE ? De combien a-t-il diminu\'{e} ?
+\end{enumerate}
+
+% ----------------------------------------------------------------------
+\exercice{\exofondamental\quad --- Calculer des d\'{e}riv\'{e}es}
+
+Calculez la d\'{e}riv\'{e}e $f'(x)$ des fonctions suivantes.
+Pr\'{e}cisez la r\`{e}gle utilis\'{e}e \`{a} chaque fois.
+
+\begin{enumerate}[label=\alph*)]
+    \item $f(x) = 3x^2$
+    \item $f(x) = x^2 - 6x + 9$
+    \item $f(x) = 2x + 5$
+    \item $f(x) = (x - 7)^2$
+    \item $f(x) = 5(x - 2)^2 + 3$
+\end{enumerate}
+
+Pour les fonctions a), b) et d), calculez la valeur de $x$ o\`{u} $f'(x) = 0$.
+Que repr\'{e}sente ce point ?
+
+% ----------------------------------------------------------------------
+\exercice{\exofondamental\quad --- Une it\'{e}ration de descente de gradient}
+
+On consid\`{e}re la fonction de co\^{u}t $J(w) = (w - 4)^2$.
+
+\begin{enumerate}[label=\alph*)]
+    \item Calculez la d\'{e}riv\'{e}e $J'(w)$.
+
+    \item On part de $w_0 = 0$ avec un taux d'apprentissage $\alpha = 0{,}2$.
+        Calculez la d\'{e}riv\'{e}e en $w_0$ : $J'(0) = ?$
+
+    \item Appliquez la r\`{e}gle de mise \`{a} jour :
+        $w_1 = w_0 - \alpha \cdot J'(w_0)$.
+        Quelle est la nouvelle valeur $w_1$ ?
+
+    \item Calculez $J(w_0)$ et $J(w_1)$. Le co\^{u}t a-t-il diminu\'{e} ?
+
+    \item Le minimum th\'{e}orique est $w^* = 4$. \`{A} quel pourcentage du chemin
+        \^{e}tes-vous apr\`{e}s une seule it\'{e}ration ?
+\end{enumerate}
+
+% ----------------------------------------------------------------------
+\exercice{\exofondamental\quad --- Trois it\'{e}rations compl\`{e}tes}
+
+On consid\`{e}re $J(w) = w^2$ (minimum en $w^* = 0$). Taux d'apprentissage $\alpha = 0{,}1$.
+
+\begin{enumerate}[label=\alph*)]
+    \item Calculez $J'(w)$.
+
+    \item En partant de $w_0 = 5$, remplissez le tableau suivant :
+
+    \begin{center}
+    \renewcommand{\arraystretch}{1.3}
+    \begin{tabular}{c|c|c|c|c}
+        \toprule
+        It\'{e}ration & $w$ & $J'(w)$ & $w_{\text{new}} = w - \alpha J'(w)$ & $J(w)$ \\
+        \midrule
+        0 & 5{,}00 & \phantom{00}?\phantom{00} & \phantom{00}?\phantom{00} & \phantom{00}?\phantom{00} \\
+        1 & ?      & ?  & ?  & ?  \\
+        2 & ?      & ?  & ?  & ?  \\
+        \bottomrule
+    \end{tabular}
+    \end{center}
+
+    \item Apr\`{e}s 3 it\'{e}rations, de combien $w$ s'est-il rapproch\'{e} de $w^* = 0$ ?
+        Calculez le ratio $w_3 / w_0$.
+
+    \item \textbf{Bonus :} montrez que $w_k = w_0 \cdot (1 - 2\alpha)^k$ pour cette fonction.
+        V\'{e}rifiez avec vos r\'{e}sultats.
+\end{enumerate}
+
+% ======================================================================
+\section*{Exercices crayon-papier --- Niveau interm\'{e}diaire}
+% ======================================================================
+
+% ----------------------------------------------------------------------
+\exercice{\exointermediaire\quad --- D\'{e}riv\'{e}es partielles de la r\'{e}gression}
+
+On consid\`{e}re 3 observations avec le mod\`{e}le $\yhat_i = w_1 x_i + w_0$ :
+
+\begin{center}
+\renewcommand{\arraystretch}{1.2}
+\begin{tabular}{c|c|c}
+    \toprule
+    $i$ & $x_i$ (exp\'{e}rience) & $y_i$ (salaire, k\texteuro) \\
+    \midrule
+    1 & 2 & 32 \\
+    2 & 5 & 44 \\
+    3 & 10 & 55 \\
+    \bottomrule
+\end{tabular}
+\end{center}
+
+\begin{enumerate}[label=\alph*)]
+    \item Avec $w_1 = 3$ et $w_0 = 25$, calculez les pr\'{e}dictions $\yhat_i$ et les erreurs $e_i = y_i - \yhat_i$.
+
+    \item Calculez la d\'{e}riv\'{e}e partielle par rapport \`{a} $w_1$ :
+    \[
+        \frac{\partial J}{\partial w_1} = \frac{-2}{n}\sum_{i=1}^{3} x_i \cdot e_i
+    \]
+
+    \item Calculez la d\'{e}riv\'{e}e partielle par rapport \`{a} $w_0$ :
+    \[
+        \frac{\partial J}{\partial w_0} = \frac{-2}{n}\sum_{i=1}^{3} e_i
+    \]
+
+    \item Avec $\alpha = 0{,}01$, calculez les nouveaux poids :
+        $w_1' = w_1 - \alpha \frac{\partial J}{\partial w_1}$ et
+        $w_0' = w_0 - \alpha \frac{\partial J}{\partial w_0}$.
+
+    \item Dans quelle direction chaque poids a-t-il boug\'{e} ? Est-ce coh\'{e}rent ?
+\end{enumerate}
+
+% ----------------------------------------------------------------------
+\exercice{\exointermediaire\quad --- Diagnostiquer un probl\`{e}me de convergence}
+
+Un \'{e}tudiant a ex\'{e}cut\'{e} une descente de gradient sur $J(w) = (w - 3)^2$ avec $\alpha = 1{,}5$
+et obtient les r\'{e}sultats suivants :
+
+\begin{center}
+\renewcommand{\arraystretch}{1.2}
+\begin{tabular}{c|c|c}
+    \toprule
+    It\'{e}ration & $w$ & $J(w)$ \\
+    \midrule
+    0 & 0{,}00  & 9{,}00 \\
+    1 & 9{,}00  & 36{,}00 \\
+    2 & $-15{,}00$ & 324{,}00 \\
+    3 & 51{,}00  & 2\,304 \\
+    4 & $-93{,}00$ & 9\,216 \\
+    \bottomrule
+\end{tabular}
+\end{center}
+
+\begin{enumerate}[label=\alph*)]
+    \item V\'{e}rifiez le calcul de l'it\'{e}ration 0 $\to$ 1 :
+        $w_1 = w_0 - \alpha \cdot J'(w_0)$.
+
+    \item Le co\^{u}t $J$ augmente-t-il ou diminue-t-il ? Quel est le probl\`{e}me ?
+
+    \item Avec quelle valeur de $\alpha$ la convergence serait-elle assur\'{e}e pour
+        cette fonction ? \emph{Indice :} pour $J(w) = (w-a)^2$, la convergence
+        n\'{e}cessite $0 < \alpha < 1$.
+
+    \item Recalculez les 3 premi\`{e}res it\'{e}rations avec $\alpha = 0{,}1$.
+        Le co\^{u}t diminue-t-il cette fois ?
+\end{enumerate}
+
+% ----------------------------------------------------------------------
+\exercice{\exointermediaire\quad --- Comparer deux taux d'apprentissage}
+
+On minimise $J(w) = (w - 5)^2$ en partant de $w_0 = 0$.
+Deux \'{e}tudiants utilisent des $\alpha$ diff\'{e}rents.
+
+\begin{enumerate}[label=\alph*)]
+    \item \textbf{\'{E}tudiant A} ($\alpha = 0{,}05$) : calculez $w_1, w_2, w_3$ et les co\^{u}ts associ\'{e}s.
+
+    \item \textbf{\'{E}tudiant B} ($\alpha = 0{,}3$) : calculez $w_1, w_2, w_3$ et les co\^{u}ts associ\'{e}s.
+
+    \item Remplissez un tableau comparatif :
+
+    \begin{center}
+    \renewcommand{\arraystretch}{1.2}
+    \begin{tabular}{c|c|c|c|c}
+        \toprule
+        & $w_1$ & $w_2$ & $w_3$ & $J(w_3)$ \\
+        \midrule
+        $\alpha = 0{,}05$ & ? & ? & ? & ? \\
+        $\alpha = 0{,}3$  & ? & ? & ? & ? \\
+        \bottomrule
+    \end{tabular}
+    \end{center}
+
+    \item Quel \'{e}tudiant se rapproche le plus vite de $w^* = 5$ ? Lequel risque-t-il
+        de d\'{e}passer le minimum avec un $\alpha$ plus grand ?
+\end{enumerate}
+
+% ======================================================================
+\section*{Exercices Python guid\'{e}s --- Niveau interm\'{e}diaire}
+% ======================================================================
+
+% ----------------------------------------------------------------------
+\exercice{\exointermediaire\quad --- Descente de gradient 1D from scratch \hfill\normalfont\small\textsf{[Python guid\'{e}]}}
+
+Compl\'{e}tez le code pour minimiser $J(w) = (w - 3)^2$ par descente de gradient :
+
+\begin{pythonbox}[Squelette --- Descente de gradient 1D]
+\begin{lstlisting}
+import numpy as np
+
+# Fonction de cout et sa derivee
+def J(w):
+    return ______  # A COMPLETER : (w - 3) ** 2
+
+def dJ(w):
+    return ______  # A COMPLETER : derivee de J
+
+# Parametres
+w = 0.0             # point de depart
+alpha = ______      # A COMPLETER : taux d'apprentissage (essayer 0.1)
+n_iter = 20         # nombre d'iterations
+
+# Boucle de descente de gradient
+for i in range(n_iter):
+    grad = ______         # A COMPLETER : calculer la derivee
+    w = ______            # A COMPLETER : mise a jour de w
+    if i < 5 or i == n_iter - 1:
+        print(f"Iter {i+1:2d} : w = {w:.4f}, J = {J(w):.4f}")
+
+print(f"\nResultat : w = {w:.4f} (optimal : 3.0)")
+print(f"Erreur : |w - 3| = {abs(w - 3):.6f}")
+\end{lstlisting}
+\end{pythonbox}
+
+% ----------------------------------------------------------------------
+\exercice{\exointermediaire\quad --- Visualiser la convergence \hfill\normalfont\small\textsf{[Python guid\'{e}]}}
+
+Compl\'{e}tez le code pour tracer la courbe de co\^{u}t \`{a} chaque it\'{e}ration :
+
+\begin{pythonbox}[Squelette --- Visualisation de la convergence]
+\begin{lstlisting}
+import numpy as np
+import matplotlib.pyplot as plt
+
+def J(w): return (w - 3) ** 2
+def dJ(w): return 2 * (w - 3)
+
+w = -2.0
+alpha = 0.15
+n_iter = 25
+
+# Sauvegarder l'historique
+hist_w = [w]
+hist_J = [J(w)]
+
+for i in range(n_iter):
+    w = w - alpha * dJ(w)
+    hist_w.append(______)   # A COMPLETER
+    hist_J.append(______)   # A COMPLETER
+
+# --- Graphique 1 : trajectoire sur la courbe ---
+fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(13, 5))
+
+w_range = np.linspace(-3, 8, 200)
+ax1.plot(w_range, J(w_range), 'b-', lw=2)
+ax1.plot(hist_w, hist_J, 'ro-', markersize=5,
+         label='Iterations')
+ax1.set_xlabel('w'); ax1.set_ylabel('J(w)')
+ax1.set_title('Trajectoire sur la courbe')
+ax1.legend(); ax1.grid(True, alpha=0.3)
+
+# --- Graphique 2 : J en fonction du numero d'iteration ---
+ax2.plot(range(len(hist_J)), ______, 'g-o',  # A COMPLETER
+         markersize=4)
+ax2.set_xlabel('______')     # A COMPLETER
+ax2.set_ylabel('______')     # A COMPLETER
+ax2.set_title('Courbe de convergence')
+ax2.grid(True, alpha=0.3)
+
+plt.tight_layout(); plt.show()
+\end{lstlisting}
+\end{pythonbox}
+
+% ----------------------------------------------------------------------
+\exercice{\exointermediaire\quad --- Gradient descent sur le dataset salaire \hfill\normalfont\small\textsf{[Python guid\'{e}]}}
+
+Compl\'{e}tez l'impl\'{e}mentation de la descente de gradient pour la r\'{e}gression
+lin\'{e}aire (exp\'{e}rience $\to$ salaire) :
+
+\begin{pythonbox}[Squelette --- R\'{e}gression par descente de gradient]
+\begin{lstlisting}
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Dataset
+x = np.array([0,1,1,2,2,0,3,1,4,5,5,6,6,7,7,4,
+    8,5,9,10,10,11,12,9,13,11,15,17,20,18], dtype=float)
+y = np.array([28.0,26.5,35.0,32.0,38.0,25.0,34.5,42.0,
+    38.5,44.0,41.0,48.0,43.5,50.0,39.0,47.0,51.0,40.0,
+    52.0,55.0,48.5,58.0,60.0,42.0,62.0,54.0,65.0,68.0,
+    72.0,58.0])
+n = len(x)
+
+# Parametres initiaux
+w1, w0 = 0.0, 0.0
+alpha = 0.001
+n_iter = 5000
+hist_mse = []
+
+for it in range(n_iter):
+    # 1. Predictions
+    y_pred = ______                      # A COMPLETER
+
+    # 2. Erreurs
+    errors = ______                      # A COMPLETER
+
+    # 3. Gradients
+    dw1 = -2/n * np.sum(______)          # A COMPLETER
+    dw0 = -2/n * np.sum(______)          # A COMPLETER
+
+    # 4. Mise a jour
+    w1 = w1 - ______                     # A COMPLETER
+    w0 = w0 - ______                     # A COMPLETER
+
+    hist_mse.append(np.mean(errors ** 2))
+
+print(f"Resultat : y = {w1:.4f} * x + {w0:.4f}")
+print(f"Attendu  : y = 2.0672 * x + 31.2830")
+print(f"MSE final = {hist_mse[-1]:.2f}")
+
+# Graphique
+fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(13, 5))
+ax1.plot(hist_mse); ax1.set_xlabel('Iteration')
+ax1.set_ylabel('MSE'); ax1.set_title('Convergence')
+ax1.grid(True, alpha=0.3)
+
+ax2.scatter(x, y, c='blue', s=30)
+xl = np.linspace(0, 21, 100)
+ax2.plot(xl, ______, 'r-', lw=2,     # A COMPLETER
+         label=f'GD: y={w1:.2f}x+{w0:.2f}')
+ax2.set_xlabel('Experience'); ax2.set_ylabel('Salaire')
+ax2.set_title('Regression'); ax2.legend()
+ax2.grid(True, alpha=0.3)
+plt.tight_layout(); plt.show()
+\end{lstlisting}
+\end{pythonbox}
+
+% ======================================================================
+\section*{Exercices Python autonomes --- Niveau avanc\'{e}}
+% ======================================================================
+
+% ----------------------------------------------------------------------
+\exercice{\exoavance\quad --- Comparer 4 taux d'apprentissage \hfill\normalfont\small\textsf{[Python autonome]}}
+
+\'{E}crivez un programme Python complet qui :
+
+\begin{enumerate}[label=\alph*)]
+    \item D\'{e}finit la fonction $J(w) = (w - 5)^2$ et sa d\'{e}riv\'{e}e.
+
+    \item Ex\'{e}cute la descente de gradient pour 4 valeurs de $\alpha$ :
+        $0{,}001$, $0{,}01$, $0{,}1$ et $0{,}9$.
+        Point de d\'{e}part : $w_0 = -3$, nombre d'it\'{e}rations : 50.
+
+    \item Trace \textbf{deux graphiques} c\^{o}te \`{a} c\^{o}te :
+    \begin{itemize}
+        \item \`{A} gauche : les 4 trajectoires sur la courbe $J(w)$ (une couleur par $\alpha$)
+        \item \`{A} droite : les 4 courbes de convergence ($J$ vs num\'{e}ro d'it\'{e}ration)
+    \end{itemize}
+
+    \item Affiche un tableau r\'{e}capitulatif :
+        pour chaque $\alpha$, la valeur finale de $w$ et le MSE final.
+
+    \item R\'{e}pondez en commentaire : quel $\alpha$ est le meilleur ? Pourquoi ?
+        Y a-t-il un $\alpha$ qui diverge ?
+\end{enumerate}
+
+\begin{attentionbox}[Consignes]
+    Utilisez uniquement NumPy et Matplotlib. Commentez en fran\c{c}ais.
+    Utilisez une boucle sur les valeurs de $\alpha$ pour \'{e}viter la r\'{e}p\'{e}tition de code.
+\end{attentionbox}
+
+% ----------------------------------------------------------------------
+\exercice{\exoavance\quad --- Gradient descent vs scikit-learn \hfill\normalfont\small\textsf{[Python autonome]}}
+
+\'{E}crivez un programme qui compare deux m\'{e}thodes pour trouver la droite de
+r\'{e}gression (exp\'{e}rience $\to$ salaire) sur le dataset fil rouge complet :
+
+\begin{enumerate}[label=\alph*)]
+    \item \textbf{M\'{e}thode 1 --- From scratch :} impl\'{e}mentez la descente de gradient
+        compl\`{e}te (d\'{e}part $w_1 = w_0 = 0$, $\alpha = 0{,}001$, 10\,000 it\'{e}rations).
+        Enregistrez $w_1$, $w_0$ et le MSE \`{a} chaque it\'{e}ration.
+
+    \item \textbf{M\'{e}thode 2 --- scikit-learn :} utilisez
+        \texttt{LinearRegression} de scikit-learn pour trouver les poids optimaux.
+        \emph{Rappel :} \texttt{X} doit \^{e}tre de shape \texttt{(n, 1)} pour scikit-learn.
+
+    \item Affichez un tableau comparatif :
+
+    \begin{center}
+    \renewcommand{\arraystretch}{1.2}
+    \begin{tabular}{l|c|c|c}
+        \toprule
+        \textbf{M\'{e}thode} & $w_1$ & $w_0$ & MSE \\
+        \midrule
+        Gradient descent (10k) & ? & ? & ? \\
+        scikit-learn & ? & ? & ? \\
+        \bottomrule
+    \end{tabular}
+    \end{center}
+
+    \item Tracez un graphique avec :
+    \begin{itemize}
+        \item le nuage de points du dataset,
+        \item la droite from scratch (rouge),
+        \item la droite scikit-learn (verte),
+        \item une l\'{e}gende avec le MSE de chaque m\'{e}thode.
+    \end{itemize}
+
+    \item Tracez la courbe de convergence du MSE (it\'{e}rations vs MSE)
+        avec une ligne horizontale indiquant le MSE de scikit-learn.
+
+    \item R\'{e}pondez en commentaire :
+        les deux m\'{e}thodes trouvent-elles le m\^{e}me r\'{e}sultat ?
+        Combien d'it\'{e}rations faut-il approximativement pour que la descente
+        de gradient atteigne 99\% de la performance de scikit-learn ?
+\end{enumerate}
+
+\begin{intuitionbox}[Indice]
+    Pour scikit-learn : \texttt{from sklearn.linear\_model import LinearRegression}.
+    L'entr\'{e}e \texttt{X} doit avoir le shape \texttt{(30, 1)} :
+    utilisez \texttt{x.reshape(-1, 1)}.
+\end{intuitionbox}
+
+% ======================================================================
+\vfill
+\separateur
+
+\begin{center}
+    \small\sffamily
+    \textbf{R\'{e}partition :}\quad
+    4 exercices \starfull{ipssiVert} fondamentaux \quad
+    3 exercices \starfull{ipssiOrange}\starfull{ipssiOrange} interm\'{e}diaires \quad
+    3 guid\'{e}s Python \starfull{ipssiOrange}\starfull{ipssiOrange} \quad
+    2 autonomes \starfull{ipssiRouge}\starfull{ipssiRouge}\starfull{ipssiRouge}
+\end{center}
+
+\begin{center}
+    {\footnotesize\sffamily\textcolor{gray}{%
+        \textcopyright\ 2025 Mohamed EL AFRIT --- IPSSI \enspace\textbullet\enspace
+        \url{www.mohamedelafrit.com} \enspace\textbullet\enspace
+        CC BY-NC-SA 4.0
+    }}
+\end{center}
+
+\end{document}

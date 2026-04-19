@@ -1,0 +1,161 @@
+% ============================================================================
+% DOCUMENT TEST — Vérification du template IPSSI
+% ============================================================================
+\input{template_ipssi}
+
+\jourNumero{1}
+\jourTheme{Données et représentation mathématique}
+
+\begin{document}
+
+% --- Page de garde ---
+\pagegarde{Fiche de synthèse}{1}{Données et représentation mathématique}
+
+% --- Table des matières ---
+\tableofcontents
+\newpage
+
+% ============================================================================
+\section{L'IA comme fonction mathématique}
+% ============================================================================
+
+Un modèle d'intelligence artificielle est fondamentalement une \motcle{fonction mathématique} qui transforme des entrées en sorties. Concrètement :
+
+\formule{\yhat = f(\vx) = \vw^T \vx + b}
+
+\begin{definitionbox}[Fonction de prédiction]
+    Une \textbf{fonction de prédiction} $f : \mathbb{R}^p \to \mathbb{R}$ associe à un vecteur d'entrée $\vx$ composé de $p$ caractéristiques (features) une valeur de sortie $\yhat$ appelée \textbf{prédiction}.
+\end{definitionbox}
+
+\begin{intuitionbox}
+    Imaginez un GPS : vous entrez une adresse (l'entrée $\vx$), le GPS calcule un itinéraire (la fonction $f$), et vous obtenez un temps de trajet estimé (la sortie $\yhat$). L'IA fonctionne exactement de la même façon, mais avec des données chiffrées.
+\end{intuitionbox}
+
+\subsection{Le dataset fil rouge}
+
+Notre dataset contient 30 développeurs fictifs, chacun décrit par 5 caractéristiques :
+
+\begin{center}
+\begin{tabularx}{0.92\textwidth}{l l X}
+    \toprule
+    \textbf{Colonne} & \textbf{Type} & \textbf{Description} \\
+    \midrule
+    \texttt{experience}  & entier  & Années d'expérience (0 à 20) \\
+    \texttt{nb\_langages} & entier  & Langages de programmation maîtrisés (1 à 8) \\
+    \texttt{niveau\_etudes} & ordinal & 1=Bac, 2=Bac+2, 3=Bac+3, 4=Bac+5, 5=Doctorat \\
+    \texttt{taille\_entreprise} & entier & Nombre d'employés (10 à 5\,000) \\
+    \texttt{remote} & entier & Pourcentage de télétravail (0 à 100) \\
+    \texttt{salaire} & float & Salaire annuel brut en k\texteuro\ (25 à 72) \\
+    \bottomrule
+\end{tabularx}
+\end{center}
+
+% ============================================================================
+\section{Vecteurs et matrices}
+% ============================================================================
+
+\subsection{Un développeur = un vecteur}
+
+\begin{definitionbox}[Vecteur de caractéristiques]
+    Un \textbf{vecteur de caractéristiques} (feature vector) est un vecteur $\vx \in \mathbb{R}^p$ dont chaque composante correspond à une caractéristique mesurable de l'observation.
+\end{definitionbox}
+
+\begin{exemplebox}[Développeur \#2 du dataset]
+    Le développeur \#2 (sortie d'école d'ingénieur, ESN) s'écrit :
+    \[
+        \vx_2 = \begin{pmatrix} 1 \\ 3 \\ 4 \\ 800 \\ 40 \end{pmatrix}
+        \quad \text{avec un salaire de } y_2 = 35{,}0 \text{ k\texteuro}
+    \]
+\end{exemplebox}
+
+\subsection{Le produit scalaire}
+
+\begin{definitionbox}[Produit scalaire]
+    Le produit scalaire de deux vecteurs $\vx, \vw \in \mathbb{R}^p$ est défini par :
+    \[
+        \pscal{\vx}{\vw} = \vx^T \vw = \sum_{i=1}^{p} x_i \cdot w_i
+    \]
+\end{definitionbox}
+
+\begin{retenirbox}
+    Le produit scalaire est l'\textbf{opération fondamentale} de l'IA. Toute prédiction linéaire s'écrit comme un produit scalaire entre les données et les paramètres du modèle :
+    \[
+        \yhat = \pscal{\vx}{\vw} + b
+    \]
+\end{retenirbox}
+
+% ============================================================================
+\section{Régression linéaire simple}
+% ============================================================================
+
+\begin{attentionbox}[Piège fréquent]
+    Ne confondez pas la \textbf{corrélation} (lien statistique entre deux variables) et la \textbf{causalité} (l'une provoque l'autre). Notre régression montre que l'expérience est \emph{corrélée} au salaire, pas qu'elle le \emph{cause} directement.
+\end{attentionbox}
+
+Sur notre dataset, la régression linéaire simple (expérience $\to$ salaire) donne :
+
+\formule{\yhat = 2{,}07 \times \texttt{experience} + 31{,}27}
+
+L'erreur quadratique moyenne (MSE) associée vaut :
+
+\[
+    \text{MSE} = \frac{1}{n} \sum_{i=1}^{n} (y_i - \yhat_i)^2 = 20{,}46 \text{ (k\texteuro)}^2
+\]
+
+% ============================================================================
+\section{Implémentation Python}
+% ============================================================================
+
+\begin{pythonbox}[Régression linéaire from scratch]
+\begin{lstlisting}
+import numpy as np
+
+# Données : expérience et salaire
+experience = np.array([0, 1, 1, 2, 2, 0, 3, 1])
+salaire = np.array([28.0, 26.5, 35.0, 32.0, 38.0, 25.0, 34.5, 42.0])
+
+# Calcul des paramètres (formule analytique)
+x_mean = experience.mean()
+y_mean = salaire.mean()
+w = np.sum((experience - x_mean) * (salaire - y_mean)) / \
+    np.sum((experience - x_mean) ** 2)
+b = y_mean - w * x_mean
+
+print(f"y_pred = {w:.2f} * x + {b:.2f}")
+\end{lstlisting}
+\end{pythonbox}
+
+% ============================================================================
+\section{Exercices}
+% ============================================================================
+
+\exercice{\exofondamental}
+
+Calculez à la main le produit scalaire $\pscal{\vx}{\vw}$ avec :
+\[
+    \vx = \begin{pmatrix} 3 \\ 5 \\ 2 \end{pmatrix}
+    \qquad
+    \vw = \begin{pmatrix} 0.5 \\ 0.3 \\ 0.8 \end{pmatrix}
+\]
+
+\exercice{\exointermediaire}
+
+À partir du dataset fil rouge, calculez manuellement la prédiction de salaire pour un développeur ayant 10 ans d'expérience, en utilisant la droite de régression $\yhat = 2{,}07x + 31{,}27$. Comparez avec la valeur réelle du développeur \#19.
+
+\exercice{\exoavance}
+
+Implémentez en Python (sans scikit-learn) la régression linéaire multiple utilisant les 5 features du dataset. Calculez le vecteur de poids $\vw$ par la formule des moindres carrés :
+\[
+    \vw = (\mX^T \mX)^{-1} \mX^T \vy
+\]
+
+\separateur
+
+\begin{center}
+    \small\sffamily\textcolor{gray}{%
+        \textcopyright\ 2025 Mohamed EL AFRIT — IPSSI | CC BY-NC-SA 4.0\\
+        \url{www.mohamedelafrit.com}
+    }
+\end{center}
+
+\end{document}

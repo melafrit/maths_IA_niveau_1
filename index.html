@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Maths appliquées à l'IA</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,700;1,400&family=Source+Serif+4:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Source Serif 4', Georgia, serif; background: #f8fafc; color: #1a1a2e; }
+  a { text-decoration: none; }
+
+  /* ── HEADER ── */
+  .header {
+    background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 40%, #7c3aed 80%, #6d28d9 100%);
+    color: white; padding: 56px 24px 48px; text-align: center;
+    position: relative; overflow: hidden;
+  }
+  .header::before {
+    content: ''; position: absolute; inset: 0;
+    background: radial-gradient(circle at 20% 50%, rgba(255,255,255,0.08) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255,255,255,0.06) 0%, transparent 40%);
+  }
+  .header-content { position: relative; z-index: 1; max-width: 720px; margin: 0 auto; }
+  .header-badge {
+    display: inline-block; background: rgba(255,255,255,0.15); backdrop-filter: blur(4px);
+    border: 1px solid rgba(255,255,255,0.2); border-radius: 20px;
+    padding: 4px 16px; font-family: 'DM Sans', sans-serif; font-size: 0.78rem;
+    font-weight: 500; letter-spacing: 0.03em; margin-bottom: 16px;
+  }
+  .header h1 {
+    font-family: 'DM Sans', sans-serif; font-size: 2.4rem; font-weight: 700;
+    margin-bottom: 12px; line-height: 1.15; letter-spacing: -0.01em;
+  }
+  .header-sub {
+    font-family: 'DM Sans', sans-serif; font-size: 1.05rem; opacity: 0.85;
+    margin-bottom: 20px;
+  }
+  .header-stats {
+    display: inline-flex; gap: 24px; background: rgba(255,255,255,0.1);
+    border-radius: 10px; padding: 10px 24px; font-family: 'DM Sans', sans-serif;
+    font-size: 0.82rem; font-weight: 500;
+  }
+  .header-stats span { opacity: 0.7; }
+
+  /* ── CONTAINER ── */
+  .container { max-width: 1100px; margin: 0 auto; padding: 40px 24px 80px; }
+
+  /* ── SECTION TITLES ── */
+  .section-header {
+    display: flex; align-items: center; gap: 12px;
+    margin: 48px 0 24px; padding-bottom: 12px;
+    border-bottom: 2px solid #e5e7eb;
+  }
+  .section-icon {
+    width: 36px; height: 36px; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.1rem; flex-shrink: 0;
+  }
+  .section-title {
+    font-family: 'DM Sans', sans-serif; font-size: 1.35rem;
+    font-weight: 700; color: #1a1a2e;
+  }
+  .section-header:first-child { margin-top: 0; }
+
+  /* ── COURSE CARDS ── */
+  .course-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 20px; }
+
+  .course-card {
+    background: white; border-radius: 14px; padding: 0;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+    border: 1px solid #f0f0f0;
+    transition: transform 0.2s, box-shadow 0.2s;
+    overflow: hidden; display: flex; flex-direction: column;
+  }
+  .course-card:hover { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(0,0,0,0.1); }
+
+  .course-card-top {
+    padding: 20px 22px 14px; display: flex; align-items: flex-start; gap: 14px;
+  }
+  .course-num {
+    width: 40px; height: 40px; border-radius: 10px; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'DM Sans', sans-serif; font-size: 0.85rem; font-weight: 700;
+    color: white;
+  }
+  .course-card-meta {
+    font-family: 'DM Sans', sans-serif; font-size: 0.7rem; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 4px;
+  }
+  .course-card h3 {
+    font-family: 'DM Sans', sans-serif; font-size: 1.05rem; font-weight: 700;
+    color: #1a1a2e; margin: 0; line-height: 1.3;
+  }
+  .course-card-body {
+    padding: 0 22px 16px; flex: 1;
+    font-size: 0.88rem; color: #6b7280; line-height: 1.55;
+  }
+  .course-card-footer {
+    padding: 12px 22px; border-top: 1px solid #f3f4f6;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .course-link {
+    font-family: 'DM Sans', sans-serif; font-size: 0.82rem; font-weight: 600;
+    display: inline-flex; align-items: center; gap: 6px;
+    transition: gap 0.2s;
+  }
+  .course-link:hover { gap: 10px; }
+  .course-hours {
+    font-family: 'DM Sans', sans-serif; font-size: 0.72rem;
+    color: #9ca3af; font-weight: 500;
+  }
+
+  /* ── PROJECT CARDS ── */
+  .project-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
+
+  .project-card {
+    background: white; border-radius: 14px; padding: 24px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+    border: 1px solid #f0f0f0;
+    transition: transform 0.2s, box-shadow 0.2s;
+    border-left: 4px solid var(--accent);
+  }
+  .project-card:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.08); }
+  .project-card-tag {
+    font-family: 'DM Sans', sans-serif; font-size: 0.7rem; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.05em; color: var(--accent);
+    margin-bottom: 8px;
+  }
+  .project-card h3 {
+    font-family: 'DM Sans', sans-serif; font-size: 1.1rem; font-weight: 700;
+    color: #1a1a2e; margin-bottom: 8px;
+  }
+  .project-card p {
+    font-size: 0.9rem; color: #6b7280; line-height: 1.55; margin-bottom: 14px;
+  }
+  .project-card a.link {
+    font-family: 'DM Sans', sans-serif; font-size: 0.85rem; font-weight: 600;
+    color: var(--accent);
+  }
+  .project-card a.link:hover { text-decoration: underline; }
+
+  /* ── PDF TABLE ── */
+  .pdf-table {
+    width: 100%; border-collapse: separate; border-spacing: 0;
+    background: white; border-radius: 14px; overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+    border: 1px solid #f0f0f0;
+  }
+  .pdf-table thead th {
+    font-family: 'DM Sans', sans-serif; font-size: 0.78rem; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.04em;
+    color: #6b7280; padding: 14px 16px;
+    background: #f9fafb; border-bottom: 2px solid #e5e7eb;
+    text-align: center;
+  }
+  .pdf-table thead th:first-child { text-align: left; padding-left: 20px; }
+  .pdf-table tbody tr { transition: background 0.15s; }
+  .pdf-table tbody tr:hover { background: #f9fafb; }
+  .pdf-table tbody tr:not(:last-child) td { border-bottom: 1px solid #f3f4f6; }
+  .pdf-table td {
+    padding: 12px 16px; text-align: center; vertical-align: middle;
+  }
+  .pdf-table td:first-child { text-align: left; padding-left: 20px; }
+
+  .pdf-jour-label {
+    display: flex; align-items: center; gap: 10px;
+    font-family: 'DM Sans', sans-serif; font-weight: 600;
+    font-size: 0.9rem; color: #1a1a2e; white-space: nowrap;
+  }
+  .pdf-jour-dot {
+    width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0;
+  }
+  .pdf-jour-topic {
+    font-weight: 400; color: #9ca3af; font-size: 0.8rem; margin-left: 4px;
+  }
+
+  .pdf-btn {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 6px 14px; border-radius: 6px; border: 1px solid #e5e7eb;
+    font-family: 'DM Sans', sans-serif; font-size: 0.78rem; font-weight: 500;
+    color: #374151; background: white; transition: all 0.15s; cursor: pointer;
+  }
+  .pdf-btn:hover { background: #f3f4f6; border-color: #d1d5db; }
+  .pdf-btn .ico { font-size: 0.9rem; }
+
+  /* ── FOOTER ── */
+  .footer {
+    text-align: center; padding: 32px 24px;
+    font-family: 'DM Sans', sans-serif; font-size: 0.8rem;
+    color: #9ca3af; border-top: 1px solid #e5e7eb; margin-top: 48px;
+  }
+  .footer a { color: #3b82f6; }
+  .footer a:hover { text-decoration: underline; }
+  .footer-links {
+    display: flex; justify-content: center; gap: 16px;
+    flex-wrap: wrap; margin-bottom: 8px;
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 1024px) {
+    .pdf-table thead th:nth-child(n+5), .pdf-table td:nth-child(n+5) { display: none; }
+  }
+  @media (max-width: 768px) {
+    .header h1 { font-size: 1.7rem; }
+    .header { padding: 40px 20px 36px; }
+    .header-stats { flex-direction: column; gap: 6px; padding: 10px 20px; }
+    .course-grid { grid-template-columns: 1fr; }
+    .project-grid { grid-template-columns: 1fr; }
+    .pdf-table { font-size: 0.85rem; }
+    .pdf-table thead th:nth-child(n+3), .pdf-table td:nth-child(n+3) { display: none; }
+    .container { padding: 28px 16px 60px; }
+  }
+  @media (max-width: 480px) {
+    .header h1 { font-size: 1.4rem; }
+    .header-stats { font-size: 0.75rem; gap: 4px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-content">
+    <div class="header-badge">2e annee Bachelor Informatique</div>
+    <h1>Mathematiques appliquees a l'Intelligence Artificielle</h1>
+    <p class="header-sub">Du vecteur au reseau de neurones : les fondations mathematiques de l'IA</p>
+    <div class="header-stats">
+      <div>23 heures <span>de formation</span></div>
+      <div>4 jours <span>de cours</span></div>
+      <div>30+ <span>exercices interactifs</span></div>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- ── COURS ── -->
+  <div class="section-header">
+    <div class="section-icon" style="background:#eff6ff; color:#3b82f6;">📚</div>
+    <div class="section-title">Cours</div>
+  </div>
+  <div class="course-grid">
+    <div class="course-card">
+      <div class="course-card-top">
+        <div class="course-num" style="background:#3b82f6;">J1</div>
+        <div>
+          <div class="course-card-meta" style="color:#3b82f6;">Jour 1</div>
+          <h3>Donnees et representation</h3>
+        </div>
+      </div>
+      <div class="course-card-body">Vecteurs, matrices, produit scalaire, regression lineaire. Le dataset fil rouge.</div>
+      <div class="course-card-footer">
+        <a href="jour1.html" class="course-link" style="color:#3b82f6;">Ouvrir le cours →</a>
+        <span class="course-hours">5h45</span>
+      </div>
+    </div>
+
+    <div class="course-card">
+      <div class="course-card-top">
+        <div class="course-num" style="background:#22c55e;">J2</div>
+        <div>
+          <div class="course-card-meta" style="color:#22c55e;">Jour 2</div>
+          <h3>Optimisation</h3>
+        </div>
+      </div>
+      <div class="course-card-body">Fonction de cout, derivee, descente de gradient, taux d'apprentissage.</div>
+      <div class="course-card-footer">
+        <a href="jour2.html" class="course-link" style="color:#22c55e;">Ouvrir le cours →</a>
+        <span class="course-hours">5h45</span>
+      </div>
+    </div>
+
+    <div class="course-card">
+      <div class="course-card-top">
+        <div class="course-num" style="background:#f97316;">J3</div>
+        <div>
+          <div class="course-card-meta" style="color:#f97316;">Jour 3</div>
+          <h3>Probabilites et classification</h3>
+        </div>
+      </div>
+      <div class="course-card-body">Probabilites, frontiere de decision, perceptron, probleme XOR.</div>
+      <div class="course-card-footer">
+        <a href="jour3.html" class="course-link" style="color:#f97316;">Ouvrir le cours →</a>
+        <span class="course-hours">5h45</span>
+      </div>
+    </div>
+
+    <div class="course-card">
+      <div class="course-card-top">
+        <div class="course-num" style="background:#a855f7;">J4</div>
+        <div>
+          <div class="course-card-meta" style="color:#a855f7;">Jour 4</div>
+          <h3>Reseaux de neurones</h3>
+        </div>
+      </div>
+      <div class="course-card-body">Neurone artificiel, fonctions d'activation, MLP, backpropagation.</div>
+      <div class="course-card-footer">
+        <a href="jour4.html" class="course-link" style="color:#a855f7;">Ouvrir le cours →</a>
+        <span class="course-hours">5h45</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── DOCUMENTS ── -->
+  <div class="section-header">
+    <div class="section-icon" style="background:#fef3c7; color:#f59e0b;">📄</div>
+    <div class="section-title">Ressources pédagogiques</div>
+  </div>
+  <table class="pdf-table">
+    <thead>
+      <tr>
+        <th>Jour</th>
+        <th>🐍 Notebook</th>
+        <th>📐 Synthese</th>
+        <th>📝 Exercices</th>
+        <th>✅ Corrections des exercices</th>
+        <th>📝 TP</th>
+        <th>✅ Corrections des TP</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <div class="pdf-jour-label">
+            <div class="pdf-jour-dot" style="background:#3b82f6;"></div>
+            Jour 1 <span class="pdf-jour-topic">Donnees</span>
+          </div>
+        </td>
+        <td><a class="pdf-btn" href="notebook/Jour1_Cours.ipynb" download><span class="ico">🐍</span> Notebook</a></td>
+        <td><a class="pdf-btn" href="pdf/jour1_synthese.pdf"><span class="ico">📐</span> Synthese</a></td>
+        <td><a class="pdf-btn" href="pdf/jour1_exercices.pdf"><span class="ico">📝</span> Exercices</a></td>
+        <td><a class="pdf-btn" href="pdf/jour1_corrections.pdf"><span class="ico">✅</span> Corrections</a></td>
+        <td><a class="pdf-btn" href="notebook/Jour1_TP_Enonce.ipynb" download><span class="ico">📝</span> TP</a></td>
+        <td><a class="pdf-btn" href="notebook/Jour1_TP_Corrige.ipynb" download><span class="ico">✅</span> Corrige</a></td>
+      </tr>
+      <tr>
+        <td>
+          <div class="pdf-jour-label">
+            <div class="pdf-jour-dot" style="background:#22c55e;"></div>
+            Jour 2 <span class="pdf-jour-topic">Optimisation</span>
+          </div>
+        </td>
+        <td><a class="pdf-btn" href="notebook/Jour2_Cours.ipynb" download><span class="ico">🐍</span> Notebook</a></td>
+        <td><a class="pdf-btn" href="pdf/jour2_synthese.pdf"><span class="ico">📐</span> Synthese</a></td>
+        <td><a class="pdf-btn" href="pdf/jour2_exercices.pdf"><span class="ico">📝</span> Exercices</a></td>
+        <td><a class="pdf-btn" href="pdf/jour2_corrections.pdf"><span class="ico">✅</span> Corrections</a></td>
+        <td><a class="pdf-btn" href="notebook/Jour2_TP_Enonce.ipynb" download><span class="ico">📝</span> TP</a></td>
+        <td><a class="pdf-btn" href="notebook/Jour2_TP_Corrige.ipynb" download><span class="ico">✅</span> Corrige</a></td>
+      </tr>
+      <tr>
+        <td>
+          <div class="pdf-jour-label">
+            <div class="pdf-jour-dot" style="background:#f97316;"></div>
+            Jour 3 <span class="pdf-jour-topic">Classification</span>
+          </div>
+        </td>
+        <td><a class="pdf-btn" href="notebook/Jour3_Cours.ipynb" download><span class="ico">🐍</span> Notebook</a></td>
+        <td><a class="pdf-btn" href="pdf/jour3_synthese.pdf"><span class="ico">📐</span> Synthese</a></td>
+        <td><a class="pdf-btn" href="pdf/jour3_exercices.pdf"><span class="ico">📝</span> Exercices</a></td>
+        <td><a class="pdf-btn" href="pdf/jour3_corrections.pdf"><span class="ico">✅</span> Corrections</a></td>
+        <td><a class="pdf-btn" href="notebook/Jour3_TP_Enonce.ipynb" download><span class="ico">📝</span> TP</a></td>
+        <td><a class="pdf-btn" href="notebook/Jour3_TP_Corrige.ipynb" download><span class="ico">✅</span> Corrige</a></td>
+      </tr>
+      <tr>
+        <td>
+          <div class="pdf-jour-label">
+            <div class="pdf-jour-dot" style="background:#a855f7;"></div>
+            Jour 4 <span class="pdf-jour-topic">Reseaux</span>
+          </div>
+        </td>
+        <td><a class="pdf-btn" href="notebook/Jour4_Cours.ipynb" download><span class="ico">🐍</span> Notebook</a></td>
+        <td><a class="pdf-btn" href="pdf/jour4_synthese.pdf"><span class="ico">📐</span> Synthese</a></td>
+        <td><a class="pdf-btn" href="pdf/jour4_exercices.pdf"><span class="ico">📝</span> Exercices</a></td>
+        <td><a class="pdf-btn" href="pdf/jour4_corrections.pdf"><span class="ico">✅</span> Corrections</a></td>
+        <td><a class="pdf-btn" href="notebook/Jour4_TP_Enonce.ipynb" download><span class="ico">📝</span> TP</a></td>
+        <td><a class="pdf-btn" href="notebook/Jour4_TP_Corrige.ipynb" download><span class="ico">✅</span> Corrige</a></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- ── PROJET & RESSOURCES ── -->
+  <div class="section-header">
+    <div class="section-icon" style="background:#ecfeff; color:#06b6d4;">🔬</div>
+    <div class="section-title">Mini Projet</div>
+  </div>
+  <div class="project-grid">
+    <div class="project-card" style="--accent: #06b6d4;">
+      <div class="project-card-tag">Mini-projet</div>
+      <h3>Du vecteur au reseau de neurones</h3>
+      <p>Projet en 6 etapes qui mobilise les notions des 4 jours sur le dataset fil rouge.</p>
+      <a href="mini_projet.html" class="link" style="color:#06b6d4;">▶ Ouvrir le projet</a>
+    </div>
+    <div class="project-card" style="--accent: #6b7280;">
+      <div class="project-card-tag">Guide</div>
+      <h3>Google Colab — Prise en main</h3>
+      <p>Tutoriel complet pour utiliser Google Colab.</p>
+      <a href="pdf/guide_colab.pdf" class="link" style="color:#6b7280;">📄 PDF</a>
+      <span style="color:#d1d5db; margin:0 8px;"></span>
+    </div>
+  </div>
+
+</div>
+
+<div class="footer">
+  <div class="footer-links">
+    <a href="https://www.mohamedelafrit.com">www.mohamedelafrit.com</a>
+    <span style="color:#e5e7eb;">|</span>
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.fr">CC BY-NC-SA 4.0</a>
+  </div>
+  <p>© 2025 Mohamed EL AFRIT</p>
+</div>
+
+</body>
+</html>

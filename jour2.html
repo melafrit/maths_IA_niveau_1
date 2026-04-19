@@ -1,0 +1,807 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Jour 2 — Optimisation — Maths IA</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,700;1,400&family=JetBrains+Mono:wght@400;500;700&family=Source+Serif+4:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; padding: 0; font-family: 'Source Serif 4', Georgia, serif; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+<script type="text/babel">
+// © 2025 Mohamed EL AFRIT// Ce contenu est distribué sous licence Creative Commons BY-NC-SA 4.0
+// https://creativecommons.org/licenses/by-nc-sa/4.0/deed.fr
+//
+// JOUR 2 — Optimisation
+// Page web interactive — Mathématiques appliquées à l'Intelligence Artificielle
+
+const { useState, useEffect, createContext, useContext } = React;
+
+/* ============================================================================
+   DATASET FIL ROUGE
+   ============================================================================ */
+const DATASET = {
+  colonnes: ["experience","nb_langages","niveau_etudes","taille_entreprise","remote","salaire","salaire_eleve"],
+  donnees: [
+    [ 0,2,3, 150, 80,28.0,0],[ 1,1,2,  50,100,26.5,0],[ 1,3,4, 800, 40,35.0,0],[ 2,2,3, 200, 60,32.0,0],
+    [ 2,4,4,3000, 20,38.0,0],[ 0,1,1,  30, 50,25.0,0],[ 3,3,3, 100, 80,34.5,0],[ 1,5,4,  15,100,42.0,0],
+    [ 4,3,3, 500, 60,38.5,0],[ 5,4,4,1200, 40,44.0,0],[ 5,3,3, 300, 80,41.0,0],[ 6,5,4,2000, 30,48.0,1],
+    [ 6,4,3, 150, 90,43.5,0],[ 7,5,4, 800, 50,50.0,1],[ 7,3,2,  80, 70,39.0,0],[ 4,6,5, 400,100,47.0,1],
+    [ 8,4,4,1500, 40,51.0,1],[ 5,2,3,4000, 10,40.0,0],[ 9,5,4, 600, 60,52.0,1],[10,6,4,2500, 30,55.0,1],
+    [10,4,3, 200, 80,48.5,1],[11,5,5,1000, 50,58.0,1],[12,7,4,3500, 20,60.0,1],[ 9,3,3,  60, 90,42.0,0],
+    [13,6,4, 800, 70,62.0,1],[11,4,4,5000, 10,54.0,1],[15,8,4,1200, 50,65.0,1],[17,6,5,2000, 40,68.0,1],
+    [20,7,4, 500, 60,72.0,1],[18,5,3, 100, 80,58.0,1],
+  ],
+};
+
+/* ============================================================================
+   SECTIONS
+   ============================================================================ */
+const SECTIONS = [
+  { id:'rappel', title:'1. Rappel et transition', level:1, children:[
+    { id:'rappel-question', title:'1.1 La question du Jour 2', level:2 },
+    { id:'rappel-mse', title:'1.2 Rappel MSE du Jour 1', level:2 },
+  ]},
+  { id:'cout', title:'2. La fonction de coût', level:1, children:[
+    { id:'cout-intuition', title:'2.1 Le GPS de l\'apprentissage', level:2 },
+    { id:'cout-formalisation', title:'2.2 Formalisation', level:2 },
+    { id:'cout-graphique', title:'2.3 Interprétation graphique', level:2 },
+    { id:'cout-python', title:'2.4 Tracer J(w)', level:2 },
+  ]},
+  { id:'minimum', title:'3. Notion de minimum', level:1, children:[
+    { id:'min-intuition', title:'3.1 Le creux de la vallée', level:2 },
+    { id:'min-formalisation', title:'3.2 Formalisation', level:2 },
+  ]},
+  { id:'derivee', title:'4. Introduction à la dérivée', level:1, children:[
+    { id:'der-intuition', title:'4.1 La pente sous vos pieds', level:2 },
+    { id:'der-formalisation', title:'4.2 Formalisation', level:2 },
+    { id:'der-utiles', title:'4.3 Dérivées utiles', level:2 },
+    { id:'der-minimum', title:'4.4 Dérivée et minimum', level:2 },
+    { id:'der-python', title:'4.5 Tracer f et f\'', level:2 },
+  ]},
+  { id:'gradient', title:'5. La descente de gradient', level:1, children:[
+    { id:'gd-accroche', title:'5.1 Descendre les yeux bandés', level:2 },
+    { id:'gd-intuition', title:'5.2 Intuition pas à pas', level:2 },
+    { id:'gd-formalisation', title:'5.3 Formalisation', level:2 },
+    { id:'gd-exemple', title:'5.4 Exemple numérique', level:2 },
+    { id:'gd-python', title:'5.5 Implémentation Python', level:2 },
+  ]},
+  { id:'alpha', title:'6. Le taux d\'apprentissage α', level:1, children:[
+    { id:'alpha-intuition', title:'6.1 La taille de vos pas', level:2 },
+    { id:'alpha-comparaison', title:'6.2 Comparaison visuelle', level:2 },
+    { id:'alpha-python', title:'6.3 Expérimentation Python', level:2 },
+  ]},
+  { id:'application', title:'7. Application au dataset salaire', level:1, children:[
+    { id:'app-derivees', title:'7.1 Dérivées partielles', level:2 },
+    { id:'app-python', title:'7.2 Implémentation complète', level:2 },
+    { id:'app-sklearn', title:'7.3 Comparaison scikit-learn', level:2 },
+  ]},
+  { id:'synthese', title:'8. Synthèse du Jour 2', level:1, children:[
+    { id:'syn-boucle', title:'8.1 La boucle d\'apprentissage', level:2 },
+    { id:'syn-tableau', title:'8.2 Tableau récapitulatif', level:2 },
+  ]},
+];
+
+/* ============================================================================
+   THEME
+   ============================================================================ */
+const THEMES = {
+  light: {
+    bg:'#ffffff', bgAlt:'#fafafa', bgCode:'#f3f4f6',
+    text:'#1a1a2e', textSecondary:'#4b5563', textMuted:'#9ca3af',
+    border:'#e5e7eb', borderLight:'#f3f4f6',
+    definitionBg:'#eff6ff', definitionBorder:'#3b82f6', definitionTitle:'#1e40af',
+    retenirBg:'#f0fdf4', retenirBorder:'#22c55e', retenirTitle:'#166534',
+    attentionBg:'#fff7ed', attentionBorder:'#f97316', attentionTitle:'#c2410c',
+    intuitionBg:'#faf5ff', intuitionBorder:'#a855f7', intuitionTitle:'#7e22ce',
+    exempleBg:'#ecfeff', exempleBorder:'#06b6d4', exempleTitle:'#0e7490',
+    codeBg:'#f8f9fa', codeBorder:'#d1d5db', codeTitle:'#1f2937',
+    sidebarBg:'#f8f9fa', sidebarText:'#374151', sidebarActive:'#3b82f6',
+    sidebarActiveBg:'#eff6ff', sidebarHover:'#f3f4f6',
+    link:'#3b82f6', accent:'#3b82f6',
+  },
+  dark: {
+    bg:'#0d1117', bgAlt:'#161b22', bgCode:'#1c2128',
+    text:'#c9d1d9', textSecondary:'#8b949e', textMuted:'#6e7681',
+    border:'#30363d', borderLight:'#21262d',
+    definitionBg:'#0d1f3c', definitionBorder:'#3b82f6', definitionTitle:'#93bbfc',
+    retenirBg:'#0a1f0d', retenirBorder:'#22c55e', retenirTitle:'#86efac',
+    attentionBg:'#1f1206', attentionBorder:'#f97316', attentionTitle:'#fdba74',
+    intuitionBg:'#1a0d2e', intuitionBorder:'#a855f7', intuitionTitle:'#d8b4fe',
+    exempleBg:'#0a1a1f', exempleBorder:'#06b6d4', exempleTitle:'#67e8f9',
+    codeBg:'#161b22', codeBorder:'#30363d', codeTitle:'#c9d1d9',
+    sidebarBg:'#161b22', sidebarText:'#8b949e', sidebarActive:'#58a6ff',
+    sidebarActiveBg:'#1c2541', sidebarHover:'#1c2128',
+    link:'#58a6ff', accent:'#58a6ff',
+  },
+};
+const ThemeContext = createContext();
+function ThemeProvider({ children }) {
+  const [mode, setMode] = useState('light');
+  return <ThemeContext.Provider value={{ mode, theme:THEMES[mode], toggle:()=>setMode(m=>m==='light'?'dark':'light') }}>{children}</ThemeContext.Provider>;
+}
+function useTheme() { return useContext(ThemeContext); }
+
+/* ============================================================================
+   KATEX
+   ============================================================================ */
+function M({ t, d }) {
+  if (!window.katex) return <code style={{fontSize:'0.9em'}}>{t}</code>;
+  try { const h = window.katex.renderToString(t, {throwOnError:false, displayMode:!!d});
+    return d ? <div style={{margin:'20px 0',textAlign:'center',overflowX:'auto'}} dangerouslySetInnerHTML={{__html:h}} /> : <span dangerouslySetInnerHTML={{__html:h}} />;
+  } catch { return <code>{t}</code>; }
+}
+
+/* ============================================================================
+   SHARED COMPONENTS (same as Jour 1)
+   ============================================================================ */
+function ThemeToggle() { const {mode,toggle}=useTheme(); return <button onClick={toggle} style={{background:'none',border:'none',cursor:'pointer',fontSize:'1.3rem',padding:'6px 10px',borderRadius:'8px'}} aria-label="Basculer le thème">{mode==='light'?'🌙':'☀️'}</button>; }
+
+function Box({ type, title, children }) {
+  const {theme}=useTheme();
+  const C={definition:{icon:'📐',label:'Définition',bg:'definitionBg',bd:'definitionBorder',tt:'definitionTitle'},retenir:{icon:'⚡',label:'À retenir',bg:'retenirBg',bd:'retenirBorder',tt:'retenirTitle'},attention:{icon:'⚠️',label:'Attention',bg:'attentionBg',bd:'attentionBorder',tt:'attentionTitle'},intuition:{icon:'💡',label:'Intuition',bg:'intuitionBg',bd:'intuitionBorder',tt:'intuitionTitle'},exemple:{icon:'📊',label:'Exemple',bg:'exempleBg',bd:'exempleBorder',tt:'exempleTitle'},code:{icon:'🐍',label:'Code Python',bg:'codeBg',bd:'codeBorder',tt:'codeTitle'}}[type];
+  return <div style={{background:theme[C.bg],borderLeft:`4px solid ${theme[C.bd]}`,borderRadius:'6px',padding:'16px 20px',margin:'20px 0'}}><div style={{fontFamily:"'DM Sans',sans-serif",fontWeight:700,color:theme[C.tt],marginBottom:'10px',fontSize:'0.95rem'}}>{C.icon} {title||C.label}</div><div style={{color:theme.text,lineHeight:1.7}}>{children}</div></div>;
+}
+
+function Sec({ id, title, level=1, children }) {
+  const {theme}=useTheme(); const s={1:'1.7rem',2:'1.3rem',3:'1.1rem'}; const Tag=level===1?'h2':level===2?'h3':'h4';
+  return <section id={id} style={{scrollMarginTop:'24px'}}><Tag style={{fontFamily:"'DM Sans',sans-serif",fontSize:s[level],color:theme.text,fontWeight:700,borderBottom:level===1?`2px solid ${theme.accent}`:'none',paddingBottom:level===1?'8px':'0',marginTop:level===1?'48px':'28px',marginBottom:'16px'}}>{title}</Tag>{children}</section>;
+}
+
+function PythonCell({ code: init, title='Code Python' }) {
+  const {theme}=useTheme(); const [code,setCode]=useState(init); const [output,setOutput]=useState(''); const [imgSrc,setImgSrc]=useState(null); const [running,setRunning]=useState(false); const [status,setStatus]=useState('idle');
+  const run = async () => {
+    setRunning(true); setOutput(''); setImgSrc(null);
+    try {
+      if (!window._pyodideReady) { setStatus('loading');
+        if (!window._pyodideLoading) { const s=document.createElement('script'); s.src='https://cdn.jsdelivr.net/pyodide/v0.24.1/full/pyodide.js'; document.head.appendChild(s); window._pyodideLoading=new Promise(r=>{s.onload=r}); }
+        await window._pyodideLoading; window._pyodideReady=await window.loadPyodide({indexURL:'https://cdn.jsdelivr.net/pyodide/v0.24.1/full/'}); await window._pyodideReady.loadPackage(['numpy','matplotlib']); setStatus('ready');
+      }
+      const py=window._pyodideReady;
+      py.runPython(`import sys,io,base64\nimport matplotlib;matplotlib.use('AGG')\nimport matplotlib.pyplot as plt\n_cap=io.StringIO();sys.stdout=_cap`);
+      py.runPython(code); setOutput(py.runPython('_cap.getvalue()'));
+      const hp=py.runPython(`_buf=io.BytesIO();_fig=plt.gcf();_h=len(_fig.get_axes())>0\nif _h:_fig.savefig(_buf,format='png',dpi=120,bbox_inches='tight',facecolor='white');_buf.seek(0)\nplt.close('all');_h`);
+      if (hp) setImgSrc(`data:image/png;base64,${py.runPython("base64.b64encode(_buf.getvalue()).decode()")}`);
+    } catch(e) { setOutput(`Erreur : ${e.message}`); } setRunning(false);
+  };
+  return <div style={{border:`1px solid ${theme.codeBorder}`,borderRadius:'8px',overflow:'hidden',margin:'20px 0'}}>
+    <div style={{background:theme.codeBg,padding:'8px 16px',display:'flex',justifyContent:'space-between',alignItems:'center',borderBottom:`1px solid ${theme.codeBorder}`,fontFamily:"'DM Sans',sans-serif",fontSize:'0.85rem',color:theme.codeTitle,fontWeight:600}}><span>🐍 {title}</span><button onClick={run} disabled={running} style={{background:'#22c55e',color:'white',border:'none',padding:'4px 14px',borderRadius:'4px',cursor:'pointer',fontWeight:600,fontSize:'0.85rem',opacity:running?0.6:1}}>{running?(status==='loading'?'⏳ Chargement Pyodide...':'⏳ Exécution...'):'▶ Exécuter'}</button></div>
+    <textarea value={code} onChange={e=>setCode(e.target.value)} spellCheck={false} style={{width:'100%',minHeight:'100px',fontFamily:"'JetBrains Mono',monospace",fontSize:'0.82rem',lineHeight:1.6,background:theme.bgCode,color:theme.text,border:'none',padding:'14px',resize:'vertical',outline:'none',boxSizing:'border-box'}} />
+    {(output||imgSrc)&&<div style={{borderTop:`1px solid ${theme.codeBorder}`,padding:'12px 16px',background:theme.bgAlt,fontFamily:"'JetBrains Mono',monospace",fontSize:'0.8rem',color:theme.textSecondary,whiteSpace:'pre-wrap'}}>{output&&<pre style={{margin:0}}>{output}</pre>}{imgSrc&&<img src={imgSrc} alt="Graphique" style={{maxWidth:'100%',marginTop:'8px',borderRadius:'4px'}} />}</div>}
+  </div>;
+}
+
+function P({ children, style={} }) { const {theme}=useTheme(); return <p style={{color:theme.text,lineHeight:1.8,marginBottom:'16px',fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.05rem',...style}}>{children}</p>; }
+function B({ children }) { return <strong style={{fontWeight:600}}>{children}</strong>; }
+function Cd({ children }) { const {theme}=useTheme(); return <code style={{background:theme.bgCode,padding:'2px 6px',borderRadius:'4px',fontFamily:"'JetBrains Mono',monospace",fontSize:'0.88em',color:theme.codeTitle}}>{children}</code>; }
+
+function DT({ rows, headers, max=10 }) {
+  const {theme}=useTheme(); const show=rows.slice(0,max);
+  return <div style={{overflowX:'auto',margin:'16px 0'}}><table style={{borderCollapse:'collapse',width:'100%',fontFamily:"'JetBrains Mono',monospace",fontSize:'0.82rem'}}><thead><tr>{headers.map((h,i)=><th key={i} style={{padding:'8px 12px',borderBottom:`2px solid ${theme.accent}`,textAlign:'left',fontFamily:"'DM Sans',sans-serif",fontWeight:600,color:theme.text,whiteSpace:'nowrap'}}>{h}</th>)}</tr></thead><tbody>{show.map((row,i)=><tr key={i} style={{background:i%2===0?'transparent':theme.bgAlt}}>{row.map((c,j)=><td key={j} style={{padding:'6px 12px',borderBottom:`1px solid ${theme.borderLight}`,color:theme.textSecondary}}>{c}</td>)}</tr>)}</tbody></table></div>;
+}
+
+/* ============================================================================
+   SIDEBAR
+   ============================================================================ */
+function Sidebar({ activeId }) {
+  const {theme}=useTheme(); const [collapsed,setCollapsed]=useState({}); const [mobileOpen,setMobileOpen]=useState(false); const [progress,setProgress]=useState(0);
+  useEffect(() => { const fn=()=>{const h=document.documentElement;setProgress(Math.min(1,Math.max(0,h.scrollTop/(h.scrollHeight-h.clientHeight))));}; window.addEventListener('scroll',fn,{passive:true}); return ()=>window.removeEventListener('scroll',fn); }, []);
+  const scrollTo=(id)=>{document.getElementById(id)?.scrollIntoView({behavior:'smooth'});setMobileOpen(false);}; const tog=(id)=>setCollapsed(c=>({...c,[id]:!c[id]}));
+  const nav = <div style={{display:'flex',flexDirection:'column',height:'100%',position:'relative'}}>
+    <div style={{position:'absolute',left:0,top:0,width:'3px',height:'100%',background:theme.borderLight,zIndex:1}}><div style={{width:'100%',height:`${progress*100}%`,background:theme.accent,transition:'height 0.1s'}} /></div>
+    <div style={{padding:'20px 20px 14px',borderBottom:`1px solid ${theme.border}`}}>
+      <a href="index.html" style={{display:'inline-flex',alignItems:'center',gap:'4px',fontFamily:"'DM Sans',sans-serif",fontSize:'0.75rem',color:theme.textMuted,textDecoration:'none',marginBottom:'8px'}}>← Accueil</a>
+      <div style={{fontFamily:"'DM Sans',sans-serif",fontWeight:700,fontSize:'1rem',color:theme.accent}}>Maths IA</div>
+      <div style={{fontFamily:"'DM Sans',sans-serif",fontSize:'0.78rem',color:theme.textMuted,marginTop:'2px'}}>Jour 2 — Optimisation</div>
+      <div style={{display:'flex',gap:'4px',marginTop:'10px'}}>
+        {[1,2,3,4].map(j=>j===2 ? <div key={j} style={{flex:1,textAlign:'center',padding:'3px 0',borderRadius:'4px',fontFamily:"'DM Sans',sans-serif",fontSize:'0.72rem',fontWeight:700,background:theme.accent,color:'#fff',border:`1px solid ${theme.accent}`}}>J{j}</div> : <a key={j} href={`jour${j}.html`} style={{flex:1,textAlign:'center',padding:'3px 0',borderRadius:'4px',fontFamily:"'DM Sans',sans-serif",fontSize:'0.72rem',fontWeight:400,background:'transparent',color:theme.textMuted,textDecoration:'none',cursor:'pointer',border:`1px solid ${theme.border}`}}>J{j}</a>)}
+      </div>
+    </div>
+    <nav style={{flex:1,overflowY:'auto',padding:'8px 0'}}>
+      {SECTIONS.map(sec=>{const isOpen=!collapsed[sec.id];const isActive=activeId===sec.id||sec.children?.some(c=>c.id===activeId);
+        return <div key={sec.id}><div onClick={()=>{scrollTo(sec.id);if(sec.children)tog(sec.id);}} style={{display:'flex',alignItems:'center',gap:'6px',padding:'7px 14px 7px 18px',cursor:'pointer',background:isActive?theme.sidebarActiveBg:'transparent',borderRight:isActive?`3px solid ${theme.sidebarActive}`:'3px solid transparent',fontFamily:"'DM Sans',sans-serif",fontSize:'0.8rem',fontWeight:isActive?600:400,color:isActive?theme.sidebarActive:theme.sidebarText,transition:'all 0.15s'}}>{sec.children&&<span style={{fontSize:'0.55rem',transition:'transform 0.2s',transform:isOpen?'rotate(90deg)':'rotate(0)',display:'inline-block'}}>▶</span>}<span style={{flex:1}}>{sec.title}</span></div>
+          {sec.children&&isOpen&&sec.children.map(ch=>{const ca=activeId===ch.id;return <div key={ch.id} onClick={()=>scrollTo(ch.id)} style={{padding:'4px 14px 4px 42px',cursor:'pointer',fontFamily:"'DM Sans',sans-serif",fontSize:'0.76rem',color:ca?theme.sidebarActive:theme.textMuted,fontWeight:ca?600:400}}>{ch.title}</div>;})}
+        </div>;})}
+    </nav>
+    <div style={{padding:'14px',borderTop:`1px solid ${theme.border}`,fontSize:'0.68rem',color:theme.textMuted,fontFamily:"'DM Sans',sans-serif",textAlign:'center',lineHeight:1.6}}>© 2025 Mohamed EL AFRIT<br/><a href="https://www.mohamedelafrit.com" style={{color:theme.link,textDecoration:'none'}}>www.mohamedelafrit.com</a><br/><a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.fr" style={{color:theme.link,textDecoration:'none'}}>CC BY-NC-SA 4.0</a></div>
+  </div>;
+  return <>
+    <button onClick={()=>setMobileOpen(!mobileOpen)} className="mob-btn" style={{display:'none',position:'fixed',top:10,left:10,zIndex:1001,background:theme.bgAlt,border:`1px solid ${theme.border}`,borderRadius:'8px',padding:'8px 10px',cursor:'pointer',fontSize:'1.2rem'}}>{mobileOpen?'✕':'☰'}</button>
+    <aside className="sidebar-el" style={{position:'fixed',left:0,top:0,width:'280px',height:'100vh',background:theme.sidebarBg,borderRight:`1px solid ${theme.border}`,zIndex:1000,overflowY:'hidden',transition:'transform 0.3s'}}>{nav}</aside>
+    {mobileOpen&&<div onClick={()=>setMobileOpen(false)} style={{position:'fixed',inset:0,background:'rgba(0,0,0,0.4)',zIndex:999}} />}
+  </>;
+}
+
+/* ============================================================================
+   CONTENT — ALL 8 SECTIONS
+   ============================================================================ */
+function Content() {
+  const {theme}=useTheme();
+  return <>
+    {/* ── SECTION 1 : RAPPEL ── */}
+    <Sec id="rappel" title="1. Rappel et transition" level={1}>
+      <Sec id="rappel-question" title="1.1 La question du Jour 2" level={2}>
+        <P>Au Jour 1, nous avons construit un modèle de régression linéaire : <M t={"\\hat{y} = w_1 \\cdot \\texttt{experience} + w_0"} />.
+        Nous avons trouvé les poids optimaux grâce à une <B>formule analytique</B> (celle des moindres carrés).</P>
+        <P>Mais cette formule n'existe que pour la régression linéaire simple. Dès qu'on passe à des modèles plus complexes
+        (réseaux de neurones, par exemple), il n'y a <B>plus de formule magique</B>.</P>
+        <Box type="intuition" title="La grande question du Jour 2">
+          <P style={{marginBottom:0}}>Comment trouver <B>automatiquement</B> les meilleurs paramètres <M t={"\\boldsymbol{\\theta}"} /> d'un modèle,
+          sans formule analytique ? La réponse : <B>l'optimisation par descente de gradient</B>.</P>
+        </Box>
+      </Sec>
+      <Sec id="rappel-mse" title="1.2 Rappel MSE du Jour 1" level={2}>
+        <PythonCell title="Rappel : MSE avec les poids du Jour 1" code={`import numpy as np
+
+experience = np.array([0,1,1,2,2,0,3,1,4,5,5,6,6,7,7,4,
+    8,5,9,10,10,11,12,9,13,11,15,17,20,18])
+salaire = np.array([28.0,26.5,35.0,32.0,38.0,25.0,34.5,42.0,
+    38.5,44.0,41.0,48.0,43.5,50.0,39.0,47.0,51.0,40.0,
+    52.0,55.0,48.5,58.0,60.0,42.0,62.0,54.0,65.0,68.0,72.0,58.0])
+
+# Poids trouves au Jour 1 (formule analytique)
+w1, w0 = 2.07, 31.27
+y_pred = w1 * experience + w0
+mse = np.mean((salaire - y_pred) ** 2)
+print(f"Poids du Jour 1 : w1={w1}, w0={w0}")
+print(f"MSE = {mse:.2f}")
+print(f"\\nQuestion : peut-on arriver a ce resultat SANS la formule analytique ?")`} />
+      </Sec>
+    </Sec>
+
+    {/* ── SECTION 2 : FONCTION DE COÛT ── */}
+    <Sec id="cout" title="2. La fonction de coût" level={1}>
+      <Sec id="cout-intuition" title="2.1 Le GPS de l'apprentissage" level={2}>
+        <Box type="intuition" title="Analogie : le GPS de l'apprentissage">
+          <P style={{marginBottom:8}}>Imaginez que vous cherchez un restaurant dans une ville inconnue, <B>sans carte</B>.
+          Vous avez juste un GPS qui vous indique la <B>distance</B> au restaurant (mais pas la direction).</P>
+          <P style={{marginBottom:0}}>La <B>fonction de coût</B> joue le rôle de ce GPS : elle mesure « à quel point
+          on est loin de la solution idéale ». Plus le coût est <B>élevé</B>, plus le modèle se trompe.
+          Plus il est <B>bas</B>, meilleur est le modèle. L'objectif : <B>minimiser ce coût</B>.</P>
+        </Box>
+      </Sec>
+
+      <Sec id="cout-formalisation" title="2.2 Formalisation" level={2}>
+        <Box type="definition" title="Fonction de coût (loss function)">
+          <P style={{marginBottom:8}}>La <B>fonction de coût</B> <M t={"J(\\mathbf{w})"} /> mesure l'erreur globale du modèle.
+          Pour la régression linéaire, on utilise le <B>MSE</B> :</P>
+          <M d t={"J(\\mathbf{w}) = \\frac{1}{n} \\sum_{i=1}^{n} \\left( y_i - \\hat{y}_i \\right)^2 = \\frac{1}{n} \\sum_{i=1}^{n} \\left( y_i - (\\mathbf{w}^T \\mathbf{x}_i + b) \\right)^2"} />
+          <P style={{marginBottom:0}}>Le coût dépend des <B>paramètres</B> <M t={"\\mathbf{w}"} /> (et <M t={"b"} />), pas des données — celles-ci sont fixées.</P>
+        </Box>
+        <P>Point crucial : <M t={"J"} /> est une <B>fonction des poids</B>. Si on change les poids, le coût change.
+        C'est cette dépendance qui va nous permettre de <B>chercher les meilleurs poids</B>.</P>
+      </Sec>
+
+      <Sec id="cout-graphique" title="2.3 Interprétation graphique" level={2}>
+        <P>Dans le cas simple (un seul poids <M t={"w_1"} />, biais fixé), <M t={"J(w_1)"} /> est une <B>parabole</B> (courbe en U).
+        Le minimum de cette parabole correspond au <B>meilleur poids</B>.</P>
+        <P>Avec 2 paramètres (<M t={"w_0, w_1"} />), <M t={"J"} /> est une <B>surface en 3D</B> en forme de bol.
+        Le fond du bol est le minimum — le point où les deux poids sont optimaux.</P>
+      </Sec>
+
+      <Sec id="cout-python" title="2.4 Tracer J(w)" level={2}>
+        <PythonCell title="Tracer J(w₁) pour w₁ variant de -5 à 10" code={`import numpy as np
+import matplotlib.pyplot as plt
+
+experience = np.array([0,1,1,2,2,0,3,1,4,5,5,6,6,7,7,4,
+    8,5,9,10,10,11,12,9,13,11,15,17,20,18])
+salaire = np.array([28.0,26.5,35.0,32.0,38.0,25.0,34.5,42.0,
+    38.5,44.0,41.0,48.0,43.5,50.0,39.0,47.0,51.0,40.0,
+    52.0,55.0,48.5,58.0,60.0,42.0,62.0,54.0,65.0,68.0,72.0,58.0])
+
+w0_fixe = 31.27  # On fixe le biais
+w1_values = np.linspace(-5, 10, 200)
+mse_values = []
+
+for w1 in w1_values:
+    y_pred = w1 * experience + w0_fixe
+    mse = np.mean((salaire - y_pred) ** 2)
+    mse_values.append(mse)
+
+fig, ax = plt.subplots(figsize=(8, 5))
+ax.plot(w1_values, mse_values, 'b-', lw=2)
+ax.axvline(2.07, color='red', ls='--', label=f'w1* = 2.07 (minimum)')
+ax.scatter([2.07], [np.mean((salaire - 2.07*experience - w0_fixe)**2)],
+           c='red', s=100, zorder=5)
+ax.set_xlabel("Poids w1 (pente)", fontsize=12)
+ax.set_ylabel("J(w1) = MSE", fontsize=12)
+ax.set_title("Fonction de cout J en fonction de w1")
+ax.legend(); ax.grid(True, alpha=0.3)
+plt.tight_layout(); plt.show()`} />
+      </Sec>
+    </Sec>
+
+    {/* ── SECTION 3 : MINIMUM ── */}
+    <Sec id="minimum" title="3. Notion de minimum" level={1}>
+      <Sec id="min-intuition" title="3.1 Le creux de la vallée" level={2}>
+        <Box type="intuition" title="Le creux de la vallée">
+          <P style={{marginBottom:0}}>La courbe <M t={"J(w_1)"} /> ressemble à une <B>vallée</B>.
+          Le point le plus bas — le <B>creux</B> — est l'endroit où l'erreur est minimale.
+          C'est là que se trouve le meilleur poids <M t={"w_1^*"} />. Tout l'enjeu de l'optimisation
+          est de <B>trouver ce creux</B>.</P>
+        </Box>
+      </Sec>
+      <Sec id="min-formalisation" title="3.2 Formalisation" level={2}>
+        <M d t={"\\mathbf{w}^* = \\arg\\min_{\\mathbf{w}} J(\\mathbf{w})"} />
+        <P>En français : <M t={"\\mathbf{w}^*"} /> est la valeur de <M t={"\\mathbf{w}"} /> qui <B>minimise</B> <M t={"J(\\mathbf{w})"} />.</P>
+        <Box type="retenir">
+          <P style={{marginBottom:0}}><B>Apprendre = optimiser</B>. Trouver les meilleurs poids d'un modèle revient
+          à trouver le minimum de la fonction de coût. C'est un problème d'<B>optimisation mathématique</B>.</P>
+        </Box>
+        <P>Comment trouver ce minimum ? On pourrait tester des milliers de poids au hasard, mais c'est très lent.
+        Il nous faut un outil mathématique : la <B>dérivée</B>.</P>
+      </Sec>
+    </Sec>
+
+    {/* ── SECTION 4 : DÉRIVÉE ── */}
+    <Sec id="derivee" title="4. Introduction à la dérivée" level={1}>
+      <Sec id="der-intuition" title="4.1 La pente sous vos pieds" level={2}>
+        <Box type="intuition" title="Analogie : la pente de la route">
+          <P style={{marginBottom:0}}>Imaginez que vous marchez sur une route vallonnée. À chaque instant, vous pouvez sentir
+          si la route <B>monte</B> (pente positive), <B>descend</B> (pente négative) ou est <B>plate</B> (pente nulle).
+          Cette pente, c'est la <B>dérivée</B>. Elle vous dit dans quelle direction et à quelle vitesse la fonction change.</P>
+        </Box>
+      </Sec>
+
+      <Sec id="der-formalisation" title="4.2 Formalisation" level={2}>
+        <Box type="definition" title="Dérivée">
+          <P style={{marginBottom:8}}>La <B>dérivée</B> de <M t={"f"} /> en un point <M t={"x"} /> mesure le <B>taux de variation instantané</B> :</P>
+          <M d t={"f'(x) = \\lim_{h \\to 0} \\frac{f(x + h) - f(x)}{h}"} />
+          <P style={{marginBottom:0}}>Intuitivement : si on bouge <M t={"x"} /> d'une toute petite quantité <M t={"h"} />,
+          de combien <M t={"f(x)"} /> change-t-il ?</P>
+        </Box>
+        <P>En pratique, on n'a pas besoin de calculer la limite. Il existe des <B>règles de dérivation</B> simples :</P>
+      </Sec>
+
+      <Sec id="der-utiles" title="4.3 Dérivées utiles" level={2}>
+        <DT headers={['Fonction f(x)','Dérivée f\'(x)','Exemple']} max={20} rows={[
+          ['c (constante)', '0', 'f(x)=5 → f\'(x)=0'],
+          ['ax + b', 'a', 'f(x)=3x+2 → f\'(x)=3'],
+          ['x²', '2x', 'f(x)=x² → f\'(x)=2x'],
+          ['ax²', '2ax', 'f(x)=4x² → f\'(x)=8x'],
+          ['(x−a)²', '2(x−a)', 'f(x)=(x−3)² → f\'(x)=2(x−3)'],
+          ['Règle de la chaîne : g(h(x))', 'g\'(h(x)) · h\'(x)', 'Composer les dérivées'],
+        ]} />
+        <Box type="retenir">
+          <P style={{marginBottom:0}}>La seule règle vraiment indispensable pour ce cours : la dérivée de <M t={"(\\text{quelque chose})^2"} /> est
+          <M t={"2 \\times (\\text{quelque chose}) \\times (\\text{d\\'eriv\\'ee de ce quelque chose})"} />.
+          C'est la <B>règle de la chaîne</B>.</P>
+        </Box>
+      </Sec>
+
+      <Sec id="der-minimum" title="4.4 Dérivée et minimum" level={2}>
+        <P>Le lien entre dérivée et minimum est fondamental :</P>
+        <Box type="retenir" title="Condition nécessaire de minimum">
+          <P style={{marginBottom:0}}>Au <B>minimum</B> d'une fonction, la dérivée est <B>nulle</B> : <M t={"f'(x^*) = 0"} />.
+          La pente est plate — on est au fond de la vallée.</P>
+        </Box>
+        <Box type="attention" title="Maximum vs Minimum">
+          <P style={{marginBottom:0}}>La dérivée nulle peut aussi indiquer un <B>maximum</B> (sommet de colline).
+          Pour le MSE, ce n'est pas un problème : la courbe est toujours en forme de U (convexe),
+          donc le seul point avec dérivée nulle est bien le minimum.</P>
+        </Box>
+        <Box type="exemple" title="Exemple : J(w) = (w−3)²">
+          <P style={{marginBottom:8}}>Dérivée : <M t={"J'(w) = 2(w - 3)"} />. Condition de minimum : <M t={"J'(w^*) = 0"} />.</P>
+          <M d t={"2(w^* - 3) = 0 \\quad \\Longrightarrow \\quad w^* = 3"} />
+          <P style={{marginBottom:0}}>Le minimum est atteint en <M t={"w^* = 3"} />, avec <M t={"J(3) = 0"} />.</P>
+        </Box>
+      </Sec>
+
+      <Sec id="der-python" title="4.5 Tracer f et f'" level={2}>
+        <PythonCell title="Fonction et sa dérivée — point critique" code={`import numpy as np
+import matplotlib.pyplot as plt
+
+# Fonction J(w) = (w - 3)^2
+w = np.linspace(-2, 8, 200)
+J = (w - 3) ** 2
+dJ = 2 * (w - 3)  # derivee
+
+fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 4.5))
+
+# Gauche : la fonction
+ax1.plot(w, J, 'b-', lw=2, label='J(w) = (w-3)²')
+ax1.scatter([3], [0], c='red', s=100, zorder=5, label='Minimum w*=3')
+ax1.set_xlabel('w'); ax1.set_ylabel('J(w)')
+ax1.set_title('Fonction de cout'); ax1.legend(); ax1.grid(True, alpha=0.3)
+
+# Droite : la derivee
+ax2.plot(w, dJ, 'purple', lw=2, label="J'(w) = 2(w-3)")
+ax2.axhline(0, color='gray', ls='-', alpha=0.3)
+ax2.scatter([3], [0], c='red', s=100, zorder=5, label="J'(3) = 0")
+ax2.set_xlabel('w'); ax2.set_ylabel("J'(w)")
+ax2.set_title('Derivee (= pente)'); ax2.legend(); ax2.grid(True, alpha=0.3)
+
+plt.tight_layout(); plt.show()
+print("Au minimum w*=3 : J'(3) = 0 (pente nulle)")`} />
+      </Sec>
+    </Sec>
+
+    {/* ── SECTION 5 : DESCENTE DE GRADIENT ── */}
+    <Sec id="gradient" title="5. La descente de gradient" level={1}>
+      <Sec id="gd-accroche" title="5.1 Descendre une montagne les yeux bandés" level={2}>
+        <Box type="intuition" title="L'analogie fondamentale">
+          <P style={{marginBottom:8}}>Imaginez que vous êtes au sommet d'une montagne, <B>les yeux bandés</B>.
+          Vous voulez descendre dans la vallée (le minimum). Votre stratégie :</P>
+          <P style={{marginBottom:8}}>1. Vous <B>tâtez le sol</B> autour de vous pour sentir la pente (= calculer la dérivée){'\n'}
+          2. Vous faites un <B>pas</B> dans la direction qui descend (= soustraire la dérivée){'\n'}
+          3. Vous <B>recommencez</B> jusqu'à sentir que le sol est plat (= dérivée ≈ 0)</P>
+          <P style={{marginBottom:0}}>C'est exactement l'algorithme de la <B>descente de gradient</B> !</P>
+        </Box>
+      </Sec>
+
+      <Sec id="gd-intuition" title="5.2 Intuition pas à pas" level={2}>
+        <P>La descente de gradient est un algorithme <B>itératif</B> :</P>
+        <P>• Si la dérivée est <B>positive</B> (pente montante) → on <B>diminue</B> <M t={"w"} />{'\n'}
+        • Si la dérivée est <B>négative</B> (pente descendante) → on <B>augmente</B> <M t={"w"} />{'\n'}
+        • Si la dérivée est <B>nulle</B> (plat) → on a trouvé le minimum !</P>
+        <P>La règle est toujours la même : <B>aller dans le sens opposé de la dérivée</B>.</P>
+      </Sec>
+
+      <Sec id="gd-formalisation" title="5.3 Formalisation" level={2}>
+        <Box type="definition" title="Règle de mise à jour de la descente de gradient">
+          <P style={{marginBottom:8}}>À chaque itération, le poids est mis à jour :</P>
+          <M d t={"w \\leftarrow w - \\alpha \\cdot \\frac{\\partial J}{\\partial w}"} />
+          <P style={{marginBottom:0}}>où <M t={"\\alpha > 0"} /> est le <B>taux d'apprentissage</B> (learning rate) et
+          <M t={"\\frac{\\partial J}{\\partial w}"} /> est la <B>dérivée</B> (ou gradient) de <M t={"J"} /> par rapport à <M t={"w"} />.</P>
+        </Box>
+        <P>Le signe « moins » est essentiel : il fait aller dans le <B>sens opposé</B> de la pente,
+        c'est-à-dire vers le bas.</P>
+      </Sec>
+
+      <Sec id="gd-exemple" title="5.4 Exemple numérique complet" level={2}>
+        <P>Prenons <M t={"J(w) = (w - 3)^2"} />, donc <M t={"J'(w) = 2(w - 3)"} />.{'\n'}
+        Partons de <M t={"w_0 = 0"} /> avec <M t={"\\alpha = 0.1"} /> :</P>
+        <Box type="exemple" title="5 itérations à la main">
+          <DT headers={['Itération','w','J\'(w) = 2(w−3)','w_new = w − α·J\'(w)','J(w)']} max={10} rows={[
+            ['0','0.00','2(0−3) = −6.0','0 − 0.1×(−6) = 0.60','9.00'],
+            ['1','0.60','2(0.6−3) = −4.8','0.6 − 0.1×(−4.8) = 1.08','5.76'],
+            ['2','1.08','2(1.08−3) = −3.84','1.08 − 0.1×(−3.84) = 1.46','3.69'],
+            ['3','1.46','2(1.46−3) = −3.07','1.46 − 0.1×(−3.07) = 1.77','2.36'],
+            ['4','1.77','2(1.77−3) = −2.46','1.77 − 0.1×(−2.46) = 2.02','1.51'],
+          ]} />
+          <P style={{marginBottom:0}}>Le poids <B>converge vers 3</B> (le minimum). À chaque itération, <M t={"J"} /> diminue.
+          La dérivée se rapproche de 0 — le sol s'aplatit.</P>
+        </Box>
+      </Sec>
+
+      <Sec id="gd-python" title="5.5 Implémentation Python" level={2}>
+        <PythonCell title="Descente de gradient sur J(w) = (w−3)²" code={`import numpy as np
+import matplotlib.pyplot as plt
+
+# Fonction et derivee
+def J(w): return (w - 3) ** 2
+def dJ(w): return 2 * (w - 3)
+
+# Parametres
+w = 0.0       # Point de depart
+alpha = 0.1   # Taux d'apprentissage
+n_iter = 20   # Nombre d'iterations
+
+# Historique pour le graphique
+hist_w = [w]
+hist_J = [J(w)]
+
+for i in range(n_iter):
+    grad = dJ(w)
+    w = w - alpha * grad
+    hist_w.append(w)
+    hist_J.append(J(w))
+    if i < 8:
+        print(f"Iter {i+1:2d} : w = {w:.4f}, J(w) = {J(w):.4f}, grad = {grad:.4f}")
+
+print(f"\\nResultat final : w = {w:.4f} (optimal = 3.0)")
+
+# Graphique
+fig, ax = plt.subplots(figsize=(8, 5))
+w_range = np.linspace(-1, 7, 200)
+ax.plot(w_range, J(w_range), 'b-', lw=2, label='J(w) = (w-3)²')
+ax.plot(hist_w, hist_J, 'ro-', markersize=6, label='Descente de gradient')
+ax.scatter([3], [0], c='green', s=150, zorder=5, marker='*', label='Minimum w*=3')
+ax.set_xlabel('w'); ax.set_ylabel('J(w)')
+ax.set_title('Descente de gradient en action')
+ax.legend(); ax.grid(True, alpha=0.3)
+plt.tight_layout(); plt.show()`} />
+        <Box type="retenir" title="L'algorithme en 3 lignes">
+          <P style={{marginBottom:0}}>1. <B>Calculer</B> le gradient : <M t={"g = \\frac{\\partial J}{\\partial w}"} />{'\n'}
+          2. <B>Mettre à jour</B> le poids : <M t={"w \\leftarrow w - \\alpha \\cdot g"} />{'\n'}
+          3. <B>Répéter</B> jusqu'à convergence</P>
+        </Box>
+      </Sec>
+    </Sec>
+
+    {/* ── SECTION 6 : TAUX D'APPRENTISSAGE ── */}
+    <Sec id="alpha" title="6. Le taux d'apprentissage α" level={1}>
+      <Sec id="alpha-intuition" title="6.1 La taille de vos pas" level={2}>
+        <Box type="intuition" title="La taille des pas">
+          <P style={{marginBottom:8}}>Le taux d'apprentissage <M t={"\\alpha"} /> contrôle la <B>taille des pas</B> :</P>
+          <P style={{marginBottom:8}}>
+            • <M t={"\\alpha"} /> <B>trop petit</B> → pas minuscules, convergence très lente (des milliers d'itérations){'\n'}
+            • <M t={"\\alpha"} /> <B>juste bien</B> → convergence rapide et stable{'\n'}
+            • <M t={"\\alpha"} /> <B>trop grand</B> → on saute par-dessus le minimum, le coût <B>oscille ou explose</B> (divergence)
+          </P>
+          <P style={{marginBottom:0}}>Choisir <M t={"\\alpha"} /> est un des <B>réglages les plus importants</B> en machine learning.</P>
+        </Box>
+      </Sec>
+
+      <Sec id="alpha-comparaison" title="6.2 Comparaison visuelle" level={2}>
+        <P>Voyons l'effet de 4 valeurs de <M t={"\\alpha"} /> sur la même fonction <M t={"J(w) = (w-3)^2"} /> :</P>
+        <Box type="attention" title="Choisir α">
+          <P style={{marginBottom:0}}>Il n'existe pas de valeur universelle pour <M t={"\\alpha"} />. En pratique, on teste
+          plusieurs valeurs (ex : 0.001, 0.01, 0.1) et on observe la <B>courbe de convergence</B>
+          (J en fonction du nombre d'itérations). Un bon <M t={"\\alpha"} /> donne une courbe qui descend
+          rapidement puis se stabilise.</P>
+        </Box>
+      </Sec>
+
+      <Sec id="alpha-python" title="6.3 Expérimentation Python" level={2}>
+        <PythonCell title="Effet du taux d'apprentissage α" code={`import numpy as np
+import matplotlib.pyplot as plt
+
+def J(w): return (w - 3) ** 2
+def dJ(w): return 2 * (w - 3)
+
+alphas = [0.001, 0.05, 0.1, 0.9]
+colors = ['#e74c3c', '#f39c12', '#2ecc71', '#9b59b6']
+
+fig, axes = plt.subplots(1, 2, figsize=(14, 5))
+
+for alpha, color in zip(alphas, colors):
+    w = 0.0
+    hist_w, hist_J = [w], [J(w)]
+    for _ in range(30):
+        w = w - alpha * dJ(w)
+        hist_w.append(w)
+        hist_J.append(J(w))
+
+    # Gauche : trajectoire sur la courbe
+    w_range = np.linspace(-1, 7, 200)
+    axes[0].plot(w_range, J(w_range), 'b-', lw=1, alpha=0.3)
+    axes[0].plot(hist_w[:15], hist_J[:15], 'o-', color=color,
+                 markersize=4, label=f'alpha={alpha}')
+
+    # Droite : convergence (J vs iterations)
+    axes[1].plot(range(len(hist_J)), hist_J, '-', color=color,
+                 lw=2, label=f'alpha={alpha}')
+
+axes[0].set_xlabel('w'); axes[0].set_ylabel('J(w)')
+axes[0].set_title('Trajectoire sur la courbe')
+axes[0].legend(); axes[0].grid(True, alpha=0.3)
+axes[0].set_ylim(-1, 15)
+
+axes[1].set_xlabel('Iteration'); axes[1].set_ylabel('J(w)')
+axes[1].set_title('Courbe de convergence')
+axes[1].legend(); axes[1].grid(True, alpha=0.3)
+axes[1].set_ylim(-0.5, 12)
+
+plt.tight_layout(); plt.show()
+print("alpha=0.001 : trop lent")
+print("alpha=0.05  : correct")
+print("alpha=0.1   : rapide et stable")
+print("alpha=0.9   : oscille mais converge (limite)")`} />
+        <Box type="retenir" title="Règle pratique">
+          <P style={{marginBottom:0}}>Commencez avec <M t={"\\alpha = 0{,}01"} /> et ajustez :
+          si <M t={"J"} /> diminue trop lentement, augmentez ; si <M t={"J"} /> oscille ou augmente, diminuez.
+          En deep learning, des optimiseurs adaptatifs (Adam, RMSProp) ajustent <M t={"\\alpha"} /> automatiquement.</P>
+        </Box>
+      </Sec>
+    </Sec>
+
+    {/* ── SECTION 7 : APPLICATION DATASET SALAIRE ── */}
+    <Sec id="application" title="7. Application au dataset salaire" level={1}>
+      <Sec id="app-derivees" title="7.1 Dérivées partielles du MSE" level={2}>
+        <P>Pour la régression simple <M t={"\\hat{y}_i = w_1 x_i + w_0"} />, le MSE a <B>deux paramètres</B>.
+        On calcule une dérivée <B>partielle</B> pour chacun :</P>
+        <M d t={"\\frac{\\partial J}{\\partial w_1} = \\frac{-2}{n} \\sum_{i=1}^{n} x_i \\cdot (y_i - \\hat{y}_i)"} />
+        <M d t={"\\frac{\\partial J}{\\partial w_0} = \\frac{-2}{n} \\sum_{i=1}^{n} (y_i - \\hat{y}_i)"} />
+        <Box type="definition" title="Gradient (cas multi-paramètres)">
+          <P style={{marginBottom:0}}>Le <B>gradient</B> est le vecteur de toutes les dérivées partielles :
+          <M t={"\\nabla J = \\begin{pmatrix} \\partial J / \\partial w_0 \\\\ \\partial J / \\partial w_1 \\end{pmatrix}"} />.
+          La mise à jour devient : <M t={"\\boldsymbol{\\theta} \\leftarrow \\boldsymbol{\\theta} - \\alpha \\nabla J"} />.</P>
+        </Box>
+      </Sec>
+
+      <Sec id="app-python" title="7.2 Implémentation complète from scratch" level={2}>
+        <PythonCell title="Descente de gradient — régression linéaire sur dataset salaire" code={`import numpy as np
+import matplotlib.pyplot as plt
+
+# Dataset
+x = np.array([0,1,1,2,2,0,3,1,4,5,5,6,6,7,7,4,
+    8,5,9,10,10,11,12,9,13,11,15,17,20,18], dtype=float)
+y = np.array([28.0,26.5,35.0,32.0,38.0,25.0,34.5,42.0,
+    38.5,44.0,41.0,48.0,43.5,50.0,39.0,47.0,51.0,40.0,
+    52.0,55.0,48.5,58.0,60.0,42.0,62.0,54.0,65.0,68.0,72.0,58.0])
+n = len(x)
+
+# Parametres initiaux
+w1, w0 = 0.0, 0.0
+alpha = 0.001  # taux d'apprentissage
+n_iter = 5000
+
+# Historique
+hist_mse = []
+
+for it in range(n_iter):
+    # Predictions
+    y_pred = w1 * x + w0
+
+    # Erreurs
+    errors = y - y_pred
+
+    # Gradients (derivees partielles)
+    dw1 = -2/n * np.sum(x * errors)
+    dw0 = -2/n * np.sum(errors)
+
+    # Mise a jour
+    w1 = w1 - alpha * dw1
+    w0 = w0 - alpha * dw0
+
+    mse = np.mean(errors ** 2)
+    hist_mse.append(mse)
+
+    if it < 5 or it % 1000 == 999:
+        print(f"Iter {it+1:5d} : w1={w1:.4f}, w0={w0:.4f}, MSE={mse:.2f}")
+
+print(f"\\nResultat : y = {w1:.4f} * x + {w0:.4f}")
+print(f"Attendu  : y = 2.0672 * x + 31.2830")
+
+# Graphique convergence
+fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(13, 5))
+ax1.plot(hist_mse, 'b-', lw=1.5)
+ax1.set_xlabel('Iteration'); ax1.set_ylabel('MSE')
+ax1.set_title('Convergence du MSE'); ax1.grid(True, alpha=0.3)
+
+ax2.scatter(x, y, c='#3b82f6', s=40, label='Donnees')
+xl = np.linspace(0, 21, 100)
+ax2.plot(xl, w1*xl + w0, 'r-', lw=2, label=f'GD: y={w1:.2f}x+{w0:.2f}')
+ax2.plot(xl, 2.07*xl+31.27, 'g--', lw=1.5, label='Analytique: y=2.07x+31.27')
+ax2.set_xlabel("Experience"); ax2.set_ylabel("Salaire (kEUR)")
+ax2.set_title("Regression par descente de gradient")
+ax2.legend(); ax2.grid(True, alpha=0.3)
+plt.tight_layout(); plt.show()`} />
+      </Sec>
+
+      <Sec id="app-sklearn" title="7.3 Comparaison avec scikit-learn" level={2}>
+        <P>Vérifions que notre implémentation from scratch donne le même résultat que scikit-learn :</P>
+        <PythonCell title="Vérification avec scikit-learn" code={`import numpy as np
+
+x = np.array([0,1,1,2,2,0,3,1,4,5,5,6,6,7,7,4,
+    8,5,9,10,10,11,12,9,13,11,15,17,20,18], dtype=float)
+y = np.array([28.0,26.5,35.0,32.0,38.0,25.0,34.5,42.0,
+    38.5,44.0,41.0,48.0,43.5,50.0,39.0,47.0,51.0,40.0,
+    52.0,55.0,48.5,58.0,60.0,42.0,62.0,54.0,65.0,68.0,72.0,58.0])
+
+# Formule analytique (Jour 1)
+xm, ym = x.mean(), y.mean()
+w1_exact = np.sum((x-xm)*(y-ym)) / np.sum((x-xm)**2)
+w0_exact = ym - w1_exact * xm
+
+# Descente de gradient (5000 iterations)
+w1, w0 = 0.0, 0.0
+for _ in range(5000):
+    errors = y - (w1*x + w0)
+    w1 -= 0.001 * (-2/len(x) * np.sum(x * errors))
+    w0 -= 0.001 * (-2/len(x) * np.sum(errors))
+
+print("=== Comparaison des methodes ===")
+print(f"Analytique   : w1 = {w1_exact:.4f}, w0 = {w0_exact:.4f}")
+print(f"Gradient (5k): w1 = {w1:.4f}, w0 = {w0:.4f}")
+print(f"\\nDifference w1 : {abs(w1 - w1_exact):.6f}")
+print(f"Difference w0 : {abs(w0 - w0_exact):.6f}")
+print("\\nLes deux methodes convergent vers le meme resultat !")`} />
+        <Box type="retenir">
+          <P style={{marginBottom:0}}>La descente de gradient est <B>plus lente</B> que la formule analytique pour la régression linéaire.
+          Mais elle est <B>universelle</B> : elle fonctionne pour n'importe quel modèle (réseaux de neurones, etc.)
+          où aucune formule analytique n'existe. C'est pourquoi elle est au cœur du deep learning.</P>
+        </Box>
+      </Sec>
+    </Sec>
+
+    {/* ── SECTION 8 : SYNTHÈSE ── */}
+    <Sec id="synthese" title="8. Synthèse du Jour 2" level={1}>
+      <Sec id="syn-boucle" title="8.1 La boucle d'apprentissage" level={2}>
+        <Box type="retenir" title="La boucle fondamentale du machine learning">
+          <div style={{textAlign:'center',fontFamily:"'DM Sans',sans-serif",fontSize:'1rem',padding:'12px 0'}}>
+            <B>Prédiction</B> <M t={"\\hat{y} = f_\\theta(x)"} /> → <B>Erreur</B> <M t={"J(\\theta)"} /> → <B>Gradient</B> <M t={"\\nabla J"} /> → <B>Mise à jour</B> <M t={"\\theta \\leftarrow \\theta - \\alpha \\nabla J"} /> → <em>recommencer</em>
+          </div>
+          <P style={{marginBottom:0}}>Cette boucle est identique pour <B>tous les modèles</B> d'apprentissage supervisé :
+          régression linéaire, perceptron (Jour 3), réseaux de neurones (Jour 4).</P>
+        </Box>
+      </Sec>
+
+      <Sec id="syn-tableau" title="8.2 Tableau récapitulatif" level={2}>
+        <DT headers={['Concept','Formule','Rôle']} max={20} rows={[
+          ['Fonction de coût', 'J(w) = (1/n)Σ(yᵢ − ŷᵢ)²', 'Mesurer l\'erreur globale'],
+          ['Minimum', 'w* = argmin J(w)', 'Le meilleur jeu de poids'],
+          ['Dérivée', 'f\'(x) = lim Δf/Δx', 'Mesurer la pente locale'],
+          ['Gradient', '∇J = (∂J/∂w₀, ∂J/∂w₁)', 'Direction de plus forte montée'],
+          ['Descente de gradient', 'w ← w − α·∂J/∂w', 'Algorithme d\'optimisation'],
+          ['Taux d\'apprentissage', 'α (ex: 0.01)', 'Taille des pas'],
+          ['Convergence', 'J diminue → stable', 'Le modèle a appris'],
+          ['Divergence', 'J augmente / oscille', 'α trop grand'],
+        ]} />
+      </Sec>
+
+    </Sec>
+  </>;
+}
+
+/* ============================================================================
+   ROOT
+   ============================================================================ */
+function Jour2Page() {
+  const [activeId,setActiveId]=useState('');
+  useEffect(()=>{
+    const ids=[]; SECTIONS.forEach(s=>{ids.push(s.id);s.children?.forEach(c=>ids.push(c.id));});
+    const obs=new IntersectionObserver(entries=>{const vis=entries.filter(e=>e.isIntersecting).sort((a,b)=>a.boundingClientRect.top-b.boundingClientRect.top);if(vis.length)setActiveId(vis[0].target.id);},{rootMargin:'-10% 0px -80% 0px'});
+    ids.forEach(id=>{const el=document.getElementById(id);if(el)obs.observe(el);}); return ()=>obs.disconnect();
+  },[]);
+  return <ThemeProvider><Shell activeId={activeId} /></ThemeProvider>;
+}
+
+function Shell({activeId}) {
+  const {theme}=useTheme();
+  return <div style={{background:theme.bg,minHeight:'100vh',transition:'background 0.3s'}}>
+    <style>{`
+      @import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,700;1,400&family=JetBrains+Mono:wght@400;500;700&family=Source+Serif+4:ital,wght@0,400;0,600;0,700;1,400&display=swap');
+      *{box-sizing:border-box} body{margin:0;padding:0}
+      .main-content{margin-left:280px;max-width:860px;padding:32px 48px 80px}
+      @media(max-width:768px){.sidebar-el{transform:translateX(-100%)}.mob-btn{display:block!important}.main-content{margin-left:0;padding:20px 16px 60px}}
+      ::selection{background:${theme.accent}33} a{color:${theme.link}}
+    `}</style>
+    <Sidebar activeId={activeId} />
+    <main className="main-content">
+      <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',marginBottom:'8px'}}>
+        <div>
+          <div style={{fontFamily:"'DM Sans',sans-serif",fontSize:'0.85rem',color:theme.textMuted,fontWeight:500}}>Jour 2 — 5h45</div>
+          <h1 style={{fontFamily:"'DM Sans',sans-serif",fontSize:'2rem',fontWeight:700,color:theme.text,margin:'4px 0 0',lineHeight:1.2}}>Optimisation</h1>
+        </div>
+        <ThemeToggle />
+      </div>
+      <div style={{height:'3px',background:`linear-gradient(90deg, ${theme.accent}, ${theme.accent}44)`,borderRadius:'2px',marginBottom:'32px'}} />
+      <Box type="retenir" title="Objectif du Jour 2">
+        <P style={{marginBottom:0}}>Comprendre comment un modèle <B>apprend automatiquement</B> ses paramètres.
+        À la fin de cette journée, vous saurez implémenter la <B>descente de gradient from scratch</B>
+        et optimiser une régression linéaire sans utiliser de formule analytique.</P>
+      </Box>
+      <div style={{display:'flex',gap:'8px',flexWrap:'wrap',margin:'20px 0'}}>
+        {[
+          {icon:'📊',label:'Colab',href:'https://drive.google.com/file/d/1_Zqm6uWDSg9sscHFhu-0uqUuOhxj5NRI/view?usp=sharing',bg:'#F9AB00',fg:'#1a1a2e'},
+          {icon:'📐',label:'Synthèse',href:'pdf/jour2_synthese.pdf',bg:theme.accent,fg:'#fff'},
+          {icon:'📝',label:'Exercices',href:'pdf/jour2_exercices.pdf',bg:'#f97316',fg:'#fff'},
+          {icon:'✅',label:'Corrections',href:'pdf/jour2_corrections.pdf',bg:'#22c55e',fg:'#fff'},
+          {icon:'🔬',label:'TP',href:'https://drive.google.com/file/d/1shGn-yYR4pbKiFbUmq0jmad_-3cL80aV/view?usp=sharing',bg:'#F9AB00',fg:'#1a1a2e'},
+          {icon:'❓',label:'QCM',href:'pdf/jour2_qcm.pdf',bg:'#8b5cf6',fg:'#fff'},
+        ].map((b,i)=>(
+          <a key={i} href={b.href} target="_blank" rel="noopener" style={{display:'inline-flex',alignItems:'center',justifyContent:'center',gap:'5px',background:b.bg,color:b.fg,
+            padding:'9px 14px',borderRadius:'6px',fontFamily:"'DM Sans',sans-serif",fontSize:'0.85rem',fontWeight:600,textDecoration:'none'}}>
+            {b.icon} {b.label}
+          </a>
+        ))}
+      </div>
+      <Content />
+      <footer style={{marginTop:'60px',padding:'24px 0',borderTop:`1px solid ${theme.border}`,textAlign:'center',fontFamily:"'DM Sans',sans-serif",fontSize:'0.8rem',color:theme.textMuted}}>
+        <p>© 2025 Mohamed EL AFRIT | <a href="https://www.mohamedelafrit.com" style={{color:theme.link,textDecoration:'none'}}>www.mohamedelafrit.com</a></p>
+        <p><a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.fr" style={{color:theme.link,textDecoration:'none'}}>CC BY-NC-SA 4.0</a></p>
+      </footer>
+    </main>
+  </div>;
+}
+
+
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(React.createElement(Jour2Page));
+</script>
+</body>
+</html>

@@ -1,0 +1,723 @@
+% ============================================================================
+% (c) 2025 Mohamed EL AFRIT -- IPSSI
+% Licence CC BY-NC-SA 4.0
+% https://creativecommons.org/licenses/by-nc-sa/4.0/deed.fr
+%
+% FICHE DE CORRECTIONS DETAILLEES -- Jour 1
+% Donnees et representation mathematique
+% ============================================================================
+\input{template_ipssi}
+
+\jourNumero{1}
+\jourTheme{Repr\'{e}sentation}
+
+\begin{document}
+
+\pagegarde{Corrections d\'{e}taill\'{e}es}{1}{Donn\'{e}es et repr\'{e}sentation math\'{e}matique}
+
+\setstretch{1.06}
+\setlength{\parskip}{2pt}
+\setlength{\abovedisplayskip}{5pt}
+\setlength{\belowdisplayskip}{5pt}
+
+% ======================================================================
+%  RAPPEL DATASET
+% ======================================================================
+\begin{tcolorbox}[
+    enhanced, colback=ipssiCyan!5, colframe=ipssiCyan!50,
+    boxrule=0.8pt, arc=4pt,
+    title={\sffamily\bfseries Rappel --- Dataset fil rouge},
+    coltitle=white, colbacktitle=ipssiCyan!70,
+]
+\small
+\begin{center}
+\renewcommand{\arraystretch}{1.1}
+\begin{tabular}{c|ccccc|c}
+    \toprule
+    \textbf{\#} & \textbf{Exp} & \textbf{Lang} & \textbf{\'{E}tudes} & \textbf{Entrep.} & \textbf{Remote} & \textbf{Salaire} \\
+    \midrule
+    0 & 0 & 2 & 3 & 150  & 80  & 28.0 \\
+    1 & 1 & 1 & 2 & 50   & 100 & 26.5 \\
+    2 & 1 & 3 & 4 & 800  & 40  & 35.0 \\
+    3 & 2 & 2 & 3 & 200  & 60  & 32.0 \\
+    4 & 2 & 4 & 4 & 3000 & 20  & 38.0 \\
+    5 & 0 & 1 & 1 & 30   & 50  & 25.0 \\
+    \bottomrule
+\end{tabular}
+\end{center}
+\end{tcolorbox}
+
+% ======================================================================
+% EXERCICE 1
+% ======================================================================
+\section*{Exercice 1 \hfill \exofondamental}
+\addcontentsline{toc}{section}{Exercice 1 --- Vecteurs et dimensions}
+\textit{Rappel : \'{e}crire des vecteurs de features et v\'{e}rifier les dimensions.}
+
+\separateur
+
+\textbf{a) Vecteur $\vx_0$ du d\'{e}veloppeur \#0.}
+
+Le d\'{e}veloppeur \#0 a les features : exp=0, lang=2, \'{e}tudes=3, entrep.=150, remote=80.
+
+\formule{
+    \vx_0 = \begin{pmatrix} 0 \\ 2 \\ 3 \\ 150 \\ 80 \end{pmatrix} \in \mathbb{R}^5
+    \qquad \Longrightarrow \qquad p = 5
+}
+
+\textbf{b) Vecteur $\vx_4$ et sa transpos\'{e}e.}
+
+\[
+    \vx_4 = \begin{pmatrix} 2 \\ 4 \\ 4 \\ 3000 \\ 20 \end{pmatrix}
+    \qquad
+    \vx_4^T = \begin{pmatrix} 2 & 4 & 4 & 3000 & 20 \end{pmatrix}
+\]
+
+\textbf{c) Nouveau d\'{e}veloppeur} (6 ans, 4 langages, Bac+5, 1200 employ\'{e}s, 50\% remote) :
+\[
+    \vx = \begin{pmatrix} 6 \\ 4 \\ 4 \\ 1200 \\ 50 \end{pmatrix} \in \mathbb{R}^5
+\]
+
+\textbf{d) Addition de vecteurs.}
+$\vx_0 + \vx_4$ : \textbf{oui}, car les deux sont dans $\mathbb{R}^5$ (m\^{e}me dimension).
+\[
+    \vx_0 + \vx_4 = \begin{pmatrix} 0+2 \\ 2+4 \\ 3+4 \\ 150+3000 \\ 80+20 \end{pmatrix}
+    = \begin{pmatrix} 2 \\ 6 \\ 7 \\ 3150 \\ 100 \end{pmatrix}
+\]
+
+$\vx_0 + (1,\, 2,\, 3)^T$ : \textbf{non}, car $\vx_0 \in \mathbb{R}^5$ et $(1,2,3)^T \in \mathbb{R}^3$.
+L'addition n'est d\'{e}finie que pour des vecteurs de \textbf{m\^{e}me dimension}.
+
+\begin{attentionbox}[Erreurs fr\'{e}quentes]
+    \begin{itemize}
+        \item Confondre la \textbf{dimension} du vecteur ($p = 5$) avec le \textbf{nombre d'observations} ($n = 30$).
+        \item Oublier la \textbf{transpos\'{e}e} : un vecteur colonne $\vx$ et sa transpos\'{e}e $\vx^T$ n'ont pas le m\^{e}me shape en NumPy.
+    \end{itemize}
+\end{attentionbox}
+
+% ======================================================================
+% EXERCICE 2
+% ======================================================================
+\section*{Exercice 2 \hfill \exofondamental}
+\addcontentsline{toc}{section}{Exercice 2 --- Produit scalaire \`{a} la main}
+\textit{Rappel : $\pscal{\vx}{\vw} = \sum_{i=1}^{p} x_i w_i$.}
+
+\separateur
+
+\textbf{a) Calcul de $\pscal{\vx}{\vw}$ :}
+\begin{align*}
+    \pscal{\vx}{\vw} &= 3 \times 0{,}5 + 5 \times 0{,}3 + 2 \times 0{,}8 \\
+                     &= 1{,}5 + 1{,}5 + 1{,}6 \\
+                     &= \boxed{4{,}6}
+\end{align*}
+
+\textbf{b) Pr\'{e}diction pour le d\'{e}veloppeur \#0} avec
+$\vw = (2{,}0;\; 1{,}5;\; 3{,}0;\; 0{,}005;\; 0{,}02)^T$ et $b = 15$ :
+\begin{align*}
+    \pscal{\vx_0}{\vw} &= 0 \times 2{,}0 + 2 \times 1{,}5 + 3 \times 3{,}0 + 150 \times 0{,}005 + 80 \times 0{,}02 \\
+                       &= 0 + 3{,}0 + 9{,}0 + 0{,}75 + 1{,}6 = 14{,}35
+\end{align*}
+Pr\'{e}diction : $\yhat_0 = 14{,}35 + 15 = \boxed{29{,}35}$ k\texteuro.
+Salaire r\'{e}el : $y_0 = 28{,}0$ k\texteuro. Erreur : $|29{,}35 - 28{,}0| = 1{,}35$ k\texteuro.
+
+\textbf{c) Pi\`{e}ge --- dimensions incompatibles.}
+
+\textbf{Non}, on ne peut pas calculer ce produit scalaire.
+Le premier vecteur est dans $\mathbb{R}^5$ et le second dans $\mathbb{R}^3$.
+Le produit scalaire exige que les deux vecteurs aient la \textbf{m\^{e}me dimension}.
+
+\begin{attentionbox}[Erreurs fr\'{e}quentes]
+    \begin{itemize}
+        \item Oublier d'additionner le \textbf{biais}~$b$ apr\`{e}s le produit scalaire.
+        \item Erreur de calcul sur les termes avec des petits poids ($0{,}005 \times 150$ se calcule mieux comme $150 / 200 = 0{,}75$).
+        \item Tenter de calculer un produit scalaire avec des dimensions diff\'{e}rentes --- en NumPy, cela provoque une \texttt{ValueError}.
+    \end{itemize}
+\end{attentionbox}
+
+% ======================================================================
+% EXERCICE 3
+% ======================================================================
+\section*{Exercice 3 \hfill \exofondamental}
+\addcontentsline{toc}{section}{Exercice 3 --- Multiplication matrice-vecteur}
+\textit{Rappel : $(\mX\vw)_i = \vx_i^T \vw$ (produit scalaire de la ligne $i$ avec $\vw$).}
+
+\separateur
+
+\textbf{a) Dimensions.}
+$\mX \in \mathbb{R}^{3 \times 2}$, $\vw \in \mathbb{R}^{2}$,
+donc $\hat{\vy} = \mX\vw \in \mathbb{R}^{3}$ (3 pr\'{e}dictions).
+
+\textbf{b) Calcul ligne par ligne :}
+\begin{align*}
+    \yhat_1 &= 1 \times 2 + 3 \times 0{,}5 = 2 + 1{,}5 = \boxed{3{,}5} \\
+    \yhat_2 &= 4 \times 2 + 2 \times 0{,}5 = 8 + 1{,}0 = \boxed{9{,}0} \\
+    \yhat_3 &= 0 \times 2 + 5 \times 0{,}5 = 0 + 2{,}5 = \boxed{2{,}5}
+\end{align*}
+\[
+    \hat{\vy} = \mX\vw = \begin{pmatrix} 3{,}5 \\ 9{,}0 \\ 2{,}5 \end{pmatrix}
+\]
+
+\textbf{c) V\'{e}rification :}
+$\vx_1^T = (1 \;\; 3)$, donc $\vx_1^T \vw = 1 \times 2 + 3 \times 0{,}5 = 3{,}5 = \yhat_1$. \checkmark
+
+\begin{retenirbox}
+    La multiplication $\mX\vw$ revient \`{a} $n$ produits scalaires en parall\`{e}le.
+    Chaque ligne de $\mX$ fait un produit scalaire avec $\vw$.
+\end{retenirbox}
+
+% ======================================================================
+% EXERCICE 4
+% ======================================================================
+\section*{Exercice 4 \hfill \exofondamental}
+\addcontentsline{toc}{section}{Exercice 4 --- Calcul du MSE}
+\textit{Rappel : $\text{MSE} = \frac{1}{n}\sum_{i=1}^{n}(y_i - \yhat_i)^2$.}
+
+\separateur
+
+\textbf{a) R\'{e}sidus $e_i = y_i - \yhat_i$ :}
+
+\begin{center}
+\renewcommand{\arraystretch}{1.2}
+\begin{tabular}{c|c|c|c|c}
+    \toprule
+    $i$ & $y_i$ & $\yhat_i$ & $e_i$ & $e_i^2$ \\
+    \midrule
+    1 & 28.0 & 31.3 & $-3{,}3$  & $10{,}89$ \\
+    2 & 35.0 & 33.3 & $+1{,}7$  & $2{,}89$  \\
+    3 & 38.0 & 35.4 & $+2{,}6$  & $6{,}76$  \\
+    4 & 44.0 & 41.6 & $+2{,}4$  & $5{,}76$  \\
+    5 & 52.0 & 49.9 & $+2{,}1$  & $4{,}41$  \\
+    \midrule
+    & & & \textbf{Somme} & $\mathbf{30{,}71}$ \\
+    \bottomrule
+\end{tabular}
+\end{center}
+
+\textbf{b-c) Calcul du MSE :}
+\formule{\text{MSE} = \frac{1}{5} \times 30{,}71 = \boxed{6{,}14 \;\text{(k\texteuro)}^2}}
+
+\textbf{d) Erreur typique :}
+$\sqrt{\text{MSE}} = \sqrt{6{,}14} \approx \boxed{2{,}48 \text{ k\texteuro}}$.
+Le mod\`{e}le se trompe en moyenne d'environ 2\,500\,\texteuro{} --- c'est raisonnable.
+
+\begin{attentionbox}[Erreurs fr\'{e}quentes]
+    \begin{itemize}
+        \item Oublier de mettre au \textbf{carr\'{e}} avant de sommer (sinon les erreurs $+$ et $-$ s'annulent).
+        \item Diviser par $n-1$ au lieu de $n$ (c'est la variance \textit{non biais\'{e}e}, pas le MSE).
+        \item Le MSE est en \textbf{(k\texteuro)$^2$}, pas en k\texteuro{}. C'est $\sqrt{\text{MSE}}$ qui est en k\texteuro.
+    \end{itemize}
+\end{attentionbox}
+
+% ======================================================================
+% EXERCICE 5
+% ======================================================================
+\section*{Exercice 5 \hfill \exointermediaire}
+\addcontentsline{toc}{section}{Exercice 5 --- Interpr\'{e}ter les poids}
+\textit{Mod\`{e}le : $\yhat = 25 + 3 \times \texttt{exp} + 1{,}5 \times \texttt{lang}$.}
+
+\separateur
+
+\textbf{a) Identification des param\`{e}tres :}
+\begin{itemize}
+    \item $w_0 = 25$ (biais) : salaire de base pr\'{e}dit quand exp\'{e}rience $= 0$ et langages $= 0$.
+    \item $w_1 = 3$ : chaque ann\'{e}e d'exp\'{e}rience suppl\'{e}mentaire augmente le salaire pr\'{e}dit de \textbf{3\,k\texteuro}.
+    \item $w_2 = 1{,}5$ : chaque langage suppl\'{e}mentaire augmente le salaire pr\'{e}dit de \textbf{1,5\,k\texteuro}.
+\end{itemize}
+
+\textbf{b)} $\yhat = 25 + 3 \times 0 + 1{,}5 \times 1 = \boxed{26{,}5}$ k\texteuro.
+C'est r\'{e}aliste pour un d\'{e}butant avec un seul langage en France.
+
+\textbf{c)} $+1$ an d'exp\'{e}rience $\Rightarrow$ $+3$\,k\texteuro.
+$+1$ langage $\Rightarrow$ $+1{,}5$\,k\texteuro.
+L'exp\'{e}rience a \textbf{deux fois plus d'impact} que le nombre de langages.
+
+\textbf{d)} $\yhat = 25 + 3 \times 5 + 1{,}5 \times 4 = 25 + 15 + 6 = \boxed{46}$ k\texteuro.
+Le d\'{e}veloppeur \#9 a un vrai salaire de 44\,k\texteuro{} --- erreur de 2\,k\texteuro, le mod\`{e}le est assez bon ici.
+
+\begin{retenirbox}
+    Les poids d'un mod\`{e}le lin\'{e}aire s'interpr\`{e}tent comme l'\textbf{impact marginal}
+    de chaque feature sur la pr\'{e}diction, \emph{toutes choses \'{e}gales par ailleurs}.
+\end{retenirbox}
+
+% ======================================================================
+% EXERCICE 6
+% ======================================================================
+\section*{Exercice 6 \hfill \exointermediaire}
+\addcontentsline{toc}{section}{Exercice 6 --- Choisir le meilleur mod\`{e}le}
+\textit{Mod\`{e}le A : $\yhat = 2x + 32$. Mod\`{e}le B : $\yhat = 3x + 25$.}
+
+\separateur
+
+\textbf{a-b) Pr\'{e}dictions :}
+
+\begin{center}
+\renewcommand{\arraystretch}{1.2}
+\begin{tabular}{c|c|c|c|c|c}
+    \toprule
+    \# & exp & $y_i$ & $\yhat_i^A = 2x{+}32$ & $\yhat_i^B = 3x{+}25$ & $(e_i^A)^2$ \;\; $(e_i^B)^2$ \\
+    \midrule
+    0 & 0 & 28.0 & 32.0 & 25.0 & 16.00 \;\;\; 9.00 \\
+    1 & 1 & 26.5 & 34.0 & 28.0 & 56.25 \;\;\; 2.25 \\
+    2 & 1 & 35.0 & 34.0 & 28.0 &  1.00 \;\;\; 49.00 \\
+    3 & 2 & 32.0 & 36.0 & 31.0 & 16.00 \;\;\; 1.00 \\
+    4 & 2 & 38.0 & 36.0 & 31.0 &  4.00 \;\;\; 49.00 \\
+    5 & 0 & 25.0 & 32.0 & 25.0 & 49.00 \;\;\; 0.00 \\
+    \bottomrule
+\end{tabular}
+\end{center}
+
+\textbf{c) MSE :}
+\begin{align*}
+    \text{MSE}_A &= \frac{16{,}00 + 56{,}25 + 1{,}00 + 16{,}00 + 4{,}00 + 49{,}00}{6}
+    = \frac{142{,}25}{6} = \boxed{23{,}71} \\[4pt]
+    \text{MSE}_B &= \frac{9{,}00 + 2{,}25 + 49{,}00 + 1{,}00 + 49{,}00 + 0{,}00}{6}
+    = \frac{110{,}25}{6} = \boxed{18{,}38}
+\end{align*}
+
+\textbf{d)} Le mod\`{e}le B est meilleur (MSE plus faible). Cependant, ni A ni B n'est optimal :
+la droite des moindres carr\'{e}s ($\yhat = 2{,}07x + 31{,}27$) a un MSE de 20{,}46 sur les 30 observations
+compl\`{e}tes. Sur un si petit \'{e}chantillon (6 observations), le classement peut changer.
+
+\begin{attentionbox}[Erreurs fr\'{e}quentes]
+    \begin{itemize}
+        \item Comparer les MSE de mod\`{e}les \'{e}valu\'{e}s sur des \'{e}chantillons \textbf{diff\'{e}rents} --- il faut toujours utiliser les m\^{e}mes donn\'{e}es.
+        \item Conclure qu'un mod\`{e}le est ``le meilleur'' alors qu'il n'est meilleur que sur ce sous-ensemble.
+    \end{itemize}
+\end{attentionbox}
+
+% ======================================================================
+% EXERCICE 7
+% ======================================================================
+\section*{Exercice 7 \hfill \exointermediaire}
+\addcontentsline{toc}{section}{Exercice 7 --- Matrice et dataset}
+\textit{Construire $\mX$ et $\vy$ \`{a} partir de profils textuels.}
+
+\separateur
+
+\textbf{a) Matrice de features $\mX \in \mathbb{R}^{4 \times 5}$ :}
+
+\emph{Encodage :} Bac$=1$, Bac+3$=3$, Bac+5$=4$.
+
+\formule{
+    \mX = \begin{pmatrix}
+        3  & 2 & 3 & 150  & 80 \\
+        7  & 5 & 4 & 800  & 50 \\
+        0  & 1 & 1 & 20   & 100 \\
+        12 & 6 & 4 & 3000 & 30
+    \end{pmatrix}
+    \in \mathbb{R}^{4 \times 5}
+}
+
+\textbf{b) Vecteur cible :}
+$\vy = \begin{pmatrix} 34 & 50 & 24 & 58 \end{pmatrix}^T \in \mathbb{R}^4$.
+
+\textbf{c)} $x_{2,4} = 100$. C'est le pourcentage de t\'{e}l\'{e}travail de Clara
+(2\textsuperscript{e} ligne, 4\textsuperscript{e} feature en partant de 0 --- ou
+3\textsuperscript{e} ligne, 5\textsuperscript{e} colonne en indexation \`{a} partir de 1).
+
+\begin{attentionbox}[Attention \`{a} l'indexation]
+    L'indexation math\'{e}matique commence \`{a} \textbf{1} ($x_{1,1}$) tandis que Python/NumPy
+    commence \`{a} \textbf{0} (\texttt{X[0,0]}). Ici Bob est la ligne 2 en math (ou \texttt{X[1]} en Python).
+\end{attentionbox}
+
+\textbf{d) Pr\'{e}diction pour Bob :}
+$\vx_{\text{Bob}} = (7,\; 5,\; 4,\; 800,\; 50)^T$.
+\begin{align*}
+    \vw^T \vx_{\text{Bob}} &= 7 \times 2 + 5 \times 1{,}5 + 4 \times 3 + 800 \times 0{,}005 + 50 \times 0{,}02 \\
+    &= 14 + 7{,}5 + 12 + 4 + 1 = 38{,}5
+\end{align*}
+$\yhat_{\text{Bob}} = 38{,}5 + 15 = \boxed{53{,}5}$ k\texteuro. Vrai salaire : 50\,k\texteuro{} --- erreur de 3{,}5\,k\texteuro.
+
+% ======================================================================
+% EXERCICE 8
+% ======================================================================
+\section*{Exercice 8 \hfill \exointermediaire}
+\addcontentsline{toc}{section}{Exercice 8 --- Vecteurs NumPy (Python guid\'{e})}
+\textit{Cr\'{e}er des vecteurs, calculer norme et produit scalaire.}
+
+\separateur
+
+\begin{pythonbox}[Correction compl\`{e}te]
+\begin{lstlisting}
+import numpy as np
+
+# 1. Vecteur du dev #3 : exp=2, lang=2, etudes=3, entrep=200, remote=60
+x3 = np.array([2, 2, 3, 200, 60])
+
+# 2. Dimension
+print(f"Dimension de x3 : {x3.shape}")  # (5,)
+
+# 3. 3e composante (index 2 en Python)
+niveau = x3[2]
+print(f"Niveau d'etudes : {niveau}")  # 3
+
+# 4. Norme euclidienne
+norme = np.sqrt(np.sum(x3 ** 2))
+print(f"Norme de x3 : {norme:.2f}")  # 209.11
+
+# 5. Vecteur du dev #5 : exp=0, lang=1, etudes=1, entrep=30, remote=50
+x5 = np.array([0, 1, 1, 30, 50])
+
+# 6. Produit scalaire avec @
+ps = x3 @ x5
+print(f"Produit scalaire x3 . x5 = {ps}")  # 9185
+
+# 7. Distance euclidienne
+distance = np.sqrt(np.sum((x3 - x5) ** 2))
+print(f"Distance : {distance:.2f}")  # 170.27
+\end{lstlisting}
+\end{pythonbox}
+
+\textbf{Sortie attendue :}
+\begin{verbatim}
+Dimension de x3 : (5,)
+Niveau d'etudes : 3
+Norme de x3 : 209.11
+Produit scalaire x3 . x5 = 9185
+Distance : 170.27
+\end{verbatim}
+
+\begin{intuitionbox}[Variante]
+    La norme peut aussi se calculer avec \texttt{np.linalg.norm(x3)}.
+    Le produit scalaire avec \texttt{np.dot(x3, x5)}.
+    L'op\'{e}rateur \texttt{@} est le plus lisible et le plus courant en pratique.
+\end{intuitionbox}
+
+\begin{attentionbox}[Erreurs fr\'{e}quentes en Python]
+    \begin{itemize}
+        \item \texttt{x3[3]} donne la 4\textsuperscript{e} composante (index 3), pas la 3\textsuperscript{e} --- l'indexation commence \`{a}~0.
+        \item La norme de $\vx$ est domin\'{e}e par les grandes valeurs (ici 200 et 60). C'est pourquoi on \textbf{normalise} souvent les features.
+    \end{itemize}
+\end{attentionbox}
+
+% ======================================================================
+% EXERCICE 9
+% ======================================================================
+\section*{Exercice 9 \hfill \exointermediaire}
+\addcontentsline{toc}{section}{Exercice 9 --- Matrice du dataset (Python guid\'{e})}
+\textit{Charger les donn\'{e}es dans une matrice, slicing lignes/colonnes.}
+
+\separateur
+
+\begin{pythonbox}[Correction compl\`{e}te]
+\begin{lstlisting}
+import numpy as np
+
+# 1. Matrice des 6 premiers developpeurs (5 features)
+X = np.array([
+    [0, 2, 3, 150, 80],     # dev #0
+    [1, 1, 2, 50, 100],     # dev #1
+    [1, 3, 4, 800, 40],     # dev #2
+    [2, 2, 3, 200, 60],     # dev #3
+    [2, 4, 4, 3000, 20],    # dev #4
+    [0, 1, 1, 30, 50],      # dev #5
+])
+
+# 2. Verifier les dimensions
+print(f"Shape de X : {X.shape}")     # (6, 5)
+
+# 3. Colonne "experience" = colonne d'index 0
+experience = X[:, 0]
+print(f"Experiences : {experience}")  # [0 1 1 2 2 0]
+
+# 4. Ligne du developpeur #4 = index 4
+dev4 = X[4, :]
+print(f"Developpeur #4 : {dev4}")    # [2 4 4 3000 20]
+
+# 5. Vecteur des salaires
+y = np.array([28.0, 26.5, 35.0, 32.0, 38.0, 25.0])
+
+# 6. Transposee
+print(f"Shape de X.T : {X.T.shape}") # (5, 6)
+
+# 7. Element X[2, 3] = dev #2, feature #3 (taille entreprise)
+print(f"X[2,3] = {X[2, 3]}")         # 800
+# C'est la taille de l'entreprise du developpeur #2
+\end{lstlisting}
+\end{pythonbox}
+
+\textbf{Sortie attendue :}
+\begin{verbatim}
+Shape de X : (6, 5)
+Experiences : [0 1 1 2 2 0]
+Developpeur #4 : [   2    4    4 3000   20]
+Shape de X.T : (5, 6)
+X[2,3] = 800
+\end{verbatim}
+
+\begin{attentionbox}[Erreurs fr\'{e}quentes en Python]
+    \begin{itemize}
+        \item Confondre \texttt{X[2]} (toute la ligne 2) et \texttt{X[:, 2]} (toute la colonne 2).
+        \item Oublier le \texttt{:} dans le slicing : \texttt{X[4]} et \texttt{X[4, :]} sont \'{e}quivalents, mais \texttt{X[:, 0]} est la seule fa\c{c}on d'extraire une colonne.
+    \end{itemize}
+\end{attentionbox}
+
+% ======================================================================
+% EXERCICE 10
+% ======================================================================
+\section*{Exercice 10 \hfill \exointermediaire}
+\addcontentsline{toc}{section}{Exercice 10 --- R\'{e}gression from scratch (Python guid\'{e})}
+\textit{Calculer la droite des moindres carr\'{e}s, le MSE, et tracer le graphique.}
+
+\separateur
+
+\begin{pythonbox}[Correction compl\`{e}te]
+\begin{lstlisting}
+import numpy as np
+import matplotlib.pyplot as plt
+
+experience = np.array([0,1,1,2,2,0,3,1,4,5,5,6,6,7,7,4,
+                        8,5,9,10,10,11,12,9,13,11,15,17,20,18])
+salaire = np.array([28.0,26.5,35.0,32.0,38.0,25.0,34.5,42.0,
+    38.5,44.0,41.0,48.0,43.5,50.0,39.0,47.0,51.0,40.0,
+    52.0,55.0,48.5,58.0,60.0,42.0,62.0,54.0,65.0,68.0,
+    72.0,58.0])
+
+# 1. Moyennes
+x_mean = experience.mean()          # 7.40
+y_mean = salaire.mean()             # 46.58
+
+# 2. Pente w (formule des moindres carres)
+numerateur = np.sum((experience - x_mean) * (salaire - y_mean))
+denominateur = np.sum((experience - x_mean) ** 2)
+w = numerateur / denominateur       # 2.07
+print(f"Pente w = {w:.4f}")
+
+# 3. Biais b
+b = y_mean - w * x_mean             # 31.27
+print(f"Biais b = {b:.4f}")
+
+# 4. Predictions
+y_pred = w * experience + b
+
+# 5. MSE
+mse = np.mean((salaire - y_pred) ** 2)  # 20.46
+print(f"MSE = {mse:.2f}")
+
+# 6. Graphique
+fig, ax = plt.subplots(figsize=(8, 5))
+ax.scatter(experience, salaire, c='blue', label='Donnees')
+x_line = np.linspace(0, 21, 100)
+ax.plot(x_line, w * x_line + b, 'r--',
+        label=f'y={w:.2f}x+{b:.2f}')
+ax.set_xlabel("Experience (annees)")
+ax.set_ylabel("Salaire (kEUR)")
+ax.set_title("Regression lineaire from scratch")
+ax.legend(); ax.grid(True, alpha=0.3)
+plt.show()
+\end{lstlisting}
+\end{pythonbox}
+
+\textbf{Sortie attendue :}
+\begin{verbatim}
+Pente w = 2.0672
+Biais b = 31.2830
+MSE = 20.46
+\end{verbatim}
++ un graphique montrant le nuage de points bleu et la droite rouge en pointill\'{e}s.
+
+\begin{intuitionbox}[Variante : avec scikit-learn]
+    En une ligne : \texttt{from sklearn.linear\_model import LinearRegression}.
+    Mais l'objectif ici est de comprendre le m\'{e}canisme \textbf{avant} d'utiliser la biblioth\`{e}que.
+\end{intuitionbox}
+
+\begin{retenirbox}
+    La formule de la pente $w_1 = \frac{\sum(x_i - \bar{x})(y_i - \bar{y})}{\sum(x_i - \bar{x})^2}$
+    mesure \`{a} quel point $x$ et $y$ varient \textbf{ensemble}, normalis\'{e} par la variance de~$x$.
+\end{retenirbox}
+
+% ======================================================================
+% EXERCICE 11
+% ======================================================================
+\section*{Exercice 11 \hfill \exoavance}
+\addcontentsline{toc}{section}{Exercice 11 --- Explorer le dataset (Python autonome)}
+\textit{Statistiques descriptives, corr\'{e}lations et visualisation.}
+
+\separateur
+
+\begin{pythonbox}[Correction compl\`{e}te]
+\begin{lstlisting}
+import numpy as np
+import matplotlib.pyplot as plt
+
+# --- Chargement du dataset ---
+data = np.array([
+    [ 0,2,3, 150, 80,28.0],[ 1,1,2,  50,100,26.5],
+    [ 1,3,4, 800, 40,35.0],[ 2,2,3, 200, 60,32.0],
+    [ 2,4,4,3000, 20,38.0],[ 0,1,1,  30, 50,25.0],
+    [ 3,3,3, 100, 80,34.5],[ 1,5,4,  15,100,42.0],
+    [ 4,3,3, 500, 60,38.5],[ 5,4,4,1200, 40,44.0],
+    [ 5,3,3, 300, 80,41.0],[ 6,5,4,2000, 30,48.0],
+    [ 6,4,3, 150, 90,43.5],[ 7,5,4, 800, 50,50.0],
+    [ 7,3,2,  80, 70,39.0],[ 4,6,5, 400,100,47.0],
+    [ 8,4,4,1500, 40,51.0],[ 5,2,3,4000, 10,40.0],
+    [ 9,5,4, 600, 60,52.0],[10,6,4,2500, 30,55.0],
+    [10,4,3, 200, 80,48.5],[11,5,5,1000, 50,58.0],
+    [12,7,4,3500, 20,60.0],[ 9,3,3,  60, 90,42.0],
+    [13,6,4, 800, 70,62.0],[11,4,4,5000, 10,54.0],
+    [15,8,4,1200, 50,65.0],[17,6,5,2000, 40,68.0],
+    [20,7,4, 500, 60,72.0],[18,5,3, 100, 80,58.0],
+])
+
+# a) Dimensions et apercu
+print(f"Dimensions : {data.shape}")
+print("5 premieres lignes :")
+print(data[:5])
+
+# b) Statistiques par colonne
+noms = ["experience","nb_langages","niveau_etudes",
+        "taille_entreprise","remote","salaire"]
+print("\n--- Statistiques descriptives ---")
+for j, nom in enumerate(noms):
+    col = data[:, j]
+    print(f"{nom:20s} | moy={col.mean():8.2f} "
+          f"std={col.std():8.2f} "
+          f"min={col.min():7.1f} max={col.max():7.1f}")
+
+# c) Correlations avec le salaire
+salaire = data[:, 5]
+print("\n--- Correlations avec le salaire ---")
+for j in range(5):
+    r = np.corrcoef(data[:, j], salaire)[0, 1]
+    print(f"{noms[j]:20s} | r = {r:.3f}")
+
+# d) 5 sous-figures
+fig, axes = plt.subplots(1, 5, figsize=(18, 3.5))
+for j in range(5):
+    r = np.corrcoef(data[:, j], salaire)[0, 1]
+    axes[j].scatter(data[:, j], salaire, s=30, alpha=0.7)
+    axes[j].set_xlabel(noms[j])
+    axes[j].set_ylabel("salaire" if j == 0 else "")
+    axes[j].set_title(f"r = {r:.2f}")
+    axes[j].grid(True, alpha=0.3)
+plt.suptitle("Correlations features vs salaire")
+plt.tight_layout(); plt.show()
+\end{lstlisting}
+\end{pythonbox}
+
+\textbf{R\'{e}sultats cl\'{e}s :}
+\begin{center}
+\begin{tabular}{l c l}
+    \toprule
+    \textbf{Feature} & $r$ & \textbf{Interpr\'{e}tation} \\
+    \midrule
+    experience        & $0{,}927$ & tr\`{e}s forte corr\'{e}lation positive \\
+    nb\_langages      & $0{,}897$ & forte corr\'{e}lation positive \\
+    niveau\_etudes    & $0{,}667$ & corr\'{e}lation mod\'{e}r\'{e}e \\
+    taille\_entreprise & $0{,}264$ & faible corr\'{e}lation \\
+    remote            & $-0{,}341$ & faible corr\'{e}lation n\'{e}gative \\
+    \bottomrule
+\end{tabular}
+\end{center}
+
+L'exp\'{e}rience est la feature la plus corr\'{e}l\'{e}e au salaire, suivie du nombre de langages.
+
+\begin{attentionbox}[Erreurs fr\'{e}quentes]
+    \begin{itemize}
+        \item Utiliser \texttt{np.corrcoef} sans extraire l'\'{e}l\'{e}ment \texttt{[0,1]} --- la fonction renvoie une \textbf{matrice} $2 \times 2$, pas un scalaire.
+        \item Confondre corr\'{e}lation et causalit\'{e} (le remote n\'{e}gatif ne signifie pas que le t\'{e}l\'{e}travail \textit{r\'{e}duit} le salaire).
+    \end{itemize}
+\end{attentionbox}
+
+% ======================================================================
+% EXERCICE 12
+% ======================================================================
+\section*{Exercice 12 \hfill \exoavance}
+\addcontentsline{toc}{section}{Exercice 12 --- Tester plusieurs mod\`{e}les (Python autonome)}
+\textit{Comparer 3 droites de r\'{e}gression, calculer le MSE, tracer le graphique.}
+
+\separateur
+
+\begin{pythonbox}[Correction compl\`{e}te]
+\begin{lstlisting}
+import numpy as np
+import matplotlib.pyplot as plt
+
+# --- Donnees ---
+experience = np.array([0,1,1,2,2,0,3,1,4,5,5,6,6,7,7,4,
+    8,5,9,10,10,11,12,9,13,11,15,17,20,18])
+salaire = np.array([28.0,26.5,35.0,32.0,38.0,25.0,34.5,
+    42.0,38.5,44.0,41.0,48.0,43.5,50.0,39.0,47.0,51.0,
+    40.0,52.0,55.0,48.5,58.0,60.0,42.0,62.0,54.0,65.0,
+    68.0,72.0,58.0])
+
+# --- 3 modeles ---
+modeles = {
+    "A": (1.5, 33),
+    "B": (2.07, 31.27),
+    "C": (2.8, 28),
+}
+
+# a-b) Predictions et MSE
+print("Modele |  w1   |  w0   |   MSE")
+print("-------|-------|-------|--------")
+resultats = {}
+for nom, (w1, w0) in modeles.items():
+    y_pred = w1 * experience + w0
+    mse = np.mean((salaire - y_pred) ** 2)
+    resultats[nom] = (w1, w0, mse)
+    print(f"   {nom}   | {w1:5.2f} | {w0:5.2f} | {mse:.2f}")
+
+# c) Graphique
+fig, ax = plt.subplots(figsize=(9, 5))
+ax.scatter(experience, salaire, c='#333', s=40,
+           zorder=3, label='Donnees')
+
+couleurs = {"A": "#e74c3c", "B": "#2ecc71", "C": "#3498db"}
+x_line = np.linspace(0, 21, 100)
+for nom, (w1, w0, mse) in resultats.items():
+    ax.plot(x_line, w1 * x_line + w0,
+            color=couleurs[nom], lw=2,
+            label=f'{nom}: y={w1}x+{w0} (MSE={mse:.1f})')
+
+ax.set_xlabel("Experience (annees)")
+ax.set_ylabel("Salaire (kEUR)")
+ax.set_title("Comparaison de 3 modeles lineaires")
+ax.legend(); ax.grid(True, alpha=0.3)
+plt.tight_layout(); plt.show()
+
+# d) Conclusion
+print("\nLe modele B a le MSE le plus faible.")
+print("C'est normal : B est la droite des moindres")
+print("carres, qui minimise le MSE par construction.")
+\end{lstlisting}
+\end{pythonbox}
+
+\textbf{Sortie attendue :}
+\begin{verbatim}
+Modele |  w1   |  w0   |   MSE
+-------|-------|-------|--------
+   A   |  1.50 | 33.00 | 27.03
+   B   |  2.07 | 31.27 | 20.46
+   C   |  2.80 | 28.00 | 21.31
+\end{verbatim}
+
+Le mod\`{e}le \textbf{B} a le MSE le plus faible ($20{,}46$), car c'est pr\'{e}cis\'{e}ment la droite
+des moindres carr\'{e}s --- celle qui, \textbf{par d\'{e}finition}, minimise le MSE.
+
+Le mod\`{e}le C a un MSE tr\`{e}s proche ($21{,}31$) : une pente un peu trop forte compens\'{e}e par un biais plus bas.
+Le mod\`{e}le A ($27{,}03$) sous-estime l'impact de l'exp\'{e}rience (pente trop faible).
+
+\begin{retenirbox}[Conclusion g\'{e}n\'{e}rale]
+    La droite des moindres carr\'{e}s est \textbf{optimale} par construction : aucun autre jeu de poids
+    $(w_1, w_0)$ ne peut donner un MSE plus faible sur les m\^{e}mes donn\'{e}es. C'est ce
+    que nous d\'{e}montrerons formellement au \textbf{Jour 2} en introduisant l'\textbf{optimisation}
+    et la \textbf{descente de gradient}.
+\end{retenirbox}
+
+\begin{intuitionbox}[Variante : boucle automatique]
+    On peut automatiser la recherche en testant des milliers de poids :
+    c'est l'id\'{e}e de la \textbf{descente de gradient} du Jour 2.
+\end{intuitionbox}
+
+% ======================================================================
+\vfill
+\begin{center}
+    {\footnotesize\sffamily\textcolor{gray}{%
+        \textcopyright\ 2025 Mohamed EL AFRIT --- IPSSI \enspace\textbullet\enspace
+        \url{www.mohamedelafrit.com} \enspace\textbullet\enspace
+        CC BY-NC-SA 4.0
+    }}
+\end{center}
+
+\end{document}

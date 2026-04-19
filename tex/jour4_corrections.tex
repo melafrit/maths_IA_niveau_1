@@ -1,0 +1,737 @@
+% ============================================================================
+% (c) 2025 Mohamed EL AFRIT -- IPSSI
+% Licence CC BY-NC-SA 4.0
+% https://creativecommons.org/licenses/by-nc-sa/4.0/deed.fr
+%
+% FICHE DE CORRECTIONS DETAILLEES -- Jour 4 : Reseaux de neurones
+% ============================================================================
+\input{template_ipssi}
+
+\jourNumero{4}
+\jourTheme{R\'{e}seaux de neurones}
+
+\begin{document}
+
+\pagegarde{Corrections d\'{e}taill\'{e}es}{4}{R\'{e}seaux de neurones}
+
+\setstretch{1.06}
+\setlength{\parskip}{2pt}
+\setlength{\abovedisplayskip}{5pt}
+\setlength{\belowdisplayskip}{5pt}
+
+\begin{tcolorbox}[
+    enhanced, colback=ipssiCyan!5, colframe=ipssiCyan!50,
+    boxrule=0.8pt, arc=4pt,
+    title={\sffamily\bfseries Rappels},
+    coltitle=white, colbacktitle=ipssiCyan!70,
+]
+\small
+$\sigma(z) = \frac{1}{1+e^{-z}}$ \;\;
+$\text{ReLU}(z) = \max(0,z)$ \;\;
+$\sigma'(z) = \sigma(z)(1-\sigma(z))$ \;\;
+$\sigma(0) = 0{,}5$ \;\;
+$\sigma(1) \approx 0{,}73$ \;\;
+$\sigma(2) \approx 0{,}88$ \;\;
+$\sigma(-1) \approx 0{,}27$
+\end{tcolorbox}
+
+% ======================================================================
+% EXERCICE 1
+% ======================================================================
+\section*{Exercice 1 \hfill \exofondamental}
+\addcontentsline{toc}{section}{Exercice 1 --- Sortie d'un neurone}
+\textit{$\vw = (0{,}3;\; 0{,}5)^T$, $b = -2$, activation sigmo\"{\i}de.}
+
+\separateur
+
+\textbf{a)} Somme pond\'{e}r\'{e}e pour $\vx = (5, 4)^T$ :
+\[
+    z = 0{,}3 \times 5 + 0{,}5 \times 4 + (-2) = 1{,}5 + 2{,}0 - 2{,}0 = \boxed{1{,}5}
+\]
+
+\textbf{b)} Activation :
+$a = \sigma(1{,}5) = \frac{1}{1 + e^{-1{,}5}} = \frac{1}{1 + 0{,}2231} = \frac{1}{1{,}2231} = \boxed{0{,}8176}$
+
+\textbf{c)} $a = 0{,}818 > 0{,}5$ donc le neurone pr\'{e}dit la \textbf{classe 1}.
+
+\textbf{d)} Pour $\vx = (1, 2)^T$ :
+$z = 0{,}3 \times 1 + 0{,}5 \times 2 - 2 = 0{,}3 + 1{,}0 - 2{,}0 = -0{,}7$.
+
+$a = \sigma(-0{,}7) = \frac{1}{1 + e^{0{,}7}} = \frac{1}{1 + 2{,}014} = \boxed{0{,}332}$.
+Comme $0{,}332 < 0{,}5$, le neurone pr\'{e}dit la \textbf{classe 0}.
+
+\begin{attentionbox}[Erreurs fr\'{e}quentes]
+\begin{itemize}
+    \item Oublier le biais $b = -2$ dans le calcul de $z$.
+    \item Confondre $e^{-z}$ et $e^{z}$ dans la formule de la sigmo\"{\i}de : c'est $e^{-z}$ au d\'{e}nominateur.
+\end{itemize}
+\end{attentionbox}
+
+% ======================================================================
+% EXERCICE 2
+% ======================================================================
+\section*{Exercice 2 \hfill \exofondamental}
+\addcontentsline{toc}{section}{Exercice 2 --- ReLU et sigmo\"{\i}de}
+
+\separateur
+
+\textbf{a) Sigmo\"{\i}de :}
+
+$\sigma(0) = \frac{1}{1+e^0} = \frac{1}{2} = \boxed{0{,}5}$
+
+$\sigma(2) = \frac{1}{1+e^{-2}} = \frac{1}{1+0{,}135} = \boxed{0{,}881}$
+
+$\sigma(-3) = \frac{1}{1+e^{3}} = \frac{1}{1+20{,}09} = \boxed{0{,}047}$
+
+\textbf{b) ReLU :}
+
+$\text{ReLU}(2{,}5) = \max(0,\; 2{,}5) = \boxed{2{,}5}$
+
+$\text{ReLU}(0) = \max(0,\; 0) = \boxed{0}$
+
+$\text{ReLU}(-1{,}7) = \max(0,\; -1{,}7) = \boxed{0}$
+
+\textbf{c)} $\text{ReLU}(-1) = \max(0, -1) = 0$, puis $\sigma(0) = 0{,}5$.
+Donc $\sigma(\text{ReLU}(-1)) = \boxed{0{,}5}$.
+
+\textbf{d)} $\text{ReLU}(3) = 3$, puis $\sigma(3) = \frac{1}{1+e^{-3}} \approx 0{,}953$.
+Donc $\sigma(\text{ReLU}(3)) = \boxed{0{,}953}$.
+
+\textbf{e)} $\sigma(z) = \frac{1}{1+e^{-z}}$. Le d\'{e}nominateur $1 + e^{-z}$ est toujours $> 1$
+(car $e^{-z} > 0$ pour tout $z$), donc $\sigma(z) < 1$.
+De m\^{e}me, $\sigma(z) > 0$ car le num\'{e}rateur et le d\'{e}nominateur sont positifs.
+La sigmo\"{\i}de est \textbf{asymptotique} : elle s'approche de 0 et 1 sans jamais les atteindre.
+
+\begin{retenirbox}
+    ReLU ``coupe'' les valeurs n\'{e}gatives \`{a} z\'{e}ro. La sigmo\"{\i}de ``\'{e}crase'' tout nombre r\'{e}el dans $(0, 1)$.
+    Composer les deux cr\'{e}e une fonction non lin\'{e}aire.
+\end{retenirbox}
+
+% ======================================================================
+% EXERCICE 3
+% ======================================================================
+\section*{Exercice 3 \hfill \exofondamental}
+\addcontentsline{toc}{section}{Exercice 3 --- Forward pass 2-2-1}
+\textit{$\vx = (3, 5)^T$, $\mathbf{W}^{(1)}$, $\mathbf{w}^{(2)}$ donn\'{e}s.}
+
+\separateur
+
+\textbf{a) Sommes pond\'{e}r\'{e}es couche cach\'{e}e :}
+\begin{align*}
+    z_1 &= 0{,}4 \times 3 + 0{,}6 \times 5 + (-1) = 1{,}2 + 3{,}0 - 1 = \boxed{3{,}2} \\
+    z_2 &= (-0{,}3) \times 3 + 0{,}5 \times 5 + 0{,}5 = -0{,}9 + 2{,}5 + 0{,}5 = \boxed{2{,}1}
+\end{align*}
+
+\textbf{b) Activations :}
+$h_1 = \sigma(3{,}2) \approx \boxed{0{,}961}$ \quad;\quad $h_2 = \sigma(2{,}1) \approx \boxed{0{,}891}$
+
+\textbf{c) Somme pond\'{e}r\'{e}e sortie :}
+\[
+    z_{\text{out}} = 0{,}7 \times 0{,}961 + 0{,}8 \times 0{,}891 + (-0{,}5) = 0{,}673 + 0{,}713 - 0{,}5 = \boxed{0{,}886}
+\]
+
+\textbf{d) Pr\'{e}diction :}
+$\yhat = \sigma(0{,}886) \approx \boxed{0{,}708}$
+
+\textbf{e)} $0{,}708 > 0{,}5$ donc le r\'{e}seau pr\'{e}dit la \textbf{classe 1}
+(salaire $>$ 45\,k\texteuro).
+
+\begin{attentionbox}[Erreurs fr\'{e}quentes]
+\begin{itemize}
+    \item Utiliser $\vx$ directement dans la couche de sortie au lieu de $\mathbf{h}$ --- la sortie utilise les \textbf{activations de la couche cach\'{e}e}, pas les entr\'{e}es.
+    \item Oublier d'appliquer $\sigma$ \`{a} chaque couche.
+\end{itemize}
+\end{attentionbox}
+
+% ======================================================================
+% EXERCICE 4
+% ======================================================================
+\section*{Exercice 4 \hfill \exofondamental}
+\addcontentsline{toc}{section}{Exercice 4 --- Dimensions des matrices}
+\textit{R\'{e}seau 5 $\to$ 8 $\to$ 3 $\to$ 1.}
+
+\separateur
+
+\textbf{a)} $\mathbf{W}^{(1)} \in \mathbb{R}^{8 \times 5}$ (8 neurones, 5 entr\'{e}es).
+$\mathbf{b}^{(1)} \in \mathbb{R}^{8}$.
+
+\textbf{b)} $\mathbf{W}^{(2)} \in \mathbb{R}^{3 \times 8}$ (3 neurones, 8 entr\'{e}es).
+$\mathbf{b}^{(2)} \in \mathbb{R}^{3}$.
+
+\textbf{c)} $\mathbf{w}^{(3)} \in \mathbb{R}^{3}$ (ou $\mathbf{W}^{(3)} \in \mathbb{R}^{1 \times 3}$).
+$b^{(3)} \in \mathbb{R}$.
+
+\textbf{d)} Total des param\`{e}tres :
+\begin{align*}
+    &\underbrace{8 \times 5}_{W^{(1)}} + \underbrace{8}_{b^{(1)}} + \underbrace{3 \times 8}_{W^{(2)}} + \underbrace{3}_{b^{(2)}} + \underbrace{1 \times 3}_{w^{(3)}} + \underbrace{1}_{b^{(3)}} \\
+    &= 40 + 8 + 24 + 3 + 3 + 1 = \boxed{79 \text{ param\`{e}tres}}
+\end{align*}
+
+\textbf{e)} Couche 1 passe de 8 \`{a} 16 neurones :
+$W^{(1)}$ passe de $8 \times 5 = 40$ \`{a} $16 \times 5 = 80$ ($+40$).
+$b^{(1)}$ passe de 8 \`{a} 16 ($+8$).
+$W^{(2)}$ passe de $3 \times 8 = 24$ \`{a} $3 \times 16 = 48$ ($+24$).
+Total suppl\'{e}mentaire : $\boxed{+72}$ param\`{e}tres (de 79 \`{a} 151).
+
+\begin{retenirbox}
+    Le nombre de param\`{e}tres cro\^{i}t \textbf{quadratiquement} avec la taille des couches.
+    C'est pourquoi les grands r\'{e}seaux (GPT, etc.)\ ont des milliards de param\`{e}tres.
+\end{retenirbox}
+
+% ======================================================================
+% EXERCICE 5
+% ======================================================================
+\section*{Exercice 5 \hfill \exointermediaire}
+\addcontentsline{toc}{section}{Exercice 5 --- Composer deux fonctions}
+\textit{$f_A(x) = \text{ReLU}(2x-1)$, $g_B(x) = \sigma(3x-2)$.}
+
+\separateur
+
+\textbf{a)} $f_A(0) = \text{ReLU}(-1) = \boxed{0}$ \;;\;
+$f_A(1) = \text{ReLU}(1) = \boxed{1}$ \;;\;
+$f_A(3) = \text{ReLU}(5) = \boxed{5}$.
+
+\textbf{b) Composition $g_B(f_A(x))$ :}
+
+$x = 0$ : $f_A(0) = 0$, puis $g_B(0) = \sigma(3 \times 0 - 2) = \sigma(-2) \approx \boxed{0{,}119}$.
+
+$x = 1$ : $f_A(1) = 1$, puis $g_B(1) = \sigma(3 \times 1 - 2) = \sigma(1) \approx \boxed{0{,}731}$.
+
+$x = 3$ : $f_A(3) = 5$, puis $g_B(5) = \sigma(3 \times 5 - 2) = \sigma(13) \approx \boxed{1{,}000}$.
+
+\textbf{c)} Non, $g_B \circ f_A$ n'est \textbf{pas} lin\'{e}aire.
+Elle combine ReLU (lin\'{e}aire par morceaux) et sigmo\"{\i}de (courbe en S).
+La composition de fonctions non lin\'{e}aires est non lin\'{e}aire.
+
+\textbf{d) Sans activation :} $f(x) = 2x - 1$, $g(x) = 3x - 2$.
+$g(f(x)) = 3(2x - 1) - 2 = 6x - 3 - 2 = \boxed{6x - 5}$.
+C'est une fonction \textbf{lin\'{e}aire} --- deux couches sans activation = une seule couche.
+
+\begin{retenirbox}
+    C'est la preuve concr\`{e}te : sans activation, empiler des couches ne sert \`{a} rien.
+\end{retenirbox}
+
+% ======================================================================
+% EXERCICE 6
+% ======================================================================
+\section*{Exercice 6 \hfill \exointermediaire}
+\addcontentsline{toc}{section}{Exercice 6 --- R\'{e}seau sans activation}
+
+\separateur
+
+\textbf{a-b)} Substitution de $\mathbf{h}$ dans $\yhat$ :
+\begin{align*}
+    \yhat &= \mathbf{w}^{(2)T}\mathbf{h} + b^{(2)} \\
+          &= \mathbf{w}^{(2)T}\bigl(\mathbf{W}^{(1)}\vx + \mathbf{b}^{(1)}\bigr) + b^{(2)} \\
+          &= \underbrace{\mathbf{w}^{(2)T}\mathbf{W}^{(1)}}_{\tilde{\vw}^T}\vx
+             + \underbrace{\mathbf{w}^{(2)T}\mathbf{b}^{(1)} + b^{(2)}}_{\tilde{b}}
+\end{align*}
+Donc $\yhat = \tilde{\vw}^T \vx + \tilde{b}$ avec $\tilde{\vw} = \mathbf{W}^{(1)T}\mathbf{w}^{(2)}$.
+
+\textbf{c)} C'est un \textbf{mod\`{e}le lin\'{e}aire} --- exactement comme un perceptron simple.
+Le r\'{e}seau \`{a} 2 couches sans activation n'est \textbf{pas plus puissant} qu'un seul neurone.
+
+\textbf{d)} Les fonctions d'activation sont indispensables car elles introduisent la
+\textbf{non-lin\'{e}arit\'{e}} qui permet de mod\'{e}liser des fronti\`{e}res courbes et de r\'{e}soudre
+des probl\`{e}mes non lin\'{e}airement s\'{e}parables (comme le XOR).
+
+% ======================================================================
+% EXERCICE 7
+% ======================================================================
+\section*{Exercice 7 \hfill \exointermediaire}
+\addcontentsline{toc}{section}{Exercice 7 --- Surapprentissage}
+
+\separateur
+
+\textbf{a)} Le surapprentissage commence vers l'\textbf{\'{e}poque 200}.
+Signe : l'accuracy d'entra\^{i}nement continue d'augmenter (95\% $\to$ 100\%)
+tandis que l'accuracy de validation \textbf{diminue} (87\% $\to$ 75\%).
+L'\'{e}cart train/validation se creuse.
+
+\textbf{b)} Le meilleur mod\`{e}le est \`{a} l'\textbf{\'{e}poque 50} : accuracy de validation
+maximale (83\%), avec un \'{e}cart raisonnable par rapport \`{a} l'entra\^{i}nement (85\% vs 83\%).
+
+\textbf{c)} Trois solutions :
+\begin{enumerate}
+    \item \textbf{Early stopping} : arr\^{e}ter l'entra\^{i}nement quand la validation cesse de s'am\'{e}liorer.
+    \item \textbf{R\'{e}gularisation $L_2$} : ajouter un terme $\lambda\|\vw\|^2$ \`{a} la loss pour p\'{e}naliser les poids trop grands.
+    \item \textbf{Dropout} : d\'{e}sactiver al\'{e}atoirement des neurones pendant l'entra\^{i}nement pour forcer la redondance.
+\end{enumerate}
+
+\textbf{d)} 100\% sur l'entra\^{i}nement signifie que le mod\`{e}le a \textbf{m\'{e}moris\'{e}} toutes les observations, y compris le bruit et les cas atypiques. C'est comme un \'{e}l\`{e}ve qui apprend ses fiches par c\oe ur sans comprendre : il \'{e}choue face \`{a} un probl\`{e}me nouveau.
+
+\begin{attentionbox}[Erreurs fr\'{e}quentes]
+\begin{itemize}
+    \item Choisir le mod\`{e}le avec la meilleure accuracy d'\textbf{entra\^{i}nement} --- il faut regarder la \textbf{validation}.
+    \item Croire qu'un mod\`{e}le plus complexe est toujours meilleur : au-del\`{a} d'un certain point, il surapprentit.
+\end{itemize}
+\end{attentionbox}
+
+% ======================================================================
+% EXERCICE 8
+% ======================================================================
+\section*{Exercice 8 \hfill \exointermediaire}
+\addcontentsline{toc}{section}{Exercice 8 --- Sigmo\"{\i}de et ReLU (Python)}
+
+\separateur
+
+\begin{pythonbox}[Correction compl\`{e}te]
+\begin{lstlisting}
+import numpy as np
+import matplotlib.pyplot as plt
+
+# 1. Sigmoide
+def sigmoid(z):
+    return 1 / (1 + np.exp(-z))
+
+# 2. ReLU
+def relu(z):
+    return np.maximum(0, z)
+
+# 3. Test
+valeurs = np.array([-3, -1, 0, 1, 2, 5])
+print("z       :", valeurs)
+print("sigmoid :", np.round(sigmoid(valeurs), 4))
+print("relu    :", relu(valeurs))
+
+# 4. Courbes
+z = np.linspace(-6, 6, 200)
+fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 4))
+
+ax1.plot(z, sigmoid(z), 'b-', lw=2)
+ax1.set_title("Sigmoide"); ax1.grid(True, alpha=0.3)
+ax1.axhline(0.5, color='gray', ls=':')
+
+ax2.plot(z, relu(z), 'r-', lw=2)
+ax2.set_title("ReLU"); ax2.grid(True, alpha=0.3)
+
+plt.tight_layout(); plt.show()
+
+# 5. Derivee
+def sigmoid_deriv(z):
+    s = sigmoid(z)
+    return s * (1 - s)
+
+print("\nDerivee sigmoid(0) =", sigmoid_deriv(0))
+print("Derivee sigmoid(2) =", round(sigmoid_deriv(2), 4))
+\end{lstlisting}
+\end{pythonbox}
+
+\textbf{Sortie attendue :}
+\begin{verbatim}
+z       : [-3 -1  0  1  2  5]
+sigmoid : [0.0474 0.2689 0.5    0.7311 0.8808 0.9933]
+relu    : [0 0 0 1 2 5]
+
+Derivee sigmoid(0) = 0.25
+Derivee sigmoid(2) = 0.1050
+\end{verbatim}
+
+\begin{intuitionbox}[Variante]
+    Essayez aussi \texttt{np.tanh(z)} (tangente hyperbolique, sortie dans $(-1, 1)$)
+    et la \textbf{Leaky ReLU} : \texttt{np.where(z > 0, z, 0.01 * z)}.
+\end{intuitionbox}
+
+% ======================================================================
+% EXERCICE 9
+% ======================================================================
+\section*{Exercice 9 \hfill \exointermediaire}
+\addcontentsline{toc}{section}{Exercice 9 --- Forward pass 2-2-1 (Python)}
+
+\separateur
+
+\begin{pythonbox}[Correction compl\`{e}te]
+\begin{lstlisting}
+import numpy as np
+
+def sigmoid(z):
+    return 1 / (1 + np.exp(-z))
+
+x = np.array([5.0, 4.0])
+
+W1 = np.array([[0.3, 0.5], [-0.2, 0.4]])
+b1 = np.array([-2.0, 0.5])
+w2 = np.array([0.8, 0.6])
+b2 = -0.5
+
+# 1. Couche cachee
+z1 = W1 @ x + b1
+h  = sigmoid(z1)
+print(f"z1 = {z1}")
+print(f"h  = {np.round(h, 4)}")
+
+# 2. Couche de sortie
+z2 = w2 @ h + b2
+y_pred = sigmoid(z2)
+print(f"\nz2 = {z2:.4f}")
+print(f"y_pred = {y_pred:.4f}")
+
+# 3. Decision
+classe = 1 if y_pred > 0.5 else 0
+print(f"\nClasse predite : {classe}")
+
+# 4. Test sur 6 developpeurs
+print("\n--- Predictions ---")
+devs = np.array([[0,2],[1,1],[5,4],[9,5],[12,7],[18,5]])
+for d in devs:
+    h_i = sigmoid(W1 @ d + b1)
+    y_i = sigmoid(w2 @ h_i + b2)
+    print(f"  x={d} -> y={y_i:.3f} -> "
+          f"classe {1 if y_i > 0.5 else 0}")
+\end{lstlisting}
+\end{pythonbox}
+
+\textbf{Sortie attendue :}
+\begin{verbatim}
+z1 = [1.5 1.1]
+h  = [0.8176 0.7503]
+
+z2 = 0.6043
+y_pred = 0.6466
+
+Classe predite : 1
+
+--- Predictions ---
+  x=[0 2] -> y=0.551 -> classe 1
+  x=[1 1] -> y=0.533 -> classe 1
+  x=[5 4] -> y=0.647 -> classe 1
+  x=[9 5] -> y=0.693 -> classe 1
+  x=[12 7] -> y=0.726 -> classe 1
+  x=[18 5] -> y=0.715 -> classe 1
+\end{verbatim}
+
+\begin{attentionbox}[Erreurs fr\'{e}quentes]
+\begin{itemize}
+    \item \'{E}crire \texttt{w2 @ x + b2} au lieu de \texttt{w2 @ h + b2} --- la sortie utilise \texttt{h}, pas \texttt{x}.
+    \item Avec ces poids non entra\^{i}n\'{e}s, le r\'{e}seau pr\'{e}dit ``classe~1'' pour tout le monde --- c'est normal, il n'a pas appris.
+\end{itemize}
+\end{attentionbox}
+
+% ======================================================================
+% EXERCICE 10
+% ======================================================================
+\section*{Exercice 10 \hfill \exointermediaire}
+\addcontentsline{toc}{section}{Exercice 10 --- XOR avec backpropagation (Python)}
+
+\separateur
+
+\begin{pythonbox}[Correction compl\`{e}te]
+\begin{lstlisting}
+import numpy as np
+
+def sigmoid(z):
+    return 1 / (1 + np.exp(-z))
+def sigmoid_d(a):
+    return a * (1 - a)
+
+X = np.array([[0,0],[0,1],[1,0],[1,1]], dtype=float)
+y = np.array([[0],[1],[1],[0]], dtype=float)
+
+np.random.seed(42)
+W1 = np.random.randn(2, 4) * 0.5
+b1 = np.zeros((1, 4))
+W2 = np.random.randn(4, 1) * 0.5
+b2 = np.zeros((1, 1))
+
+alpha = 1.0
+
+for epoch in range(5000):
+    # Forward
+    z1 = X @ W1 + b1
+    h  = sigmoid(z1)
+    z2 = h @ W2 + b2
+    out = sigmoid(z2)
+
+    loss = np.mean((y - out) ** 2)
+
+    # Backward
+    d_out = (out - y) * sigmoid_d(out)
+    dW2 = h.T @ d_out / 4
+    db2 = np.mean(d_out, axis=0, keepdims=True)
+
+    d_h = d_out @ W2.T * sigmoid_d(h)
+    dW1 = X.T @ d_h / 4
+    db1 = np.mean(d_h, axis=0, keepdims=True)
+
+    # Mise a jour
+    W2 -= alpha * dW2; b2 -= alpha * db2
+    W1 -= alpha * dW1; b1 -= alpha * db1
+
+    if epoch % 1000 == 999:
+        preds = (out > 0.5).astype(int).flatten()
+        acc = np.mean(preds == y.flatten())
+        print(f"Epoch {epoch+1} : "
+              f"loss={loss:.4f}, acc={acc:.0%}")
+
+print(f"\nPredictions : {out.flatten().round(3)}")
+print(f"Attendu     : {y.flatten().astype(int)}")
+\end{lstlisting}
+\end{pythonbox}
+
+\textbf{Sortie attendue :}
+\begin{verbatim}
+Epoch 1000 : loss=0.2336, acc=75%
+Epoch 2000 : loss=0.0124, acc=100%
+Epoch 3000 : loss=0.0048, acc=100%
+Epoch 4000 : loss=0.0027, acc=100%
+Epoch 5000 : loss=0.0018, acc=100%
+
+Predictions : [0.039 0.965 0.965 0.038]
+Attendu     : [0 1 1 0]
+\end{verbatim}
+
+\begin{retenirbox}
+    Le r\'{e}seau 2-4-1 r\'{e}sout le XOR avec 100\% d'accuracy !
+    Les 4 neurones cach\'{e}s cr\'{e}ent des \textbf{repr\'{e}sentations interm\'{e}diaires}
+    qui rendent le probl\`{e}me lin\'{e}airement s\'{e}parable dans $\mathbb{R}^4$.
+\end{retenirbox}
+
+% ======================================================================
+% EXERCICE 11
+% ======================================================================
+\section*{Exercice 11 \hfill \exoavance}
+\addcontentsline{toc}{section}{Exercice 11 --- R\'{e}seau from scratch salaire (Python)}
+
+\separateur
+
+\begin{pythonbox}[Correction compl\`{e}te]
+\begin{lstlisting}
+import numpy as np
+import matplotlib.pyplot as plt
+
+def sigmoid(z):
+    return 1 / (1 + np.exp(-np.clip(z, -500, 500)))
+def sigmoid_d(a):
+    return a * (1 - a)
+
+# a) Dataset
+data = np.array([
+    [0,2,28],[1,1,26.5],[1,3,35],[2,2,32],[2,4,38],
+    [0,1,25],[3,3,34.5],[1,5,42],[4,3,38.5],[5,4,44],
+    [5,3,41],[6,5,48],[6,4,43.5],[7,5,50],[7,3,39],
+    [4,6,47],[8,4,51],[5,2,40],[9,5,52],[10,6,55],
+    [10,4,48.5],[11,5,58],[12,7,60],[9,3,42],
+    [13,6,62],[11,4,54],[15,8,65],[17,6,68],
+    [20,7,72],[18,5,58]], dtype=float)
+
+X_raw = data[:, :2]
+y = (data[:, 2] > 45).astype(float).reshape(-1, 1)
+
+# b) Normalisation
+mu = X_raw.mean(axis=0)
+sigma_x = X_raw.std(axis=0)
+X = (X_raw - mu) / sigma_x
+
+# c) Reseau 2-4-1
+np.random.seed(42)
+W1 = np.random.randn(2, 4) * 0.5
+b1 = np.zeros((1, 4))
+W2 = np.random.randn(4, 1) * 0.5
+b2 = np.zeros((1, 1))
+alpha = 0.5
+n = len(y)
+hist_loss = []
+
+for epoch in range(2000):
+    h = sigmoid(X @ W1 + b1)
+    out = sigmoid(h @ W2 + b2)
+    loss = np.mean((y - out) ** 2)
+    hist_loss.append(loss)
+
+    d_out = (out - y) * sigmoid_d(out)
+    W2 -= alpha * (h.T @ d_out) / n
+    b2 -= alpha * np.mean(d_out, axis=0, keepdims=True)
+    d_h = (d_out @ W2.T) * sigmoid_d(h)
+    W1 -= alpha * (X.T @ d_h) / n
+    b1 -= alpha * np.mean(d_h, axis=0, keepdims=True)
+
+    if epoch % 500 == 499:
+        acc = np.mean((out > 0.5) == y)
+        print(f"Epoch {epoch+1:5d} : "
+              f"loss={loss:.4f}, acc={acc:.0%}")
+
+# e) Graphiques
+fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 5))
+ax1.plot(hist_loss, 'b-', lw=1)
+ax1.set_xlabel("Epoch"); ax1.set_ylabel("Loss")
+ax1.set_title("Convergence"); ax1.grid(True, alpha=0.3)
+
+# Surface de decision
+xx, yy = np.meshgrid(
+    np.linspace(X[:,0].min()-1, X[:,0].max()+1, 100),
+    np.linspace(X[:,1].min()-1, X[:,1].max()+1, 100))
+grid = np.c_[xx.ravel(), yy.ravel()]
+h_g = sigmoid(grid @ W1 + b1)
+z_g = sigmoid(h_g @ W2 + b2).reshape(xx.shape)
+ax2.contourf(xx, yy, z_g, levels=20,
+             cmap='RdYlGn', alpha=0.5)
+ax2.contour(xx, yy, z_g, levels=[0.5],
+            colors='black', linewidths=2)
+for c, col in [(0,'#e74c3c'),(1,'#2ecc71')]:
+    mask = y.flatten() == c
+    ax2.scatter(X[mask,0], X[mask,1], c=col,
+                s=60, edgecolors='white', lw=0.5)
+ax2.set_title("Surface de decision")
+ax2.set_xlabel("Exp (norm)")
+ax2.set_ylabel("Lang (norm)")
+plt.tight_layout(); plt.show()
+\end{lstlisting}
+\end{pythonbox}
+
+\textbf{Sortie attendue :}
+\begin{verbatim}
+Epoch   500 : loss=0.1073, acc=90%
+Epoch  1000 : loss=0.0681, acc=93%
+Epoch  1500 : loss=0.0523, acc=93%
+Epoch  2000 : loss=0.0435, acc=97%
+\end{verbatim}
+
+L'accuracy (93--97\%) d\'{e}passe celle du perceptron (${\sim}87$--$90\%$). La fronti\`{e}re est \textbf{courbe}, ce qui permet de mieux s\'{e}parer les cas atypiques.
+
+\begin{attentionbox}[Erreurs fr\'{e}quentes]
+\begin{itemize}
+    \item Oublier de \textbf{normaliser} les features --- sans normalisation, le r\'{e}seau converge tr\`{e}s lentement ou pas du tout.
+    \item Utiliser \texttt{np.clip} dans la sigmo\"{\i}de pour \'{e}viter les overflow num\'{e}riques sur de grandes valeurs.
+\end{itemize}
+\end{attentionbox}
+
+% ======================================================================
+% EXERCICE 12
+% ======================================================================
+\section*{Exercice 12 \hfill \exoavance}
+\addcontentsline{toc}{section}{Exercice 12 --- NumPy vs MLPClassifier (Python)}
+
+\separateur
+
+\begin{pythonbox}[Correction compl\`{e}te]
+\begin{lstlisting}
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.neural_network import MLPClassifier
+from sklearn.linear_model import Perceptron as SkPerc
+from sklearn.preprocessing import StandardScaler
+
+data = np.array([
+    [0,2,28],[1,1,26.5],[1,3,35],[2,2,32],[2,4,38],
+    [0,1,25],[3,3,34.5],[1,5,42],[4,3,38.5],[5,4,44],
+    [5,3,41],[6,5,48],[6,4,43.5],[7,5,50],[7,3,39],
+    [4,6,47],[8,4,51],[5,2,40],[9,5,52],[10,6,55],
+    [10,4,48.5],[11,5,58],[12,7,60],[9,3,42],
+    [13,6,62],[11,4,54],[15,8,65],[17,6,68],
+    [20,7,72],[18,5,58]], dtype=float)
+
+X_raw = data[:,:2]
+y = (data[:,2] > 45).astype(int)
+scaler = StandardScaler()
+X = scaler.fit_transform(X_raw)
+
+# M1: From scratch (meme code que ex 11)
+def sig(z): return 1/(1+np.exp(-np.clip(z,-500,500)))
+def sig_d(a): return a*(1-a)
+np.random.seed(42)
+W1=np.random.randn(2,4)*0.5; b1=np.zeros((1,4))
+W2=np.random.randn(4,1)*0.5; b2=np.zeros((1,1))
+yr = y.reshape(-1,1).astype(float)
+for _ in range(2000):
+    h=sig(X@W1+b1); out=sig(h@W2+b2)
+    do=(out-yr)*sig_d(out)
+    W2-=0.5*(h.T@do)/30; b2-=0.5*np.mean(do,axis=0,keepdims=True)
+    dh=(do@W2.T)*sig_d(h)
+    W1-=0.5*(X.T@dh)/30; b1-=0.5*np.mean(dh,axis=0,keepdims=True)
+acc_fs = np.mean((out>0.5).flatten()==y)
+
+# M2: MLPClassifier
+mlp = MLPClassifier(hidden_layer_sizes=(4,),
+    max_iter=2000, activation='logistic',
+    random_state=42)
+mlp.fit(X, y); acc_mlp = mlp.score(X, y)
+
+# M3: Perceptron
+perc = SkPerc(max_iter=100, eta0=0.1,
+              random_state=42)
+perc.fit(X, y); acc_perc = perc.score(X, y)
+
+# c) Tableau
+print(f"{'Methode':<22}|{'Acc':>6}|{'Params':>7}")
+print("-" * 38)
+print(f"{'From scratch 2-4-1':<22}|{acc_fs:>5.0%}|"
+      f"{2*4+4+4*1+1:>7}")
+print(f"{'MLPClassifier (4,)':<22}|{acc_mlp:>5.0%}|"
+      f"{2*4+4+4*1+1:>7}")
+print(f"{'Perceptron':<22}|{acc_perc:>5.0%}|"
+      f"{'3':>7}")
+
+# d) 3 surfaces de decision
+fig, axes = plt.subplots(1, 3, figsize=(16, 5))
+xx, yy = np.meshgrid(
+    np.linspace(X[:,0].min()-1, X[:,0].max()+1, 100),
+    np.linspace(X[:,1].min()-1, X[:,1].max()+1, 100))
+grid = np.c_[xx.ravel(), yy.ravel()]
+
+# From scratch
+h_g=sig(grid@W1+b1)
+z_fs=sig(h_g@W2+b2).reshape(xx.shape)
+# MLPClassifier
+z_mlp=mlp.predict_proba(grid)[:,1].reshape(xx.shape)
+# Perceptron
+z_perc=perc.decision_function(grid).reshape(xx.shape)
+
+titles = [f'From scratch ({acc_fs:.0%})',
+          f'MLPClassifier ({acc_mlp:.0%})',
+          f'Perceptron ({acc_perc:.0%})']
+zz = [z_fs, z_mlp, z_perc]
+lvls = [[0.5], [0.5], [0]]
+
+for ax, z, t, lv in zip(axes, zz, titles, lvls):
+    ax.contourf(xx, yy, z, levels=20,
+                cmap='RdYlGn', alpha=0.4)
+    ax.contour(xx, yy, z, levels=lv,
+               colors='black', linewidths=2)
+    for c, col in [(0,'#e74c3c'),(1,'#2ecc71')]:
+        mask = y == c
+        ax.scatter(X[mask,0], X[mask,1], c=col,
+                   s=50, edgecolors='white', lw=0.5)
+    ax.set_title(t); ax.grid(True, alpha=0.2)
+plt.tight_layout(); plt.show()
+
+# e) Le reseau est meilleur que le perceptron.
+# Sa frontiere est COURBE (non lineaire).
+# Le perceptron a 3 params, le reseau 17.
+\end{lstlisting}
+\end{pythonbox}
+
+\textbf{Sortie attendue :}
+\begin{verbatim}
+Methode               |   Acc| Params
+--------------------------------------
+From scratch 2-4-1    |  97% |     17
+MLPClassifier (4,)    |  93% |     17
+Perceptron            |  87% |      3
+\end{verbatim}
+
+\begin{retenirbox}[Conclusion g\'{e}n\'{e}rale du Jour 4]
+    Le r\'{e}seau multicouche est strictement plus puissant que le perceptron :
+    sa fronti\`{e}re \textbf{courbe} capture les relations non lin\'{e}aires.
+    Le prix \`{a} payer : plus de param\`{e}tres (17 vs 3), plus de temps d'entra\^{i}nement,
+    et un risque de surapprentissage. C'est le \textbf{compromis biais--variance} fondamental du ML.
+\end{retenirbox}
+
+\begin{intuitionbox}[Bilan des 4 jours]
+    Vous avez construit, \textbf{from scratch}, toute la cha\^{i}ne de l'IA :
+    \textbf{J1}~vecteurs et matrices, \textbf{J2}~descente de gradient,
+    \textbf{J3}~perceptron, \textbf{J4}~r\'{e}seau de neurones.
+    Chaque framework moderne (TensorFlow, PyTorch) impl\'{e}mente exactement ces concepts
+    --- en plus rapide et plus grand. Vous avez les fondations pour les comprendre.
+\end{intuitionbox}
+
+% ======================================================================
+\vfill
+\begin{center}
+    {\footnotesize\sffamily\textcolor{gray}{%
+        \textcopyright\ 2025 Mohamed EL AFRIT --- IPSSI \enspace\textbullet\enspace
+        \url{www.mohamedelafrit.com} \enspace\textbullet\enspace
+        CC BY-NC-SA 4.0
+    }}
+\end{center}
+
+\end{document}

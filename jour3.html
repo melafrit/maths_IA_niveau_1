@@ -1,0 +1,972 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Jour 3 — Probabilités et classification — Maths IA</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,700;1,400&family=JetBrains+Mono:wght@400;500;700&family=Source+Serif+4:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; padding: 0; font-family: 'Source Serif 4', Georgia, serif; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+<script type="text/babel">
+// © 2025 Mohamed EL AFRIT// Ce contenu est distribué sous licence Creative Commons BY-NC-SA 4.0
+// https://creativecommons.org/licenses/by-nc-sa/4.0/deed.fr
+//
+// JOUR 3 — Probabilités et classification
+
+const { useState, useEffect, createContext, useContext } = React;
+
+// ─── DATASET ──────────────────────────────────────────────────────────
+const DATASET_RAW = [
+  [0,2,3,150,80,28.0,0],[1,1,2,50,100,26.5,0],[1,3,4,800,40,35.0,0],[2,2,3,200,60,32.0,0],
+  [2,4,4,3000,20,38.0,0],[0,1,1,30,50,25.0,0],[3,3,3,100,80,34.5,0],[1,5,4,15,100,42.0,0],
+  [4,3,3,500,60,38.5,0],[5,4,4,1200,40,44.0,0],[5,3,3,300,80,41.0,0],[6,5,4,2000,30,48.0,1],
+  [6,4,3,150,90,43.5,0],[7,5,4,800,50,50.0,1],[7,3,2,80,70,39.0,0],[4,6,5,400,100,47.0,1],
+  [8,4,4,1500,40,51.0,1],[5,2,3,4000,10,40.0,0],[9,5,4,600,60,52.0,1],[10,6,4,2500,30,55.0,1],
+  [10,4,3,200,80,48.5,1],[11,5,5,1000,50,58.0,1],[12,7,4,3500,20,60.0,1],[9,3,3,60,90,42.0,0],
+  [13,6,4,800,70,62.0,1],[11,4,4,5000,10,54.0,1],[15,8,4,1200,50,65.0,1],[17,6,5,2000,40,68.0,1],
+  [20,7,4,500,60,72.0,1],[18,5,3,100,80,58.0,1],
+];
+
+// ─── SECTIONS ─────────────────────────────────────────────────────────
+const SECTIONS = [
+  { id:"transition", title:"1. De la régression à la classification", level:1, children:[
+    { id:"trans-question", title:"1.1 La nouvelle question", level:2 },
+    { id:"trans-binaire", title:"1.2 Classification binaire", level:2 },
+    { id:"trans-python", title:"1.3 Visualiser les deux classes", level:2 },
+  ]},
+  { id:"proba", title:"2. Rappels de probabilités", level:1, children:[
+    { id:"proba-event", title:"2.1 Probabilité d'un événement", level:2 },
+    { id:"proba-variable", title:"2.2 Variable aléatoire", level:2 },
+    { id:"proba-esperance", title:"2.3 Espérance et variance", level:2 },
+    { id:"proba-cond", title:"2.4 Probabilité conditionnelle", level:2 },
+    { id:"proba-python", title:"2.5 Probabilités empiriques", level:2 },
+  ]},
+  { id:"classif", title:"3. Classification linéaire", level:1, children:[
+    { id:"cl-intuition", title:"3.1 Tracer une frontière", level:2 },
+    { id:"cl-formalisation", title:"3.2 Fonction de décision", level:2 },
+    { id:"cl-regle", title:"3.3 Règle de décision", level:2 },
+    { id:"cl-python", title:"3.4 Visualiser les classes", level:2 },
+  ]},
+  { id:"frontiere", title:"4. Frontière de décision", level:1, children:[
+    { id:"fr-intuition", title:"4.1 Droite, plan, hyperplan", level:2 },
+    { id:"fr-formalisation", title:"4.2 Formalisation", level:2 },
+    { id:"fr-python", title:"4.3 Tracer la frontière", level:2 },
+  ]},
+  { id:"perceptron", title:"5. Le perceptron", level:1, children:[
+    { id:"pc-accroche", title:"5.1 Le premier neurone (1957)", level:2 },
+    { id:"pc-intuition", title:"5.2 Décision binaire", level:2 },
+    { id:"pc-formalisation", title:"5.3 Formalisation", level:2 },
+    { id:"pc-algo", title:"5.4 Algorithme d'apprentissage", level:2 },
+    { id:"pc-exemple", title:"5.5 Exemple numérique", level:2 },
+    { id:"pc-python", title:"5.6 Perceptron from scratch", level:2 },
+  ]},
+  { id:"xor", title:"6. Limites : le problème XOR", level:1, children:[
+    { id:"xor-probleme", title:"6.1 Présentation du XOR", level:2 },
+    { id:"xor-python", title:"6.2 Le perceptron échoue", level:2 },
+  ]},
+  { id:"sklearn", title:"7. Comparaison scikit-learn", level:1, children:[
+    { id:"sk-python", title:"7.1 Perceptron sklearn", level:2 },
+    { id:"sk-compare", title:"7.2 Résultats comparés", level:2 },
+  ]},
+  { id:"synthese", title:"8. Synthèse du Jour 3", level:1, children:[
+    { id:"syn-tableau", title:"8.1 Régression vs Classification", level:2 },
+    { id:"syn-pipeline", title:"8.2 Pipeline du perceptron", level:2 },
+  ]},
+];
+
+// ─── THEME ────────────────────────────────────────────────────────────
+const THEMES = {
+  light: {
+    bg:"#ffffff", bgAlt:"#fafafa", bgCode:"#f3f4f6",
+    text:"#1a1a2e", textSecondary:"#4b5563", textMuted:"#9ca3af",
+    border:"#e5e7eb", borderLight:"#f3f4f6",
+    definitionBg:"#eff6ff", definitionBorder:"#3b82f6", definitionTitle:"#1e40af",
+    retenirBg:"#f0fdf4", retenirBorder:"#22c55e", retenirTitle:"#166534",
+    attentionBg:"#fff7ed", attentionBorder:"#f97316", attentionTitle:"#c2410c",
+    intuitionBg:"#faf5ff", intuitionBorder:"#a855f7", intuitionTitle:"#7e22ce",
+    exempleBg:"#ecfeff", exempleBorder:"#06b6d4", exempleTitle:"#0e7490",
+    codeBg:"#f8f9fa", codeBorder:"#d1d5db", codeTitle:"#1f2937",
+    sidebarBg:"#f8f9fa", sidebarText:"#374151", sidebarActive:"#3b82f6", sidebarActiveBg:"#eff6ff",
+    link:"#3b82f6", accent:"#3b82f6",
+  },
+  dark: {
+    bg:"#0d1117", bgAlt:"#161b22", bgCode:"#1c2128",
+    text:"#c9d1d9", textSecondary:"#8b949e", textMuted:"#6e7681",
+    border:"#30363d", borderLight:"#21262d",
+    definitionBg:"#0d1f3c", definitionBorder:"#3b82f6", definitionTitle:"#93bbfc",
+    retenirBg:"#0a1f0d", retenirBorder:"#22c55e", retenirTitle:"#86efac",
+    attentionBg:"#1f1206", attentionBorder:"#f97316", attentionTitle:"#fdba74",
+    intuitionBg:"#1a0d2e", intuitionBorder:"#a855f7", intuitionTitle:"#d8b4fe",
+    exempleBg:"#0a1a1f", exempleBorder:"#06b6d4", exempleTitle:"#67e8f9",
+    codeBg:"#161b22", codeBorder:"#30363d", codeTitle:"#c9d1d9",
+    sidebarBg:"#161b22", sidebarText:"#8b949e", sidebarActive:"#58a6ff", sidebarActiveBg:"#1c2541",
+    link:"#58a6ff", accent:"#58a6ff",
+  },
+};
+
+const ThemeContext = createContext();
+
+function ThemeProvider({ children }) {
+  const [mode, setMode] = useState("light");
+  const toggle = () => setMode((m) => (m === "light" ? "dark" : "light"));
+  return (
+    <ThemeContext.Provider value={{ mode, theme: THEMES[mode], toggle }}>
+      {children}
+    </ThemeContext.Provider>
+  );
+}
+
+function useTheme() {
+  return useContext(ThemeContext);
+}
+
+// ─── KATEX ────────────────────────────────────────────────────────────
+function M({ t, d }) {
+  if (!window.katex) return <code style={{ fontSize: "0.9em" }}>{t}</code>;
+  try {
+    const html = window.katex.renderToString(t, { throwOnError: false, displayMode: !!d });
+    if (d) return <div style={{ margin: "20px 0", textAlign: "center", overflowX: "auto" }} dangerouslySetInnerHTML={{ __html: html }} />;
+    return <span dangerouslySetInnerHTML={{ __html: html }} />;
+  } catch (e) {
+    return <code>{t}</code>;
+  }
+}
+
+// ─── COMPONENTS ───────────────────────────────────────────────────────
+function ThemeToggle() {
+  const { mode, toggle } = useTheme();
+  return (
+    <button
+      onClick={toggle}
+      style={{ background: "none", border: "none", cursor: "pointer", fontSize: "1.3rem", padding: "6px 10px", borderRadius: "8px" }}
+      aria-label="Basculer le thème"
+    >
+      {mode === "light" ? "🌙" : "☀️"}
+    </button>
+  );
+}
+
+const BOX_CONFIG = {
+  definition: { icon: "📐", label: "Définition", bg: "definitionBg", bd: "definitionBorder", tt: "definitionTitle" },
+  retenir: { icon: "⚡", label: "À retenir", bg: "retenirBg", bd: "retenirBorder", tt: "retenirTitle" },
+  attention: { icon: "⚠️", label: "Attention", bg: "attentionBg", bd: "attentionBorder", tt: "attentionTitle" },
+  intuition: { icon: "💡", label: "Intuition", bg: "intuitionBg", bd: "intuitionBorder", tt: "intuitionTitle" },
+  exemple: { icon: "📊", label: "Exemple", bg: "exempleBg", bd: "exempleBorder", tt: "exempleTitle" },
+  code: { icon: "🐍", label: "Code Python", bg: "codeBg", bd: "codeBorder", tt: "codeTitle" },
+};
+
+function Box({ type, title, children }) {
+  const { theme } = useTheme();
+  const cfg = BOX_CONFIG[type];
+  return (
+    <div style={{ background: theme[cfg.bg], borderLeft: `4px solid ${theme[cfg.bd]}`, borderRadius: "6px", padding: "16px 20px", margin: "20px 0" }}>
+      <div style={{ fontFamily: "'DM Sans',sans-serif", fontWeight: 700, color: theme[cfg.tt], marginBottom: "10px", fontSize: "0.95rem" }}>
+        {cfg.icon} {title || cfg.label}
+      </div>
+      <div style={{ color: theme.text, lineHeight: 1.7 }}>{children}</div>
+    </div>
+  );
+}
+
+function Sec({ id, title, level = 1, children }) {
+  const { theme } = useTheme();
+  const sizes = { 1: "1.7rem", 2: "1.3rem", 3: "1.1rem" };
+  const Tag = level === 1 ? "h2" : level === 2 ? "h3" : "h4";
+  return (
+    <section id={id} style={{ scrollMarginTop: "24px" }}>
+      <Tag style={{
+        fontFamily: "'DM Sans',sans-serif", fontSize: sizes[level], color: theme.text, fontWeight: 700,
+        borderBottom: level === 1 ? `2px solid ${theme.accent}` : "none",
+        paddingBottom: level === 1 ? "8px" : "0",
+        marginTop: level === 1 ? "48px" : "28px", marginBottom: "16px",
+      }}>
+        {title}
+      </Tag>
+      {children}
+    </section>
+  );
+}
+
+function PythonCell({ code: init, title = "Code Python" }) {
+  const { theme } = useTheme();
+  const [code, setCode] = useState(init);
+  const [output, setOutput] = useState("");
+  const [imgSrc, setImgSrc] = useState(null);
+  const [running, setRunning] = useState(false);
+  const [status, setStatus] = useState("idle");
+
+  const run = async () => {
+    setRunning(true);
+    setOutput("");
+    setImgSrc(null);
+    try {
+      if (!window._pyodideReady) {
+        setStatus("loading");
+        if (!window._pyodideLoading) {
+          const s = document.createElement("script");
+          s.src = "https://cdn.jsdelivr.net/pyodide/v0.24.1/full/pyodide.js";
+          document.head.appendChild(s);
+          window._pyodideLoading = new Promise((res) => { s.onload = res; });
+        }
+        await window._pyodideLoading;
+        window._pyodideReady = await window.loadPyodide({ indexURL: "https://cdn.jsdelivr.net/pyodide/v0.24.1/full/" });
+        await window._pyodideReady.loadPackage(["numpy", "matplotlib"]);
+        setStatus("ready");
+      }
+      const py = window._pyodideReady;
+      py.runPython("import sys,io,base64\nimport matplotlib;matplotlib.use('AGG')\nimport matplotlib.pyplot as plt\n_cap=io.StringIO();sys.stdout=_cap");
+      py.runPython(code);
+      setOutput(py.runPython("_cap.getvalue()"));
+      const hasPlot = py.runPython("_buf=io.BytesIO();_fig=plt.gcf();_h=len(_fig.get_axes())>0\nif _h:_fig.savefig(_buf,format='png',dpi=120,bbox_inches='tight',facecolor='white');_buf.seek(0)\nplt.close('all');_h");
+      if (hasPlot) {
+        setImgSrc("data:image/png;base64," + py.runPython("base64.b64encode(_buf.getvalue()).decode()"));
+      }
+    } catch (e) {
+      setOutput("Erreur : " + e.message);
+    }
+    setRunning(false);
+  };
+
+  const btnLabel = running ? (status === "loading" ? "⏳ Chargement..." : "⏳ Exécution...") : "▶ Exécuter";
+
+  return (
+    <div style={{ border: `1px solid ${theme.codeBorder}`, borderRadius: "8px", overflow: "hidden", margin: "20px 0" }}>
+      <div style={{
+        background: theme.codeBg, padding: "8px 16px", display: "flex", justifyContent: "space-between", alignItems: "center",
+        borderBottom: `1px solid ${theme.codeBorder}`, fontFamily: "'DM Sans',sans-serif", fontSize: "0.85rem", color: theme.codeTitle, fontWeight: 600,
+      }}>
+        <span>🐍 {title}</span>
+        <button onClick={run} disabled={running} style={{
+          background: "#22c55e", color: "white", border: "none", padding: "4px 14px", borderRadius: "4px",
+          cursor: "pointer", fontWeight: 600, fontSize: "0.85rem", opacity: running ? 0.6 : 1,
+        }}>
+          {btnLabel}
+        </button>
+      </div>
+      <textarea
+        value={code}
+        onChange={(e) => setCode(e.target.value)}
+        spellCheck={false}
+        style={{
+          width: "100%", minHeight: "100px", fontFamily: "'JetBrains Mono',monospace", fontSize: "0.82rem", lineHeight: 1.6,
+          background: theme.bgCode, color: theme.text, border: "none", padding: "14px", resize: "vertical", outline: "none", boxSizing: "border-box",
+        }}
+      />
+      {(output || imgSrc) && (
+        <div style={{
+          borderTop: `1px solid ${theme.codeBorder}`, padding: "12px 16px", background: theme.bgAlt,
+          fontFamily: "'JetBrains Mono',monospace", fontSize: "0.8rem", color: theme.textSecondary, whiteSpace: "pre-wrap",
+        }}>
+          {output && <pre style={{ margin: 0 }}>{output}</pre>}
+          {imgSrc && <img src={imgSrc} alt="Graphique" style={{ maxWidth: "100%", marginTop: "8px", borderRadius: "4px" }} />}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function P({ children, style = {} }) {
+  const { theme } = useTheme();
+  return (
+    <p style={{ color: theme.text, lineHeight: 1.8, marginBottom: "16px", fontFamily: "'Source Serif 4',Georgia,serif", fontSize: "1.05rem", ...style }}>
+      {children}
+    </p>
+  );
+}
+
+function B({ children }) {
+  return <strong style={{ fontWeight: 600 }}>{children}</strong>;
+}
+
+function DT({ rows, headers, max = 10 }) {
+  const { theme } = useTheme();
+  const show = rows.slice(0, max);
+  return (
+    <div style={{ overflowX: "auto", margin: "16px 0" }}>
+      <table style={{ borderCollapse: "collapse", width: "100%", fontFamily: "'JetBrains Mono',monospace", fontSize: "0.82rem" }}>
+        <thead>
+          <tr>
+            {headers.map((h, i) => (
+              <th key={i} style={{ padding: "8px 12px", borderBottom: `2px solid ${theme.accent}`, textAlign: "left", fontFamily: "'DM Sans',sans-serif", fontWeight: 600, color: theme.text, whiteSpace: "nowrap" }}>{h}</th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {show.map((row, i) => (
+            <tr key={i} style={{ background: i % 2 === 0 ? "transparent" : theme.bgAlt }}>
+              {row.map((c, j) => (
+                <td key={j} style={{ padding: "6px 12px", borderBottom: `1px solid ${theme.borderLight}`, color: theme.textSecondary }}>{c}</td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+// ─── SIDEBAR ──────────────────────────────────────────────────────────
+function Sidebar({ activeId }) {
+  const { theme } = useTheme();
+  const [collapsed, setCollapsed] = useState({});
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const [progress, setProgress] = useState(0);
+
+  useEffect(() => {
+    const fn = () => {
+      const h = document.documentElement;
+      setProgress(Math.min(1, Math.max(0, h.scrollTop / (h.scrollHeight - h.clientHeight))));
+    };
+    window.addEventListener("scroll", fn, { passive: true });
+    return () => window.removeEventListener("scroll", fn);
+  }, []);
+
+  const scrollTo = (id) => {
+    document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
+    setMobileOpen(false);
+  };
+
+  const tog = (id) => setCollapsed((c) => ({ ...c, [id]: !c[id] }));
+
+  return (
+    <>
+      <button
+        onClick={() => setMobileOpen(!mobileOpen)}
+        className="mob-btn"
+        style={{ display: "none", position: "fixed", top: 10, left: 10, zIndex: 1001, background: theme.bgAlt, border: `1px solid ${theme.border}`, borderRadius: "8px", padding: "8px 10px", cursor: "pointer", fontSize: "1.2rem" }}
+      >
+        {mobileOpen ? "✕" : "☰"}
+      </button>
+
+      <aside className="sidebar-el" style={{
+        position: "fixed", left: 0, top: 0, width: "280px", height: "100vh",
+        background: theme.sidebarBg, borderRight: `1px solid ${theme.border}`, zIndex: 1000, overflowY: "hidden",
+      }}>
+        <div style={{ display: "flex", flexDirection: "column", height: "100%", position: "relative" }}>
+          {/* Progress bar */}
+          <div style={{ position: "absolute", left: 0, top: 0, width: "3px", height: "100%", background: theme.borderLight, zIndex: 1 }}>
+            <div style={{ width: "100%", height: `${progress * 100}%`, background: theme.accent, transition: "height 0.1s" }} />
+          </div>
+
+          {/* Header */}
+          <div style={{ padding: "20px 20px 14px", borderBottom: `1px solid ${theme.border}` }}>
+            <a href="index.html" style={{ display: "inline-flex", alignItems: "center", gap: "4px", fontFamily: "'DM Sans',sans-serif", fontSize: "0.75rem", color: theme.textMuted, textDecoration: "none", marginBottom: "8px" }}>← Accueil</a>
+            <div style={{ fontFamily: "'DM Sans',sans-serif", fontWeight: 700, fontSize: "1rem", color: theme.accent }}>Maths IA</div>
+            <div style={{ fontFamily: "'DM Sans',sans-serif", fontSize: "0.78rem", color: theme.textMuted, marginTop: "2px" }}>Jour 3 — Probabilités & classification</div>
+            <div style={{ display: "flex", gap: "4px", marginTop: "10px" }}>
+              {[1, 2, 3, 4].map((j) => (
+                j === 3 ? <div key={j} style={{
+                  flex: 1, textAlign: "center", padding: "3px 0", borderRadius: "4px",
+                  fontFamily: "'DM Sans',sans-serif", fontSize: "0.72rem", fontWeight: 700,
+                  background: theme.accent, color: "#fff",
+                  border: `1px solid ${theme.accent}`,
+                }}>
+                  J{j}
+                </div>
+                : <a key={j} href={`jour${j}.html`} style={{
+                  flex: 1, textAlign: "center", padding: "3px 0", borderRadius: "4px",
+                  fontFamily: "'DM Sans',sans-serif", fontSize: "0.72rem", fontWeight: 400,
+                  background: "transparent", color: theme.textMuted, textDecoration: "none",
+                  cursor: "pointer", border: `1px solid ${theme.border}`,
+                }}>
+                  J{j}
+                </a>
+              ))}
+            </div>
+          </div>
+
+          {/* Nav */}
+          <nav style={{ flex: 1, overflowY: "auto", padding: "8px 0" }}>
+            {SECTIONS.map((sec) => {
+              const isOpen = !collapsed[sec.id];
+              const isActive = activeId === sec.id || (sec.children && sec.children.some((c) => c.id === activeId));
+              return (
+                <div key={sec.id}>
+                  <div
+                    onClick={() => { scrollTo(sec.id); if (sec.children) tog(sec.id); }}
+                    style={{
+                      display: "flex", alignItems: "center", gap: "6px", padding: "7px 14px 7px 18px", cursor: "pointer",
+                      background: isActive ? theme.sidebarActiveBg : "transparent",
+                      borderRight: isActive ? `3px solid ${theme.sidebarActive}` : "3px solid transparent",
+                      fontFamily: "'DM Sans',sans-serif", fontSize: "0.8rem", fontWeight: isActive ? 600 : 400,
+                      color: isActive ? theme.sidebarActive : theme.sidebarText,
+                    }}
+                  >
+                    {sec.children && (
+                      <span style={{ fontSize: "0.55rem", transition: "transform 0.2s", transform: isOpen ? "rotate(90deg)" : "rotate(0)", display: "inline-block" }}>▶</span>
+                    )}
+                    <span style={{ flex: 1 }}>{sec.title}</span>
+                  </div>
+                  {sec.children && isOpen && sec.children.map((ch) => {
+                    const ca = activeId === ch.id;
+                    return (
+                      <div key={ch.id} onClick={() => scrollTo(ch.id)} style={{
+                        padding: "4px 14px 4px 42px", cursor: "pointer", fontFamily: "'DM Sans',sans-serif",
+                        fontSize: "0.76rem", color: ca ? theme.sidebarActive : theme.textMuted, fontWeight: ca ? 600 : 400,
+                      }}>
+                        {ch.title}
+                      </div>
+                    );
+                  })}
+                </div>
+              );
+            })}
+          </nav>
+
+          {/* Footer */}
+          <div style={{ padding: "14px", borderTop: `1px solid ${theme.border}`, fontSize: "0.68rem", color: theme.textMuted, fontFamily: "'DM Sans',sans-serif", textAlign: "center", lineHeight: 1.6 }}>
+            © 2025 Mohamed EL AFRIT<br />
+            <a href="https://www.mohamedelafrit.com" style={{ color: theme.link, textDecoration: "none" }}>www.mohamedelafrit.com</a><br />
+            <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.fr" style={{ color: theme.link, textDecoration: "none" }}>CC BY-NC-SA 4.0</a>
+          </div>
+        </div>
+      </aside>
+
+      {mobileOpen && <div onClick={() => setMobileOpen(false)} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.4)", zIndex: 999 }} />}
+    </>
+  );
+}
+
+// ─── PYTHON CODE CONSTANTS ────────────────────────────────────────────
+const DATA_PY = `data = np.array([
+    [ 0,2,3, 150, 80,28.0],[ 1,1,2,  50,100,26.5],[ 1,3,4, 800, 40,35.0],
+    [ 2,2,3, 200, 60,32.0],[ 2,4,4,3000, 20,38.0],[ 0,1,1,  30, 50,25.0],
+    [ 3,3,3, 100, 80,34.5],[ 1,5,4,  15,100,42.0],[ 4,3,3, 500, 60,38.5],
+    [ 5,4,4,1200, 40,44.0],[ 5,3,3, 300, 80,41.0],[ 6,5,4,2000, 30,48.0],
+    [ 6,4,3, 150, 90,43.5],[ 7,5,4, 800, 50,50.0],[ 7,3,2,  80, 70,39.0],
+    [ 4,6,5, 400,100,47.0],[ 8,4,4,1500, 40,51.0],[ 5,2,3,4000, 10,40.0],
+    [ 9,5,4, 600, 60,52.0],[10,6,4,2500, 30,55.0],[10,4,3, 200, 80,48.5],
+    [11,5,5,1000, 50,58.0],[12,7,4,3500, 20,60.0],[ 9,3,3,  60, 90,42.0],
+    [13,6,4, 800, 70,62.0],[11,4,4,5000, 10,54.0],[15,8,4,1200, 50,65.0],
+    [17,6,5,2000, 40,68.0],[20,7,4, 500, 60,72.0],[18,5,3, 100, 80,58.0]])`;
+
+const DATA_PY_SMALL = `data = np.array([
+    [ 0,2,28.0],[ 1,1,26.5],[ 1,3,35.0],[ 2,2,32.0],[ 2,4,38.0],[ 0,1,25.0],
+    [ 3,3,34.5],[ 1,5,42.0],[ 4,3,38.5],[ 5,4,44.0],[ 5,3,41.0],[ 6,5,48.0],
+    [ 6,4,43.5],[ 7,5,50.0],[ 7,3,39.0],[ 4,6,47.0],[ 8,4,51.0],[ 5,2,40.0],
+    [ 9,5,52.0],[10,6,55.0],[10,4,48.5],[11,5,58.0],[12,7,60.0],[ 9,3,42.0],
+    [13,6,62.0],[11,4,54.0],[15,8,65.0],[17,6,68.0],[20,7,72.0],[18,5,58.0]])`;
+
+// ─── CONTENT ──────────────────────────────────────────────────────────
+function Content() {
+  const { theme } = useTheme();
+
+  return (
+    <>
+      {/* ═══ SECTION 1 ═══ */}
+      <Sec id="transition" title="1. De la régression à la classification" level={1}>
+        <Sec id="trans-question" title="1.1 La nouvelle question" level={2}>
+          <P>Au Jour 1 et 2, nous avons prédit une valeur <B>continue</B> : le salaire exact. Aujourd'hui, nous changeons de question :</P>
+          <Box type="intuition" title="La question du Jour 3">
+            <P style={{ marginBottom: 0 }}>Au lieu de prédire « ce développeur gagnera <B>47 352 €</B> », peut-on prédire « ce développeur gagne-t-il <B>plus ou moins de 45 000 €</B> ? » C'est un problème de <B>classification binaire</B> : la réponse est oui (classe 1) ou non (classe 0).</P>
+          </Box>
+        </Sec>
+
+        <Sec id="trans-binaire" title="1.2 Classification binaire" level={2}>
+          <Box type="definition" title="Classification binaire">
+            <P style={{ marginBottom: 8 }}>Un problème de <B>classification binaire</B> consiste à prédire une variable cible <M t={"y \\in \\{0, 1\\}"} /> à partir de features <M t={"\\mathbf{x}"} /> :</P>
+            <M d t={"f : \\mathbb{R}^p \\longrightarrow \\{0, 1\\}"} />
+            <P style={{ marginBottom: 0 }}>
+              {"\u2022"} <M t={"y = 0"} /> : classe négative (salaire ≤ 45k€)<br />
+              {"\u2022"} <M t={"y = 1"} /> : classe positive (salaire {">"} 45k€)
+            </P>
+          </Box>
+          <P>On passe d'une <B>régression</B> (prédire un nombre) à une <B>classification</B> (prédire une catégorie).</P>
+        </Sec>
+
+        <Sec id="trans-python" title="1.3 Visualiser les deux classes" level={2}>
+          <PythonCell title="Créer salaire_eleve et visualiser" code={`import numpy as np
+import matplotlib.pyplot as plt
+
+${DATA_PY}
+
+experience = data[:, 0]; salaire = data[:, 5]
+salaire_eleve = (salaire > 45).astype(int)
+
+print(f"Classe 0 (<=45k) : {np.sum(salaire_eleve==0)} dev")
+print(f"Classe 1 (>45k)  : {np.sum(salaire_eleve==1)} dev")
+
+fig, ax = plt.subplots(figsize=(8, 5))
+colors = ['#e74c3c' if y==0 else '#2ecc71' for y in salaire_eleve]
+ax.scatter(experience, salaire, c=colors, s=60, edgecolors='white', lw=0.5)
+ax.axhline(45, color='gray', ls='--', alpha=0.5, label='Seuil 45k')
+ax.set_xlabel("Experience"); ax.set_ylabel("Salaire (k EUR)")
+ax.set_title("Classification binaire : salaire > 45k ?")
+ax.legend(); ax.grid(True, alpha=0.3)
+plt.tight_layout(); plt.show()`} />
+        </Sec>
+      </Sec>
+
+      {/* ═══ SECTION 2 ═══ */}
+      <Sec id="proba" title="2. Rappels de probabilités utiles" level={1}>
+        <Sec id="proba-event" title="2.1 Probabilité d'un événement" level={2}>
+          <Box type="definition" title="Probabilité">
+            <P style={{ marginBottom: 8 }}>La <B>probabilité</B> d'un événement <M t={"A"} /> est un nombre entre 0 et 1 :</P>
+            <M d t={"P(A) \\in [0, 1]"} />
+            <P style={{ marginBottom: 0 }}><M t={"P(A) = 0"} /> : impossible. <M t={"P(A) = 1"} /> : certain. <M t={"P(A) = 0{,}5"} /> : une chance sur deux.</P>
+          </Box>
+          <P>En pratique, on <B>estime</B> les probabilités à partir des données. Si 15 développeurs sur 30 gagnent plus de 45k€ :</P>
+          <M d t={"P(\\text{salaire\\_eleve} = 1) = \\frac{15}{30} = 0{,}5"} />
+        </Sec>
+
+        <Sec id="proba-variable" title="2.2 Variable aléatoire discrète" level={2}>
+          <Box type="definition" title="Variable aléatoire discrète">
+            <P style={{ marginBottom: 0 }}>Une <B>variable aléatoire discrète</B> <M t={"Y"} /> prend un nombre fini de valeurs. Ici <M t={"Y = \\texttt{salaire\\_eleve}"} /> prend les valeurs <M t={"\\{0, 1\\}"} />.</P>
+          </Box>
+          <Box type="intuition" title="Analogie : le dé">
+            <P style={{ marginBottom: 0 }}>Un dé à 6 faces est une variable aléatoire discrète prenant les valeurs <M t={"\\{1,2,3,4,5,6\\}"} />, chacune avec probabilité <M t={"1/6"} />. Notre variable <M t={"Y"} /> est un « dé à 2 faces » (pile ou face).</P>
+          </Box>
+        </Sec>
+
+        <Sec id="proba-esperance" title="2.3 Espérance et variance (intuition)" level={2}>
+          <Box type="definition" title="Espérance">
+            <P style={{ marginBottom: 0 }}>L'<B>espérance</B> <M t={"E[Y]"} /> est la « valeur moyenne ». Pour notre variable binaire : <M t={"E[Y] = P(Y=1) = 0{,}5"} />.</P>
+          </Box>
+          <Box type="definition" title="Variance">
+            <P style={{ marginBottom: 0 }}>La <B>variance</B> <M t={"\\text{Var}(Y) = p(1-p)"} /> mesure la dispersion. Ici : <M t={"0{,}5 \\times 0{,}5 = 0{,}25"} />.</P>
+          </Box>
+        </Sec>
+
+        <Sec id="proba-cond" title="2.4 Probabilité conditionnelle" level={2}>
+          <Box type="definition" title="Probabilité conditionnelle">
+            <P style={{ marginBottom: 8 }}>La probabilité de <M t={"A"} /> <B>sachant</B> <M t={"B"} /> :</P>
+            <M d t={"P(A \\mid B) = \\frac{P(A \\cap B)}{P(B)}"} />
+            <P style={{ marginBottom: 0 }}>Exemple : « Quelle est la probabilité de gagner plus de 45k€ <B>sachant</B> qu'on a plus de 5 ans d'expérience ? »</P>
+          </Box>
+        </Sec>
+
+        <Sec id="proba-python" title="2.5 Probabilités empiriques" level={2}>
+          <PythonCell title="Calculer des probabilités sur le dataset" code={`import numpy as np
+
+${DATA_PY}
+
+exp = data[:, 0]; sal = data[:, 5]
+y = (sal > 45).astype(int)
+
+p1 = np.mean(y)
+print(f"P(salaire > 45k) = {np.sum(y)}/{len(y)} = {p1:.2f}")
+
+# P(salaire > 45k | experience > 5)
+mask = exp > 5
+p_cond = np.mean(y[mask])
+print(f"P(sal>45k | exp>5) = {np.sum(y[mask])}/{np.sum(mask)} = {p_cond:.2f}")
+
+# P(salaire > 45k | experience <= 5)
+p_low = np.mean(y[exp <= 5])
+print(f"P(sal>45k | exp<=5) = {p_low:.2f}")
+
+print(f"\\nAvoir >5 ans d'exp multiplie la proba par {p_cond/max(p_low,0.01):.1f}x")`} />
+        </Sec>
+      </Sec>
+
+      {/* ═══ SECTION 3 ═══ */}
+      <Sec id="classif" title="3. Classification linéaire" level={1}>
+        <Sec id="cl-intuition" title="3.1 Tracer une frontière" level={2}>
+          <Box type="intuition" title="Séparer les pommes des oranges">
+            <P style={{ marginBottom: 0 }}>Imaginez un panier de fruits mélangés. Vous posez une <B>règle</B> au milieu pour séparer pommes et oranges. En classification, cette ligne s'appelle la <B>frontière de décision</B>.</P>
+          </Box>
+        </Sec>
+
+        <Sec id="cl-formalisation" title="3.2 Fonction de décision" level={2}>
+          <Box type="definition" title="Classifieur linéaire">
+            <P style={{ marginBottom: 8 }}>Un <B>classifieur linéaire</B> utilise une fonction de décision :</P>
+            <M d t={"g(\\mathbf{x}) = \\mathbf{w}^T \\mathbf{x} + b = w_1 x_1 + w_2 x_2 + \\cdots + w_p x_p + b"} />
+            <P style={{ marginBottom: 0 }}>Le signe de <M t={"g(\\mathbf{x})"} /> détermine la classe prédite.</P>
+          </Box>
+        </Sec>
+
+        <Sec id="cl-regle" title="3.3 Règle de décision" level={2}>
+          <M d t={"\\hat{y} = \\begin{cases} 1 & \\text{si } g(\\mathbf{x}) > 0 \\\\[4pt] 0 & \\text{si } g(\\mathbf{x}) \\leq 0 \\end{cases}"} />
+          <Box type="retenir">
+            <P style={{ marginBottom: 0 }}>La classification linéaire = régression (produit scalaire + biais) + on regarde le <B>signe</B>.</P>
+          </Box>
+        </Sec>
+
+        <Sec id="cl-python" title="3.4 Visualiser les classes en 2D" level={2}>
+          <PythonCell title="Nuage 2D coloré par classe" code={`import numpy as np
+import matplotlib.pyplot as plt
+
+${DATA_PY}
+exp = data[:,0]; lang = data[:,1]; sal = data[:,5]
+y = (sal > 45).astype(int)
+
+fig, ax = plt.subplots(figsize=(8, 6))
+for c, color, label in [(0,'#e74c3c','<= 45k'),(1,'#2ecc71','> 45k')]:
+    mask = y == c
+    ax.scatter(exp[mask], lang[mask], c=color, s=70, label=label, edgecolors='white', lw=0.5)
+ax.set_xlabel("Experience"); ax.set_ylabel("Nb langages")
+ax.set_title("Experience vs Langages (colore par salaire)")
+ax.legend(); ax.grid(True, alpha=0.3)
+plt.tight_layout(); plt.show()`} />
+        </Sec>
+      </Sec>
+
+      {/* ═══ SECTION 4 ═══ */}
+      <Sec id="frontiere" title="4. Frontière de décision et hyperplan" level={1}>
+        <Sec id="fr-intuition" title="4.1 Droite, plan, hyperplan" level={2}>
+          <Box type="intuition">
+            <P style={{ marginBottom: 0 }}>Avec 2 features, la frontière est une <B>droite</B>. Avec 3 features, un <B>plan</B>. Avec <M t={"p"} /> features, un <B>hyperplan</B>.</P>
+          </Box>
+        </Sec>
+
+        <Sec id="fr-formalisation" title="4.2 Formalisation" level={2}>
+          <Box type="definition" title="Hyperplan de décision">
+            <P style={{ marginBottom: 8 }}>La <B>frontière de décision</B> est l'ensemble des points tels que :</P>
+            <M d t={"\\mathbf{w}^T \\mathbf{x} + b = 0"} />
+            <P style={{ marginBottom: 0 }}>C'est l'endroit où le modèle « hésite » entre les deux classes.</P>
+          </Box>
+          <P>Avec 2 features (<M t={"x_1"} /> = expérience, <M t={"x_2"} /> = langages) :</P>
+          <M d t={"w_1 x_1 + w_2 x_2 + b = 0 \\quad \\Longleftrightarrow \\quad x_2 = -\\frac{w_1}{w_2} x_1 - \\frac{b}{w_2}"} />
+          <Box type="retenir">
+            <P style={{ marginBottom: 0 }}>La frontière est une <B>droite</B> qu'on peut tracer sur le graphique !</P>
+          </Box>
+        </Sec>
+
+        <Sec id="fr-python" title="4.3 Tracer la frontière" level={2}>
+          <PythonCell title="Frontière de décision manuelle" code={`import numpy as np
+import matplotlib.pyplot as plt
+
+${DATA_PY_SMALL}
+exp=data[:,0]; lang=data[:,1]; sal=data[:,2]
+y = (sal > 45).astype(int)
+
+w1, w2, b = 0.5, 0.8, -4.0  # poids manuels
+
+fig, ax = plt.subplots(figsize=(8, 6))
+for c, color, label in [(0,'#e74c3c','<= 45k'),(1,'#2ecc71','> 45k')]:
+    mask = y == c
+    ax.scatter(exp[mask], lang[mask], c=color, s=70, label=label, edgecolors='white', lw=0.5)
+
+x1_line = np.linspace(-1, 21, 100)
+x2_line = -(w1/w2) * x1_line - b/w2
+ax.plot(x1_line, x2_line, 'k--', lw=2, label='Frontiere')
+ax.set_xlim(-1, 21); ax.set_ylim(0, 9)
+ax.set_xlabel("Experience"); ax.set_ylabel("Nb langages")
+ax.set_title("Frontiere de decision (poids manuels)")
+ax.legend(); ax.grid(True, alpha=0.3)
+plt.tight_layout(); plt.show()`} />
+        </Sec>
+      </Sec>
+
+      {/* ═══ SECTION 5 ═══ */}
+      <Sec id="perceptron" title="5. Le perceptron" level={1}>
+        <Sec id="pc-accroche" title="5.1 Le premier neurone artificiel (1957)" level={2}>
+          <P>Le <B>perceptron</B>, inventé par Frank Rosenblatt en 1957, est le premier modèle de neurone artificiel. C'est l'ancêtre des réseaux de neurones modernes.</P>
+        </Sec>
+
+        <Sec id="pc-intuition" title="5.2 Un neurone qui prend une décision binaire" level={2}>
+          <Box type="intuition" title="Le neurone biologique">
+            <P style={{ marginBottom: 0 }}>Un neurone biologique reçoit des signaux. Si la somme dépasse un <B>seuil</B>, il s'active. Le perceptron fait pareil : somme pondérée des entrées, et si elle dépasse le seuil, il prédit classe 1.</P>
+          </Box>
+        </Sec>
+
+        <Sec id="pc-formalisation" title="5.3 Formalisation" level={2}>
+          <Box type="definition" title="Le perceptron">
+            <M d t={"\\hat{y} = \\text{signe}(\\mathbf{w}^T \\mathbf{x} + b)"} />
+            <P style={{ marginBottom: 8 }}>avec la <B>fonction signe</B> :</P>
+            <M d t={"\\text{signe}(z) = \\begin{cases} 1 & \\text{si } z > 0 \\\\ 0 & \\text{si } z \\leq 0 \\end{cases}"} />
+          </Box>
+        </Sec>
+
+        <Sec id="pc-algo" title="5.4 Algorithme d'apprentissage" level={2}>
+          <Box type="definition" title="Règle de mise à jour du perceptron">
+            <P style={{ marginBottom: 8 }}>Pour chaque observation <M t={"(\\mathbf{x}_i, y_i)"} /> :</P>
+            <P style={{ marginBottom: 8 }}>1. <B>Prédire</B> : <M t={"\\hat{y}_i = \\text{signe}(\\mathbf{w}^T \\mathbf{x}_i + b)"} /></P>
+            <P style={{ marginBottom: 8 }}>2. <B>Si erreur</B>, mettre à jour :</P>
+            <M d t={"\\mathbf{w} \\leftarrow \\mathbf{w} + \\alpha \\cdot (y_i - \\hat{y}_i) \\cdot \\mathbf{x}_i"} />
+            <M d t={"b \\leftarrow b + \\alpha \\cdot (y_i - \\hat{y}_i)"} />
+            <P style={{ marginBottom: 0 }}>3. <B>Répéter</B> sur tout le dataset (plusieurs époques).</P>
+          </Box>
+          <Box type="retenir">
+            <P style={{ marginBottom: 0 }}>Si le perceptron se trompe, il ajuste ses poids vers la bonne réponse. S'il ne se trompe pas, il ne change rien. C'est un apprentissage <B>par correction d'erreurs</B>.</P>
+          </Box>
+        </Sec>
+
+        <Sec id="pc-exemple" title="5.5 Exemple numérique : 3 itérations" level={2}>
+          <Box type="exemple" title="3 itérations du perceptron">
+            <P style={{ marginBottom: 8 }}>Données simplifiées, <M t={"\\alpha = 1"} /> :</P>
+            <DT headers={["i", "x\u2081", "x\u2082", "y", "w", "b", "g(x)", "\u0177", "Erreur ?", "Mise à jour"]} max={5} rows={[
+              ["1", "2", "3", "1", "(0,0)", "0", "0", "0", "Oui", "w=(2,3), b=1"],
+              ["2", "1", "1", "0", "(2,3)", "1", "6", "1", "Oui", "w=(1,2), b=0"],
+              ["3", "3", "5", "1", "(1,2)", "0", "13", "1", "Non", "inchangé"],
+            ]} />
+          </Box>
+        </Sec>
+
+        <Sec id="pc-python" title="5.6 Perceptron from scratch" level={2}>
+          <PythonCell title="Perceptron from scratch + frontière" code={`import numpy as np
+import matplotlib.pyplot as plt
+
+${DATA_PY_SMALL}
+X = data[:, :2]; y = (data[:, 2] > 45).astype(int)
+n = len(y)
+
+# Entrainement
+w = np.zeros(2); b = 0.0; alpha = 0.1
+for epoch in range(100):
+    errs = 0
+    for i in range(n):
+        z = w @ X[i] + b
+        yp = 1 if z > 0 else 0
+        if yp != y[i]:
+            err = y[i] - yp
+            w = w + alpha * err * X[i]
+            b = b + alpha * err
+            errs += 1
+    if epoch < 5 or epoch % 20 == 19:
+        acc = np.mean([(1 if (w@X[j]+b)>0 else 0)==y[j] for j in range(n)])
+        print(f"Epoch {epoch+1:3d} : erreurs={errs}, accuracy={acc:.0%}")
+
+print(f"\\nPoids : w=[{w[0]:.3f}, {w[1]:.3f}], b={b:.3f}")
+
+# Graphique
+fig, ax = plt.subplots(figsize=(8, 6))
+for c, color, label in [(0,'#e74c3c','<= 45k'),(1,'#2ecc71','> 45k')]:
+    mask = y == c
+    ax.scatter(X[mask,0], X[mask,1], c=color, s=70, label=label, edgecolors='white', lw=0.5)
+
+if abs(w[1]) > 1e-6:
+    x1_line = np.linspace(-1, 21, 100)
+    x2_line = -(w[0]/w[1]) * x1_line - b/w[1]
+    ax.plot(x1_line, x2_line, 'k--', lw=2, label='Frontiere perceptron')
+
+ax.set_xlim(-1, 21); ax.set_ylim(0, 9)
+ax.set_xlabel("Experience"); ax.set_ylabel("Nb langages")
+ax.set_title("Perceptron : frontiere apprise")
+ax.legend(); ax.grid(True, alpha=0.3)
+plt.tight_layout(); plt.show()`} />
+        </Sec>
+      </Sec>
+
+      {/* ═══ SECTION 6 ═══ */}
+      <Sec id="xor" title="6. Limites du perceptron : le problème XOR" level={1}>
+        <Sec id="xor-probleme" title="6.1 Le problème XOR" level={2}>
+          <P>Le XOR (« ou exclusif ») : (0,0) et (1,1) sont classe 0, (0,1) et (1,0) sont classe 1. Aucune <B>droite</B> ne peut séparer ces deux classes.</P>
+          <Box type="attention" title="Limite fondamentale du perceptron">
+            <P style={{ marginBottom: 0 }}>Le perceptron ne résout que les problèmes <B>linéairement séparables</B>. Le XOR ne l'est pas. C'est cette limite qui a conduit aux <B>réseaux de neurones multicouches</B> (Jour 4).</P>
+          </Box>
+        </Sec>
+
+        <Sec id="xor-python" title="6.2 Le perceptron échoue sur XOR" level={2}>
+          <PythonCell title="Échec du perceptron sur XOR" code={`import numpy as np
+import matplotlib.pyplot as plt
+
+X_xor = np.array([[0,0],[0,1],[1,0],[1,1]])
+y_xor = np.array([0, 1, 1, 0])
+
+w = np.zeros(2); b = 0.0; alpha = 0.1
+errors_hist = []
+for epoch in range(200):
+    errs = 0
+    for i in range(4):
+        z = w @ X_xor[i] + b
+        yp = 1 if z > 0 else 0
+        if yp != y_xor[i]:
+            err = y_xor[i] - yp
+            w += alpha * err * X_xor[i]
+            b += alpha * err
+            errs += 1
+    errors_hist.append(errs)
+
+acc = np.mean([(1 if (w@X_xor[i]+b)>0 else 0)==y_xor[i] for i in range(4)])
+print(f"Accuracy apres 200 epoques : {acc:.0%}")
+print("Le perceptron ne converge JAMAIS sur XOR !")
+
+fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 5))
+for c, color, label in [(0,'#e74c3c','Classe 0'),(1,'#2ecc71','Classe 1')]:
+    mask = y_xor == c
+    ax1.scatter(X_xor[mask,0], X_xor[mask,1], c=color, s=200, label=label, edgecolors='black', lw=2, zorder=3)
+ax1.set_xlim(-0.5, 1.5); ax1.set_ylim(-0.5, 1.5)
+ax1.set_title("Probleme XOR (non lineairement separable)")
+ax1.legend(); ax1.grid(True, alpha=0.3)
+
+ax2.plot(errors_hist, 'r-', lw=1)
+ax2.set_xlabel("Epoque"); ax2.set_ylabel("Erreurs")
+ax2.set_title("Le perceptron oscille sans converger")
+ax2.grid(True, alpha=0.3)
+plt.tight_layout(); plt.show()
+print("\\nSolution : reseau multicouche (Jour 4) !")`} />
+        </Sec>
+      </Sec>
+
+      {/* ═══ SECTION 7 ═══ */}
+      <Sec id="sklearn" title="7. Comparaison avec scikit-learn" level={1}>
+        <Sec id="sk-python" title="7.1 Perceptron scikit-learn" level={2}>
+          <PythonCell title="Perceptron sklearn vs from scratch" code={`import numpy as np
+from sklearn.linear_model import Perceptron as SkPerceptron
+
+${DATA_PY_SMALL}
+X = data[:, :2]; y = (data[:, 2] > 45).astype(int)
+
+# scikit-learn
+clf = SkPerceptron(max_iter=100, eta0=0.1, random_state=42)
+clf.fit(X, y)
+acc_sk = clf.score(X, y)
+
+# From scratch
+w = np.zeros(2); b = 0.0
+for _ in range(100):
+    for i in range(len(y)):
+        z = w @ X[i] + b
+        yp = 1 if z > 0 else 0
+        if yp != y[i]:
+            err = y[i] - yp
+            w += 0.1 * err * X[i]
+            b += 0.1 * err
+acc_fs = np.mean([(1 if (w@X[i]+b)>0 else 0)==y[i] for i in range(len(y))])
+
+print("=== Comparaison ===")
+print(f"{'Methode':<20} | {'w1':>8} | {'w2':>8} | {'b':>8} | {'Acc':>6}")
+print("-" * 60)
+print(f"{'From scratch':<20} | {w[0]:>8.3f} | {w[1]:>8.3f} | {b:>8.3f} | {acc_fs:>5.0%}")
+print(f"{'scikit-learn':<20} | {clf.coef_[0][0]:>8.3f} | {clf.coef_[0][1]:>8.3f} | {clf.intercept_[0]:>8.3f} | {acc_sk:>5.0%}")`} />
+        </Sec>
+
+        <Sec id="sk-compare" title="7.2 Résultats comparés" level={2}>
+          <Box type="retenir">
+            <P style={{ marginBottom: 0 }}>Les deux méthodes trouvent des poids différents mais des accuracies similaires. C'est normal : il existe <B>plusieurs frontières</B> possibles. Le perceptron trouve <em>une</em> solution, pas nécessairement la « meilleure ».</P>
+          </Box>
+        </Sec>
+      </Sec>
+
+      {/* ═══ SECTION 8 ═══ */}
+      <Sec id="synthese" title="8. Synthèse du Jour 3" level={1}>
+        <Sec id="syn-tableau" title="8.1 Régression vs Classification" level={2}>
+          <DT headers={["", "Régression (J1-J2)", "Classification (J3)"]} max={10} rows={[
+            ["Question", "Combien ?", "Quelle classe ?"],
+            ["Sortie y", "Nombre réel", "Étiquette {0, 1}"],
+            ["Modèle", "ŷ = wᵀx + b", "ŷ = signe(wᵀx + b)"],
+            ["Erreur", "MSE", "Accuracy"],
+            ["Optimisation", "Gradient descent", "Correction d'erreurs"],
+            ["Frontière", "Droite de régression", "Hyperplan"],
+            ["sklearn", "LinearRegression", "Perceptron"],
+          ]} />
+        </Sec>
+
+        <Sec id="syn-pipeline" title="8.2 Pipeline du perceptron" level={2}>
+          <Box type="retenir" title="Pipeline complet">
+            <div style={{ textAlign: "center", fontFamily: "'DM Sans',sans-serif", fontSize: "1rem", padding: "12px 0" }}>
+              <B>Features</B> <M t={"\\mathbf{x}"} /> → <B>Score</B> <M t={"\\mathbf{w}^T\\mathbf{x}+b"} /> → <B>Signe</B> → <B>Classe</B> <M t={"\\hat{y} \\in \\{0,1\\}"} />
+            </div>
+            <P style={{ marginBottom: 0 }}>Au <B>Jour 4</B>, nous remplacerons la fonction signe par des <B>fonctions d'activation</B> plus souples (sigmoïde, ReLU) et nous empilerons plusieurs neurones pour former un <B>réseau de neurones</B>.</P>
+          </Box>
+        </Sec>
+
+      </Sec>
+    </>
+  );
+}
+
+// ─── ROOT ─────────────────────────────────────────────────────────────
+function Jour3Page() {
+  const [activeId, setActiveId] = useState("");
+
+  useEffect(() => {
+    const ids = [];
+    SECTIONS.forEach((s) => {
+      ids.push(s.id);
+      if (s.children) s.children.forEach((c) => ids.push(c.id));
+    });
+    const obs = new IntersectionObserver(
+      (entries) => {
+        const vis = entries.filter((e) => e.isIntersecting).sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
+        if (vis.length > 0) setActiveId(vis[0].target.id);
+      },
+      { rootMargin: "-10% 0px -80% 0px" }
+    );
+    ids.forEach((id) => {
+      const el = document.getElementById(id);
+      if (el) obs.observe(el);
+    });
+    return () => obs.disconnect();
+  }, []);
+
+  return (
+    <ThemeProvider>
+      <Shell activeId={activeId} />
+    </ThemeProvider>
+  );
+}
+
+function Shell({ activeId }) {
+  const { theme } = useTheme();
+
+  return (
+    <div style={{ background: theme.bg, minHeight: "100vh", transition: "background 0.3s" }}>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,700;1,400&family=JetBrains+Mono:wght@400;500;700&family=Source+Serif+4:ital,wght@0,400;0,600;0,700;1,400&display=swap');
+        * { box-sizing: border-box; }
+        body { margin: 0; padding: 0; }
+        .main-content { margin-left: 280px; max-width: 860px; padding: 32px 48px 80px; }
+        @media (max-width: 768px) {
+          .sidebar-el { transform: translateX(-100%); }
+          .mob-btn { display: block !important; }
+          .main-content { margin-left: 0; padding: 20px 16px 60px; }
+        }
+        ::selection { background: ${theme.accent}33; }
+        a { color: ${theme.link}; }
+      `}</style>
+
+      <Sidebar activeId={activeId} />
+
+      <main className="main-content">
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "8px" }}>
+          <div>
+            <div style={{ fontFamily: "'DM Sans',sans-serif", fontSize: "0.85rem", color: theme.textMuted, fontWeight: 500 }}>Jour 3 — 5h45</div>
+            <h1 style={{ fontFamily: "'DM Sans',sans-serif", fontSize: "2rem", fontWeight: 700, color: theme.text, margin: "4px 0 0", lineHeight: 1.2 }}>
+              Probabilités et classification
+            </h1>
+          </div>
+          <ThemeToggle />
+        </div>
+        <div style={{ height: "3px", background: `linear-gradient(90deg, ${theme.accent}, ${theme.accent}44)`, borderRadius: "2px", marginBottom: "32px" }} />
+
+        <Box type="retenir" title="Objectif du Jour 3">
+          <P style={{ marginBottom: 0 }}>Passer de la <B>régression</B> à la <B>classification</B>. À la fin, vous saurez implémenter un <B>perceptron from scratch</B> et comprendre ses limites — ce qui motivera les réseaux de neurones du Jour 4.</P>
+        </Box>
+        <div style={{ display:'flex', gap:'8px', flexWrap:'wrap', margin:'20px 0' }}>
+          {[
+            {icon:'📊',label:'Colab',href:'https://drive.google.com/file/d/1yBP-S14t5xcD0V4VqZ201k5jk4BKmzct/view?usp=sharing',bg:'#F9AB00',fg:'#1a1a2e'},
+            {icon:'📐',label:'Synthèse',href:'pdf/jour3_synthese.pdf',bg:theme.accent,fg:'#fff'},
+            {icon:'📝',label:'Exercices',href:'pdf/jour3_exercices.pdf',bg:'#f97316',fg:'#fff'},
+            {icon:'✅',label:'Corrections',href:'pdf/jour3_corrections.pdf',bg:'#22c55e',fg:'#fff'},
+            {icon:'🔬',label:'TP',href:'https://drive.google.com/file/d/1Gbhzs6O2oKGw5nnBimU1mQmoIgJ5Qg7V/view?usp=drive_link',bg:'#F9AB00',fg:'#1a1a2e'},
+            {icon:'❓',label:'QCM',href:'pdf/jour3_qcm.pdf',bg:'#8b5cf6',fg:'#fff'},
+          ].map((b,i)=>(
+            <a key={i} href={b.href} target="_blank" rel="noopener" style={{ display:'inline-flex', alignItems:'center', justifyContent:'center', gap:'5px', background:b.bg, color:b.fg,
+              padding:'9px 14px', borderRadius:'6px', fontFamily:"'DM Sans',sans-serif", fontSize:'0.85rem', fontWeight:600, textDecoration:'none' }}>
+              {b.icon} {b.label}
+            </a>
+          ))}
+        </div>
+
+        <Content />
+
+        <footer style={{ marginTop: "60px", padding: "24px 0", borderTop: `1px solid ${theme.border}`, textAlign: "center", fontFamily: "'DM Sans',sans-serif", fontSize: "0.8rem", color: theme.textMuted }}>
+          <p>© 2025 Mohamed EL AFRIT | <a href="https://www.mohamedelafrit.com" style={{ color: theme.link, textDecoration: "none" }}>www.mohamedelafrit.com</a></p>
+          <p><a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.fr" style={{ color: theme.link, textDecoration: "none" }}>CC BY-NC-SA 4.0</a></p>
+        </footer>
+      </main>
+    </div>
+  );
+}
+
+
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(React.createElement(Jour3Page));
+</script>
+</body>
+</html>

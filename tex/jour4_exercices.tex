@@ -1,0 +1,480 @@
+% ============================================================================
+% (c) 2025 Mohamed EL AFRIT -- IPSSI
+% Licence CC BY-NC-SA 4.0
+% https://creativecommons.org/licenses/by-nc-sa/4.0/deed.fr
+%
+% FICHE D'EXERCICES (enonces) -- Jour 4 : Reseaux de neurones
+% ============================================================================
+\input{template_ipssi}
+
+\jourNumero{4}
+\jourTheme{R\'{e}seaux de neurones}
+
+\begin{document}
+
+\pagegarde{Fiche d'exercices}{4}{R\'{e}seaux de neurones}
+
+\setstretch{1.08}
+\setlength{\parskip}{3pt}
+\setlength{\abovedisplayskip}{6pt}
+\setlength{\belowdisplayskip}{6pt}
+
+% ======================================================================
+% RAPPELS
+% ======================================================================
+\begin{tcolorbox}[
+    enhanced, colback=ipssiCyan!5, colframe=ipssiCyan!50,
+    boxrule=0.8pt, arc=4pt,
+    title={\sffamily\bfseries Rappels --- Formules du Jour 4},
+    coltitle=white, colbacktitle=ipssiCyan!70,
+]
+\small
+\textbf{Neurone :}
+$a = \sigma(\vw^T\vx + b)$
+\hfill
+\textbf{Sigmo\"{\i}de :}
+$\sigma(z) = \frac{1}{1+e^{-z}}$
+\hfill
+\textbf{ReLU :}
+$\text{ReLU}(z) = \max(0, z)$
+
+\medskip
+\textbf{Forward pass :}
+$\mathbf{h} = \sigma(\mathbf{W}^{(1)}\vx + \mathbf{b}^{(1)})$
+\;;\;
+$\yhat = \sigma(\mathbf{w}^{(2)T}\mathbf{h} + b^{(2)})$
+
+\medskip
+\textbf{Mise \`{a} jour :}
+$\boldsymbol{\theta} \leftarrow \boldsymbol{\theta} - \alpha \nabla L$
+\hfill
+\textbf{D\'{e}riv\'{e}e sigmo\"{\i}de :} $\sigma'(z) = \sigma(z)(1-\sigma(z))$
+
+\medskip
+\textbf{Valeurs utiles :}
+$\sigma(0) = 0{,}5$\;;\;
+$\sigma(1) \approx 0{,}73$\;;\;
+$\sigma(2) \approx 0{,}88$\;;\;
+$\sigma(-1) \approx 0{,}27$\;;\;
+$\sigma(-2) \approx 0{,}12$
+\end{tcolorbox}
+
+% ======================================================================
+\section*{Exercices crayon-papier --- Niveau fondamental}
+% ======================================================================
+
+% ----------------------------------------------------------------------
+\exercice{\exofondamental\quad --- Sortie d'un neurone}
+
+Un neurone a les poids $\vw = \begin{pmatrix} 0{,}3 \\ 0{,}5 \end{pmatrix}$,
+le biais $b = -2$ et utilise l'activation \textbf{sigmo\"{\i}de}.
+
+L'entr\'{e}e est $\vx = \begin{pmatrix} 5 \\ 4 \end{pmatrix}$
+(exp\'{e}rience = 5, langages = 4).
+
+\begin{enumerate}[label=\alph*)]
+    \item Calculez la somme pond\'{e}r\'{e}e $z = \vw^T\vx + b$.
+    \item Calculez l'activation $a = \sigma(z) = \frac{1}{1 + e^{-z}}$.
+        \emph{Conseil : calculez d'abord $e^{-z}$ avec une calculatrice ou les valeurs utiles ci-dessus.}
+    \item Si le seuil de d\'{e}cision est $0{,}5$, quelle classe le neurone pr\'{e}dit-il ?
+    \item On change l'entr\'{e}e : $\vx = \begin{pmatrix} 1 \\ 2 \end{pmatrix}$
+        (exp=1, lang=2). Recalculez $z$ et $a$. Quelle classe ?
+\end{enumerate}
+
+% ----------------------------------------------------------------------
+\exercice{\exofondamental\quad --- Appliquer ReLU et sigmo\"{\i}de}
+
+Calculez les valeurs suivantes en d\'{e}taillant chaque \'{e}tape :
+
+\begin{enumerate}[label=\alph*)]
+    \item $\sigma(0)$, $\sigma(2)$, $\sigma(-3)$
+    \item $\text{ReLU}(2{,}5)$, $\text{ReLU}(0)$, $\text{ReLU}(-1{,}7)$
+    \item $\sigma(\text{ReLU}(-1))$ --- composez les deux fonctions.
+    \item $\sigma(\text{ReLU}(3))$ --- m\^{e}me chose.
+    \item Pourquoi $\sigma(z)$ ne vaut-il \textbf{jamais} exactement 0 ni exactement 1 ?
+\end{enumerate}
+
+% ----------------------------------------------------------------------
+\exercice{\exofondamental\quad --- Forward pass d'un r\'{e}seau 2-2-1}
+
+On consid\`{e}re un r\'{e}seau avec 2 entr\'{e}es, 2 neurones cach\'{e}s, 1 sortie.
+Tous les neurones utilisent l'activation sigmo\"{\i}de.
+
+\textbf{Poids couche cach\'{e}e :}
+\[
+    \mathbf{W}^{(1)} = \begin{pmatrix} 0{,}4 & 0{,}6 \\ -0{,}3 & 0{,}5 \end{pmatrix}
+    \quad
+    \mathbf{b}^{(1)} = \begin{pmatrix} -1 \\ 0{,}5 \end{pmatrix}
+\]
+
+\textbf{Poids couche de sortie :}
+$\mathbf{w}^{(2)} = \begin{pmatrix} 0{,}7 \\ 0{,}8 \end{pmatrix}$,
+$b^{(2)} = -0{,}5$.
+
+Entr\'{e}e : $\vx = \begin{pmatrix} 3 \\ 5 \end{pmatrix}$.
+
+\begin{enumerate}[label=\alph*)]
+    \item Calculez les sommes pond\'{e}r\'{e}es de la couche cach\'{e}e :
+        $z_1 = \mathbf{W}^{(1)}_{\text{ligne 1}} \cdot \vx + b_1^{(1)}$ et $z_2$.
+    \item Appliquez l'activation : $h_1 = \sigma(z_1)$ et $h_2 = \sigma(z_2)$.
+    \item Calculez la somme pond\'{e}r\'{e}e de la sortie :
+        $z_{\text{out}} = \mathbf{w}^{(2)T}\mathbf{h} + b^{(2)}$.
+    \item Calculez la pr\'{e}diction $\yhat = \sigma(z_{\text{out}})$.
+    \item Le r\'{e}seau pr\'{e}dit-il classe 0 ou classe 1 ?
+\end{enumerate}
+
+% ----------------------------------------------------------------------
+\exercice{\exofondamental\quad --- Dimensions des matrices de poids}
+
+Un r\'{e}seau a l'architecture suivante : \textbf{5 entr\'{e}es $\to$ 8 neurones cach\'{e}s $\to$ 3 neurones cach\'{e}s $\to$ 1 sortie}.
+
+\begin{enumerate}[label=\alph*)]
+    \item Quelle est la dimension de $\mathbf{W}^{(1)}$ (poids de la 1\textsuperscript{re} couche cach\'{e}e) ?
+        Et de $\mathbf{b}^{(1)}$ ?
+    \item Quelle est la dimension de $\mathbf{W}^{(2)}$ (poids de la 2\textsuperscript{e} couche) ?
+        Et de $\mathbf{b}^{(2)}$ ?
+    \item Quelle est la dimension de $\mathbf{w}^{(3)}$ (poids de la sortie) ?
+    \item Combien de param\`{e}tres (poids + biais) le r\'{e}seau a-t-il \textbf{au total} ?
+    \item Si on augmente la couche cach\'{e}e 1 de 8 \`{a} 16 neurones,
+        combien de param\`{e}tres suppl\'{e}mentaires cela ajoute-t-il ?
+\end{enumerate}
+
+% ======================================================================
+\section*{Exercices crayon-papier --- Niveau interm\'{e}diaire}
+% ======================================================================
+
+% ----------------------------------------------------------------------
+\exercice{\exointermediaire\quad --- Composer deux fonctions}
+
+On d\'{e}finit deux neurones :
+\begin{itemize}
+    \item Neurone A : $f_A(x) = \text{ReLU}(2x - 1)$
+    \item Neurone B : $g_B(x) = \sigma(3x - 2)$
+\end{itemize}
+
+\begin{enumerate}[label=\alph*)]
+    \item Calculez $f_A(0)$, $f_A(1)$, $f_A(3)$.
+    \item Calculez la composition $g_B(f_A(x))$ pour $x = 0$, $x = 1$, $x = 3$.
+        D\'{e}taillez chaque \'{e}tape.
+    \item La composition $g_B \circ f_A$ est-elle une fonction lin\'{e}aire ?
+        Justifiez.
+    \item Que se passerait-il si les deux neurones n'avaient \textbf{pas}
+        de fonction d'activation (i.e.\ $f_A(x) = 2x - 1$, $g_B(x) = 3x - 2$) ?
+        Calculez la composition. Est-elle lin\'{e}aire ?
+\end{enumerate}
+
+% ----------------------------------------------------------------------
+\exercice{\exointermediaire\quad --- Pourquoi les activations sont indispensables}
+
+On consid\`{e}re un r\'{e}seau \`{a} 2 couches \textbf{sans} fonction d'activation :
+\begin{align*}
+    \text{Couche 1 :}\quad & \mathbf{h} = \mathbf{W}^{(1)}\vx + \mathbf{b}^{(1)} \\
+    \text{Couche 2 :}\quad & \yhat = \mathbf{w}^{(2)T}\mathbf{h} + b^{(2)}
+\end{align*}
+
+\begin{enumerate}[label=\alph*)]
+    \item Substituez l'expression de $\mathbf{h}$ dans celle de $\yhat$.
+        Simplifiez l'expression.
+    \item Montrez que $\yhat$ peut s'\'{e}crire sous la forme $\yhat = \tilde{\vw}^T \vx + \tilde{b}$
+        pour un certain $\tilde{\vw}$ et $\tilde{b}$.
+    \item Que repr\'{e}sente cette forme ? Le r\'{e}seau \`{a} 2 couches est-il plus
+        puissant qu'un simple neurone ?
+    \item Conclusion : pourquoi les fonctions d'activation sont-elles
+        \textbf{indispensables} dans un r\'{e}seau multicouche ?
+\end{enumerate}
+
+% ----------------------------------------------------------------------
+\exercice{\exointermediaire\quad --- Analyser un cas de surapprentissage}
+
+Un \'{e}tudiant a entra\^{i}n\'{e} un r\'{e}seau sur le dataset salaire et obtient les
+accuracies suivantes au fil des \'{e}poques :
+
+\begin{center}
+\renewcommand{\arraystretch}{1.15}
+\begin{tabular}{c|c|c}
+    \toprule
+    \textbf{\'{E}poque} & \textbf{Accuracy entra\^{i}nement} & \textbf{Accuracy validation} \\
+    \midrule
+    10   & 70\% & 67\% \\
+    50   & 85\% & 83\% \\
+    200  & 95\% & 87\% \\
+    500  & 99\% & 82\% \\
+    1000 & 100\% & 75\% \\
+    \bottomrule
+\end{tabular}
+\end{center}
+
+\begin{enumerate}[label=\alph*)]
+    \item \`{A} quelle \'{e}poque le mod\`{e}le commence-t-il \`{a} \textbf{surapprentir} ?
+        Justifiez.
+    \item Quelle \'{e}poque choisiriez-vous comme \textbf{meilleur mod\`{e}le} ? Pourquoi ?
+    \item Proposez 3 solutions pour r\'{e}duire le surapprentissage.
+    \item Pourquoi une accuracy de 100\% sur l'entra\^{i}nement est-elle
+        \textbf{suspecte} plut\^{o}t que rassurante ?
+\end{enumerate}
+
+% ======================================================================
+\section*{Exercices Python guid\'{e}s --- Niveau interm\'{e}diaire}
+% ======================================================================
+
+% ----------------------------------------------------------------------
+\exercice{\exointermediaire\quad --- Sigmo\"{\i}de et ReLU en Python \hfill\normalfont\small\textsf{[Python guid\'{e}]}}
+
+\begin{pythonbox}[Squelette --- Fonctions d'activation]
+\begin{lstlisting}
+import numpy as np
+import matplotlib.pyplot as plt
+
+# 1. Implementer la sigmoide
+def sigmoid(z):
+    return ______  # A COMPLETER
+
+# 2. Implementer ReLU
+def relu(z):
+    return ______  # A COMPLETER
+
+# 3. Tester sur des valeurs
+valeurs = np.array([-3, -1, 0, 1, 2, 5])
+print("z       :", valeurs)
+print("sigmoid :", np.round(sigmoid(valeurs), 4))
+print("relu    :", relu(valeurs))
+
+# 4. Tracer les courbes
+z = np.linspace(-6, 6, 200)
+fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 4))
+
+ax1.plot(z, ______, 'b-', lw=2)  # A COMPLETER
+ax1.set_title("Sigmoide"); ax1.grid(True, alpha=0.3)
+ax1.axhline(0.5, color='gray', ls=':')
+
+ax2.plot(z, ______, 'r-', lw=2)  # A COMPLETER
+ax2.set_title("ReLU"); ax2.grid(True, alpha=0.3)
+
+plt.tight_layout(); plt.show()
+
+# 5. Derivee de la sigmoide
+def sigmoid_deriv(z):
+    s = sigmoid(z)
+    return ______  # A COMPLETER : s * (1 - s)
+
+print("\nDerivee sigmoid(0) =", sigmoid_deriv(0))
+print("Derivee sigmoid(2) =", round(sigmoid_deriv(2), 4))
+\end{lstlisting}
+\end{pythonbox}
+
+% ----------------------------------------------------------------------
+\exercice{\exointermediaire\quad --- Forward pass 2-2-1 en NumPy \hfill\normalfont\small\textsf{[Python guid\'{e}]}}
+
+\begin{pythonbox}[Squelette --- Forward pass]
+\begin{lstlisting}
+import numpy as np
+
+def sigmoid(z):
+    return 1 / (1 + np.exp(-z))
+
+# Entree : un developpeur
+x = np.array([5.0, 4.0])
+
+# Poids couche cachee (2 neurones)
+W1 = np.array([[0.3, 0.5],
+               [-0.2, 0.4]])
+b1 = np.array([-2.0, 0.5])
+
+# Poids couche de sortie (1 neurone)
+w2 = np.array([0.8, 0.6])
+b2 = -0.5
+
+# 1. Couche cachee
+z1 = ______           # A COMPLETER : W1 @ x + b1
+h  = ______           # A COMPLETER : sigmoid(z1)
+print(f"z1 = {z1}")
+print(f"h  = {np.round(h, 4)}")
+
+# 2. Couche de sortie
+z2 = ______           # A COMPLETER : w2 @ h + b2
+y_pred = ______       # A COMPLETER : sigmoid(z2)
+print(f"\nz2 = {z2:.4f}")
+print(f"y_pred = {y_pred:.4f}")
+
+# 3. Decision
+classe = ______       # A COMPLETER : 1 si y_pred > 0.5
+print(f"\nClasse predite : {classe}")
+
+# 4. Tester sur tous les developpeurs
+print("\n--- Predictions sur 6 developpeurs ---")
+devs = np.array([[0,2],[1,1],[5,4],[9,5],[12,7],[18,5]])
+for d in devs:
+    h_i = sigmoid(W1 @ d + b1)
+    y_i = sigmoid(w2 @ h_i + b2)
+    print(f"  x={d} -> y_pred={y_i:.3f} "
+          f"-> classe {1 if y_i > 0.5 else 0}")
+\end{lstlisting}
+\end{pythonbox}
+
+% ----------------------------------------------------------------------
+\exercice{\exointermediaire\quad --- R\'{e}seau qui apprend XOR \hfill\normalfont\small\textsf{[Python guid\'{e}]}}
+
+\begin{pythonbox}[Squelette --- XOR avec backpropagation]
+\begin{lstlisting}
+import numpy as np
+
+def sigmoid(z):
+    return 1 / (1 + np.exp(-z))
+def sigmoid_d(a):
+    return a * (1 - a)
+
+# Donnees XOR
+X = np.array([[0,0],[0,1],[1,0],[1,1]], dtype=float)
+y = np.array([[0],[1],[1],[0]], dtype=float)
+
+# Poids aleatoires (reseau 2-4-1)
+np.random.seed(42)
+W1 = np.random.randn(2, 4) * 0.5
+b1 = np.zeros((1, 4))
+W2 = np.random.randn(4, 1) * 0.5
+b2 = np.zeros((1, 1))
+
+alpha = 1.0
+
+for epoch in range(5000):
+    # Forward
+    z1 = ______          # A COMPLETER : X @ W1 + b1
+    h  = ______          # A COMPLETER : sigmoid(z1)
+    z2 = ______          # A COMPLETER : h @ W2 + b2
+    out = ______         # A COMPLETER : sigmoid(z2)
+
+    loss = np.mean((y - out) ** 2)
+
+    # Backward
+    d_out = (out - y) * sigmoid_d(out)
+    dW2 = ______         # A COMPLETER : h.T @ d_out / 4
+    db2 = np.mean(d_out, axis=0, keepdims=True)
+
+    d_h = d_out @ W2.T * sigmoid_d(h)
+    dW1 = ______         # A COMPLETER : X.T @ d_h / 4
+    db1 = np.mean(d_h, axis=0, keepdims=True)
+
+    # Mise a jour
+    W2 -= alpha * dW2; b2 -= alpha * db2
+    W1 -= alpha * dW1; b1 -= alpha * db1
+
+    if epoch % 1000 == 999:
+        preds = (out > 0.5).astype(int).flatten()
+        acc = np.mean(preds == y.flatten())
+        print(f"Epoch {epoch+1} : "
+              f"loss={loss:.4f}, acc={acc:.0%}")
+
+print(f"\nPredictions : {out.flatten().round(3)}")
+print(f"Attendu     : {y.flatten().astype(int)}")
+\end{lstlisting}
+\end{pythonbox}
+
+% ======================================================================
+\section*{Exercices Python autonomes --- Niveau avanc\'{e}}
+% ======================================================================
+
+% ----------------------------------------------------------------------
+\exercice{\exoavance\quad --- R\'{e}seau from scratch pour salaire\_eleve \hfill\normalfont\small\textsf{[Python autonome]}}
+
+\'{E}crivez un programme Python complet qui :
+
+\begin{enumerate}[label=\alph*)]
+    \item Charge le dataset salaire (30 d\'{e}veloppeurs, 2 features :
+        exp\'{e}rience et nb\_langages) et la cible binaire (seuil 45\,k\texteuro).
+
+    \item \textbf{Normalise} les features (soustraire la moyenne, diviser par l'\'{e}cart-type).
+
+    \item Impl\'{e}mente un r\'{e}seau \textbf{2-4-1} from scratch avec :
+    \begin{itemize}
+        \item Forward pass (sigmo\"{\i}de partout)
+        \item Backward pass (backpropagation)
+        \item Mise \`{a} jour par descente de gradient ($\alpha = 0{,}5$, 2000 \'{e}poques)
+    \end{itemize}
+
+    \item Affiche la \textbf{loss et l'accuracy} toutes les 500 \'{e}poques.
+
+    \item Trace \textbf{deux graphiques} c\^{o}te \`{a} c\^{o}te :
+    \begin{itemize}
+        \item \`{A} gauche : courbe de loss par \'{e}poque
+        \item \`{A} droite : nuage de points + r\'{e}gions de d\'{e}cision du r\'{e}seau
+            (utiliser \texttt{meshgrid} + \texttt{contourf})
+    \end{itemize}
+
+    \item Comparez l'accuracy finale avec le \textbf{perceptron} du Jour~3 (${\sim}87$--$90\%$).
+\end{enumerate}
+
+\begin{attentionbox}[Consignes]
+    \begin{itemize}
+        \item Utilisez \textbf{uniquement} NumPy et Matplotlib.
+        \item La normalisation est \textbf{essentielle} pour que le r\'{e}seau converge.
+        \item Initialisez les poids al\'{e}atoirement (\texttt{np.random.randn * 0.5}).
+    \end{itemize}
+\end{attentionbox}
+
+% ----------------------------------------------------------------------
+\exercice{\exoavance\quad --- NumPy vs scikit-learn MLPClassifier \hfill\normalfont\small\textsf{[Python autonome]}}
+
+\'{E}crivez un programme qui compare deux impl\'{e}mentations :
+
+\begin{enumerate}[label=\alph*)]
+    \item \textbf{M\'{e}thode 1 --- From scratch :} votre r\'{e}seau 2-4-1 de l'exercice~11.
+
+    \item \textbf{M\'{e}thode 2 --- scikit-learn :}
+    \begin{verbatim}
+from sklearn.neural_network import MLPClassifier
+from sklearn.preprocessing import StandardScaler
+    \end{verbatim}
+    Utilisez \texttt{MLPClassifier(hidden\_layer\_sizes=(4,),
+    max\_iter=2000, activation='logistic', random\_state=42)}.
+
+    \item Affichez un \textbf{tableau comparatif} :
+    \begin{center}
+    \renewcommand{\arraystretch}{1.2}
+    \begin{tabular}{l|c|c}
+        \toprule
+        \textbf{M\'{e}thode} & \textbf{Accuracy} & \textbf{Nb param\`{e}tres} \\
+        \midrule
+        From scratch (2-4-1) & ? & ? \\
+        MLPClassifier (4,) & ? & ? \\
+        Perceptron (Jour 3) & ? & ? \\
+        \bottomrule
+    \end{tabular}
+    \end{center}
+
+    \item Tracez les \textbf{surfaces de d\'{e}cision} des 3 mod\`{e}les c\^{o}te \`{a} c\^{o}te
+        (3 sous-figures avec \texttt{contourf}).
+
+    \item R\'{e}pondez en commentaire : le r\'{e}seau est-il meilleur que le perceptron ?
+        La fronti\`{e}re est-elle lin\'{e}aire ou courbe ? Combien de param\`{e}tres le
+        r\'{e}seau a-t-il vs le perceptron ?
+\end{enumerate}
+
+\begin{intuitionbox}[Indice]
+    Le perceptron a 3 param\`{e}tres ($w_1, w_2, b$). Le r\'{e}seau 2-4-1 a
+    $2 \times 4 + 4 + 4 \times 1 + 1 = 17$ param\`{e}tres. Plus de param\`{e}tres
+    = plus de capacit\'{e} \`{a} mod\'{e}liser des fronti\`{e}res complexes, mais aussi
+    plus de risque de surapprentissage.
+\end{intuitionbox}
+
+% ======================================================================
+\vfill
+\separateur
+
+\begin{center}
+    \small\sffamily
+    \textbf{R\'{e}partition :}\quad
+    4 exercices \starfull{ipssiVert} fondamentaux \quad
+    3 exercices \starfull{ipssiOrange}\starfull{ipssiOrange} interm\'{e}diaires \quad
+    3 guid\'{e}s Python \starfull{ipssiOrange}\starfull{ipssiOrange} \quad
+    2 autonomes \starfull{ipssiRouge}\starfull{ipssiRouge}\starfull{ipssiRouge}
+\end{center}
+
+\begin{center}
+    {\footnotesize\sffamily\textcolor{gray}{%
+        \textcopyright\ 2025 Mohamed EL AFRIT --- IPSSI \enspace\textbullet\enspace
+        \url{www.mohamedelafrit.com} \enspace\textbullet\enspace
+        CC BY-NC-SA 4.0
+    }}
+\end{center}
+
+\end{document}

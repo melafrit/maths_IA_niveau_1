@@ -1,0 +1,477 @@
+% ============================================================================
+% © 2025 Mohamed EL AFRIT — IPSSI
+% Licence CC BY-NC-SA 4.0
+% https://creativecommons.org/licenses/by-nc-sa/4.0/deed.fr
+%
+% FICHE D'EXERCICES (énoncés) — Jour 1
+% Données et représentation mathématique
+% ============================================================================
+\input{template_ipssi}
+
+\jourNumero{1}
+\jourTheme{Repr\'{e}sentation}
+
+\begin{document}
+
+\pagegarde{Fiche d'exercices}{1}{Donn\'{e}es et repr\'{e}sentation math\'{e}matique}
+
+% ── Compacter pour la densité ──────────────────────────────────────────────
+\setstretch{1.08}
+\setlength{\parskip}{3pt}
+\setlength{\abovedisplayskip}{6pt}
+\setlength{\belowdisplayskip}{6pt}
+
+% ══════════════════════════════════════════════════════════════════════════
+% RAPPEL DU DATASET FIL ROUGE
+% ══════════════════════════════════════════════════════════════════════════
+\begin{tcolorbox}[
+    enhanced, colback=ipssiCyan!5, colframe=ipssiCyan!50,
+    boxrule=0.8pt, arc=4pt, title={\sffamily\bfseries Rappel --- Dataset fil rouge},
+    coltitle=white, colbacktitle=ipssiCyan!70,
+]
+\small
+Tous les exercices utilisent le dataset \textbf{Salaire d\'{e}veloppeur} (30 observations, 5 features).
+Colonnes : \texttt{experience} (0--20), \texttt{nb\_langages} (1--8), \texttt{niveau\_etudes} (1--5),
+\texttt{taille\_entreprise} (15--5000), \texttt{remote} (0--100), \texttt{salaire} (25--72 k\texteuro).
+
+\medskip
+\begin{center}
+\renewcommand{\arraystretch}{1.1}
+\begin{tabular}{c|ccccc|c}
+    \toprule
+    \textbf{\#} & \textbf{Exp} & \textbf{Lang} & \textbf{\'{E}tudes} & \textbf{Entrep.} & \textbf{Remote} & \textbf{Salaire} \\
+    \midrule
+    0  & 0  & 2 & 3 & 150  & 80  & 28.0 \\
+    1  & 1  & 1 & 2 & 50   & 100 & 26.5 \\
+    2  & 1  & 3 & 4 & 800  & 40  & 35.0 \\
+    3  & 2  & 2 & 3 & 200  & 60  & 32.0 \\
+    4  & 2  & 4 & 4 & 3000 & 20  & 38.0 \\
+    5  & 0  & 1 & 1 & 30   & 50  & 25.0 \\
+    \bottomrule
+\end{tabular}
+\end{center}
+
+R\'{e}gression simple (exp\'{e}rience $\to$ salaire) :
+$\yhat = 2{,}07 \times \texttt{experience} + 31{,}27$ \quad (MSE $= 20{,}46$).
+\end{tcolorbox}
+
+% ══════════════════════════════════════════════════════════════════════════
+\section*{Exercices crayon-papier --- Niveau fondamental}
+% ══════════════════════════════════════════════════════════════════════════
+
+% ──────────────────────────────────────────────────────────────────────────
+\exercice{\exofondamental\quad --- Vecteurs et dimensions}
+
+\begin{enumerate}[label=\alph*)]
+    \item \'{E}crivez le vecteur de features $\vx_0$ du d\'{e}veloppeur \#0 du dataset.
+        Quelle est sa dimension~$p$ ?
+
+    \item \'{E}crivez le vecteur $\vx_4$ du d\'{e}veloppeur \#4. \'{E}crivez sa transpos\'{e}e $\vx_4^T$.
+
+    \item Un nouveau d\'{e}veloppeur a le profil suivant : 6 ans d'exp\'{e}rience,
+        4 langages, Bac+5, entreprise de 1200 employ\'{e}s, 50\% de remote.
+        \'{E}crivez son vecteur $\vx$ et pr\'{e}cisez $\vx \in \mathbb{R}^{?}$.
+
+    \item Peut-on calculer $\vx_0 + \vx_4$ ? Et $\vx_0 + \begin{pmatrix} 1 \\ 2 \\ 3 \end{pmatrix}$ ?
+        Justifiez.
+\end{enumerate}
+
+% ──────────────────────────────────────────────────────────────────────────
+\exercice{\exofondamental\quad --- Produit scalaire \`{a} la main}
+
+\begin{enumerate}[label=\alph*)]
+    \item Calculez le produit scalaire $\pscal{\vx}{\vw}$ avec :
+    \[
+        \vx = \begin{pmatrix} 3 \\ 5 \\ 2 \end{pmatrix}
+        \qquad
+        \vw = \begin{pmatrix} 0.5 \\ 0.3 \\ 0.8 \end{pmatrix}
+    \]
+    D\'{e}taillez le calcul terme \`{a} terme.
+
+    \item Calculez $\pscal{\vx_0}{\vw}$ en utilisant le d\'{e}veloppeur \#0 du dataset
+        et le vecteur de poids $\vw = \begin{pmatrix} 2.0 \\ 1.5 \\ 3.0 \\ 0.005 \\ 0.02 \end{pmatrix}$.
+        Ajoutez un biais $b = 15$ pour obtenir la pr\'{e}diction $\yhat_0$.
+        Comparez avec le vrai salaire $y_0 = 28{,}0$ k\texteuro.
+
+    \item \textbf{Pi\`{e}ge :} peut-on calculer le produit scalaire suivant ?
+    \[
+        \left\langle
+        \begin{pmatrix} 1 \\ 2 \\ 3 \\ 4 \\ 5 \end{pmatrix},\;
+        \begin{pmatrix} 0.1 \\ 0.2 \\ 0.3 \end{pmatrix}
+        \right\rangle
+    \]
+    Expliquez pourquoi.
+\end{enumerate}
+
+% ──────────────────────────────────────────────────────────────────────────
+\exercice{\exofondamental\quad --- Multiplication matrice-vecteur}
+
+Soit la matrice $\mX$ et le vecteur $\vw$ suivants :
+\[
+    \mX = \begin{pmatrix}
+        1 & 3 \\
+        4 & 2 \\
+        0 & 5
+    \end{pmatrix}
+    \qquad
+    \vw = \begin{pmatrix} 2 \\ 0.5 \end{pmatrix}
+\]
+
+\begin{enumerate}[label=\alph*)]
+    \item Quelle est la dimension de $\mX$ ? De $\vw$ ?
+        Quelle sera la dimension du r\'{e}sultat $\hat{\vy} = \mX\vw$ ?
+
+    \item Calculez $\hat{\vy} = \mX\vw$ en d\'{e}taillant chaque produit scalaire
+        (ligne par ligne).
+
+    \item V\'{e}rifiez que $\yhat_1 = \vx_1^T \vw$ o\`{u} $\vx_1^T$ est la premi\`{e}re
+        ligne de $\mX$.
+\end{enumerate}
+
+% ──────────────────────────────────────────────────────────────────────────
+\exercice{\exofondamental\quad --- Calcul du MSE}
+
+Un mod\`{e}le a produit les pr\'{e}dictions suivantes pour 5 d\'{e}veloppeurs :
+
+\begin{center}
+\renewcommand{\arraystretch}{1.2}
+\begin{tabular}{c|c|c}
+    \toprule
+    D\'{e}veloppeur $i$ & Salaire r\'{e}el $y_i$ (k\texteuro) & Pr\'{e}diction $\yhat_i$ (k\texteuro) \\
+    \midrule
+    1 & 28.0 & 31.3 \\
+    2 & 35.0 & 33.3 \\
+    3 & 38.0 & 35.4 \\
+    4 & 44.0 & 41.6 \\
+    5 & 52.0 & 49.9 \\
+    \bottomrule
+\end{tabular}
+\end{center}
+
+\begin{enumerate}[label=\alph*)]
+    \item Calculez l'erreur (r\'{e}sidu) $e_i = y_i - \yhat_i$ pour chaque observation.
+
+    \item Calculez l'erreur au carr\'{e} $e_i^2$ pour chaque observation.
+
+    \item Calculez le MSE : $\text{MSE} = \frac{1}{n}\sum_{i=1}^{n} e_i^2$.
+
+    \item L'erreur typique du mod\`{e}le est $\sqrt{\text{MSE}}$.
+        Calculez-la et interpr\'{e}tez : est-ce que le mod\`{e}le pr\'{e}dit bien ?
+\end{enumerate}
+
+% ══════════════════════════════════════════════════════════════════════════
+\section*{Exercices crayon-papier --- Niveau interm\'{e}diaire}
+% ══════════════════════════════════════════════════════════════════════════
+
+% ──────────────────────────────────────────────────────────────────────────
+\exercice{\exointermediaire\quad --- Interpr\'{e}ter les poids d'un mod\`{e}le}
+
+On consid\`{e}re le mod\`{e}le lin\'{e}aire suivant pour pr\'{e}dire le salaire (en k\texteuro) :
+\[
+    \yhat = 25 + 3 \times \texttt{experience} + 1{,}5 \times \texttt{nb\_langages}
+\]
+
+\begin{enumerate}[label=\alph*)]
+    \item Identifiez $w_0$ (biais), $w_1$ et $w_2$.
+        Que repr\'{e}sente concr\`{e}tement chacun de ces param\`{e}tres ?
+
+    \item Quel salaire ce mod\`{e}le pr\'{e}dit-il pour un d\'{e}veloppeur avec 0 ann\'{e}e
+        d'exp\'{e}rience et 1 langage ? Est-ce r\'{e}aliste ?
+
+    \item Quel est l'impact d'une ann\'{e}e d'exp\'{e}rience suppl\'{e}mentaire sur le salaire
+        pr\'{e}dit ? D'un langage suppl\'{e}mentaire ?
+
+    \item Si un d\'{e}veloppeur a 5 ans d'exp\'{e}rience et ma\^{i}trise 4 langages,
+        quel salaire le mod\`{e}le pr\'{e}dit-il ?
+        Comparez avec le d\'{e}veloppeur \#9 du dataset ($y_9 = 44{,}0$ k\texteuro).
+\end{enumerate}
+
+% ──────────────────────────────────────────────────────────────────────────
+\exercice{\exointermediaire\quad --- Choisir le meilleur mod\`{e}le}
+
+Deux mod\`{e}les concurrents pr\'{e}disent le salaire \`{a} partir de l'exp\'{e}rience seule :
+
+\begin{center}
+\renewcommand{\arraystretch}{1.1}
+\begin{tabular}{l l}
+    \toprule
+    \textbf{Mod\`{e}le A :} & $\yhat = 2{,}0 \times \texttt{experience} + 32$ \\
+    \textbf{Mod\`{e}le B :} & $\yhat = 3{,}0 \times \texttt{experience} + 25$ \\
+    \bottomrule
+\end{tabular}
+\end{center}
+
+Utilisez les 6 premiers d\'{e}veloppeurs du dataset (voir tableau en haut de page).
+
+\begin{enumerate}[label=\alph*)]
+    \item Calculez les pr\'{e}dictions $\yhat_i$ du mod\`{e}le A pour chaque d\'{e}veloppeur.
+
+    \item Calculez les pr\'{e}dictions $\yhat_i$ du mod\`{e}le B pour chaque d\'{e}veloppeur.
+
+    \item Calculez le MSE du mod\`{e}le A et le MSE du mod\`{e}le B.
+
+    \item Quel mod\`{e}le est le meilleur selon le MSE ? Le r\'{e}sultat vous surprend-il ?
+\end{enumerate}
+
+% ──────────────────────────────────────────────────────────────────────────
+\exercice{\exointermediaire\quad --- Construire la matrice \`{a} partir de donn\'{e}es textuelles}
+
+Voici les profils de 4 d\'{e}veloppeurs :
+
+\begin{itemize}
+    \item \textbf{Alice} : 3 ans d'exp\'{e}rience, 2 langages, Bac+3, PME (150 employ\'{e}s),
+        80\% remote, salaire 34 k\texteuro.
+    \item \textbf{Bob} : 7 ans, 5 langages, Bac+5, scale-up (800 employ\'{e}s),
+        50\% remote, salaire 50 k\texteuro.
+    \item \textbf{Clara} : 0 an, 1 langage, Bac, micro-entreprise (20 employ\'{e}s),
+        100\% remote, salaire 24 k\texteuro.
+    \item \textbf{David} : 12 ans, 6 langages, Bac+5, grand groupe (3000 employ\'{e}s),
+        30\% remote, salaire 58 k\texteuro.
+\end{itemize}
+
+\begin{enumerate}[label=\alph*)]
+    \item Construisez la matrice de features $\mX \in \mathbb{R}^{? \times ?}$.
+        Pr\'{e}cisez les dimensions.
+
+    \item Construisez le vecteur cible $\vy \in \mathbb{R}^{?}$.
+
+    \item Que vaut l'\'{e}l\'{e}ment $x_{2,4}$ ? Que repr\'{e}sente-t-il concr\`{e}tement ?
+
+    \item En utilisant $\vw = \begin{pmatrix} 2 \\ 1.5 \\ 3 \\ 0.005 \\ 0.02 \end{pmatrix}$ et $b = 15$,
+        calculez la pr\'{e}diction pour Bob ($\yhat_2 = \vw^T \vx_2 + b$).
+\end{enumerate}
+
+% ══════════════════════════════════════════════════════════════════════════
+\section*{Exercices Python guid\'{e}s --- Niveau interm\'{e}diaire}
+% ══════════════════════════════════════════════════════════════════════════
+
+% ──────────────────────────────────────────────────────────────────────────
+\exercice{\exointermediaire\quad --- Cr\'{e}er et manipuler des vecteurs NumPy \hfill\normalfont\small\textsf{[Python guid\'{e}]}}
+
+Compl\'{e}tez le code suivant dans Google Colab :
+
+\begin{pythonbox}[Squelette --- Vecteurs NumPy]
+\begin{lstlisting}
+import numpy as np
+
+# 1. Creer le vecteur du developpeur #3 du dataset
+x3 = np.array([______])  # A COMPLETER
+
+# 2. Afficher la dimension
+print(f"Dimension de x3 : {______}")  # A COMPLETER
+
+# 3. Acceder a la 3e composante (niveau d'etudes)
+niveau = ______  # A COMPLETER
+print(f"Niveau d'etudes : {niveau}")
+
+# 4. Calculer la norme du vecteur
+# Rappel : ||x|| = sqrt(x1**2 + x2**2 + ... + xp**2)
+norme = np.sqrt(np.______(x3 ** 2))  # A COMPLETER
+print(f"Norme de x3 : {norme:.2f}")
+
+# 5. Creer le vecteur du developpeur #5
+x5 = np.array([______])  # A COMPLETER
+
+# 6. Calculer le produit scalaire de x3 et x5
+ps = ______  # A COMPLETER (utiliser @)
+print(f"Produit scalaire x3 . x5 = {ps}")
+
+# 7. Calculer la distance entre les deux developpeurs
+# distance = ||x3 - x5||
+distance = np.sqrt(np.sum((______ - ______) ** 2))
+print(f"Distance : {distance:.2f}")
+\end{lstlisting}
+\end{pythonbox}
+
+% ──────────────────────────────────────────────────────────────────────────
+\exercice{\exointermediaire\quad --- Construire la matrice du dataset \hfill\normalfont\small\textsf{[Python guid\'{e}]}}
+
+\begin{pythonbox}[Squelette --- Matrice NumPy]
+\begin{lstlisting}
+import numpy as np
+
+# 1. Creer la matrice des 6 premiers developpeurs
+#    (5 features seulement, pas le salaire)
+X = np.array([
+    [0, 2, 3, 150, 80],
+    [1, 1, 2, 50, 100],
+    ______,  # A COMPLETER : dev #2
+    ______,  # A COMPLETER : dev #3
+    ______,  # A COMPLETER : dev #4
+    ______,  # A COMPLETER : dev #5
+])
+
+# 2. Verifier les dimensions
+print(f"Shape de X : {______}")  # doit afficher (6, 5)
+
+# 3. Extraire la colonne "experience" (colonne 0)
+experience = X[:, ______]  # A COMPLETER
+print(f"Experiences : {experience}")
+
+# 4. Extraire la ligne du developpeur #4
+dev4 = X[______, :]  # A COMPLETER
+print(f"Developpeur #4 : {dev4}")
+
+# 5. Creer le vecteur des salaires
+y = np.array([28.0, 26.5, ______, ______, ______, ______])
+
+# 6. Calculer la transposee et afficher son shape
+print(f"Shape de X.T : {______}")  # doit afficher (5, 6)
+
+# 7. Quelle est la valeur de X[2, 3] ?
+#    Que represente-t-elle ?
+print(f"X[2,3] = {X[2, 3]}")  # interpreter !
+\end{lstlisting}
+\end{pythonbox}
+
+% ──────────────────────────────────────────────────────────────────────────
+\exercice{\exointermediaire\quad --- R\'{e}gression lin\'{e}aire from scratch \hfill\normalfont\small\textsf{[Python guid\'{e}]}}
+
+\begin{pythonbox}[Squelette --- R\'{e}gression lin\'{e}aire]
+\begin{lstlisting}
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Donnees completes (experience, salaire)
+experience = np.array([0,1,1,2,2,0,3,1,4,5,5,6,6,7,7,4,
+                        8,5,9,10,10,11,12,9,13,11,15,17,20,18])
+salaire = np.array([28.0,26.5,35.0,32.0,38.0,25.0,34.5,42.0,
+    38.5,44.0,41.0,48.0,43.5,50.0,39.0,47.0,51.0,40.0,
+    52.0,55.0,48.5,58.0,60.0,42.0,62.0,54.0,65.0,68.0,72.0,58.0])
+
+# 1. Calculer les moyennes
+x_mean = ______  # A COMPLETER
+y_mean = ______  # A COMPLETER
+
+# 2. Calculer la pente w (formule des moindres carres)
+# w = sum((xi - x_mean) * (yi - y_mean)) / sum((xi - x_mean)**2)
+numerateur = np.sum(______)    # A COMPLETER
+denominateur = np.sum(______)  # A COMPLETER
+w = numerateur / denominateur
+print(f"Pente w = {w:.4f}")
+
+# 3. Calculer le biais b
+b = ______  # A COMPLETER (formule : y_mean - w * x_mean)
+print(f"Biais b = {b:.4f}")
+
+# 4. Calculer les predictions pour tous les developpeurs
+y_pred = ______  # A COMPLETER (formule : w * experience + b)
+
+# 5. Calculer le MSE
+mse = np.mean(______)  # A COMPLETER
+print(f"MSE = {mse:.2f}")
+
+# 6. Tracer le graphique
+fig, ax = plt.subplots(figsize=(8, 5))
+ax.scatter(experience, salaire, c='blue', label='Donnees')
+x_line = np.linspace(0, 21, 100)
+ax.plot(x_line, ______, 'r--', label=f'y={w:.2f}x+{b:.2f}')
+ax.set_xlabel("Experience (annees)")
+ax.set_ylabel("Salaire (kEUR)")
+ax.set_title("Regression lineaire from scratch")
+ax.legend()
+ax.grid(True, alpha=0.3)
+plt.show()
+\end{lstlisting}
+\end{pythonbox}
+
+% ══════════════════════════════════════════════════════════════════════════
+\section*{Exercices Python autonomes --- Niveau avanc\'{e}}
+% ══════════════════════════════════════════════════════════════════════════
+
+% ──────────────────────────────────────────────────────────────────────────
+\exercice{\exoavance\quad --- Explorer le dataset salaire \hfill\normalfont\small\textsf{[Python autonome]}}
+
+\'{E}crivez un programme Python complet (sans squelette) qui r\'{e}alise les t\^{a}ches suivantes
+\`{a} partir du dataset fil rouge (30 d\'{e}veloppeurs, 6 colonnes) :
+
+\begin{enumerate}[label=\alph*)]
+    \item Chargez le dataset complet dans un tableau NumPy.
+        Affichez ses dimensions et les 5 premi\`{e}res lignes.
+
+    \item Calculez et affichez pour chaque colonne :
+        la \textbf{moyenne}, l'\textbf{\'{e}cart-type}, le \textbf{minimum} et le \textbf{maximum}.
+
+    \item Calculez la \textbf{corr\'{e}lation} entre chaque feature et le salaire.
+        \emph{Rappel :} $r_{xy} = \frac{\sum (x_i - \bar{x})(y_i - \bar{y})}
+        {\sqrt{\sum (x_i - \bar{x})^2 \cdot \sum (y_i - \bar{y})^2}}$
+        \quad (ou utilisez \texttt{np.corrcoef}).
+
+    \item Tracez un graphique avec 5 sous-figures (une par feature) montrant
+        chaque feature en abscisse et le salaire en ordonn\'{e}e.
+        Quelle feature semble la plus corr\'{e}l\'{e}e au salaire visuellement ?
+\end{enumerate}
+
+\begin{attentionbox}[Consignes]
+    \begin{itemize}
+        \item Utilisez \textbf{uniquement} NumPy et Matplotlib (pas de pandas).
+        \item Commentez votre code en fran\c{c}ais.
+        \item Affichez des r\'{e}sultats lisibles avec \texttt{f-strings} format\'{e}es.
+    \end{itemize}
+\end{attentionbox}
+
+% ──────────────────────────────────────────────────────────────────────────
+\exercice{\exoavance\quad --- Tester plusieurs mod\`{e}les \hfill\normalfont\small\textsf{[Python autonome]}}
+
+Vous \^{e}tes data scientist junior. Votre manager vous demande de comparer
+3 mod\`{e}les lin\'{e}aires simples (exp\'{e}rience $\to$ salaire) :
+
+\begin{center}
+\renewcommand{\arraystretch}{1.2}
+\begin{tabular}{c l c c}
+    \toprule
+    \textbf{Mod\`{e}le} & \textbf{Formule} & $w_1$ & $w_0$ \\
+    \midrule
+    A & $\yhat = 1{,}5 \times x + 33$ & 1.5 & 33 \\
+    B & $\yhat = 2{,}07 \times x + 31{,}27$ & 2.07 & 31.27 \\
+    C & $\yhat = 2{,}8 \times x + 28$ & 2.8 & 28 \\
+    \bottomrule
+\end{tabular}
+\end{center}
+
+\'{E}crivez un programme Python complet qui :
+
+\begin{enumerate}[label=\alph*)]
+    \item Charge le dataset et extrait les colonnes \texttt{experience} et \texttt{salaire}.
+
+    \item Pour chacun des 3 mod\`{e}les, calcule les pr\'{e}dictions $\hat{\vy}$
+        et le MSE associ\'{e}. Affichez un tableau r\'{e}capitulatif.
+
+    \item Trace un \textbf{unique graphique} montrant :
+        \begin{itemize}
+            \item les 30 points du dataset (nuage de points),
+            \item les 3 droites de r\'{e}gression (avec une couleur et un label diff\'{e}rents),
+            \item une l\'{e}gende indiquant le MSE de chaque mod\`{e}le.
+        \end{itemize}
+
+    \item R\'{e}pondez (en commentaire ou \texttt{print}) :
+        quel mod\`{e}le est le meilleur ? Pourquoi \'{e}tait-ce pr\'{e}visible ?
+\end{enumerate}
+
+\begin{intuitionbox}[Indice]
+    Le mod\`{e}le B correspond \`{a} la droite des moindres carr\'{e}s calcul\'{e}e en cours.
+    Est-ce forc\'{e}ment le meilleur ?
+\end{intuitionbox}
+
+% ══════════════════════════════════════════════════════════════════════════
+\vfill
+\separateur
+
+\begin{center}
+    \small\sffamily
+    \textbf{R\'{e}partition :}\quad
+    4 exercices \starfull{ipssiVert} fondamentaux \quad
+    3 exercices \starfull{ipssiOrange}\starfull{ipssiOrange} interm\'{e}diaires \quad
+    3 guid\'{e}s Python \starfull{ipssiOrange}\starfull{ipssiOrange} \quad
+    2 autonomes \starfull{ipssiRouge}\starfull{ipssiRouge}\starfull{ipssiRouge}
+\end{center}
+
+\begin{center}
+    {\footnotesize\sffamily\textcolor{gray}{%
+        \textcopyright\ 2025 Mohamed EL AFRIT --- IPSSI \enspace\textbullet\enspace
+        \url{www.mohamedelafrit.com} \enspace\textbullet\enspace
+        CC BY-NC-SA 4.0
+    }}
+\end{center}
+
+\end{document}

@@ -1,0 +1,888 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Jour 1 — Données et représentation — Maths IA</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,700;1,400&family=JetBrains+Mono:wght@400;500;700&family=Source+Serif+4:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; padding: 0; font-family: 'Source Serif 4', Georgia, serif; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+<script type="text/babel">
+// © 2025 Mohamed EL AFRIT// Ce contenu est distribué sous licence Creative Commons BY-NC-SA 4.0
+// https://creativecommons.org/licenses/by-nc-sa/4.0/deed.fr
+//
+// JOUR 1 — Données et représentation mathématique
+// Page web interactive — Mathématiques appliquées à l'Intelligence Artificielle
+
+const { useState, useEffect, useRef, useCallback, createContext, useContext } = React;
+
+/* ============================================================================
+   DATASET FIL ROUGE
+   ============================================================================ */
+const DATASET = {
+  colonnes: ["experience","nb_langages","niveau_etudes","taille_entreprise","remote","salaire","salaire_eleve"],
+  donnees: [
+    [ 0,2,3, 150, 80,28.0,0],[ 1,1,2,  50,100,26.5,0],[ 1,3,4, 800, 40,35.0,0],[ 2,2,3, 200, 60,32.0,0],
+    [ 2,4,4,3000, 20,38.0,0],[ 0,1,1,  30, 50,25.0,0],[ 3,3,3, 100, 80,34.5,0],[ 1,5,4,  15,100,42.0,0],
+    [ 4,3,3, 500, 60,38.5,0],[ 5,4,4,1200, 40,44.0,0],[ 5,3,3, 300, 80,41.0,0],[ 6,5,4,2000, 30,48.0,1],
+    [ 6,4,3, 150, 90,43.5,0],[ 7,5,4, 800, 50,50.0,1],[ 7,3,2,  80, 70,39.0,0],[ 4,6,5, 400,100,47.0,1],
+    [ 8,4,4,1500, 40,51.0,1],[ 5,2,3,4000, 10,40.0,0],[ 9,5,4, 600, 60,52.0,1],[10,6,4,2500, 30,55.0,1],
+    [10,4,3, 200, 80,48.5,1],[11,5,5,1000, 50,58.0,1],[12,7,4,3500, 20,60.0,1],[ 9,3,3,  60, 90,42.0,0],
+    [13,6,4, 800, 70,62.0,1],[11,4,4,5000, 10,54.0,1],[15,8,4,1200, 50,65.0,1],[17,6,5,2000, 40,68.0,1],
+    [20,7,4, 500, 60,72.0,1],[18,5,3, 100, 80,58.0,1],
+  ],
+  stats: { regression:{w:2.07,b:31.27,mse:20.46}, correlations:{exp_sal:0.927,etu_sal:0.667,lang_sal:0.897}, classification:{seuil:45,classe0:15,classe1:15} },
+};
+
+/* ============================================================================
+   SECTIONS TABLE OF CONTENTS
+   ============================================================================ */
+const SECTIONS = [
+  { id:'ia-fonction', title:"1. L'IA comme fonction mathématique", level:1, children:[
+    { id:'ia-accroche', title:'1.1 Comment Netflix vous recommande', level:2 },
+    { id:'ia-intuition', title:'1.2 Intuition : la machine à café', level:2 },
+    { id:'ia-formalisation', title:'1.3 Formalisation : ŷ = f(x)', level:2 },
+    { id:'ia-parametres', title:"1.4 Paramètres et apprentissage", level:2 },
+  ]},
+  { id:'dataset', title:'2. Dataset : observations et features', level:1, children:[
+    { id:'dataset-presentation', title:'2.1 Le dataset fil rouge', level:2 },
+    { id:'dataset-tableau', title:'2.2 Tableau des données', level:2 },
+    { id:'dataset-python', title:'2.3 Le dataset en NumPy', level:2 },
+  ]},
+  { id:'vecteurs', title:'3. Vecteurs', level:1, children:[
+    { id:'vecteurs-intuition', title:'3.1 Un développeur = un point', level:2 },
+    { id:'vecteurs-formalisation', title:'3.2 Formalisation', level:2 },
+    { id:'vecteurs-exemple', title:'3.3 Exemple numérique', level:2 },
+    { id:'vecteurs-python', title:'3.4 Vecteurs en NumPy', level:2 },
+  ]},
+  { id:'matrices', title:'4. Matrices', level:1, children:[
+    { id:'matrices-intuition', title:'4.1 Du tableau à la matrice', level:2 },
+    { id:'matrices-formalisation', title:'4.2 Formalisation', level:2 },
+    { id:'matrices-python', title:'4.3 Matrices en NumPy', level:2 },
+  ]},
+  { id:'produit-scalaire', title:'5. Produit scalaire', level:1, children:[
+    { id:'ps-intuition', title:'5.1 Pondérer les features', level:2 },
+    { id:'ps-formalisation', title:'5.2 Formalisation', level:2 },
+    { id:'ps-exemple', title:'5.3 Exemple numérique', level:2 },
+    { id:'ps-python', title:'5.4 Calcul en Python', level:2 },
+  ]},
+  { id:'mat-vec', title:'6. Multiplication matrice-vecteur', level:1, children:[
+    { id:'mv-intuition', title:'6.1 Prédire tous les salaires', level:2 },
+    { id:'mv-formalisation', title:'6.2 Formalisation', level:2 },
+    { id:'mv-python', title:'6.3 Calcul en Python', level:2 },
+  ]},
+  { id:'regression', title:'7. Régression linéaire', level:1, children:[
+    { id:'reg-accroche', title:'7.1 Tracer la meilleure droite', level:2 },
+    { id:'reg-intuition', title:'7.2 Moindres carrés', level:2 },
+    { id:'reg-formalisation', title:'7.3 Formalisation', level:2 },
+    { id:'reg-mse', title:'7.4 Erreur et MSE', level:2 },
+    { id:'reg-python', title:'7.5 Implémentation Python', level:2 },
+  ]},
+  { id:'synthese', title:'8. Synthèse du Jour 1', level:1, children:[
+    { id:'synthese-recap', title:'8.1 Tableau récapitulatif', level:2 },
+    { id:'synthese-pipeline', title:'8.2 Pipeline visuel', level:2 },
+  ]},
+];
+
+/* ============================================================================
+   THEME SYSTEM
+   ============================================================================ */
+const THEMES = {
+  light: {
+    bg:'#ffffff', bgAlt:'#fafafa', bgCode:'#f3f4f6',
+    text:'#1a1a2e', textSecondary:'#4b5563', textMuted:'#9ca3af',
+    border:'#e5e7eb', borderLight:'#f3f4f6',
+    definitionBg:'#eff6ff', definitionBorder:'#3b82f6', definitionTitle:'#1e40af',
+    retenirBg:'#f0fdf4', retenirBorder:'#22c55e', retenirTitle:'#166534',
+    attentionBg:'#fff7ed', attentionBorder:'#f97316', attentionTitle:'#c2410c',
+    intuitionBg:'#faf5ff', intuitionBorder:'#a855f7', intuitionTitle:'#7e22ce',
+    exempleBg:'#ecfeff', exempleBorder:'#06b6d4', exempleTitle:'#0e7490',
+    codeBg:'#f8f9fa', codeBorder:'#d1d5db', codeTitle:'#1f2937',
+    sidebarBg:'#f8f9fa', sidebarText:'#374151', sidebarActive:'#3b82f6',
+    sidebarActiveBg:'#eff6ff', sidebarHover:'#f3f4f6',
+    link:'#3b82f6', accent:'#3b82f6',
+    classe0:'#e74c3c', classe1:'#2ecc71', regression:'#3498db',
+  },
+  dark: {
+    bg:'#0d1117', bgAlt:'#161b22', bgCode:'#1c2128',
+    text:'#c9d1d9', textSecondary:'#8b949e', textMuted:'#6e7681',
+    border:'#30363d', borderLight:'#21262d',
+    definitionBg:'#0d1f3c', definitionBorder:'#3b82f6', definitionTitle:'#93bbfc',
+    retenirBg:'#0a1f0d', retenirBorder:'#22c55e', retenirTitle:'#86efac',
+    attentionBg:'#1f1206', attentionBorder:'#f97316', attentionTitle:'#fdba74',
+    intuitionBg:'#1a0d2e', intuitionBorder:'#a855f7', intuitionTitle:'#d8b4fe',
+    exempleBg:'#0a1a1f', exempleBorder:'#06b6d4', exempleTitle:'#67e8f9',
+    codeBg:'#161b22', codeBorder:'#30363d', codeTitle:'#c9d1d9',
+    sidebarBg:'#161b22', sidebarText:'#8b949e', sidebarActive:'#58a6ff',
+    sidebarActiveBg:'#1c2541', sidebarHover:'#1c2128',
+    link:'#58a6ff', accent:'#58a6ff',
+    classe0:'#ff6b6b', classe1:'#51cf66', regression:'#74c0fc',
+  },
+};
+
+const ThemeContext = createContext();
+function ThemeProvider({ children }) {
+  const [mode, setMode] = useState('light');
+  const theme = THEMES[mode];
+  const toggle = () => setMode(m => m === 'light' ? 'dark' : 'light');
+  return <ThemeContext.Provider value={{ mode, theme, toggle }}>{children}</ThemeContext.Provider>;
+}
+function useTheme() { return useContext(ThemeContext); }
+
+/* ============================================================================
+   KATEX LOADER + MATH COMPONENTS
+   ============================================================================ */
+function M({ t, d }) {
+  if (!window.katex) return <code style={{ fontSize:'0.9em' }}>{t}</code>;
+  try {
+    const html = window.katex.renderToString(t, { throwOnError: false, displayMode: !!d });
+    if (d) return <div style={{ margin:'20px 0', textAlign:'center', overflowX:'auto' }} dangerouslySetInnerHTML={{ __html: html }} />;
+    return <span dangerouslySetInnerHTML={{ __html: html }} />;
+  } catch { return <code>{t}</code>; }
+}
+
+/* ============================================================================
+   REUSABLE COMPONENTS
+   ============================================================================ */
+function ThemeToggle() {
+  const { mode, toggle } = useTheme();
+  return (
+    <button onClick={toggle} style={{ background:'none', border:'none', cursor:'pointer', fontSize:'1.3rem', padding:'6px 10px', borderRadius:'8px' }}
+      title={mode==='light'?'Mode sombre':'Mode clair'} aria-label="Basculer le thème">
+      {mode==='light'?'🌙':'☀️'}
+    </button>
+  );
+}
+
+function Box({ type, title, children }) {
+  const { theme } = useTheme();
+  const C = {
+    definition:{icon:'📐',label:'Définition',bg:'definitionBg',bd:'definitionBorder',tt:'definitionTitle'},
+    retenir:{icon:'⚡',label:'À retenir',bg:'retenirBg',bd:'retenirBorder',tt:'retenirTitle'},
+    attention:{icon:'⚠️',label:'Attention',bg:'attentionBg',bd:'attentionBorder',tt:'attentionTitle'},
+    intuition:{icon:'💡',label:'Intuition',bg:'intuitionBg',bd:'intuitionBorder',tt:'intuitionTitle'},
+    exemple:{icon:'📊',label:'Exemple',bg:'exempleBg',bd:'exempleBorder',tt:'exempleTitle'},
+    code:{icon:'🐍',label:'Code Python',bg:'codeBg',bd:'codeBorder',tt:'codeTitle'},
+  }[type];
+  return (
+    <div style={{ background:theme[C.bg], borderLeft:`4px solid ${theme[C.bd]}`, borderRadius:'6px', padding:'16px 20px', margin:'20px 0' }}>
+      <div style={{ fontFamily:"'DM Sans',sans-serif", fontWeight:700, color:theme[C.tt], marginBottom:'10px', fontSize:'0.95rem' }}>
+        {C.icon} {title||C.label}
+      </div>
+      <div style={{ color:theme.text, lineHeight:1.7 }}>{children}</div>
+    </div>
+  );
+}
+
+function Sec({ id, title, level=1, children }) {
+  const { theme } = useTheme();
+  const sizes = { 1:'1.7rem', 2:'1.3rem', 3:'1.1rem' };
+  const Tag = level===1?'h2':level===2?'h3':'h4';
+  return (
+    <section id={id} style={{ scrollMarginTop:'24px' }}>
+      <Tag style={{ fontFamily:"'DM Sans',sans-serif", fontSize:sizes[level], color:theme.text, fontWeight:700,
+        borderBottom:level===1?`2px solid ${theme.accent}`:'none', paddingBottom:level===1?'8px':'0',
+        marginTop:level===1?'48px':'28px', marginBottom:'16px' }}>
+        {title}
+      </Tag>
+      {children}
+    </section>
+  );
+}
+
+function PythonCell({ code: init, title='Code Python' }) {
+  const { theme } = useTheme();
+  const [code, setCode] = useState(init);
+  const [output, setOutput] = useState('');
+  const [imgSrc, setImgSrc] = useState(null);
+  const [running, setRunning] = useState(false);
+  const [status, setStatus] = useState('idle');
+
+  const run = async () => {
+    setRunning(true); setOutput(''); setImgSrc(null);
+    try {
+      if (!window._pyodideReady) {
+        setStatus('loading');
+        if (!window._pyodideLoading) {
+          const s = document.createElement('script');
+          s.src = 'https://cdn.jsdelivr.net/pyodide/v0.24.1/full/pyodide.js';
+          document.head.appendChild(s);
+          window._pyodideLoading = new Promise(res => { s.onload = res; });
+        }
+        await window._pyodideLoading;
+        window._pyodideReady = await window.loadPyodide({ indexURL:'https://cdn.jsdelivr.net/pyodide/v0.24.1/full/' });
+        await window._pyodideReady.loadPackage(['numpy','matplotlib']);
+        setStatus('ready');
+      }
+      const py = window._pyodideReady;
+      py.runPython(`import sys,io,base64\nimport matplotlib;matplotlib.use('AGG')\nimport matplotlib.pyplot as plt\n_cap=io.StringIO();sys.stdout=_cap`);
+      py.runPython(code);
+      setOutput(py.runPython('_cap.getvalue()'));
+      const hasPlot = py.runPython(`_buf=io.BytesIO();_fig=plt.gcf();_h=len(_fig.get_axes())>0\nif _h:_fig.savefig(_buf,format='png',dpi=120,bbox_inches='tight',facecolor='white');_buf.seek(0)\nplt.close('all');_h`);
+      if (hasPlot) setImgSrc(`data:image/png;base64,${py.runPython("base64.b64encode(_buf.getvalue()).decode()")}`);
+    } catch(e) { setOutput(`Erreur : ${e.message}`); }
+    setRunning(false);
+  };
+
+  return (
+    <div style={{ border:`1px solid ${theme.codeBorder}`, borderRadius:'8px', overflow:'hidden', margin:'20px 0' }}>
+      <div style={{ background:theme.codeBg, padding:'8px 16px', display:'flex', justifyContent:'space-between', alignItems:'center',
+        borderBottom:`1px solid ${theme.codeBorder}`, fontFamily:"'DM Sans',sans-serif", fontSize:'0.85rem', color:theme.codeTitle, fontWeight:600 }}>
+        <span>🐍 {title}</span>
+        <button onClick={run} disabled={running} style={{ background:'#22c55e', color:'white', border:'none', padding:'4px 14px', borderRadius:'4px', cursor:'pointer', fontWeight:600, fontSize:'0.85rem', opacity:running?0.6:1 }}>
+          {running?(status==='loading'?'⏳ Chargement Pyodide...':'⏳ Exécution...'):'▶ Exécuter'}
+        </button>
+      </div>
+      <textarea value={code} onChange={e=>setCode(e.target.value)} spellCheck={false}
+        style={{ width:'100%', minHeight:'100px', fontFamily:"'JetBrains Mono',monospace", fontSize:'0.82rem', lineHeight:1.6,
+          background:theme.bgCode, color:theme.text, border:'none', padding:'14px', resize:'vertical', outline:'none', boxSizing:'border-box' }} />
+      {(output||imgSrc)&&(
+        <div style={{ borderTop:`1px solid ${theme.codeBorder}`, padding:'12px 16px', background:theme.bgAlt,
+          fontFamily:"'JetBrains Mono',monospace", fontSize:'0.8rem', color:theme.textSecondary, whiteSpace:'pre-wrap' }}>
+          {output&&<pre style={{ margin:0 }}>{output}</pre>}
+          {imgSrc&&<img src={imgSrc} alt="Graphique" style={{ maxWidth:'100%', marginTop:'8px', borderRadius:'4px' }} />}
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ============================================================================
+   SIDEBAR
+   ============================================================================ */
+function Sidebar({ activeId }) {
+  const { theme } = useTheme();
+  const [collapsed, setCollapsed] = useState({});
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const [progress, setProgress] = useState(0);
+
+  useEffect(() => {
+    const fn = () => { const h=document.documentElement; setProgress(Math.min(1,Math.max(0,h.scrollTop/(h.scrollHeight-h.clientHeight)))); };
+    window.addEventListener('scroll', fn, { passive:true });
+    return () => window.removeEventListener('scroll', fn);
+  }, []);
+
+  const scrollTo = (id) => { document.getElementById(id)?.scrollIntoView({ behavior:'smooth' }); setMobileOpen(false); };
+  const tog = (id) => setCollapsed(c => ({ ...c, [id]: !c[id] }));
+
+  const nav = (
+    <div style={{ display:'flex', flexDirection:'column', height:'100%', position:'relative' }}>
+      <div style={{ position:'absolute', left:0, top:0, width:'3px', height:'100%', background:theme.borderLight, zIndex:1 }}>
+        <div style={{ width:'100%', height:`${progress*100}%`, background:theme.accent, transition:'height 0.1s' }} />
+      </div>
+      <div style={{ padding:'20px 20px 14px', borderBottom:`1px solid ${theme.border}` }}>
+        <a href="index.html" style={{ display:'inline-flex', alignItems:'center', gap:'4px', fontFamily:"'DM Sans',sans-serif", fontSize:'0.75rem', color:theme.textMuted, textDecoration:'none', marginBottom:'8px' }}>← Accueil</a>
+        <div style={{ fontFamily:"'DM Sans',sans-serif", fontWeight:700, fontSize:'1rem', color:theme.accent }}>Maths IA</div>
+        <div style={{ fontFamily:"'DM Sans',sans-serif", fontSize:'0.78rem', color:theme.textMuted, marginTop:'2px' }}>Jour 1 — Données & représentation</div>
+        <div style={{ display:'flex', gap:'4px', marginTop:'10px' }}>
+          {[1,2,3,4].map(j=>(
+            j===1 ? <div key={j} style={{ flex:1, textAlign:'center', padding:'3px 0', borderRadius:'4px', fontFamily:"'DM Sans',sans-serif",
+              fontSize:'0.72rem', fontWeight:700, background:theme.accent, color:'#fff',
+              border:`1px solid ${theme.accent}` }}>J{j}</div>
+            : <a key={j} href={`jour${j}.html`} style={{ flex:1, textAlign:'center', padding:'3px 0', borderRadius:'4px', fontFamily:"'DM Sans',sans-serif",
+              fontSize:'0.72rem', fontWeight:400, background:'transparent', color:theme.textMuted, textDecoration:'none',
+              cursor:'pointer', border:`1px solid ${theme.border}` }}>J{j}</a>
+          ))}
+        </div>
+      </div>
+      <nav style={{ flex:1, overflowY:'auto', padding:'8px 0' }}>
+        {SECTIONS.map(sec => {
+          const isOpen = !collapsed[sec.id];
+          const isActive = activeId===sec.id || sec.children?.some(c=>c.id===activeId);
+          return (
+            <div key={sec.id}>
+              <div onClick={()=>{scrollTo(sec.id);if(sec.children)tog(sec.id);}}
+                style={{ display:'flex', alignItems:'center', gap:'6px', padding:'7px 14px 7px 18px', cursor:'pointer',
+                  background:isActive?theme.sidebarActiveBg:'transparent', borderRight:isActive?`3px solid ${theme.sidebarActive}`:'3px solid transparent',
+                  fontFamily:"'DM Sans',sans-serif", fontSize:'0.8rem', fontWeight:isActive?600:400,
+                  color:isActive?theme.sidebarActive:theme.sidebarText, transition:'all 0.15s' }}>
+                {sec.children&&<span style={{ fontSize:'0.55rem', transition:'transform 0.2s', transform:isOpen?'rotate(90deg)':'rotate(0)', display:'inline-block' }}>▶</span>}
+                <span style={{ flex:1 }}>{sec.title}</span>
+              </div>
+              {sec.children&&isOpen&&sec.children.map(ch=>{
+                const ca = activeId===ch.id;
+                return <div key={ch.id} onClick={()=>scrollTo(ch.id)} style={{ padding:'4px 14px 4px 42px', cursor:'pointer',
+                  fontFamily:"'DM Sans',sans-serif", fontSize:'0.76rem', color:ca?theme.sidebarActive:theme.textMuted, fontWeight:ca?600:400 }}>{ch.title}</div>;
+              })}
+            </div>
+          );
+        })}
+      </nav>
+      <div style={{ padding:'14px', borderTop:`1px solid ${theme.border}`, fontSize:'0.68rem', color:theme.textMuted, fontFamily:"'DM Sans',sans-serif", textAlign:'center', lineHeight:1.6 }}>
+        © 2025 Mohamed EL AFRIT<br/>
+        <a href="https://www.mohamedelafrit.com" style={{ color:theme.link, textDecoration:'none' }}>www.mohamedelafrit.com</a><br/>
+        <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.fr" style={{ color:theme.link, textDecoration:'none' }}>CC BY-NC-SA 4.0</a>
+      </div>
+    </div>
+  );
+
+  return (
+    <>
+      <button onClick={()=>setMobileOpen(!mobileOpen)} className="mob-btn"
+        style={{ display:'none', position:'fixed', top:10, left:10, zIndex:1001, background:theme.bgAlt, border:`1px solid ${theme.border}`, borderRadius:'8px', padding:'8px 10px', cursor:'pointer', fontSize:'1.2rem' }}>
+        {mobileOpen?'✕':'☰'}
+      </button>
+      <aside className="sidebar-el" style={{ position:'fixed', left:0, top:0, width:'280px', height:'100vh', background:theme.sidebarBg,
+        borderRight:`1px solid ${theme.border}`, zIndex:1000, overflowY:'hidden', transition:'transform 0.3s' }}>{nav}</aside>
+      {mobileOpen&&<div onClick={()=>setMobileOpen(false)} style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.4)', zIndex:999 }} />}
+    </>
+  );
+}
+
+/* ============================================================================
+   HELPERS
+   ============================================================================ */
+function P({ children, style={} }) {
+  const { theme } = useTheme();
+  return <p style={{ color:theme.text, lineHeight:1.8, marginBottom:'16px', fontFamily:"'Source Serif 4',Georgia,serif", fontSize:'1.05rem', ...style }}>{children}</p>;
+}
+function B({ children }) { return <strong style={{ fontWeight:600 }}>{children}</strong>; }
+function Cd({ children }) {
+  const { theme } = useTheme();
+  return <code style={{ background:theme.bgCode, padding:'2px 6px', borderRadius:'4px', fontFamily:"'JetBrains Mono',monospace", fontSize:'0.88em', color:theme.codeTitle }}>{children}</code>;
+}
+function DT({ rows, headers, max=10 }) {
+  const { theme } = useTheme();
+  const show = rows.slice(0,max);
+  return (
+    <div style={{ overflowX:'auto', margin:'16px 0' }}>
+      <table style={{ borderCollapse:'collapse', width:'100%', fontFamily:"'JetBrains Mono',monospace", fontSize:'0.82rem' }}>
+        <thead><tr>{headers.map((h,i)=><th key={i} style={{ padding:'8px 12px', borderBottom:`2px solid ${theme.accent}`, textAlign:'right', fontFamily:"'DM Sans',sans-serif", fontWeight:600, color:theme.text, whiteSpace:'nowrap' }}>{h}</th>)}</tr></thead>
+        <tbody>{show.map((row,i)=>(
+          <tr key={i} style={{ background:i%2===0?'transparent':theme.bgAlt }}>
+            {row.map((c,j)=><td key={j} style={{ padding:'6px 12px', borderBottom:`1px solid ${theme.borderLight}`, textAlign:'right', color:theme.textSecondary }}>{c}</td>)}
+          </tr>
+        ))}</tbody>
+      </table>
+      {rows.length>max&&<div style={{ textAlign:'center', color:theme.textMuted, fontSize:'0.8rem', marginTop:'8px', fontFamily:"'DM Sans',sans-serif" }}>… et {rows.length-max} autres lignes</div>}
+    </div>
+  );
+}
+
+/* ============================================================================
+   MAIN PAGE CONTENT
+   ============================================================================ */
+function Content() {
+  const { theme } = useTheme();
+  return (<>
+    {/* ── SECTION 1 ── */}
+    <Sec id="ia-fonction" title="1. L'IA comme fonction mathématique" level={1}>
+
+      <Sec id="ia-accroche" title="1.1 Comment Netflix vous recommande des films" level={2}>
+        <P>Quand vous ouvrez Netflix, l'application vous propose des films « faits pour vous ». Comment fait-elle ?
+        Elle ne vous connaît pas personnellement — mais elle possède des <B>données</B> sur vous : les films
+        que vous avez regardés, ceux que vous avez aimés, l'heure à laquelle vous les regardez…</P>
+        <P>À partir de ces données, Netflix utilise une <B>fonction mathématique</B> qui prend vos caractéristiques
+        en entrée et produit une note de recommandation en sortie. C'est exactement ce que fait
+        un modèle d'intelligence artificielle : il transforme des nombres en entrée en un résultat en sortie.</P>
+        <P>Aujourd'hui, nous allons comprendre comment structurer ces données et comment fonctionne cette transformation
+        — en utilisant un exemple concret : <B>prédire le salaire d'un développeur</B>.</P>
+      </Sec>
+
+      <Sec id="ia-intuition" title="1.2 Intuition : la machine à café" level={2}>
+        <Box type="intuition" title="Analogie : la machine à café">
+          <P style={{marginBottom:8}}>Pensez à une machine à café automatique :</P>
+          <P style={{marginBottom:8}}>
+            • Vous insérez des <B>entrées</B> : le type de boisson, la taille, le sucre{'\n'}
+            • La machine effectue un <B>calcul interne</B> (dosage, mélange, chauffe){'\n'}
+            • Elle produit une <B>sortie</B> : votre café
+          </P>
+          <P style={{marginBottom:0}}>Un modèle d'IA fonctionne pareil : il prend des nombres en entrée (les <em>features</em>),
+          effectue un calcul, et produit un nombre en sortie (la <em>prédiction</em>). La seule différence :
+          la « recette » est <B>apprise à partir de données</B>.</P>
+        </Box>
+      </Sec>
+
+      <Sec id="ia-formalisation" title="1.3 Formalisation : ŷ = f(x)" level={2}>
+        <P>Traduisons cette intuition en notation mathématique. Un modèle d'IA est une <B>fonction</B> :</P>
+        <M d t={"\\hat{y} = f(\\mathbf{x})"} />
+        <P>
+          • <M t={"\\mathbf{x}"} /> est le <B>vecteur d'entrée</B> — les caractéristiques (features) d'une observation{'\n'}
+          • <M t={"f"} /> est la <B>fonction de prédiction</B> — le modèle{'\n'}
+          • <M t={"\\hat{y}"} /> (lire « y chapeau ») est la <B>prédiction</B> — la valeur estimée
+        </P>
+        <Box type="definition" title="Fonction de prédiction">
+          <P style={{marginBottom:0}}>Une <B>fonction de prédiction</B> <M t={"f : \\mathbb{R}^p \\to \\mathbb{R}"} /> associe à un
+          vecteur d'entrée <M t={"\\mathbf{x}"} /> composé de <M t={"p"} /> caractéristiques
+          une valeur de sortie <M t={"\\hat{y}"} /> appelée <B>prédiction</B>.</P>
+        </Box>
+        <P>Dans le cas de la <B>régression linéaire</B>, cette fonction prend la forme :</P>
+        <M d t={"\\hat{y} = \\mathbf{w}^T \\mathbf{x} + b"} />
+        <P>où <M t={"\\mathbf{w}"} /> est un vecteur de <B>poids</B> (weights) et <M t={"b"} /> est un <B>biais</B> (bias).</P>
+      </Sec>
+
+      <Sec id="ia-parametres" title="1.4 Paramètres et apprentissage" level={2}>
+        <P>En pratique, on écrit le modèle de façon plus précise :</P>
+        <M d t={"\\hat{y} = f_{\\boldsymbol{\\theta}}(\\mathbf{x})"} />
+        <P>L'indice <M t={"\\boldsymbol{\\theta}"} /> (thêta) représente les <B>paramètres</B> du modèle —
+        les « boutons de réglage » qui déterminent comment la fonction transforme l'entrée en sortie.</P>
+        <Box type="retenir" title="L'apprentissage en une phrase">
+          <P style={{marginBottom:0}}><B>Apprendre</B>, pour un modèle d'IA, c'est <B>ajuster ses paramètres</B> <M t={"\\boldsymbol{\\theta}"} /> pour
+          que ses prédictions <M t={"\\hat{y}"} /> soient les plus proches possible des vraies valeurs <M t={"y"} />.
+          C'est ce que nous verrons au Jour 2 avec la descente de gradient.</P>
+        </Box>
+        <Box type="intuition">
+          <P style={{marginBottom:0}}>Reprenons la machine à café. Imaginez qu'elle est mal réglée :
+          le café est trop amer. Vous tournez un <B>bouton</B> (paramètre). Vous goûtez, c'est mieux
+          mais encore un peu fort. Vous réajustez. Après plusieurs essais, le café est parfait.
+          L'IA fait exactement cela — mais automatiquement, et avec des millions de « boutons ».</P>
+        </Box>
+      </Sec>
+    </Sec>
+
+    {/* ── SECTION 2 ── */}
+    <Sec id="dataset" title="2. Dataset : observations et features" level={1}>
+      <Sec id="dataset-presentation" title="2.1 Le dataset fil rouge" level={2}>
+        <P>Tout au long de ce module, nous travaillerons avec un <B>dataset unique</B> directement lié
+        à votre futur métier : la <B>prédiction du salaire d'un développeur</B>.</P>
+        <P>Ce dataset contient <B>30 développeurs fictifs</B> (mais réalistes), chacun décrit par 5 caractéristiques :</P>
+        <Box type="exemple" title="Structure du dataset fil rouge">
+          <DT headers={['Colonne','Type','Description','Plage']}
+            rows={[['experience','entier',"Années d'expérience",'0–20'],['nb_langages','entier','Langages maîtrisés','1–8'],
+              ['niveau_etudes','ordinal','1=Bac … 5=Doctorat','1–5'],['taille_entreprise','entier',"Nb d'employés",'15–5000'],
+              ['remote','entier','% télétravail','0–100'],['salaire','float','Salaire brut (k€)','25–72']]} max={10} />
+        </Box>
+        <P>La <B>variable cible</B> (ce qu'on prédit) est le <B>salaire</B>. Les 5 premières colonnes sont les <B>features</B>.</P>
+      </Sec>
+
+      <Sec id="dataset-tableau" title="2.2 Tableau des données" level={2}>
+        <P>Voici les premières lignes. Chaque ligne = un développeur, chaque colonne = une caractéristique :</P>
+        <DT headers={['#','Exp','Lang','Études','Entrep.','Remote','Salaire']}
+          rows={DATASET.donnees.slice(0,12).map((r,i)=>[i,r[0],r[1],r[2],r[3],r[4],r[5].toFixed(1)])} max={12} />
+        <P>Le dataset contient aussi des <B>cas atypiques</B> : un junior polyglotte payé 42k€ (#7),
+        un développeur expérimenté Bac+2 à 39k€ (#14), ou un senior sous-payé en agence (#23).</P>
+      </Sec>
+
+      <Sec id="dataset-python" title="2.3 Le dataset en NumPy" level={2}>
+        <P>En IA, on utilise des <B>tableaux NumPy</B> pour des calculs vectorisés ultra-rapides :</P>
+        <PythonCell title="Créer le dataset en NumPy" code={`import numpy as np
+
+# Dataset : [experience, nb_langages, niveau_etudes, taille_entreprise, remote, salaire]
+data = np.array([
+    [ 0,2,3, 150, 80,28.0],[ 1,1,2,  50,100,26.5],[ 1,3,4, 800, 40,35.0],
+    [ 2,2,3, 200, 60,32.0],[ 2,4,4,3000, 20,38.0],[ 0,1,1,  30, 50,25.0],
+    [ 3,3,3, 100, 80,34.5],[ 1,5,4,  15,100,42.0],[ 4,3,3, 500, 60,38.5],
+    [ 5,4,4,1200, 40,44.0],[ 5,3,3, 300, 80,41.0],[ 6,5,4,2000, 30,48.0],
+    [ 6,4,3, 150, 90,43.5],[ 7,5,4, 800, 50,50.0],[ 7,3,2,  80, 70,39.0],
+    [ 4,6,5, 400,100,47.0],[ 8,4,4,1500, 40,51.0],[ 5,2,3,4000, 10,40.0],
+    [ 9,5,4, 600, 60,52.0],[10,6,4,2500, 30,55.0],[10,4,3, 200, 80,48.5],
+    [11,5,5,1000, 50,58.0],[12,7,4,3500, 20,60.0],[ 9,3,3,  60, 90,42.0],
+    [13,6,4, 800, 70,62.0],[11,4,4,5000, 10,54.0],[15,8,4,1200, 50,65.0],
+    [17,6,5,2000, 40,68.0],[20,7,4, 500, 60,72.0],[18,5,3, 100, 80,58.0],
+])
+
+experience = data[:, 0]
+salaire    = data[:, 5]
+
+print(f"Dimensions : {data.shape} → {data.shape[0]} dev, {data.shape[1]} colonnes")
+print(f"Salaire moyen : {salaire.mean():.1f} k€")
+print(f"Salaire min/max : {salaire.min():.0f} / {salaire.max():.0f} k€")`} />
+      </Sec>
+    </Sec>
+
+    {/* ── SECTION 3 ── */}
+    <Sec id="vecteurs" title="3. Vecteurs : représenter une observation" level={1}>
+      <Sec id="vecteurs-intuition" title="3.1 Un développeur = un point dans l'espace" level={2}>
+        <P>Chaque développeur est décrit par 5 nombres. On peut voir ces 5 nombres comme
+        les <B>coordonnées d'un point</B> dans un espace à 5 dimensions.</P>
+        <Box type="intuition" title="Analogie : les coordonnées GPS">
+          <P style={{marginBottom:0}}>Une position GPS est un « vecteur » à 2 dimensions : (latitude, longitude).
+          Avec 2 nombres, on localise un point sur Terre.
+          Un développeur est un « point » dans un espace à 5 dimensions : (expérience, langages, études, entreprise, remote).
+          On ne peut pas le dessiner, mais mathématiquement c'est la même idée !</P>
+        </Box>
+      </Sec>
+
+      <Sec id="vecteurs-formalisation" title="3.2 Formalisation" level={2}>
+        <Box type="definition" title="Vecteur de caractéristiques (feature vector)">
+          <P style={{marginBottom:8}}>Un <B>vecteur de caractéristiques</B> est un vecteur <M t={"\\mathbf{x} \\in \\mathbb{R}^p"} /> dont
+          chaque composante correspond à une caractéristique mesurable :</P>
+          <M d t={"\\mathbf{x} = \\begin{pmatrix} x_1 \\\\ x_2 \\\\ \\vdots \\\\ x_p \\end{pmatrix}"} />
+          <P style={{marginBottom:0}}>On note <M t={"p"} /> le nombre de features. Dans notre dataset, <M t={"p = 5"} />.</P>
+        </Box>
+        <P>Par convention, un vecteur est en <B>colonne</B>. Sa <B>transposée</B> <M t={"\\mathbf{x}^T"} /> est en ligne :</P>
+        <M d t={"\\mathbf{x}^T = \\begin{pmatrix} x_1 & x_2 & \\cdots & x_p \\end{pmatrix}"} />
+        <Box type="attention" title="La dimension compte !">
+          <P style={{marginBottom:0}}>Un vecteur dans <M t={"\\mathbb{R}^5"} /> a exactement 5 composantes.
+          On ne peut pas additionner <M t={"\\mathbb{R}^5"} /> et <M t={"\\mathbb{R}^3"} />.
+          En NumPy, c'est le <Cd>shape</Cd> qui indique la dimension.</P>
+        </Box>
+      </Sec>
+
+      <Sec id="vecteurs-exemple" title="3.3 Exemple numérique" level={2}>
+        <Box type="exemple" title="Développeur #2 du dataset">
+          <M d t={"\\mathbf{x}_2 = \\begin{pmatrix} 1 \\\\ 3 \\\\ 4 \\\\ 800 \\\\ 40 \\end{pmatrix} \\quad \\text{avec } y_2 = 35{,}0 \\text{ k€}"} />
+          <P style={{marginBottom:0}}>Composantes : <M t={"x_1=1"} /> (1 an), <M t={"x_2=3"} /> (3 langages),
+          <M t={"x_3=4"} /> (Bac+5), <M t={"x_4=800"} /> (800 employés), <M t={"x_5=40"} /> (40% remote).</P>
+        </Box>
+      </Sec>
+
+      <Sec id="vecteurs-python" title="3.4 Vecteurs en NumPy" level={2}>
+        <PythonCell title="Créer et manipuler des vecteurs" code={`import numpy as np
+
+# Le développeur #2 comme vecteur
+x2 = np.array([1, 3, 4, 800, 40])
+print(f"Vecteur x2 : {x2}")
+print(f"Dimension  : p = {len(x2)} features")
+
+# Accéder aux composantes
+print(f"\\nExpérience : {x2[0]} an")
+print(f"Langages   : {x2[1]}")
+print(f"Études     : {x2[2]} → Bac+5")
+
+# Opérations vectorielles
+x0 = np.array([0, 2, 3, 150, 80])  # Dev #0
+print(f"\\nDifférence x2 - x0 : {x2 - x0}")
+print(f"Double de x2       : {2 * x2}")`} />
+      </Sec>
+    </Sec>
+
+    {/* ── SECTION 4 ── */}
+    <Sec id="matrices" title="4. Matrices : représenter un dataset" level={1}>
+      <Sec id="matrices-intuition" title="4.1 Du tableau à la matrice" level={2}>
+        <P>Notre dataset est un tableau de 30 lignes × 5 colonnes.
+        En mathématiques, un tel tableau rectangulaire s'appelle une <B>matrice</B>.</P>
+        <Box type="intuition">
+          <P style={{marginBottom:0}}>Si un vecteur est une « liste de nombres » (1D),
+          une matrice est un « tableau de nombres » (2D).
+          C'est comme passer d'une <B>fiche individuelle</B> d'un développeur
+          au <B>fichier Excel complet</B> de toute l'équipe.</P>
+        </Box>
+      </Sec>
+
+      <Sec id="matrices-formalisation" title="4.2 Formalisation" level={2}>
+        <Box type="definition" title="Matrice de données">
+          <P style={{marginBottom:8}}><M t={"\\mathbf{X} \\in \\mathbb{R}^{n \\times p}"} /> est un tableau de <M t={"n"} /> lignes × <M t={"p"} /> colonnes :</P>
+          <M d t={"\\mathbf{X} = \\begin{pmatrix} x_{11} & x_{12} & \\cdots & x_{1p} \\\\ x_{21} & x_{22} & \\cdots & x_{2p} \\\\ \\vdots & \\vdots & \\ddots & \\vdots \\\\ x_{n1} & x_{n2} & \\cdots & x_{np} \\end{pmatrix}"} />
+          <P style={{marginBottom:0}}><M t={"x_{ij}"} /> = feature <M t={"j"} /> de l'observation <M t={"i"} />.
+          Ici <M t={"n=30"} />, <M t={"p=5"} />, donc <M t={"\\mathbf{X} \\in \\mathbb{R}^{30 \\times 5}"} />.</P>
+        </Box>
+      </Sec>
+
+      <Sec id="matrices-python" title="4.3 Matrices en NumPy" level={2}>
+        <PythonCell title="Matrice du dataset en NumPy" code={`import numpy as np
+
+# 6 premiers développeurs, 5 features
+X = np.array([
+    [ 0,2,3, 150, 80], [ 1,1,2,  50,100],
+    [ 1,3,4, 800, 40], [ 2,2,3, 200, 60],
+    [ 2,4,4,3000, 20], [ 0,1,1,  30, 50],
+])
+
+print(f"Shape : {X.shape} → {X.shape[0]} dev × {X.shape[1]} features")
+print(f"\\nDev #2, études : X[2,2] = {X[2,2]}")
+print(f"\\nColonne expérience : {X[:, 0]}")
+print(f"\\nTransposée shape : {X.T.shape}")`} />
+      </Sec>
+    </Sec>
+
+    {/* ── SECTION 5 ── */}
+    <Sec id="produit-scalaire" title="5. Produit scalaire : combiner features et poids" level={1}>
+      <Sec id="ps-intuition" title="5.1 Pondérer les features" level={2}>
+        <P>Certaines features comptent plus que d'autres pour prédire le salaire.
+        L'expérience a plus d'impact que le % de télétravail.</P>
+        <Box type="intuition" title="Analogie : la moyenne pondérée">
+          <P style={{marginBottom:0}}>Pensez au calcul de votre moyenne au bac : français (coef 5), maths (coef 7),
+          sport (coef 2)… Chaque matière est multipliée par un <B>poids</B> différent.
+          Le produit scalaire fait cela : il multiplie chaque feature par un poids, puis additionne le tout.</P>
+        </Box>
+      </Sec>
+
+      <Sec id="ps-formalisation" title="5.2 Formalisation" level={2}>
+        <Box type="definition" title="Produit scalaire">
+          <M d t={"\\langle \\mathbf{x}, \\mathbf{w} \\rangle = \\mathbf{x}^T \\mathbf{w} = \\sum_{i=1}^{p} x_i \\cdot w_i"} />
+          <P style={{marginBottom:0}}>Le résultat est un <B>scalaire</B> (un seul nombre).</P>
+        </Box>
+        <Box type="attention" title="Dimensions compatibles">
+          <P style={{marginBottom:0}}>Le produit scalaire exige que les deux vecteurs aient la <B>même dimension</B>.
+          <M t={"\\mathbf{x} \\in \\mathbb{R}^5"} /> et <M t={"\\mathbf{w} \\in \\mathbb{R}^3"} /> → impossible.</P>
+        </Box>
+      </Sec>
+
+      <Sec id="ps-exemple" title="5.3 Exemple numérique" level={2}>
+        <Box type="exemple" title="Prédiction manuelle du salaire">
+          <M d t={"\\mathbf{x}_2 = \\begin{pmatrix} 1 \\\\ 3 \\\\ 4 \\\\ 800 \\\\ 40 \\end{pmatrix}, \\quad \\mathbf{w} = \\begin{pmatrix} 2.0 \\\\ 1.5 \\\\ 3.0 \\\\ 0.005 \\\\ 0.02 \\end{pmatrix}"} />
+          <M d t={"\\langle \\mathbf{x}_2, \\mathbf{w} \\rangle = 2.0 + 4.5 + 12.0 + 4.0 + 0.8 = 23.3"} />
+          <P style={{marginBottom:0}}>Avec un biais <M t={"b=15"} /> : <M t={"\\hat{y} = 23.3 + 15 = 38.3"} /> k€. Le vrai salaire est 35.0 k€ — pas mal !</P>
+        </Box>
+      </Sec>
+
+      <Sec id="ps-python" title="5.4 Calcul en Python" level={2}>
+        <PythonCell title="Produit scalaire : 3 méthodes" code={`import numpy as np
+
+x2 = np.array([1, 3, 4, 800, 40])
+w  = np.array([2.0, 1.5, 3.0, 0.005, 0.02])
+
+# Méthode 1 : boucle manuelle
+res = 0
+for i in range(len(x2)):
+    res += x2[i] * w[i]
+print(f"Boucle : {res}")
+
+# Méthode 2 : np.dot
+print(f"np.dot : {np.dot(x2, w)}")
+
+# Méthode 3 : opérateur @
+print(f"x @ w  : {x2 @ w}")
+
+# Prédiction avec biais
+b = 15.0
+print(f"\\nPrédiction : {x2 @ w + b:.1f} k€  (vrai : 35.0 k€)")`} />
+      </Sec>
+    </Sec>
+
+    {/* ── SECTION 6 ── */}
+    <Sec id="mat-vec" title="6. Multiplication matrice-vecteur" level={1}>
+      <Sec id="mv-intuition" title="6.1 Prédire tous les salaires d'un coup" level={2}>
+        <P>Le produit scalaire prédit <B>un seul</B> salaire. La <B>multiplication matrice-vecteur</B> calcule
+        le produit scalaire de <B>chaque ligne</B> avec le vecteur de poids — toutes les prédictions d'un coup.</P>
+        <Box type="intuition">
+          <P style={{marginBottom:0}}>C'est comme appuyer sur un bouton qui calcule 30 salaires simultanément,
+          au lieu de faire 30 calculs séparés.</P>
+        </Box>
+      </Sec>
+
+      <Sec id="mv-formalisation" title="6.2 Formalisation" level={2}>
+        <M d t={"\\hat{\\mathbf{y}} = \\mathbf{X} \\mathbf{w} \\in \\mathbb{R}^n \\quad \\text{avec} \\quad \\hat{y}_i = \\sum_{j=1}^{p} x_{ij} w_j"} />
+        <Box type="exemple" title="Exemple 3×2">
+          <M d t={"\\begin{pmatrix} 1 & 2 \\\\ 3 & 4 \\\\ 5 & 6 \\end{pmatrix} \\begin{pmatrix} 0.5 \\\\ 0.3 \\end{pmatrix} = \\begin{pmatrix} 1.1 \\\\ 2.7 \\\\ 4.3 \\end{pmatrix}"} />
+        </Box>
+        <Box type="retenir" title="Lien produit scalaire ↔ multiplication matricielle">
+          <P style={{marginBottom:0}}><M t={"\\mathbf{Xw}"} /> = <B>n produits scalaires en parallèle</B>. Chaque ligne de <M t={"\\mathbf{X}"} /> fait
+          un produit scalaire avec <M t={"\\mathbf{w}"} />. C'est l'opération fondamentale de tout modèle linéaire.</P>
+        </Box>
+      </Sec>
+
+      <Sec id="mv-python" title="6.3 Calcul en Python" level={2}>
+        <PythonCell title="Multiplication matrice-vecteur" code={`import numpy as np
+
+# 6 premiers développeurs
+X = np.array([
+    [ 0,2,3, 150, 80], [ 1,1,2,  50,100],
+    [ 1,3,4, 800, 40], [ 2,2,3, 200, 60],
+    [ 2,4,4,3000, 20], [ 0,1,1,  30, 50],
+])
+w = np.array([2.0, 1.5, 3.0, 0.005, 0.02])
+b = 15.0
+
+y_pred = X @ w + b
+vrais = np.array([28.0, 26.5, 35.0, 32.0, 38.0, 25.0])
+
+print("Prédictions :", np.round(y_pred, 1))
+print("Vrais       :", vrais)
+print("Erreurs     :", np.round(y_pred - vrais, 1))`} />
+      </Sec>
+    </Sec>
+
+    {/* ── SECTION 7 ── */}
+    <Sec id="regression" title="7. Régression linéaire : notre premier modèle" level={1}>
+      <Sec id="reg-accroche" title="7.1 Tracer la meilleure droite" level={2}>
+        <P>Peut-on tracer une <B>droite</B> qui prédit le salaire à partir de l'expérience ?
+        Intuitivement oui : plus d'expérience → salaire plus élevé. Mais <em>quelle</em> droite parmi
+        les infinités de droites possibles ?</P>
+      </Sec>
+
+      <Sec id="reg-intuition" title="7.2 La droite des moindres carrés" level={2}>
+        <Box type="intuition" title="Ajuster une règle sur un nuage de points">
+          <P style={{marginBottom:0}}>Imaginez une règle transparente posée sur un graphique avec 30 points.
+          Vous essayez de la placer « au milieu ». Les distances entre les points et la règle sont
+          des <B>erreurs</B>. La droite des moindres carrés minimise la somme des carrés de ces erreurs.</P>
+        </Box>
+      </Sec>
+
+      <Sec id="reg-formalisation" title="7.3 Formalisation" level={2}>
+        <P>Cas simple (une feature : expérience) :</P>
+        <M d t={"\\hat{y} = w_1 \\cdot \\texttt{experience} + w_0"} />
+        <P><M t={"w_1"} /> = <B>pente</B> (impact de chaque année), <M t={"w_0"} /> = <B>ordonnée à l'origine</B> (salaire de base).</P>
+        <P>Cas général avec <M t={"p"} /> features :</P>
+        <M d t={"\\hat{\\mathbf{y}} = \\mathbf{X}\\mathbf{w} + b"} />
+        <Box type="attention" title="Corrélation ≠ Causalité">
+          <P style={{marginBottom:0}}>L'expérience est <B>corrélée</B> au salaire, mais ne le <em>cause</em> pas directement.
+          D'autres facteurs cachés pourraient expliquer les deux.</P>
+        </Box>
+      </Sec>
+
+      <Sec id="reg-mse" title="7.4 Erreur et MSE" level={2}>
+        <Box type="definition" title="Erreur quadratique moyenne (MSE)">
+          <M d t={"\\text{MSE} = J(\\mathbf{w}) = \\frac{1}{n} \\sum_{i=1}^{n} (y_i - \\hat{y}_i)^2"} />
+          <P style={{marginBottom:0}}>On élève au carré pour pénaliser les grosses erreurs et éviter
+          que positives et négatives ne s'annulent.</P>
+        </Box>
+        <Box type="retenir">
+          <P style={{marginBottom:0}}>Plus le MSE est <B>petit</B>, meilleur est le modèle.
+          Sur notre dataset : MSE = <B>20.46 (k€)²</B>, soit une erreur typique ≈ <M t={"\\sqrt{20.46} \\approx 4.5"} /> k€.</P>
+        </Box>
+      </Sec>
+
+      <Sec id="reg-python" title="7.5 Implémentation Python" level={2}>
+        <PythonCell title="Régression linéaire from scratch + graphique" code={`import numpy as np
+import matplotlib.pyplot as plt
+
+# Dataset : [experience, salaire]
+data = np.array([
+    [ 0,28.0],[ 1,26.5],[ 1,35.0],[ 2,32.0],[ 2,38.0],[ 0,25.0],
+    [ 3,34.5],[ 1,42.0],[ 4,38.5],[ 5,44.0],[ 5,41.0],[ 6,48.0],
+    [ 6,43.5],[ 7,50.0],[ 7,39.0],[ 4,47.0],[ 8,51.0],[ 5,40.0],
+    [ 9,52.0],[10,55.0],[10,48.5],[11,58.0],[12,60.0],[ 9,42.0],
+    [13,62.0],[11,54.0],[15,65.0],[17,68.0],[20,72.0],[18,58.0],
+])
+x = data[:, 0]; y = data[:, 1]
+
+# Formule analytique des moindres carrés
+xm, ym = x.mean(), y.mean()
+w = np.sum((x - xm) * (y - ym)) / np.sum((x - xm) ** 2)
+b = ym - w * xm
+
+y_pred = w * x + b
+mse = np.mean((y - y_pred) ** 2)
+
+print(f"y = {w:.2f} * experience + {b:.2f}")
+print(f"Chaque année ≈ +{w:.2f} k€")
+print(f"MSE = {mse:.2f} (k€)²")
+
+fig, ax = plt.subplots(figsize=(8, 5))
+ax.scatter(x, y, c='#3b82f6', s=50, alpha=0.8, zorder=3)
+xl = np.linspace(0, 21, 100)
+ax.plot(xl, w*xl+b, 'r--', lw=2, label=f'y={w:.2f}x+{b:.2f}')
+ax.axhline(45, color='gray', ls=':', alpha=0.5, label='Seuil 45 k€')
+ax.set_xlabel("Années d'expérience"); ax.set_ylabel("Salaire (k€)")
+ax.set_title("Régression linéaire : Expérience → Salaire")
+ax.legend(); ax.grid(True, alpha=0.3); plt.tight_layout(); plt.show()`} />
+
+        <PythonCell title="Calcul du MSE from scratch" code={`import numpy as np
+
+experience = np.array([0, 1, 1, 2, 2, 0])
+salaire    = np.array([28.0, 26.5, 35.0, 32.0, 38.0, 25.0])
+
+w, b = 2.07, 31.27
+y_pred = w * experience + b
+
+print("Vrais     :", salaire)
+print("Prédits   :", np.round(y_pred, 2))
+
+erreurs = salaire - y_pred
+print("Erreurs   :", np.round(erreurs, 2))
+print("Erreurs²  :", np.round(erreurs**2, 2))
+print(f"MSE = {np.mean(erreurs**2):.2f}")`} />
+      </Sec>
+    </Sec>
+
+    {/* ── SECTION 8 ── */}
+    <Sec id="synthese" title="8. Synthèse du Jour 1" level={1}>
+      <Sec id="synthese-recap" title="8.1 Tableau récapitulatif" level={2}>
+        <DT headers={['Concept','Notation','NumPy']} max={20}
+          rows={[['Observation','x ∈ ℝᵖ','np.array([...])'],['Dataset','X ∈ ℝⁿˣᵖ','np.array([[...]])'],
+            ['Prédiction','ŷ = wᵀx + b','x @ w + b'],['Produit scalaire','⟨x,w⟩','np.dot(x,w)'],
+            ['Toutes prédictions','ŷ = Xw','X @ w'],['Erreur MSE','J = (1/n)Σ(y-ŷ)²','np.mean((y-yp)**2)'],
+            ['Pente','w₁','formule analytique'],['Biais','w₀ ou b','y_mean - w*x_mean']]} />
+      </Sec>
+
+      <Sec id="synthese-pipeline" title="8.2 Pipeline visuel" level={2}>
+        <Box type="retenir" title="Le pipeline du Jour 1">
+          <div style={{ textAlign:'center', fontFamily:"'DM Sans',sans-serif", fontSize:'1rem', padding:'12px 0' }}>
+            <B>Données</B> → <B>Vecteur</B> <M t={"\\mathbf{x}"} /> → <B>Matrice</B> <M t={"\\mathbf{X}"} /> → <B>Produit</B> <M t={"\\mathbf{Xw}"} /> → <B>Prédiction</B> <M t={"\\hat{y}"} />
+          </div>
+          <P style={{marginBottom:0}}>
+            Chaque étape s'appuie sur la précédente. Au <B>Jour 2</B>, nous verrons comment
+            <em> trouver automatiquement</em> les meilleurs poids grâce à la <B>descente de gradient</B>.
+          </P>
+        </Box>
+      </Sec>
+
+    </Sec>
+  </>);
+}
+
+/* ============================================================================
+   ROOT
+   ============================================================================ */
+function Jour1Page() {
+  const [activeId, setActiveId] = useState('');
+
+  useEffect(() => {
+    const ids = [];
+    SECTIONS.forEach(s => { ids.push(s.id); s.children?.forEach(c => ids.push(c.id)); });
+    const obs = new IntersectionObserver(entries => {
+      const vis = entries.filter(e => e.isIntersecting).sort((a,b) => a.boundingClientRect.top - b.boundingClientRect.top);
+      if (vis.length) setActiveId(vis[0].target.id);
+    }, { rootMargin: '-10% 0px -80% 0px' });
+    ids.forEach(id => { const el = document.getElementById(id); if (el) obs.observe(el); });
+    return () => obs.disconnect();
+  }, []);
+
+  return <ThemeProvider><Shell activeId={activeId} /></ThemeProvider>;
+}
+
+function Shell({ activeId }) {
+  const { theme } = useTheme();
+  return (
+    <div style={{ background:theme.bg, minHeight:'100vh', transition:'background 0.3s' }}>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,700;1,400&family=JetBrains+Mono:wght@400;500;700&family=Source+Serif+4:ital,wght@0,400;0,600;0,700;1,400&display=swap');
+        *{box-sizing:border-box} body{margin:0;padding:0}
+        .main-content{margin-left:280px;max-width:860px;padding:32px 48px 80px}
+        @media(max-width:768px){.sidebar-el{transform:translateX(-100%)}.mob-btn{display:block!important}.main-content{margin-left:0;padding:20px 16px 60px}}
+        ::selection{background:${theme.accent}33} a{color:${theme.link}}
+      `}</style>
+      <Sidebar activeId={activeId} />
+      <main className="main-content">
+        <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', marginBottom:'8px' }}>
+          <div>
+            <div style={{ fontFamily:"'DM Sans',sans-serif", fontSize:'0.85rem', color:theme.textMuted, fontWeight:500 }}>Jour 1 — 5h45</div>
+            <h1 style={{ fontFamily:"'DM Sans',sans-serif", fontSize:'2rem', fontWeight:700, color:theme.text, margin:'4px 0 0', lineHeight:1.2 }}>
+              Données et représentation mathématique
+            </h1>
+          </div>
+          <ThemeToggle />
+        </div>
+        <div style={{ height:'3px', background:`linear-gradient(90deg, ${theme.accent}, ${theme.accent}44)`, borderRadius:'2px', marginBottom:'32px' }} />
+        <Box type="retenir" title="Objectif du Jour 1">
+          <P style={{marginBottom:0}}>Comprendre que les systèmes d'IA manipulent des <B>objets mathématiques</B> (vecteurs, matrices, fonctions)
+          et savoir les manipuler en Python avec NumPy. À la fin de cette journée, vous saurez implémenter
+          une <B>régression linéaire from scratch</B> pour prédire le salaire d'un développeur.</P>
+        </Box>
+        <div style={{ display:'flex', gap:'8px', flexWrap:'wrap', margin:'20px 0' }}>
+          {[
+            {icon:'📊',label:'Colab',href:'https://drive.google.com/file/d/1DubkVIhdURBkIPkdtfRHPnmWpUr80tXp/view?usp=sharing',bg:'#F9AB00',fg:'#1a1a2e'},
+            {icon:'📐',label:'Synthèse',href:'pdf/jour1_synthese.pdf',bg:theme.accent,fg:'#fff'},
+            {icon:'📝',label:'Exercices',href:'pdf/jour1_exercices.pdf',bg:'#f97316',fg:'#fff'},
+            {icon:'✅',label:'Corrections',href:'pdf/jour1_corrections.pdf',bg:'#22c55e',fg:'#fff'},
+            {icon:'🔬',label:'TP',href:'https://drive.google.com/file/d/11LjtKUgZkqKw_3rJFUgc_77udLX-1Qjh/view?usp=sharing',bg:'#F9AB00',fg:'#1a1a2e'},
+            {icon:'❓',label:'QCM',href:'pdf/jour1_qcm.pdf',bg:'#8b5cf6',fg:'#fff'},
+          ].map((b,i)=>(
+            <a key={i} href={b.href} target="_blank" rel="noopener" style={{ display:'inline-flex', alignItems:'center', justifyContent:'center', gap:'5px', background:b.bg, color:b.fg,
+              padding:'9px 14px', borderRadius:'6px', fontFamily:"'DM Sans',sans-serif", fontSize:'0.85rem', fontWeight:600, textDecoration:'none' }}>
+              {b.icon} {b.label}
+            </a>
+          ))}
+        </div>
+        <Content />
+        <footer style={{ marginTop:'60px', padding:'24px 0', borderTop:`1px solid ${theme.border}`, textAlign:'center',
+          fontFamily:"'DM Sans',sans-serif", fontSize:'0.8rem', color:theme.textMuted }}>
+          <p>© 2025 Mohamed EL AFRIT | <a href="https://www.mohamedelafrit.com" style={{ color:theme.link, textDecoration:'none' }}>www.mohamedelafrit.com</a></p>
+          <p><a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.fr" style={{ color:theme.link, textDecoration:'none' }}>CC BY-NC-SA 4.0</a></p>
+        </footer>
+      </main>
+    </div>
+  );
+}
+
+
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(React.createElement(Jour1Page));
+</script>
+</body>
+</html>

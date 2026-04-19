@@ -1,0 +1,314 @@
+% ============================================================================
+% (c) 2025 Mohamed EL AFRIT -- IPSSI
+% Licence CC BY-NC-SA 4.0
+% https://creativecommons.org/licenses/by-nc-sa/4.0/deed.fr
+%
+% FICHE DE SYNTHESE -- Jour 3 : Probabilites et classification
+% ============================================================================
+\input{template_ipssi}
+
+\jourNumero{3}
+\jourTheme{Classification}
+
+\begin{document}
+
+\pagegarde{Fiche de synth\`{e}se}{3}{Probabilit\'{e}s et classification}
+
+\setstretch{1.05}
+\setlength{\parskip}{2pt}
+\setlength{\abovedisplayskip}{5pt}
+\setlength{\belowdisplayskip}{5pt}
+
+% ======================================================================
+\section{De la r\'{e}gression \`{a} la classification}
+% ======================================================================
+
+Au lieu de pr\'{e}dire un salaire exact (r\'{e}gression), on pr\'{e}dit une
+\motcle{cat\'{e}gorie} : le d\'{e}veloppeur gagne-t-il plus ou moins de 45\,k\texteuro{} ?
+
+\begin{definitionbox}[Classification binaire]
+    Un probl\`{e}me de \textbf{classification binaire} consiste \`{a} pr\'{e}dire
+    une variable cible $y \in \{0, 1\}$ \`{a} partir de features $\vx$ :
+    \[
+        f : \mathbb{R}^p \longrightarrow \{0, 1\}
+    \]
+    \begin{itemize}
+        \item $y = 0$ : classe n\'{e}gative (salaire $\leq$ 45\,k\texteuro)
+        \item $y = 1$ : classe positive (salaire $>$ 45\,k\texteuro)
+    \end{itemize}
+    Notre dataset est \textbf{\'{e}quilibr\'{e}} : 15 d\'{e}veloppeurs dans chaque classe.
+\end{definitionbox}
+
+% ======================================================================
+\section{Rappels de probabilit\'{e}s utiles}
+% ======================================================================
+
+\begin{definitionbox}[Probabilit\'{e}]
+    La probabilit\'{e} d'un \'{e}v\'{e}nement $A$ est un nombre $P(A) \in [0, 1]$.
+    On l'\textbf{estime} \`{a} partir des donn\'{e}es :
+    $P(A) \approx \frac{\text{nombre de cas favorables}}{\text{nombre total}}$.
+
+    \medskip
+    \emph{Exemple :} $P(\text{salaire\_eleve} = 1) = \frac{15}{30} = 0{,}5$.
+\end{definitionbox}
+
+\begin{definitionbox}[Probabilit\'{e} conditionnelle]
+    La probabilit\'{e} de $A$ \textbf{sachant} $B$ :
+    \begin{equation}
+        P(A \mid B) = \frac{P(A \cap B)}{P(B)}
+        \label{eq:cond}
+    \end{equation}
+    \emph{Exemple :} $P(\text{sal}{>}45\text{k} \mid \text{exp}{>}5) \approx 0{,}85$
+    \;vs.\;
+    $P(\text{sal}{>}45\text{k} \mid \text{exp}{\leq}5) \approx 0{,}17$.
+\end{definitionbox}
+
+\begin{center}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabularx}{0.92\textwidth}{l c X}
+    \toprule
+    \textbf{Notion} & \textbf{Formule} & \textbf{Intuition} \\
+    \midrule
+    Probabilit\'{e}     & $P(A) \in [0,1]$ & Fr\'{e}quence relative d'un \'{e}v\'{e}nement \\
+    Esp\'{e}rance        & $E[Y] = \sum_k k \cdot P(Y{=}k)$ & Moyenne th\'{e}orique \\
+    Variance           & $\text{Var}(Y) = E[(Y{-}E[Y])^2]$ & Dispersion autour de la moyenne \\
+    Var. binaire       & $\text{Var}(Y) = p(1{-}p)$ & Max.\ quand $p = 0{,}5$ \\
+    \bottomrule
+\end{tabularx}
+\end{center}
+
+% ======================================================================
+\section{Classification lin\'{e}aire et fronti\`{e}re de d\'{e}cision}
+% ======================================================================
+
+\begin{definitionbox}[Classifieur lin\'{e}aire]
+    Un classifieur lin\'{e}aire utilise une \textbf{fonction de d\'{e}cision} :
+    \begin{equation}
+        g(\vx) = \vw^T \vx + b
+        \label{eq:decision}
+    \end{equation}
+    et la \textbf{r\`{e}gle de d\'{e}cision} :
+    $\yhat = 1$ si $g(\vx) > 0$, \quad $\yhat = 0$ sinon.
+\end{definitionbox}
+
+\begin{definitionbox}[Fronti\`{e}re de d\'{e}cision (hyperplan)]
+    La \textbf{fronti\`{e}re} est l'ensemble des points o\`{u} $g(\vx) = 0$ :
+    \begin{equation}
+        \vw^T \vx + b = 0
+        \label{eq:frontiere}
+    \end{equation}
+    Avec 2 features : droite $x_2 = -\frac{w_1}{w_2}\,x_1 - \frac{b}{w_2}$.
+\end{definitionbox}
+
+\begin{center}
+\begin{tikzpicture}[scale=0.75]
+    % Axes
+    \draw[->, thick] (-0.5,0) -- (8.5,0) node[right] {$x_1$ (exp.)};
+    \draw[->, thick] (0,-0.3) -- (0,6.5) node[above] {$x_2$ (lang.)};
+    % Frontiere
+    \draw[ipssiBleu, very thick, dashed] (0.5,5.5) -- (7.5,1.5)
+        node[pos=0.35, above right, font=\small\sffamily] {$\vw^T\vx + b = 0$};
+    % Points classe 0
+    \foreach \x/\y in {1/2, 1.5/1, 2/3, 0.5/1.5, 3/2.5, 2.5/1.8}
+        \fill[ipssiRouge] (\x, \y) circle (4pt);
+    % Points classe 1
+    \foreach \x/\y in {5/4, 6/5, 7/3.5, 5.5/5.5, 6.5/4.5, 7.5/5}
+        \fill[ipssiVert] (\x, \y) circle (4pt);
+    % Labels
+    \node[ipssiRouge, font=\small\sffamily\bfseries] at (1.5, 4.5) {Classe 0};
+    \node[ipssiRouge, font=\scriptsize\sffamily] at (1.5, 4.0) {$\leq$ 45\,k\texteuro};
+    \node[ipssiVert, font=\small\sffamily\bfseries] at (6.5, 1.5) {Classe 1};
+    \node[ipssiVert, font=\scriptsize\sffamily] at (6.5, 1.0) {$>$ 45\,k\texteuro};
+    % Annotations
+    \draw[<-, gray, thin] (3.8, 3.7) -- (4.5, 4.8)
+        node[above, font=\scriptsize\sffamily, gray, align=center] {fronti\`{e}re\\de d\'{e}cision};
+\end{tikzpicture}
+\end{center}
+
+\begin{retenirbox}
+    La classification lin\'{e}aire = r\'{e}gression (produit scalaire + biais) + on regarde
+    le \textbf{signe}. D'un c\^{o}t\'{e} de la fronti\`{e}re : classe 0, de l'autre : classe 1.
+\end{retenirbox}
+
+% ======================================================================
+\section{Le perceptron}
+% ======================================================================
+
+Le \motcle{perceptron} (Rosenblatt, 1957) est le premier neurone artificiel.
+
+\begin{definitionbox}[Mod\`{e}le du perceptron]
+    \begin{equation}
+        \yhat = \text{signe}(\vw^T \vx + b)
+        \quad\text{avec}\quad
+        \text{signe}(z) = \begin{cases} 1 & \text{si } z > 0 \\ 0 & \text{sinon} \end{cases}
+        \label{eq:perceptron}
+    \end{equation}
+\end{definitionbox}
+
+\begin{definitionbox}[Algorithme d'apprentissage]
+    Pour chaque observation $(\vx_i, y_i)$ :
+    \begin{enumerate}
+        \item \textbf{Pr\'{e}dire} : $\yhat_i = \text{signe}(\vw^T \vx_i + b)$
+        \item \textbf{Si erreur} ($\yhat_i \neq y_i$), \textbf{mettre \`{a} jour} :
+    \end{enumerate}
+    \begin{align}
+        \vw &\leftarrow \vw + \alpha \cdot (y_i - \yhat_i) \cdot \vx_i
+        \label{eq:update-w} \\
+        b   &\leftarrow b + \alpha \cdot (y_i - \yhat_i)
+        \label{eq:update-b}
+    \end{align}
+    R\'{e}p\'{e}ter sur tout le dataset, plusieurs fois (\'{e}poques).
+\end{definitionbox}
+
+\begin{intuitionbox}[Fonctionnement]
+    Si le perceptron pr\'{e}dit \textbf{0 alors que la vraie classe est 1}
+    $(y_i - \yhat_i = +1)$ :
+    les poids sont \textbf{augment\'{e}s} dans la direction de $\vx_i$,
+    poussant la fronti\`{e}re pour inclure ce point dans la zone ``classe 1''.
+
+    S'il pr\'{e}dit \textbf{1 au lieu de 0} $(y_i - \yhat_i = -1)$ :
+    les poids sont \textbf{diminu\'{e}s}, repoussant la fronti\`{e}re.
+
+    S'il ne se trompe pas : aucun changement.
+\end{intuitionbox}
+
+\begin{exemplebox}[R\'{e}sultat sur le dataset salaire]
+    Avec 2 features (exp\'{e}rience, nb\_langages), $\alpha = 0{,}1$, 100 \'{e}poques :
+
+    \medskip
+    \textbf{Accuracy $\approx$ 87--93\%} (selon l'initialisation).
+
+    Le perceptron s\'{e}pare correctement la majorit\'{e} des d\'{e}veloppeurs,
+    mais quelques cas atypiques (junior bien pay\'{e}, senior sous-pay\'{e})
+    restent mal class\'{e}s.
+\end{exemplebox}
+
+% ======================================================================
+\section{Limites du perceptron --- Le probl\`{e}me XOR}
+% ======================================================================
+
+\begin{attentionbox}[Limite fondamentale]
+    Le perceptron ne r\'{e}sout que les probl\`{e}mes \textbf{lin\'{e}airement s\'{e}parables} ---
+    o\`{u} une droite (ou un hyperplan) suffit \`{a} s\'{e}parer les classes.
+
+    \medskip
+    Le \textbf{XOR} (ou exclusif) n'est \emph{pas} lin\'{e}airement s\'{e}parable :
+    les points $(0,0)$ et $(1,1)$ sont en classe~0,
+    les points $(0,1)$ et $(1,0)$ en classe~1.
+    Aucune droite ne peut les s\'{e}parer.
+
+    \medskip
+    $\Rightarrow$ Il faut \textbf{plus d'un neurone} : c'est l'id\'{e}e des
+    \textbf{r\'{e}seaux de neurones multicouches} (Jour~4).
+\end{attentionbox}
+
+\begin{center}
+\begin{tikzpicture}[scale=1.4]
+    % Axes
+    \draw[->, thick] (-0.3,0) -- (1.8,0) node[right, font=\small] {$x_1$};
+    \draw[->, thick] (0,-0.3) -- (0,1.8) node[above, font=\small] {$x_2$};
+    % Points
+    \fill[ipssiRouge] (0, 0) circle (4pt) node[below left, font=\scriptsize] {(0,0)};
+    \fill[ipssiVert]  (0, 1) circle (4pt) node[above left, font=\scriptsize] {(0,1)};
+    \fill[ipssiVert]  (1, 0) circle (4pt) node[below right, font=\scriptsize] {(1,0)};
+    \fill[ipssiRouge] (1, 1) circle (4pt) node[above right, font=\scriptsize] {(1,1)};
+    % Impossible line
+    \draw[ipssiBleu, thick, dashed, opacity=0.4] (-0.2, 1.5) -- (1.5, -0.2);
+    \draw[ipssiOrange, thick, dashed, opacity=0.4] (-0.2, 0.3) -- (1.5, 1.2);
+    % Cross
+    \node[font=\Large, ipssiRouge] at (0.5, 0.5) {$\boldsymbol{\times}$};
+    \node[below, font=\scriptsize\sffamily, gray] at (0.5, -0.4)
+        {Aucune droite ne s\'{e}pare les classes};
+\end{tikzpicture}
+\end{center}
+
+% ======================================================================
+\section{Tableau comparatif : r\'{e}gression vs classification}
+% ======================================================================
+
+\begin{center}
+\renewcommand{\arraystretch}{1.4}
+\begin{tabularx}{\textwidth}{l >{\centering\arraybackslash}X >{\centering\arraybackslash}X}
+    \toprule
+    & \textbf{R\'{e}gression (Jours 1--2)} & \textbf{Classification (Jour 3)} \\
+    \midrule
+    Question
+        & Combien ?
+        & Quelle classe ? \\
+    Sortie $y$
+        & Nombre r\'{e}el (salaire)
+        & \'{E}tiquette $\{0, 1\}$ \\
+    Mod\`{e}le
+        & $\yhat = \vw^T\vx + b$
+        & $\yhat = \text{signe}(\vw^T\vx + b)$ \\
+    Mesure d'erreur
+        & MSE : $\frac{1}{n}\sum(y_i - \yhat_i)^2$
+        & Accuracy : \% bien class\'{e}s \\
+    Optimisation
+        & Descente de gradient
+        & Correction d'erreurs \\
+    Fronti\`{e}re
+        & Droite de r\'{e}gression
+        & Hyperplan de d\'{e}cision \\
+    scikit-learn
+        & \texttt{LinearRegression}
+        & \texttt{Perceptron} \\
+    \bottomrule
+\end{tabularx}
+\end{center}
+
+% ======================================================================
+\section{Formules essentielles \`{a} retenir}
+% ======================================================================
+
+\begin{tcolorbox}[
+    enhanced, colback=ipssiBleu!3, colframe=ipssiBleu!40, boxrule=1pt, arc=4pt,
+    title={\sffamily\bfseries Formules du Jour 3}, coltitle=white, colbacktitle=ipssiBleu!70,
+]
+\begin{align}
+    \text{Probabilit\'{e} conditionnelle}\quad
+        & P(A \mid B) = \frac{P(A \cap B)}{P(B)}
+        \label{eq:f-cond} \\[5pt]
+    \text{Fonction de d\'{e}cision}\quad
+        & g(\vx) = \vw^T \vx + b
+        \label{eq:f-decision} \\[5pt]
+    \text{Fronti\`{e}re}\quad
+        & \vw^T \vx + b = 0
+        \label{eq:f-front} \\[5pt]
+    \text{Perceptron}\quad
+        & \yhat = \text{signe}(\vw^T \vx + b)
+        \label{eq:f-perceptron} \\[5pt]
+    \text{Mise \`{a} jour poids}\quad
+        & \vw \leftarrow \vw + \alpha\,(y_i - \yhat_i)\,\vx_i
+        \label{eq:f-update-w} \\[5pt]
+    \text{Mise \`{a} jour biais}\quad
+        & b \leftarrow b + \alpha\,(y_i - \yhat_i)
+        \label{eq:f-update-b}
+\end{align}
+\end{tcolorbox}
+
+\separateur
+
+\begin{center}
+    \small\sffamily
+    \textbf{Pipeline du Jour 3 :}\quad
+    \fcolorbox{ipssiBleu!40}{ipssiBleu!5}{\;Features $\vx$\;}
+    $\;\longrightarrow\;$
+    \fcolorbox{ipssiBleu!40}{ipssiBleu!5}{\;Score $\vw^T\vx + b$\;}
+    $\;\longrightarrow\;$
+    \fcolorbox{ipssiViolet!40}{ipssiViolet!5}{\;Signe\;}
+    $\;\longrightarrow\;$
+    \fcolorbox{ipssiVert!40}{ipssiVert!5}{\;Classe $\yhat \in \{0,1\}$\;}
+\end{center}
+
+\vfill
+
+\begin{center}
+    {\footnotesize\sffamily\textcolor{gray}{%
+        \textcopyright\ 2025 Mohamed EL AFRIT --- IPSSI \enspace\textbullet\enspace
+        \url{www.mohamedelafrit.com} \enspace\textbullet\enspace
+        CC BY-NC-SA 4.0
+    }}
+\end{center}
+
+\end{document}

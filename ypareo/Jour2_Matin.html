@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<style>
+body { font-family: Calibri, Arial, sans-serif; font-size: 14px; line-height: 1.6; color: #1a1a2e; max-width: 800px; margin: 20px auto; padding: 0 20px; }
+h1 { color: #2563eb; font-size: 1.5em; border-bottom: 2px solid #2563eb; padding-bottom: 6px; }
+h2 { color: #1e40af; font-size: 1.2em; margin-top: 20px; }
+ul { padding-left: 24px; }
+li { margin-bottom: 4px; }
+.info { background: #f3f4f6; padding: 10px 16px; border-radius: 6px; margin-bottom: 16px; }
+.info strong { color: #374151; }
+.box-blue { background: #dbeafe; border-left: 4px solid #2563eb; padding: 12px 16px; border-radius: 4px; margin: 16px 0; }
+.box-blue strong { color: #1e40af; }
+.box-orange { background: #fff7ed; border-left: 4px solid #ea580c; padding: 12px 16px; border-radius: 4px; margin: 16px 0; }
+.box-orange strong { color: #ea580c; }
+.box-green { background: #dcfce7; border-left: 4px solid #16a34a; padding: 12px 16px; border-radius: 4px; margin: 16px 0; }
+.box-green strong { color: #166534; }
+.livrable { background: #fef2f2; border: 2px solid #ea580c; padding: 14px 18px; border-radius: 8px; margin: 20px 0; }
+.livrable h3 { color: #ea580c; margin-top: 0; }
+code { background: #f3f4f6; padding: 2px 6px; border-radius: 3px; font-family: Consolas, monospace; font-size: 13px; }
+.footer { margin-top: 30px; padding-top: 12px; border-top: 1px solid #e5e7eb; font-size: 12px; color: #9ca3af; text-align: center; }
+</style>
+</head>
+<body>
+
+<h1>Jour 2 — MATIN — Optimisation</h1>
+
+<div class="info">
+<strong>Date :</strong> [À compléter] &nbsp;|&nbsp; <strong>Horaires :</strong> 9h00 – 12h30 &nbsp;|&nbsp; <strong>Durée :</strong> 3h30<br>
+<strong>Module :</strong> Mathématiques appliquées à l'Intelligence Artificielle<br>
+<strong>Intervenant :</strong> Mohamed EL AFRIT
+</div>
+
+<h2>Contenu de la séance (cours magistral + démonstrations)</h2>
+
+<strong>Notions abordées :</strong>
+<ul>
+<li>Rappel du Jour 1 : régression linéaire, MSE, poids choisis manuellement</li>
+<li>Fonction de coût J(w) = MSE : mesure de l'erreur en fonction des poids</li>
+<li>Interprétation graphique : la parabole (forme en U), le minimum comme « fond de la vallée »</li>
+<li>Notion de minimum : w* = argmin J(w), l'apprentissage = trouver le fond de la vallée</li>
+<li>Introduction intuitive à la dérivée : la pente d'une route, f'(x) = 0 au minimum</li>
+<li>Tableau des dérivées utiles : (ax²)' = 2ax, ((x−a)²)' = 2(x−a), règle de la chaîne</li>
+<li>Descente de gradient : w ← w − α·∂J/∂w (intuition : descendre une montagne les yeux bandés)</li>
+<li>Taux d'apprentissage α : trop petit → lent, trop grand → divergence, bon → convergence rapide</li>
+<li>Application au dataset : gradients ∂J/∂w₁ et ∂J/∂w₀, 5000 itérations, comparaison avec solution analytique</li>
+</ul>
+
+<div class="box-blue">
+<strong>🎯 Fil rouge — Application sur le dataset salaire</strong><br>
+• On optimise les poids de la régression par descente de gradient.<br>
+• Démonstration en live : 5000 itérations, courbe de convergence du MSE.<br>
+• Résultat : ŷ = 2.07×exp + 31.28, MSE = 20.46 (identique à la solution analytique).<br>
+• Comparaison de 4 valeurs de α (0.001, 0.05, 0.1, 0.9) sur un graphique.
+</div>
+
+<strong>Compétences visées :</strong>
+<ul>
+<li>Comprendre la fonction de coût comme mesure d'erreur à minimiser</li>
+<li>Calculer une dérivée simple et identifier un minimum</li>
+<li>Implémenter la descente de gradient et observer la convergence</li>
+<li>Choisir un taux d'apprentissage adapté</li>
+</ul>
+
+<strong>Supports utilisés :</strong>
+<ul>
+<li>Page web interactive Jour 2 (cours avec démonstrations Python exécutables)</li>
+<li>Notebook Google Colab « Jour2_Cours_Demo.ipynb » (démonstrations en live)</li>
+<li>Fiche de synthèse Jour 2 (distribuée en PDF)</li>
+</ul>
+
+<div class="footer">© 2025 Mohamed EL AFRIT — IPSSI — www.mohamedelafrit.com — CC BY-NC-SA 4.0</div>
+</body>
+</html>

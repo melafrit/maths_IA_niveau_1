@@ -1,0 +1,330 @@
+% ============================================================================
+% (c) 2025 Mohamed EL AFRIT -- IPSSI
+% Licence CC BY-NC-SA 4.0
+% https://creativecommons.org/licenses/by-nc-sa/4.0/deed.fr
+%
+% FICHE DE SYNTHESE -- Jour 2 : Optimisation
+% ============================================================================
+\input{template_ipssi}
+
+\jourNumero{2}
+\jourTheme{Optimisation}
+
+\begin{document}
+
+\pagegarde{Fiche de synth\`{e}se}{2}{Optimisation}
+
+\setstretch{1.05}
+\setlength{\parskip}{2pt}
+\setlength{\abovedisplayskip}{5pt}
+\setlength{\belowdisplayskip}{5pt}
+
+% ======================================================================
+\section{Fonction de co\^{u}t (loss function)}
+% ======================================================================
+
+La \motcle{fonction de co\^{u}t} $J(\vw)$ mesure l'erreur globale du mod\`{e}le.
+Pour la r\'{e}gression lin\'{e}aire, on utilise l'\textbf{erreur quadratique moyenne} (MSE) :
+
+\begin{definitionbox}[Fonction de co\^{u}t MSE]
+    \begin{equation}
+        J(\vw, b) = \frac{1}{n} \sum_{i=1}^{n} \bigl(y_i - \yhat_i\bigr)^2
+        = \frac{1}{n} \sum_{i=1}^{n} \bigl(y_i - (\vw^T \vx_i + b)\bigr)^2
+        \label{eq:cout}
+    \end{equation}
+    Le co\^{u}t d\'{e}pend des \textbf{param\`{e}tres} $(\vw, b)$, pas des donn\'{e}es (fix\'{e}es).
+\end{definitionbox}
+
+\begin{retenirbox}[Objectif]
+    \textbf{Apprendre} = trouver $\vw^* = \arg\min_{\vw} J(\vw)$,
+    c'est-\`{a}-dire les poids qui \textbf{minimisent} l'erreur.
+\end{retenirbox}
+
+\textbf{Interpr\'{e}tation graphique} --- dans le cas simple (1 param\`{e}tre $w_1$, biais fix\'{e}),
+$J(w_1)$ est une \textbf{parabole} (courbe en~U). Le minimum est le creux de la courbe :
+
+\begin{center}
+\begin{tikzpicture}[scale=0.82]
+    % Axes
+    \draw[->, thick] (-0.5,0) -- (7,0) node[right] {$w_1$};
+    \draw[->, thick] (0,-0.3) -- (0,5.2) node[above] {$J(w_1)$};
+    % Parabole
+    \draw[ipssiBleu, very thick, domain=0.2:6.5, samples=80]
+        plot (\x, {0.35*(\x - 3.5)^2 + 0.3});
+    % Minimum
+    \fill[ipssiVert] (3.5, 0.3) circle (3pt);
+    \draw[ipssiVert, dashed] (3.5, 0) -- (3.5, 0.3);
+    \node[below, ipssiVert, font=\small\sffamily\bfseries] at (3.5, -0.15) {$w_1^*$};
+    \node[right, ipssiVert, font=\small\sffamily] at (3.7, 0.5) {minimum};
+    % Annotations
+    \node[ipssiBleu, font=\small] at (1.2, 3.5) {$J$ \'{e}lev\'{e}};
+    \node[ipssiBleu, font=\small] at (5.8, 3.5) {$J$ \'{e}lev\'{e}};
+    \draw[->, gray, thick] (1.5, 2.5) -- (2.5, 1.2);
+    \node[gray, font=\scriptsize\sffamily] at (1.2, 2.0) {descente};
+    \draw[->, gray, thick] (5.5, 2.5) -- (4.5, 1.2);
+    \node[gray, font=\scriptsize\sffamily] at (5.8, 2.0) {descente};
+\end{tikzpicture}
+\end{center}
+
+% ======================================================================
+\section{D\'{e}riv\'{e}e --- r\'{e}sum\'{e}}
+% ======================================================================
+
+\begin{definitionbox}[D\'{e}riv\'{e}e]
+    La d\'{e}riv\'{e}e de $f$ en $x$ mesure le \textbf{taux de variation instantan\'{e}} :
+    \begin{equation}
+        f'(x) = \lim_{h \to 0} \frac{f(x+h) - f(x)}{h}
+        \label{eq:derivee}
+    \end{equation}
+\end{definitionbox}
+
+\subsection{D\'{e}riv\'{e}es utiles}
+
+\begin{center}
+\renewcommand{\arraystretch}{1.35}
+\begin{tabularx}{0.92\textwidth}{l c X}
+    \toprule
+    \textbf{Fonction} $f(x)$ & \textbf{D\'{e}riv\'{e}e} $f'(x)$ & \textbf{Exemple} \\
+    \midrule
+    $c$ (constante)        & $0$          & $f=5 \Rightarrow f'=0$ \\
+    $ax + b$               & $a$          & $f=3x+2 \Rightarrow f'=3$ \\
+    $x^2$                  & $2x$         & $f=x^2 \Rightarrow f'=2x$ \\
+    $ax^2$                 & $2ax$        & $f=4x^2 \Rightarrow f'=8x$ \\
+    $(x-a)^2$              & $2(x-a)$     & $f=(x{-}3)^2 \Rightarrow f'=2(x{-}3)$ \\
+    \midrule
+    \multicolumn{3}{l}{\textbf{R\`{e}gle de la cha\^{i}ne :}
+    $[g(h(x))]' = g'(h(x)) \cdot h'(x)$} \\
+    \bottomrule
+\end{tabularx}
+\end{center}
+
+\subsection{Lien d\'{e}riv\'{e}e -- minimum}
+
+\begin{retenirbox}
+    Au \textbf{minimum} d'une fonction : $f'(x^*) = 0$ (pente nulle, fond de la vall\'{e}e).
+    Pour le MSE (fonction \textbf{convexe}), le seul point o\`{u} $J'=0$ est le minimum global.
+\end{retenirbox}
+
+% ======================================================================
+\section{Descente de gradient}
+% ======================================================================
+
+\begin{definitionbox}[Algorithme de la descente de gradient]
+    R\'{e}p\'{e}ter jusqu'\`{a} convergence :
+    \begin{equation}
+        \boxed{\;w \leftarrow w - \alpha \cdot \frac{\partial J}{\partial w}\;}
+        \label{eq:gd}
+    \end{equation}
+    \begin{enumerate}
+        \item \textbf{Pr\'{e}dire} : $\yhat_i = \vw^T \vx_i + b$ pour tout $i$
+        \item \textbf{Calculer l'erreur} : $J(\vw)$ (MSE)
+        \item \textbf{Calculer le gradient} : $\nabla J = \bigl(\frac{\partial J}{\partial w_0},\, \frac{\partial J}{\partial w_1}, \ldots\bigr)$
+        \item \textbf{Mettre \`{a} jour} : $\vw \leftarrow \vw - \alpha \, \nabla J$
+    \end{enumerate}
+\end{definitionbox}
+
+\textbf{Illustration} --- it\'{e}rations successives sur la courbe de co\^{u}t :
+
+\begin{center}
+\begin{tikzpicture}[scale=0.82]
+    % Axes
+    \draw[->, thick] (-0.5,0) -- (7.5,0) node[right] {$w$};
+    \draw[->, thick] (0,-0.3) -- (0,5.5) node[above] {$J(w)$};
+    % Parabole
+    \draw[ipssiBleu, very thick, domain=0.3:7, samples=80]
+        plot (\x, {0.3*(\x - 4)^2 + 0.2});
+    % Iterations
+    \fill[ipssiRouge] (1.0, {0.3*(1-4)^2+0.2}) circle (3pt);
+    \node[above left, ipssiRouge, font=\scriptsize\sffamily] at (1.0, {0.3*(1-4)^2+0.2}) {$w_0$};
+
+    \fill[ipssiOrange] (2.2, {0.3*(2.2-4)^2+0.2}) circle (3pt);
+    \node[above, ipssiOrange, font=\scriptsize\sffamily] at (2.2, {0.3*(2.2-4)^2+0.2+0.15}) {$w_1$};
+
+    \fill[ipssiOrange!70!ipssiVert] (3.0, {0.3*(3-4)^2+0.2}) circle (3pt);
+    \node[above, font=\scriptsize\sffamily, color=ipssiOrange!70!ipssiVert] at (3.0, {0.3*(3-4)^2+0.2+0.15}) {$w_2$};
+
+    \fill[ipssiVert!70!black] (3.5, {0.3*(3.5-4)^2+0.2}) circle (3pt);
+    \node[above right, font=\scriptsize\sffamily, color=ipssiVert!70!black] at (3.5, {0.3*(3.5-4)^2+0.2+0.1}) {$w_3$};
+
+    \fill[ipssiVert] (4.0, 0.2) circle (4pt);
+    \node[below right, ipssiVert, font=\small\sffamily\bfseries] at (4.0, -0.1) {$w^*$};
+
+    % Arrows
+    \draw[->, ipssiRouge, thick] (1.0, {0.3*(1-4)^2+0.2-0.1})
+        to[out=-30, in=160] (2.1, {0.3*(2.2-4)^2+0.2+0.05});
+    \draw[->, ipssiOrange, thick] (2.3, {0.3*(2.2-4)^2+0.2-0.1})
+        to[out=-20, in=160] (2.9, {0.3*(3-4)^2+0.2+0.05});
+
+    % Label
+    \node[gray, font=\scriptsize\sffamily, align=center] at (6.2, 3.5)
+        {$w \leftarrow w - \alpha J'(w)$\\[2pt]``pas dans la direction\\qui descend''};
+\end{tikzpicture}
+\end{center}
+
+\begin{intuitionbox}[Analogie]
+    Descendre une montagne \textbf{les yeux band\'{e}s} : on t\^{a}te la pente (gradient),
+    on fait un pas dans la direction descendante ($-\alpha \nabla J$), on recommence.
+\end{intuitionbox}
+
+% ======================================================================
+\section{Taux d'apprentissage $\alpha$}
+% ======================================================================
+
+Le taux d'apprentissage $\alpha$ contr\^{o}le la \textbf{taille des pas} :
+
+\begin{center}
+\renewcommand{\arraystretch}{1.4}
+\begin{tabularx}{\textwidth}{c >{\centering\arraybackslash}p{3.5cm} X}
+    \toprule
+    \textbf{Valeur de $\alpha$} & \textbf{Comportement} & \textbf{Cons\'{e}quence} \\
+    \midrule
+    Trop petit (ex: $10^{-5}$)
+        & Convergence tr\`{e}s lente
+        & Des milliers d'it\'{e}rations n\'{e}cessaires. Pas pratique. \\
+    Bon (ex: $10^{-2}$)
+        & Convergence rapide et stable
+        & $J$ diminue r\'{e}guli\`{e}rement puis se stabilise. Id\'{e}al. \\
+    Trop grand (ex: $1$)
+        & Oscillation ou divergence
+        & On ``saute'' par-dessus le minimum. $J$ augmente ! \\
+    \bottomrule
+\end{tabularx}
+\end{center}
+
+\begin{attentionbox}[Choisir $\alpha$]
+    Commencer par $\alpha = 0{,}01$, observer la courbe $J$ vs it\'{e}rations :
+    si elle descend trop lentement $\Rightarrow$ augmenter ;
+    si elle oscille ou monte $\Rightarrow$ diminuer.
+\end{attentionbox}
+
+% ======================================================================
+\section{Application \`{a} la r\'{e}gression lin\'{e}aire}
+% ======================================================================
+
+Pour $\yhat_i = w_1 x_i + w_0$ et $J = \frac{1}{n}\sum(y_i - \yhat_i)^2$,
+les \textbf{d\'{e}riv\'{e}es partielles} sont :
+
+\begin{align}
+    \frac{\partial J}{\partial w_1}
+    &= \frac{-2}{n} \sum_{i=1}^{n} x_i \cdot (y_i - \yhat_i)
+    \label{eq:dw1} \\[4pt]
+    \frac{\partial J}{\partial w_0}
+    &= \frac{-2}{n} \sum_{i=1}^{n} (y_i - \yhat_i)
+    \label{eq:dw0}
+\end{align}
+
+\textbf{Mise \`{a} jour simultan\'{e}e} \`{a} chaque it\'{e}ration :
+\[
+    w_1 \leftarrow w_1 - \alpha \frac{\partial J}{\partial w_1}
+    \qquad\qquad
+    w_0 \leftarrow w_0 - \alpha \frac{\partial J}{\partial w_0}
+\]
+
+\begin{exemplebox}[R\'{e}sultat sur le dataset salaire]
+    D\'{e}part : $w_1 = 0$, $w_0 = 0$, $\alpha = 0{,}001$, 5\,000 it\'{e}rations.
+
+    \medskip
+    \begin{tabular}{l l}
+        \textbf{Descente de gradient :} & $\yhat = 2{,}0672 \, x + 31{,}2830$ \quad (MSE $= 20{,}46$) \\
+        \textbf{Formule analytique :}   & $\yhat = 2{,}0672 \, x + 31{,}2830$ \quad (MSE $= 20{,}46$) \\
+    \end{tabular}
+
+    \medskip
+    Les deux m\'{e}thodes convergent vers le \textbf{m\^{e}me r\'{e}sultat}.
+    La descente de gradient est plus lente mais \textbf{universelle}.
+\end{exemplebox}
+
+% ======================================================================
+\section{Formules essentielles \`{a} retenir}
+% ======================================================================
+
+\begin{tcolorbox}[
+    enhanced, colback=ipssiBleu!3, colframe=ipssiBleu!40, boxrule=1pt, arc=4pt,
+    title={\sffamily\bfseries Formules du Jour 2}, coltitle=white, colbacktitle=ipssiBleu!70,
+]
+\begin{align}
+    \text{Fonction de co\^{u}t}\quad
+        & J(\vw) = \frac{1}{n} \sum_{i=1}^{n} (y_i - \yhat_i)^2
+        \label{eq:f-cout} \\[5pt]
+    \text{D\'{e}riv\'{e}e}\quad
+        & f'(x) = \lim_{h\to 0} \frac{f(x+h)-f(x)}{h}
+        \label{eq:f-deriv} \\[5pt]
+    \text{Mise \`{a} jour (GD)}\quad
+        & w \leftarrow w - \alpha \cdot \frac{\partial J}{\partial w}
+        \label{eq:f-gd} \\[5pt]
+    \text{Gradient pente}\quad
+        & \frac{\partial J}{\partial w_1} = \frac{-2}{n}\sum x_i(y_i - \yhat_i)
+        \label{eq:f-dw1} \\[5pt]
+    \text{Gradient biais}\quad
+        & \frac{\partial J}{\partial w_0} = \frac{-2}{n}\sum (y_i - \yhat_i)
+        \label{eq:f-dw0} \\[5pt]
+    \text{Condition de minimum}\quad
+        & \nabla J(\vw^*) = \mathbf{0}
+        \label{eq:f-min}
+\end{align}
+\end{tcolorbox}
+
+% ======================================================================
+\section{Tableau r\'{e}capitulatif}
+% ======================================================================
+
+\begin{center}
+\renewcommand{\arraystretch}{1.35}
+\begin{tabularx}{\textwidth}{l >{\centering\arraybackslash}p{4cm} X}
+    \toprule
+    \textbf{Concept} & \textbf{Formule} & \textbf{Code Python} \\
+    \midrule
+    Fonction de co\^{u}t
+        & $J = \frac{1}{n}\sum(y_i-\yhat_i)^2$
+        & \texttt{np.mean((y - y\_pred)**2)} \\
+    D\'{e}riv\'{e}e de $(w{-}a)^2$
+        & $2(w-a)$
+        & \texttt{2 * (w - a)} \\
+    Gradient $\partial J / \partial w_1$
+        & $\frac{-2}{n}\sum x_i e_i$
+        & \texttt{-2/n * np.sum(x * err)} \\
+    Gradient $\partial J / \partial w_0$
+        & $\frac{-2}{n}\sum e_i$
+        & \texttt{-2/n * np.sum(err)} \\
+    Mise \`{a} jour
+        & $w \leftarrow w - \alpha \nabla J$
+        & \texttt{w -= alpha * grad} \\
+    Taux d'apprentissage
+        & $\alpha$ (ex : $0{,}01$)
+        & \texttt{alpha = 0.01} \\
+    Pr\'{e}diction
+        & $\yhat = w_1 x + w_0$
+        & \texttt{y\_pred = w1*x + w0} \\
+    Boucle d'entra\^{i}nement
+        & $T$ it\'{e}rations
+        & \texttt{for \_ in range(5000):} \\
+    \bottomrule
+\end{tabularx}
+\end{center}
+
+\separateur
+
+\begin{center}
+    \small\sffamily
+    \textbf{Boucle du Jour 2 :}\quad
+    \fcolorbox{ipssiBleu!40}{ipssiBleu!5}{\;Pr\'{e}diction $\yhat$\;}
+    $\;\longrightarrow\;$
+    \fcolorbox{ipssiOrange!40}{ipssiOrange!5}{\;Erreur $J$\;}
+    $\;\longrightarrow\;$
+    \fcolorbox{ipssiViolet!40}{ipssiViolet!5}{\;Gradient $\nabla J$\;}
+    $\;\longrightarrow\;$
+    \fcolorbox{ipssiVert!40}{ipssiVert!5}{\;Mise \`{a} jour $\vw$\;}
+    $\;\circlearrowleft$
+\end{center}
+
+\vfill
+
+\begin{center}
+    {\footnotesize\sffamily\textcolor{gray}{%
+        \textcopyright\ 2025 Mohamed EL AFRIT --- IPSSI \enspace\textbullet\enspace
+        \url{www.mohamedelafrit.com} \enspace\textbullet\enspace
+        CC BY-NC-SA 4.0
+    }}
+\end{center}
+
+\end{document}

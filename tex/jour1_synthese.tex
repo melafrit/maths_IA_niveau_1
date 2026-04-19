@@ -1,0 +1,294 @@
+% ============================================================================
+% © 2025 Mohamed EL AFRIT — IPSSI
+% Licence CC BY-NC-SA 4.0
+% https://creativecommons.org/licenses/by-nc-sa/4.0/deed.fr
+%
+% FICHE DE SYNTHÈSE — Jour 1
+% Données et représentation mathématique
+% ============================================================================
+\input{template_ipssi}
+
+\jourNumero{1}
+\jourTheme{Repr\'{e}sentation}
+
+\begin{document}
+
+% ── Page de garde ──────────────────────────────────────────────────────────
+\pagegarde{Fiche de synth\`{e}se}{1}{Donn\'{e}es et repr\'{e}sentation math\'{e}matique}
+
+% Compacter pour tenir en 3-4 pages (hors page de garde)
+\setstretch{1.05}
+\setlength{\parskip}{2pt}
+\setlength{\abovedisplayskip}{6pt}
+\setlength{\belowdisplayskip}{6pt}
+
+% ══════════════════════════════════════════════════════════════════════════
+\section{L'IA comme fonction math\'{e}matique}
+% ══════════════════════════════════════════════════════════════════════════
+
+Un mod\`{e}le d'intelligence artificielle est une \motcle{fonction math\'{e}matique} qui
+transforme des entr\'{e}es num\'{e}riques en une sortie (la pr\'{e}diction).
+
+\begin{definitionbox}[Fonction de pr\'{e}diction]
+    Une \textbf{fonction de pr\'{e}diction} $f_{\boldsymbol{\theta}} : \mathbb{R}^p \to \mathbb{R}$
+    associe \`{a} un vecteur d'entr\'{e}e~$\vx$ compos\'{e} de $p$~features une valeur~$\yhat$ :
+    %
+    \formule{\yhat = f_{\boldsymbol{\theta}}(\vx)}
+    %
+    \begin{itemize}
+        \item $\vx \in \mathbb{R}^p$ : vecteur d'entr\'{e}e (les \emph{features} de l'observation)
+        \item $\boldsymbol{\theta}$ : \textbf{param\`{e}tres} du mod\`{e}le (poids et biais)
+        \item $\yhat$ : \textbf{pr\'{e}diction} (valeur estim\'{e}e par le mod\`{e}le)
+    \end{itemize}
+\end{definitionbox}
+
+Dans le cas \textbf{lin\'{e}aire}, la fonction prend la forme :
+\formule{\yhat = \vw^T \vx + b}
+o\`{u} $\vw \in \mathbb{R}^p$ est le vecteur de \motcle{poids} (weights) et $b \in \mathbb{R}$ le \motcle{biais} (bias).
+
+\begin{retenirbox}[Apprendre = ajuster les param\`{e}tres]
+    L'\textbf{apprentissage} consiste \`{a} trouver les valeurs de $\boldsymbol{\theta} = (\vw, b)$
+    qui minimisent l'\'{e}cart entre les pr\'{e}dictions $\yhat$ et les vraies valeurs~$y$.
+\end{retenirbox}
+
+% ══════════════════════════════════════════════════════════════════════════
+\section{Vecteurs et matrices}
+% ══════════════════════════════════════════════════════════════════════════
+
+\subsection{Vecteur de caract\'{e}ristiques}
+
+\begin{definitionbox}[Vecteur (feature vector)]
+    Un \textbf{vecteur de caract\'{e}ristiques} repr\'{e}sente une observation par
+    $p$ valeurs num\'{e}riques :
+    \[
+        \vx = \begin{pmatrix} x_1 \\ x_2 \\ \vdots \\ x_p \end{pmatrix} \in \mathbb{R}^p
+    \]
+    Chaque composante $x_j$ correspond \`{a} une feature.
+    La \textbf{transpos\'{e}e} $\vx^T = (x_1 \; x_2 \; \cdots \; x_p)$ est la version en ligne.
+\end{definitionbox}
+
+\begin{exemplebox}[D\'{e}veloppeur \#2 du dataset]
+    $p = 5$ features $\to$
+    $\vx_2 = \begin{pmatrix} 1 & 3 & 4 & 800 & 40 \end{pmatrix}^T$
+    avec salaire r\'{e}el $y_2 = 35{,}0$ k\texteuro.
+\end{exemplebox}
+
+\subsection{Matrice de donn\'{e}es}
+
+\begin{definitionbox}[Matrice de donn\'{e}es]
+    La \textbf{matrice de donn\'{e}es} $\mX \in \mathbb{R}^{n \times p}$ regroupe
+    $n$~observations de $p$~features.
+    Chaque \textbf{ligne}~$i$ = une observation $\vx_i^T$,
+    chaque \textbf{colonne}~$j$ = une feature.
+    L'\'{e}l\'{e}ment $x_{ij}$ = valeur de la feature~$j$ pour l'observation~$i$.
+    \emph{Notre dataset :} $\mX \in \mathbb{R}^{30 \times 5}$.
+    \[
+        \mX = \begin{pmatrix}
+            x_{11} & x_{12} & \cdots & x_{1p} \\
+            \vdots & \vdots & \ddots & \vdots \\
+            x_{n1} & x_{n2} & \cdots & x_{np}
+        \end{pmatrix}
+    \]
+\end{definitionbox}
+
+\subsection{Conventions de notation}
+
+\begin{center}
+\begin{tabularx}{0.88\textwidth}{l c X}
+    \toprule
+    \textbf{Objet} & \textbf{Notation} & \textbf{Convention} \\
+    \midrule
+    Scalaire       & $n, p, \alpha$ & minuscule italique \\
+    Vecteur        & $\vx, \vw$ & minuscule \textbf{gras} \\
+    Matrice        & $\mX, \mW$ & majuscule \textbf{gras} \\
+    Pr\'{e}diction & $\yhat$ & accent \textit{chapeau} \\
+    Transpos\'{e}e & $\vx^T, \mX^T$ & exposant $T$ \\
+    Composante     & $x_i$, $x_{ij}$ & indice(s) \\
+    \bottomrule
+\end{tabularx}
+\end{center}
+
+\begin{attentionbox}[Dimension]
+    On ne peut additionner que des vecteurs de \textbf{m\^{e}me dimension}.
+    En NumPy, la propri\'{e}t\'{e} \texttt{shape} indique toujours la dimension d'un tableau.
+\end{attentionbox}
+
+% ══════════════════════════════════════════════════════════════════════════
+\section{Produit scalaire}
+% ══════════════════════════════════════════════════════════════════════════
+
+\begin{definitionbox}[Produit scalaire]
+    Le produit scalaire de $\vx, \vw \in \mathbb{R}^p$ admet trois \'{e}critures
+    \'{e}quivalentes :
+    %
+    \formule{
+        \pscal{\vx}{\vw}
+        \;=\; \vx^T \vw
+        \;=\; \sum_{i=1}^{p} x_i \, w_i
+    }
+    %
+    Le r\'{e}sultat est un \textbf{scalaire} (un seul nombre).
+\end{definitionbox}
+
+\textbf{Propri\'{e}t\'{e}s essentielles :}
+\begin{enumerate}
+    \item \textbf{Commutativit\'{e} :} $\pscal{\vx}{\vw} = \pscal{\vw}{\vx}$
+    \item \textbf{Lin\'{e}arit\'{e} :}
+        $\pscal{\vx}{\alpha\vw + \beta\mathbf{v}}
+        = \alpha\pscal{\vx}{\vw} + \beta\pscal{\vx}{\mathbf{v}}$
+    \item \textbf{Positivit\'{e} :}
+        $\pscal{\vx}{\vx} = \|\vx\|^2 \geq 0$ \enspace
+        (li\'{e} \`{a} la norme du vecteur)
+\end{enumerate}
+
+\begin{intuitionbox}[Lien avec la pr\'{e}diction]
+    Toute pr\'{e}diction lin\'{e}aire est un produit scalaire :
+    $\yhat = \pscal{\vx}{\vw} + b
+    = \underbrace{x_1 w_1}_{\text{exp.}} + \underbrace{x_2 w_2}_{\text{lang.}}
+    + \cdots + \underbrace{x_p w_p}_{\text{remote}} + b$.
+    Chaque poids $w_j$ mesure l'\textbf{importance} de la feature~$j$.
+\end{intuitionbox}
+
+\textbf{Multiplication matrice-vecteur.}
+Pour pr\'{e}dire le salaire de \emph{tous} les d\'{e}veloppeurs d'un coup :
+\formule{\hat{\vy} = \mX \vw \in \mathbb{R}^n}
+Chaque composante $\yhat_i = \vx_i^T \vw$ est un produit scalaire.
+C'est \textbf{$n$ produits scalaires en parall\`{e}le}.
+
+% ══════════════════════════════════════════════════════════════════════════
+\section{R\'{e}gression lin\'{e}aire}
+% ══════════════════════════════════════════════════════════════════════════
+
+Le mod\`{e}le de r\'{e}gression lin\'{e}aire pr\'{e}dit une valeur continue :
+\textbf{cas simple} $\yhat = w_1 x + w_0$ ;
+\textbf{cas g\'{e}n\'{e}ral} $\yhat = \vw^T \vx + b$ ;
+\textbf{forme matricielle} $\hat{\vy} = \mX \vw + b\,\mathbf{1}_n$.
+
+Sur notre dataset (exp\'{e}rience $\to$ salaire) :
+\formule{\yhat = 2{,}07 \times \texttt{experience} + 31{,}27}
+
+Interpr\'{e}tation : $+1$ an d'exp\'{e}rience $\approx +2{,}07$~k\texteuro\ de salaire
+pr\'{e}dit ; salaire de base estim\'{e} \`{a} $31{,}27$~k\texteuro.
+
+\begin{definitionbox}[Erreur quadratique moyenne --- MSE]
+    Le \textbf{MSE} (\emph{Mean Squared Error}) mesure la qualit\'{e} du mod\`{e}le :
+    \begin{equation}
+        \text{MSE} = J(\vw) = \frac{1}{n} \sum_{i=1}^{n} (y_i - \yhat_i)^2
+        \label{eq:mse}
+    \end{equation}
+    On \'{e}l\`{e}ve au carr\'{e} pour p\'{e}naliser les grosses erreurs et \'{e}viter les
+    compensations entre erreurs positives et n\'{e}gatives.
+\end{definitionbox}
+
+\begin{retenirbox}[Objectif de l'apprentissage]
+    Trouver $\vw$ qui \textbf{minimise} $J(\vw)$. La \textbf{descente de gradient}
+    (Jour~2) automatisera cette recherche.
+    Sur notre dataset : $\text{MSE} = 20{,}46$~(k\texteuro)$^2 \Rightarrow$
+    erreur typique $\approx 4{,}5$~k\texteuro.
+\end{retenirbox}
+
+% ══════════════════════════════════════════════════════════════════════════
+\section{Synth\`{e}se et formules essentielles}
+% ══════════════════════════════════════════════════════════════════════════
+
+\subsection{Tableau r\'{e}capitulatif}
+
+\begin{center}
+\renewcommand{\arraystretch}{1.4}
+\begin{tabularx}{\textwidth}{l >{\centering\arraybackslash}p{4cm} X}
+    \toprule
+    \textbf{Concept} & \textbf{Notation} & \textbf{Code NumPy} \\
+    \midrule
+    Observation (vecteur)
+        & $\vx \in \mathbb{R}^p$
+        & \texttt{x = np.array([1, 3, 4, 800, 40])} \\
+    Dataset (matrice)
+        & $\mX \in \mathbb{R}^{n \times p}$
+        & \texttt{X = np.array([[...], ...])} \\
+    Transpos\'{e}e
+        & $\mX^T$
+        & \texttt{X.T} \\
+    Produit scalaire
+        & $\pscal{\vx}{\vw} = \vx^T\vw$
+        & \texttt{np.dot(x, w)} ou \texttt{x @ w} \\
+    Pr\'{e}diction
+        & $\yhat = \vw^T\vx + b$
+        & \texttt{x @ w + b} \\
+    Toutes les pr\'{e}dictions
+        & $\hat{\vy} = \mX\vw$
+        & \texttt{X @ w} \\
+    Erreur MSE
+        & $\tfrac{1}{n}\sum(y_i - \yhat_i)^2$
+        & \texttt{np.mean((y - y\_pred)**2)} \\
+    Pente (r\'{e}g. simple)
+        & $w_1$
+        & formule analytique (\'{e}q.~\ref{eq:pente}) \\
+    Biais
+        & $w_0$ ou $b$
+        & \texttt{y.mean() - w * x.mean()} \\
+    \bottomrule
+\end{tabularx}
+\end{center}
+
+\subsection{Formules \`{a} retenir}
+
+\begin{tcolorbox}[
+    enhanced,
+    colback=ipssiBleu!3,
+    colframe=ipssiBleu!40,
+    boxrule=1pt,
+    arc=4pt,
+    title={\sffamily\bfseries Formules du Jour 1},
+    coltitle=white,
+    colbacktitle=ipssiBleu!70,
+]
+\begin{align}
+    \text{Produit scalaire}\quad
+        & \pscal{\vx}{\vw} = \sum_{i=1}^{p} x_i \, w_i
+        \label{eq:ps} \\[6pt]
+    \text{Pr\'{e}diction lin\'{e}aire}\quad
+        & \yhat = \vw^T \vx + b
+        \label{eq:pred} \\[6pt]
+    \text{Pr\'{e}dictions matricielles}\quad
+        & \hat{\vy} = \mX \vw + b\,\mathbf{1}_n
+        \label{eq:pred-mat} \\[6pt]
+    \text{Erreur quadratique}\quad
+        & J(\vw) = \frac{1}{n} \sum_{i=1}^{n} (y_i - \yhat_i)^2
+        \label{eq:mse2} \\[6pt]
+    \text{Pente (r\'{e}g. simple)}\quad
+        & w_1 = \frac{\sum_{i}(x_i - \bar{x})(y_i - \bar{y})}
+                     {\sum_{i}(x_i - \bar{x})^2}
+        \label{eq:pente} \\[6pt]
+    \text{Ordonn\'{e}e \`{a} l'origine}\quad
+        & w_0 = \bar{y} - w_1 \, \bar{x}
+        \label{eq:biais}
+\end{align}
+\end{tcolorbox}
+
+\separateur
+
+\begin{center}
+    \small\sffamily
+    \textbf{Pipeline du Jour 1 :}\quad
+    \fcolorbox{ipssiBleu!40}{ipssiBleu!5}{\;Donn\'{e}es\;}
+    $\;\longrightarrow\;$
+    \fcolorbox{ipssiBleu!40}{ipssiBleu!5}{\;Vecteur $\vx$\;}
+    $\;\longrightarrow\;$
+    \fcolorbox{ipssiBleu!40}{ipssiBleu!5}{\;Matrice $\mX$\;}
+    $\;\longrightarrow\;$
+    \fcolorbox{ipssiBleu!40}{ipssiBleu!5}{\;Produit $\mX\vw$\;}
+    $\;\longrightarrow\;$
+    \fcolorbox{ipssiVert!40}{ipssiVert!5}{\;Pr\'{e}diction $\yhat$\;}
+\end{center}
+
+\vfill
+
+\begin{center}
+    {\footnotesize\sffamily\textcolor{gray}{%
+        \textcopyright\ 2025 Mohamed EL AFRIT --- IPSSI \enspace\textbullet\enspace
+        \url{www.mohamedelafrit.com} \enspace\textbullet\enspace
+        CC BY-NC-SA 4.0
+    }}
+\end{center}
+
+\end{document}

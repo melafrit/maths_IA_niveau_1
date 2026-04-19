@@ -1,0 +1,361 @@
+% ============================================================================
+% (c) 2025 Mohamed EL AFRIT -- IPSSI
+% Licence CC BY-NC-SA 4.0
+% https://creativecommons.org/licenses/by-nc-sa/4.0/deed.fr
+%
+% FICHE DE SYNTHESE -- Jour 4 : Reseaux de neurones
+% ============================================================================
+\input{template_ipssi}
+
+\jourNumero{4}
+\jourTheme{R\'{e}seaux de neurones}
+
+\begin{document}
+
+\pagegarde{Fiche de synth\`{e}se}{4}{R\'{e}seaux de neurones}
+
+\setstretch{1.05}
+\setlength{\parskip}{2pt}
+\setlength{\abovedisplayskip}{5pt}
+\setlength{\belowdisplayskip}{5pt}
+
+% ======================================================================
+\section{Le neurone artificiel}
+% ======================================================================
+
+Le neurone artificiel est une version enrichie du perceptron :
+il remplace la fonction signe par une \motcle{fonction d'activation} non lin\'{e}aire.
+
+\begin{definitionbox}[Neurone artificiel]
+    Un neurone calcule deux \'{e}tapes :
+    \begin{align}
+        \text{Somme pond\'{e}r\'{e}e :}\quad & z = \vw^T \vx + b
+        \label{eq:somme} \\
+        \text{Activation :}\quad & a = \sigma(z)
+        \label{eq:activation}
+    \end{align}
+    o\`{u} $\sigma$ est une fonction d'activation non lin\'{e}aire.
+\end{definitionbox}
+
+\begin{center}
+\begin{tikzpicture}[
+    node distance=1.6cm and 2.2cm,
+    neuron/.style={circle, draw=ipssiBleu, thick, minimum size=1.1cm, font=\small\sffamily},
+    input/.style={circle, draw=gray, thick, minimum size=0.8cm, font=\small},
+    arr/.style={->, thick, >=stealth},
+]
+    % Entrees
+    \node[input] (x1) at (0, 1.2) {$x_1$};
+    \node[input] (x2) at (0, 0) {$x_2$};
+    \node[input] (xp) at (0, -1.2) {$x_p$};
+    \node[gray, font=\small] at (0, -0.6) {$\vdots$};
+
+    % Neurone
+    \node[neuron, fill=ipssiBleu!10] (n) at (3.2, 0) {$\Sigma$};
+
+    % Activation
+    \node[neuron, fill=ipssiViolet!15, draw=ipssiViolet] (act) at (5.8, 0) {$\sigma$};
+
+    % Sortie
+    \node[font=\small\sffamily] (out) at (7.8, 0) {$a = \sigma(z)$};
+
+    % Fleches
+    \draw[arr] (x1) -- node[above, font=\scriptsize, pos=0.4] {$w_1$} (n);
+    \draw[arr] (x2) -- node[above, font=\scriptsize, pos=0.4] {$w_2$} (n);
+    \draw[arr] (xp) -- node[below, font=\scriptsize, pos=0.4] {$w_p$} (n);
+    \draw[arr] (n) -- node[above, font=\scriptsize] {$z$} (act);
+    \draw[arr] (act) -- (out);
+
+    % Biais
+    \node[font=\scriptsize, gray] (bias) at (3.2, -1.5) {biais $b$};
+    \draw[arr, gray, dashed] (bias) -- (n);
+
+    % Labels
+    \node[below, font=\scriptsize\sffamily, gray] at (1.5, -2) {$z = w_1 x_1 + w_2 x_2 + \cdots + w_p x_p + b$};
+\end{tikzpicture}
+\end{center}
+
+% ======================================================================
+\section{Fonctions d'activation}
+% ======================================================================
+
+\begin{center}
+\renewcommand{\arraystretch}{1.4}
+\begin{tabularx}{\textwidth}{l >{\centering\arraybackslash}p{4.5cm} X}
+    \toprule
+    \textbf{Fonction} & \textbf{Formule} & \textbf{Propri\'{e}t\'{e}s} \\
+    \midrule
+    Sigmo\"{\i}de
+        & $\sigma(z) = \dfrac{1}{1 + e^{-z}}$
+        & Sortie dans $(0,1)$. Id\'{e}ale pour les probabilit\'{e}s.
+          D\'{e}riv\'{e}e : $\sigma'(z) = \sigma(z)(1-\sigma(z))$. \\[6pt]
+    ReLU
+        & $\text{ReLU}(z) = \max(0, z)$
+        & Sortie $\geq 0$. Rapide \`{a} calculer. La plus utilis\'{e}e
+          dans les r\'{e}seaux modernes. \\[6pt]
+    Signe
+        & $\text{signe}(z) \in \{0, 1\}$
+        & \'{E}chelon binaire (perceptron Jour~3).
+          Non diff\'{e}rentiable $\Rightarrow$ pas de gradient. \\
+    \bottomrule
+\end{tabularx}
+\end{center}
+
+\begin{center}
+\begin{tikzpicture}[scale=0.72]
+    % --- Sigmoide ---
+    \begin{scope}[xshift=0cm]
+        \draw[->, thick] (-3.5,0) -- (3.8,0) node[right, font=\scriptsize] {$z$};
+        \draw[->, thick] (0,-0.3) -- (0,2.5) node[above, font=\scriptsize] {$\sigma(z)$};
+        \draw[ipssiBleu, very thick, domain=-3.3:3.3, samples=60]
+            plot (\x, {2/(1+exp(-\x))});
+        \draw[gray, dashed, thin] (-3.5,2) -- (3.5,2);
+        \draw[gray, dashed, thin] (-3.5,1) -- (3.5,1);
+        \node[font=\scriptsize, gray] at (3, 2.2) {$1$};
+        \node[font=\scriptsize, gray] at (3, 1.2) {$0{,}5$};
+        \node[below, font=\small\sffamily\bfseries, ipssiBleu] at (0, -0.7) {Sigmo\"{\i}de};
+    \end{scope}
+    % --- ReLU ---
+    \begin{scope}[xshift=9cm]
+        \draw[->, thick] (-3.5,0) -- (3.8,0) node[right, font=\scriptsize] {$z$};
+        \draw[->, thick] (0,-0.3) -- (0,3.5) node[above, font=\scriptsize] {ReLU};
+        \draw[ipssiRouge, very thick] (-3.3,0) -- (0,0);
+        \draw[ipssiRouge, very thick] (0,0) -- (3,3);
+        \node[below, font=\small\sffamily\bfseries, ipssiRouge] at (0, -0.7) {ReLU};
+    \end{scope}
+\end{tikzpicture}
+\end{center}
+
+\begin{retenirbox}[Pourquoi les activations sont indispensables]
+    Sans fonction d'activation, un empilement de couches lin\'{e}aires reste \textbf{lin\'{e}aire}.
+    Les activations introduisent la \textbf{non-lin\'{e}arit\'{e}} qui permet au r\'{e}seau de
+    mod\'{e}liser des relations complexes (comme le XOR).
+\end{retenirbox}
+
+% ======================================================================
+\section{R\'{e}seau multicouche (MLP)}
+% ======================================================================
+
+\begin{definitionbox}[Perceptron multicouche]
+    Un \textbf{MLP} (\emph{Multi-Layer Perceptron}) est compos\'{e} de :
+    \begin{itemize}
+        \item \textbf{Couche d'entr\'{e}e} : re\c{c}oit les features $\vx$ (pas de calcul)
+        \item \textbf{Couche(s) cach\'{e}e(s)} : neurones qui cr\'{e}ent de nouvelles repr\'{e}sentations
+        \item \textbf{Couche de sortie} : produit la pr\'{e}diction $\yhat$
+    \end{itemize}
+    Chaque neurone est connect\'{e} \`{a} \textbf{tous} les neurones de la couche suivante.
+\end{definitionbox}
+
+\begin{center}
+\begin{tikzpicture}[
+    node distance=1.2cm and 2.5cm,
+    neuron/.style={circle, draw, thick, minimum size=0.9cm, font=\scriptsize\sffamily},
+    arr/.style={->, thick, >=stealth, gray!70},
+    scale=0.85, transform shape,
+]
+    % Entrees
+    \node[neuron, draw=gray, fill=gray!10] (i1) at (0, 1) {$x_1$};
+    \node[neuron, draw=gray, fill=gray!10] (i2) at (0, -1) {$x_2$};
+    \node[below, font=\scriptsize\sffamily, gray] at (0, -2) {Entr\'{e}e};
+
+    % Couche cachee
+    \node[neuron, draw=ipssiBleu, fill=ipssiBleu!10] (h1) at (3, 1.5) {$h_1$};
+    \node[neuron, draw=ipssiBleu, fill=ipssiBleu!10] (h2) at (3, 0) {$h_2$};
+    \node[neuron, draw=ipssiBleu, fill=ipssiBleu!10] (h3) at (3, -1.5) {$h_3$};
+    \node[below, font=\scriptsize\sffamily, ipssiBleu] at (3, -2.3) {Cach\'{e}e};
+
+    % Sortie
+    \node[neuron, draw=ipssiVert, fill=ipssiVert!10] (o1) at (6, 0) {$\yhat$};
+    \node[below, font=\scriptsize\sffamily, ipssiVert] at (6, -2) {Sortie};
+
+    % Connexions entree -> cachee
+    \foreach \i in {1,2} \foreach \h in {1,2,3}
+        \draw[arr] (i\i) -- (h\h);
+    % Connexions cachee -> sortie
+    \foreach \h in {1,2,3}
+        \draw[arr] (h\h) -- (o1);
+
+    % Labels
+    \node[above, font=\scriptsize, ipssiBleu] at (1.5, 1.7) {$\mathbf{W}^{(1)}, \mathbf{b}^{(1)}$};
+    \node[above, font=\scriptsize, ipssiVert] at (4.5, 1.2) {$\mathbf{w}^{(2)}, b^{(2)}$};
+\end{tikzpicture}
+\end{center}
+
+\subsection{Forward pass (propagation avant)}
+
+Le calcul se fait \textbf{couche par couche}, de l'entr\'{e}e vers la sortie :
+
+\begin{align}
+    \text{Couche cach\'{e}e :}\quad
+        & \mathbf{h} = \sigma\bigl(\mathbf{W}^{(1)} \vx + \mathbf{b}^{(1)}\bigr)
+        \label{eq:forward1} \\[4pt]
+    \text{Couche de sortie :}\quad
+        & \yhat = \sigma\bigl(\mathbf{w}^{(2)T} \mathbf{h} + b^{(2)}\bigr)
+        \label{eq:forward2}
+\end{align}
+
+\begin{exemplebox}[R\'{e}seau 2-2-1 --- calcul complet]
+    Entr\'{e}e $\vx = (5, 4)^T$ :
+
+    \smallskip
+    $z_1 = 0{,}3 \times 5 + 0{,}5 \times 4 - 2 = 1{,}5 \;\Rightarrow\; h_1 = \sigma(1{,}5) = 0{,}82$
+
+    $z_2 = {-}0{,}2 \times 5 + 0{,}4 \times 4 + 0{,}5 = 1{,}1 \;\Rightarrow\; h_2 = \sigma(1{,}1) = 0{,}75$
+
+    $z_{\text{out}} = 0{,}8 \times 0{,}82 + 0{,}6 \times 0{,}75 - 0{,}5 = 0{,}61 \;\Rightarrow\; \yhat = \sigma(0{,}61) = 0{,}65$
+
+    \smallskip
+    Pr\'{e}diction : 65\% de probabilit\'{e} d'\^{e}tre en classe~1.
+\end{exemplebox}
+
+% ======================================================================
+\section{Apprentissage et backpropagation}
+% ======================================================================
+
+\subsection{Fonctions de perte}
+
+\begin{center}
+\renewcommand{\arraystretch}{1.35}
+\begin{tabularx}{\textwidth}{l >{\centering\arraybackslash}p{5.5cm} X}
+    \toprule
+    \textbf{T\^{a}che} & \textbf{Perte} & \textbf{Usage} \\
+    \midrule
+    R\'{e}gression
+        & $J = \frac{1}{n}\sum(y_i - \yhat_i)^2$
+        & MSE (Jours 1--2) \\
+    Classification
+        & $L = -\frac{1}{n}\sum\bigl[y_i\ln\yhat_i + (1{-}y_i)\ln(1{-}\yhat_i)\bigr]$
+        & Cross-entropy binaire \\
+    \bottomrule
+\end{tabularx}
+\end{center}
+
+\subsection{Backpropagation (intuition)}
+
+\begin{intuitionbox}[Propager l'erreur en arri\`{e}re]
+    La \textbf{backpropagation} calcule la contribution de \textbf{chaque poids} \`{a} l'erreur
+    finale, en remontant de la sortie vers l'entr\'{e}e. C'est la \textbf{r\`{e}gle de la cha\^{i}ne}
+    (Jour~2) appliqu\'{e}e \`{a} chaque couche du r\'{e}seau.
+\end{intuitionbox}
+
+\begin{retenirbox}[La boucle d'entra\^{i}nement]
+    L'entra\^{i}nement d'un r\'{e}seau r\'{e}p\`{e}te 3 \'{e}tapes :
+    \begin{enumerate}
+        \item \textbf{Forward pass} : calculer $\yhat$ couche par couche
+        \item \textbf{Backward pass} : calculer $\nabla L$ pour chaque poids (backpropagation)
+        \item \textbf{Mise \`{a} jour} : $\boldsymbol{\theta} \leftarrow \boldsymbol{\theta} - \alpha \nabla L$
+    \end{enumerate}
+    C'est la \textbf{m\^{e}me boucle} qu'au Jour~2, mais appliqu\'{e}e \`{a} toutes les couches.
+\end{retenirbox}
+
+% ======================================================================
+\section{Comparatif : perceptron vs r\'{e}seau}
+% ======================================================================
+
+\begin{center}
+\renewcommand{\arraystretch}{1.4}
+\begin{tabularx}{\textwidth}{l >{\centering\arraybackslash}X >{\centering\arraybackslash}X}
+    \toprule
+    & \textbf{Perceptron (Jour 3)} & \textbf{R\'{e}seau MLP (Jour 4)} \\
+    \midrule
+    Architecture  & 1 couche (entr\'{e}e $\to$ sortie) & Plusieurs couches \\
+    Activation    & Signe (0 ou 1) & Sigmo\"{\i}de, ReLU, \ldots \\
+    Fronti\`{e}re & Lin\'{e}aire (droite) & \textbf{Non lin\'{e}aire} (courbe) \\
+    R\'{e}sout XOR ? & Non & \textbf{Oui} \\
+    Accuracy dataset & ${\sim}87$--$90\%$ & ${\sim}93$--$97\%$ \\
+    Apprentissage & Correction d'erreurs & Backpropagation + GD \\
+    scikit-learn  & \texttt{Perceptron} & \texttt{MLPClassifier} \\
+    \bottomrule
+\end{tabularx}
+\end{center}
+
+% ======================================================================
+\section{Limites et risques}
+% ======================================================================
+
+\begin{attentionbox}[Surapprentissage (overfitting)]
+    Un r\'{e}seau trop gros peut \textbf{m\'{e}moriser} les donn\'{e}es au lieu de \textbf{g\'{e}n\'{e}raliser}.
+    Solutions : jeu de \textbf{validation}, \textbf{r\'{e}gularisation} ($L_2$), \textbf{dropout},
+    \textbf{early stopping}.
+\end{attentionbox}
+
+\begin{attentionbox}[Biais dans les donn\'{e}es]
+    Un r\'{e}seau ne fait qu'apprendre les \textbf{patterns pr\'{e}sents dans les donn\'{e}es}.
+    Si les donn\'{e}es contiennent des biais (discrimination), le mod\`{e}le les reproduira.
+    La responsabilit\'{e} \'{e}thique incombe aux humains qui con\c{c}oivent le syst\`{e}me.
+\end{attentionbox}
+
+% ======================================================================
+\section{Formules essentielles \`{a} retenir}
+% ======================================================================
+
+\begin{tcolorbox}[
+    enhanced, colback=ipssiBleu!3, colframe=ipssiBleu!40, boxrule=1pt, arc=4pt,
+    title={\sffamily\bfseries Formules du Jour 4}, coltitle=white, colbacktitle=ipssiBleu!70,
+]
+\begin{align}
+    \text{Neurone}\quad
+        & a = \sigma(\vw^T \vx + b)
+        \label{eq:f-neurone} \\[4pt]
+    \text{Sigmo\"{\i}de}\quad
+        & \sigma(z) = \frac{1}{1 + e^{-z}}, \quad \sigma'(z) = \sigma(z)(1{-}\sigma(z))
+        \label{eq:f-sigmoid} \\[4pt]
+    \text{ReLU}\quad
+        & \text{ReLU}(z) = \max(0, z)
+        \label{eq:f-relu} \\[4pt]
+    \text{Forward (cach\'{e}e)}\quad
+        & \mathbf{h} = \sigma(\mathbf{W}^{(1)} \vx + \mathbf{b}^{(1)})
+        \label{eq:f-fwd1} \\[4pt]
+    \text{Forward (sortie)}\quad
+        & \yhat = \sigma(\mathbf{w}^{(2)T} \mathbf{h} + b^{(2)})
+        \label{eq:f-fwd2} \\[4pt]
+    \text{Cross-entropy}\quad
+        & L = -\tfrac{1}{n}\sum\bigl[y_i\ln\yhat_i + (1{-}y_i)\ln(1{-}\yhat_i)\bigr]
+        \label{eq:f-ce} \\[4pt]
+    \text{Mise \`{a} jour}\quad
+        & \boldsymbol{\theta} \leftarrow \boldsymbol{\theta} - \alpha \nabla L
+        \label{eq:f-update}
+\end{align}
+\end{tcolorbox}
+
+\separateur
+
+\begin{center}
+    \small\sffamily
+    \textbf{Pipeline du Jour 4 :}\quad
+    \fcolorbox{ipssiBleu!40}{ipssiBleu!5}{\;$\vx$\;}
+    $\;\xrightarrow{\mathbf{W}^{(1)}}\;$
+    \fcolorbox{ipssiBleu!40}{ipssiBleu!5}{\;$\sigma$\;}
+    $\;\to\;$
+    \fcolorbox{ipssiViolet!40}{ipssiViolet!5}{\;$\mathbf{h}$\;}
+    $\;\xrightarrow{\mathbf{w}^{(2)}}\;$
+    \fcolorbox{ipssiBleu!40}{ipssiBleu!5}{\;$\sigma$\;}
+    $\;\to\;$
+    \fcolorbox{ipssiVert!40}{ipssiVert!5}{\;$\yhat$\;}
+\end{center}
+
+\vspace{6pt}
+
+\begin{center}
+    \small\sffamily
+    \textbf{Les 4 jours en un mot :}\quad
+    \fcolorbox{gray!30}{gray!5}{\;J1 Repr\'{e}sentation\;}
+    $\;\to\;$
+    \fcolorbox{gray!30}{gray!5}{\;J2 Optimisation\;}
+    $\;\to\;$
+    \fcolorbox{gray!30}{gray!5}{\;J3 Classification\;}
+    $\;\to\;$
+    \fcolorbox{gray!30}{gray!5}{\;J4 R\'{e}seaux\;}
+\end{center}
+
+\vfill
+
+\begin{center}
+    {\footnotesize\sffamily\textcolor{gray}{%
+        \textcopyright\ 2025 Mohamed EL AFRIT --- IPSSI \enspace\textbullet\enspace
+        \url{www.mohamedelafrit.com} \enspace\textbullet\enspace
+        CC BY-NC-SA 4.0
+    }}
+\end{center}
+
+\end{document}

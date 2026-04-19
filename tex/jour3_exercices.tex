@@ -1,0 +1,579 @@
+% ============================================================================
+% (c) 2025 Mohamed EL AFRIT -- IPSSI
+% Licence CC BY-NC-SA 4.0
+% https://creativecommons.org/licenses/by-nc-sa/4.0/deed.fr
+%
+% FICHE D'EXERCICES (enonces) -- Jour 3 : Probabilites et classification
+% ============================================================================
+\input{template_ipssi}
+
+\jourNumero{3}
+\jourTheme{Classification}
+
+\begin{document}
+
+\pagegarde{Fiche d'exercices}{3}{Probabilit\'{e}s et classification}
+
+\setstretch{1.08}
+\setlength{\parskip}{3pt}
+\setlength{\abovedisplayskip}{6pt}
+\setlength{\belowdisplayskip}{6pt}
+
+% ======================================================================
+% RAPPELS
+% ======================================================================
+\begin{tcolorbox}[
+    enhanced, colback=ipssiCyan!5, colframe=ipssiCyan!50,
+    boxrule=0.8pt, arc=4pt,
+    title={\sffamily\bfseries Rappels --- Formules du Jour 3},
+    coltitle=white, colbacktitle=ipssiCyan!70,
+]
+\small
+\textbf{Probabilit\'{e} conditionnelle :}
+$P(A \mid B) = \frac{P(A \cap B)}{P(B)}$
+\hfill
+\textbf{Perceptron :}
+$\yhat = \text{signe}(\vw^T \vx + b)$
+
+\medskip
+\textbf{R\`{e}gle de d\'{e}cision :}
+$\yhat = 1$ si $g(\vx) = \vw^T\vx + b > 0$, sinon $\yhat = 0$.
+\hfill
+\textbf{Fronti\`{e}re :} $\vw^T\vx + b = 0$
+
+\medskip
+\textbf{Mise \`{a} jour (si erreur) :}
+$\vw \leftarrow \vw + \alpha(y_i - \yhat_i)\vx_i$ \;;\;
+$b \leftarrow b + \alpha(y_i - \yhat_i)$
+
+\medskip
+\textbf{Accuracy :}
+$\text{Acc} = \frac{\text{nombre de pr\'{e}dictions correctes}}{n}$
+\hfill
+\textbf{Dataset :} 30 dev, seuil 45\,k\texteuro, classes \'{e}quilibr\'{e}es 15/15.
+\end{tcolorbox}
+
+% ======================================================================
+\section*{Exercices crayon-papier --- Niveau fondamental}
+% ======================================================================
+
+% ----------------------------------------------------------------------
+\exercice{\exofondamental\quad --- Probabilit\'{e}s simples sur un mini-dataset}
+
+Voici un mini-dataset de 8 d\'{e}veloppeurs :
+
+\begin{center}
+\renewcommand{\arraystretch}{1.15}
+\begin{tabular}{c|c|c|c}
+    \toprule
+    \textbf{Dev} & \textbf{Exp\'{e}rience} & \textbf{Salaire (k\texteuro)} & \textbf{salaire\_eleve} \\
+    \midrule
+    A & 2  & 30 & 0 \\
+    B & 4  & 42 & 0 \\
+    C & 6  & 48 & 1 \\
+    D & 8  & 55 & 1 \\
+    E & 3  & 35 & 0 \\
+    F & 10 & 60 & 1 \\
+    G & 1  & 28 & 0 \\
+    H & 7  & 46 & 1 \\
+    \bottomrule
+\end{tabular}
+\end{center}
+
+\begin{enumerate}[label=\alph*)]
+    \item Calculez $P(\text{salaire\_eleve} = 1)$.
+    \item Calculez $P(\text{salaire\_eleve} = 0)$.
+        V\'{e}rifiez que $P(0) + P(1) = 1$.
+    \item Calculez $P(\text{exp\'{e}rience} \geq 6)$.
+    \item Combien de d\'{e}veloppeurs ont \`{a} la fois exp\'{e}rience $\geq 6$ \textbf{et} salaire\_eleve $= 1$ ?
+\end{enumerate}
+
+% ----------------------------------------------------------------------
+\exercice{\exofondamental\quad --- Probabilit\'{e} conditionnelle \`{a} la main}
+
+En utilisant le m\^{e}me mini-dataset de l'exercice~1 :
+
+\begin{enumerate}[label=\alph*)]
+    \item Calculez $P(\text{salaire\_eleve} = 1 \mid \text{exp} \geq 6)$ en utilisant la formule :
+    \[
+        P(A \mid B) = \frac{\text{nombre de dev avec exp} \geq 6 \textbf{ et } \text{salaire\_eleve} = 1}{\text{nombre de dev avec exp} \geq 6}
+    \]
+
+    \item Calculez $P(\text{salaire\_eleve} = 1 \mid \text{exp} < 6)$.
+
+    \item Comparez les deux r\'{e}sultats. Que constatez-vous ?
+        Avoir plus de 6 ans d'exp\'{e}rience change-t-il la probabilit\'{e} d'\^{e}tre bien pay\'{e} ?
+
+    \item Calculez le \textbf{ratio} :
+    $\frac{P(\text{sal\_eleve}=1 \mid \text{exp}\geq 6)}{P(\text{sal\_eleve}=1 \mid \text{exp}<6)}$.
+    Interpr\'{e}tez.
+\end{enumerate}
+
+% ----------------------------------------------------------------------
+\exercice{\exofondamental\quad --- R\`{e}gle de d\'{e}cision sur 3 observations}
+
+On dispose d'un classifieur lin\'{e}aire avec les poids
+$\vw = \begin{pmatrix} 0{,}5 \\ 0{,}8 \end{pmatrix}$ et le biais $b = -4$.
+
+Les features sont : $x_1 = $ exp\'{e}rience, $x_2 = $ nb\_langages.
+
+\begin{enumerate}[label=\alph*)]
+    \item Pour les 3 d\'{e}veloppeurs suivants, calculez le score $g(\vx) = \vw^T\vx + b$
+        et la pr\'{e}diction $\yhat$ :
+
+    \begin{center}
+    \renewcommand{\arraystretch}{1.3}
+    \begin{tabular}{c|c|c|c|c|c}
+        \toprule
+        Dev & $x_1$ & $x_2$ & $g(\vx) = 0{,}5 x_1 + 0{,}8 x_2 - 4$ & $\yhat$ & $y$ (vrai) \\
+        \midrule
+        1 & 2  & 3 & ? & ? & 0 \\
+        2 & 10 & 6 & ? & ? & 1 \\
+        3 & 5  & 4 & ? & ? & 0 \\
+        \bottomrule
+    \end{tabular}
+    \end{center}
+
+    \item Quelles pr\'{e}dictions sont correctes ? Calculez l'accuracy.
+
+    \item Le dev~3 a $g(\vx) > 0$ mais $y = 0$. Comment appelle-t-on ce type d'erreur ?
+\end{enumerate}
+
+% ----------------------------------------------------------------------
+\exercice{\exofondamental\quad --- Tracer une fronti\`{e}re de d\'{e}cision}
+
+On consid\`{e}re le classifieur de l'exercice~3 : $g(\vx) = 0{,}5\,x_1 + 0{,}8\,x_2 - 4$.
+
+\begin{enumerate}[label=\alph*)]
+    \item La fronti\`{e}re de d\'{e}cision est l'ensemble des points o\`{u} $g(\vx) = 0$.
+        \'{E}crivez l'\'{e}quation de la droite sous la forme $x_2 = a\,x_1 + c$.
+
+    \item Calculez deux points de cette droite :
+        quand $x_1 = 0$, que vaut $x_2$ ? Quand $x_1 = 8$ ?
+
+    \item Sur un graphique papier avec $x_1$ en abscisse (0 \`{a} 12) et $x_2$ en ordonn\'{e}e (0 \`{a} 8),
+        tracez la droite et les 3 d\'{e}veloppeurs de l'exercice~3.
+        Indiquez les zones ``classe 0'' et ``classe 1''.
+
+    \item Le dev~3 est-il du ``bon c\^{o}t\'{e}'' de la fronti\`{e}re ?
+\end{enumerate}
+
+% ======================================================================
+\section*{Exercices crayon-papier --- Niveau interm\'{e}diaire}
+% ======================================================================
+
+% ----------------------------------------------------------------------
+\exercice{\exointermediaire\quad --- Trois it\'{e}rations du perceptron \`{a} la main}
+
+On entra\^{i}ne un perceptron avec 2 features, $\alpha = 1$, poids initiaux $\vw = (0, 0)^T$, biais $b = 0$.
+
+Donn\'{e}es d'entra\^{i}nement :
+
+\begin{center}
+\renewcommand{\arraystretch}{1.2}
+\begin{tabular}{c|cc|c}
+    \toprule
+    $i$ & $x_1$ & $x_2$ & $y$ \\
+    \midrule
+    1 & 3 & 4 & 1 \\
+    2 & 1 & 1 & 0 \\
+    3 & 5 & 2 & 1 \\
+    \bottomrule
+\end{tabular}
+\end{center}
+
+Pour chaque observation (dans l'ordre $i = 1, 2, 3$) :
+
+\begin{enumerate}[label=\alph*)]
+    \item Calculez $g(\vx_i) = \vw^T\vx_i + b$ et $\yhat_i = \text{signe}(g)$.
+
+    \item Comparez $\yhat_i$ et $y_i$. Y a-t-il erreur ?
+
+    \item Si oui, calculez $\vw_{\text{new}} = \vw + \alpha(y_i - \yhat_i)\vx_i$
+        et $b_{\text{new}} = b + \alpha(y_i - \yhat_i)$.
+
+    \item Remplissez le tableau complet :
+
+    \begin{center}
+    \renewcommand{\arraystretch}{1.3}
+    \begin{tabular}{c|c|c|c|c|c|c}
+        \toprule
+        $i$ & $\vw$ avant & $b$ & $g(\vx_i)$ & $\yhat_i$ & Erreur ? & $\vw$ apr\`{e}s \\
+        \midrule
+        1 & $(0, 0)$ & 0 & ? & ? & ? & ? \\
+        2 & ?        & ? & ? & ? & ? & ? \\
+        3 & ?        & ? & ? & ? & ? & ? \\
+        \bottomrule
+    \end{tabular}
+    \end{center}
+\end{enumerate}
+
+% ----------------------------------------------------------------------
+\exercice{\exointermediaire\quad --- Pourquoi le XOR n'est pas lin\'{e}airement s\'{e}parable}
+
+Le probl\`{e}me XOR est d\'{e}fini par :
+
+\begin{center}
+\renewcommand{\arraystretch}{1.15}
+\begin{tabular}{cc|c}
+    \toprule
+    $x_1$ & $x_2$ & $y$ \\
+    \midrule
+    0 & 0 & 0 \\
+    0 & 1 & 1 \\
+    1 & 0 & 1 \\
+    1 & 1 & 0 \\
+    \bottomrule
+\end{tabular}
+\end{center}
+
+\begin{enumerate}[label=\alph*)]
+    \item Placez les 4 points sur un graphique ($x_1$ en abscisse, $x_2$ en ordonn\'{e}e).
+        Utilisez des couleurs diff\'{e}rentes pour les classes 0 et 1.
+
+    \item Essayez de tracer une \textbf{droite} qui s\'{e}pare les rouges des verts.
+        Y arrivez-vous ?
+
+    \item Supposons un classifieur lin\'{e}aire $g(\vx) = w_1 x_1 + w_2 x_2 + b$.
+        Montrez par l'absurde qu'il est impossible de trouver $(w_1, w_2, b)$
+        qui classifie correctement les 4 points.
+
+        \emph{Indice :} \'{e}crivez les 4 in\'{e}galit\'{e}s que les poids devraient satisfaire :
+        $g(0,0) \leq 0$, $g(0,1) > 0$, $g(1,0) > 0$, $g(1,1) \leq 0$.
+        Montrez la contradiction.
+
+    \item Pourquoi dit-on que ce probl\`{e}me n'est \textbf{pas lin\'{e}airement s\'{e}parable} ?
+        Que faudrait-il pour le r\'{e}soudre ?
+\end{enumerate}
+
+% ----------------------------------------------------------------------
+\exercice{\exointermediaire\quad --- Calculer l'accuracy d'un classifieur}
+
+Un classifieur a produit les r\'{e}sultats suivants sur 10 observations :
+
+\begin{center}
+\renewcommand{\arraystretch}{1.15}
+\begin{tabular}{c|cccccccccc}
+    \toprule
+    $i$       & 1 & 2 & 3 & 4 & 5 & 6 & 7 & 8 & 9 & 10 \\
+    \midrule
+    $y_i$ (vrai)  & 0 & 1 & 1 & 0 & 1 & 0 & 1 & 0 & 1 & 0 \\
+    $\yhat_i$ (pr\'{e}dit)& 0 & 1 & 0 & 0 & 1 & 1 & 1 & 0 & 0 & 0 \\
+    \bottomrule
+\end{tabular}
+\end{center}
+
+\begin{enumerate}[label=\alph*)]
+    \item Pour chaque observation, indiquez si la pr\'{e}diction est correcte
+        (\checkmark) ou incorrecte (\texttimes).
+
+    \item Calculez l'\textbf{accuracy} : $\text{Acc} = \frac{\text{nb correct}}{n}$.
+
+    \item Combien y a-t-il de \textbf{faux positifs} (pr\'{e}dit 1, vrai 0)
+        et de \textbf{faux n\'{e}gatifs} (pr\'{e}dit 0, vrai 1) ?
+
+    \item Si on pr\'{e}disait \textbf{toujours} la classe 0 pour tout le monde,
+        quelle serait l'accuracy ? Ce classifieur ``na\"{i}f'' serait-il bon ?
+\end{enumerate}
+
+% ======================================================================
+\section*{Exercices Python guid\'{e}s --- Niveau interm\'{e}diaire}
+% ======================================================================
+
+% ----------------------------------------------------------------------
+\exercice{\exointermediaire\quad --- Probabilit\'{e}s empiriques sur le dataset \hfill\normalfont\small\textsf{[Python guid\'{e}]}}
+
+\begin{pythonbox}[Squelette --- Probabilit\'{e}s]
+\begin{lstlisting}
+import numpy as np
+
+data = np.array([
+    [ 0,2,3, 150, 80,28.0],[ 1,1,2,  50,100,26.5],
+    [ 1,3,4, 800, 40,35.0],[ 2,2,3, 200, 60,32.0],
+    [ 2,4,4,3000, 20,38.0],[ 0,1,1,  30, 50,25.0],
+    [ 3,3,3, 100, 80,34.5],[ 1,5,4,  15,100,42.0],
+    [ 4,3,3, 500, 60,38.5],[ 5,4,4,1200, 40,44.0],
+    [ 5,3,3, 300, 80,41.0],[ 6,5,4,2000, 30,48.0],
+    [ 6,4,3, 150, 90,43.5],[ 7,5,4, 800, 50,50.0],
+    [ 7,3,2,  80, 70,39.0],[ 4,6,5, 400,100,47.0],
+    [ 8,4,4,1500, 40,51.0],[ 5,2,3,4000, 10,40.0],
+    [ 9,5,4, 600, 60,52.0],[10,6,4,2500, 30,55.0],
+    [10,4,3, 200, 80,48.5],[11,5,5,1000, 50,58.0],
+    [12,7,4,3500, 20,60.0],[ 9,3,3,  60, 90,42.0],
+    [13,6,4, 800, 70,62.0],[11,4,4,5000, 10,54.0],
+    [15,8,4,1200, 50,65.0],[17,6,5,2000, 40,68.0],
+    [20,7,4, 500, 60,72.0],[18,5,3, 100, 80,58.0]])
+
+exp = data[:, 0]; sal = data[:, 5]
+y = (sal > 45).astype(int)
+
+# 1. P(salaire_eleve = 1)
+p1 = ______               # A COMPLETER
+print(f"P(sal>45k) = {p1:.2f}")
+
+# 2. P(sal>45k | exp > 10)
+mask_exp10 = ______        # A COMPLETER : exp > 10
+p_cond = np.mean(______)   # A COMPLETER : y filtre
+print(f"P(sal>45k | exp>10) = {p_cond:.2f}")
+
+# 3. P(sal>45k | nb_langages >= 5)
+lang = data[:, 1]
+mask_lang5 = ______         # A COMPLETER
+p_lang = np.mean(______)    # A COMPLETER
+print(f"P(sal>45k | lang>=5) = {p_lang:.2f}")
+
+# 4. Quelle feature est la plus "predictive" ?
+print("\n--- Comparaison ---")
+for seuil_exp in [3, 5, 8, 10]:
+    mask = exp > seuil_exp
+    if np.sum(mask) > 0:
+        p = np.mean(y[mask])
+        print(f"P(sal>45k | exp>{seuil_exp:2d}) = {p:.2f} "
+              f"({np.sum(mask)} dev)")
+\end{lstlisting}
+\end{pythonbox}
+
+% ----------------------------------------------------------------------
+\exercice{\exointermediaire\quad --- R\`{e}gle de d\'{e}cision et fronti\`{e}re \hfill\normalfont\small\textsf{[Python guid\'{e}]}}
+
+\begin{pythonbox}[Squelette --- Fronti\`{e}re de d\'{e}cision]
+\begin{lstlisting}
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Dataset (experience, nb_langages, salaire)
+data = np.array([
+    [ 0,2,28.0],[ 1,1,26.5],[ 1,3,35.0],[ 2,2,32.0],
+    [ 2,4,38.0],[ 0,1,25.0],[ 3,3,34.5],[ 1,5,42.0],
+    [ 4,3,38.5],[ 5,4,44.0],[ 5,3,41.0],[ 6,5,48.0],
+    [ 6,4,43.5],[ 7,5,50.0],[ 7,3,39.0],[ 4,6,47.0],
+    [ 8,4,51.0],[ 5,2,40.0],[ 9,5,52.0],[10,6,55.0],
+    [10,4,48.5],[11,5,58.0],[12,7,60.0],[ 9,3,42.0],
+    [13,6,62.0],[11,4,54.0],[15,8,65.0],[17,6,68.0],
+    [20,7,72.0],[18,5,58.0]])
+
+X = data[:, :2]  # experience, nb_langages
+y = (data[:, 2] > 45).astype(int)
+
+# Poids manuels
+w = np.array([______, ______])  # A COMPLETER (essayer 0.5, 0.8)
+b = ______                       # A COMPLETER (essayer -4)
+
+# 1. Calculer g(x) pour chaque developpeur
+scores = ______                  # A COMPLETER : X @ w + b
+
+# 2. Predictions
+y_pred = (scores > 0).astype(int)
+
+# 3. Accuracy
+acc = np.mean(______)            # A COMPLETER
+print(f"Accuracy = {acc:.0%}")
+
+# 4. Graphique avec frontiere
+fig, ax = plt.subplots(figsize=(8, 6))
+for c, color, label in [(0,'#e74c3c','<= 45k'),
+                          (1,'#2ecc71','> 45k')]:
+    mask = y == c
+    ax.scatter(X[mask,0], X[mask,1], c=color,
+               s=70, label=label, edgecolors='white')
+
+# Frontiere : w1*x1 + w2*x2 + b = 0
+#          => x2 = -(w1/w2)*x1 - b/w2
+x1_line = np.linspace(-1, 21, 100)
+x2_line = ______     # A COMPLETER : equation de la droite
+ax.plot(x1_line, x2_line, 'k--', lw=2, label='Frontiere')
+ax.set_xlim(-1, 21); ax.set_ylim(0, 9)
+ax.set_xlabel("Experience"); ax.set_ylabel("Nb langages")
+ax.set_title(f"Frontiere (accuracy={acc:.0%})")
+ax.legend(); ax.grid(True, alpha=0.3)
+plt.tight_layout(); plt.show()
+\end{lstlisting}
+\end{pythonbox}
+
+% ----------------------------------------------------------------------
+\exercice{\exointermediaire\quad --- Perceptron from scratch \hfill\normalfont\small\textsf{[Python guid\'{e}]}}
+
+\begin{pythonbox}[Squelette --- Perceptron]
+\begin{lstlisting}
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Dataset (meme que exercice 9)
+data = np.array([
+    [ 0,2,28.0],[ 1,1,26.5],[ 1,3,35.0],[ 2,2,32.0],
+    [ 2,4,38.0],[ 0,1,25.0],[ 3,3,34.5],[ 1,5,42.0],
+    [ 4,3,38.5],[ 5,4,44.0],[ 5,3,41.0],[ 6,5,48.0],
+    [ 6,4,43.5],[ 7,5,50.0],[ 7,3,39.0],[ 4,6,47.0],
+    [ 8,4,51.0],[ 5,2,40.0],[ 9,5,52.0],[10,6,55.0],
+    [10,4,48.5],[11,5,58.0],[12,7,60.0],[ 9,3,42.0],
+    [13,6,62.0],[11,4,54.0],[15,8,65.0],[17,6,68.0],
+    [20,7,72.0],[18,5,58.0]])
+
+X = data[:, :2]
+y = (data[:, 2] > 45).astype(int)
+n = len(y)
+
+# Initialisation
+w = np.zeros(2)
+b = 0.0
+alpha = ______       # A COMPLETER (essayer 0.1)
+n_epochs = 100
+
+for epoch in range(n_epochs):
+    n_errors = 0
+    for i in range(n):
+        # 1. Score
+        z = ______   # A COMPLETER : w @ X[i] + b
+
+        # 2. Prediction
+        y_pred = ______  # A COMPLETER : 1 si z>0
+
+        # 3. Mise a jour si erreur
+        if y_pred != y[i]:
+            error = ______  # A COMPLETER : y[i] - y_pred
+            w = w + ______  # A COMPLETER
+            b = b + ______  # A COMPLETER
+            n_errors += 1
+
+    if epoch < 5 or epoch % 20 == 19:
+        acc = np.mean([(1 if (w@X[j]+b)>0 else 0)==y[j]
+                        for j in range(n)])
+        print(f"Epoch {epoch+1:3d} : "
+              f"erreurs={n_errors}, acc={acc:.0%}")
+
+# Graphique final
+fig, ax = plt.subplots(figsize=(8, 6))
+for c, color, label in [(0,'#e74c3c','<= 45k'),
+                          (1,'#2ecc71','> 45k')]:
+    mask = y == c
+    ax.scatter(X[mask,0], X[mask,1], c=color,
+               s=70, label=label, edgecolors='white')
+
+if abs(w[1]) > 1e-6:
+    x1 = np.linspace(-1, 21, 100)
+    x2 = ______  # A COMPLETER : frontiere
+    ax.plot(x1, x2, 'k--', lw=2, label='Frontiere')
+
+ax.set_xlim(-1, 21); ax.set_ylim(0, 9)
+ax.set_xlabel("Experience"); ax.set_ylabel("Nb langages")
+ax.set_title("Perceptron from scratch")
+ax.legend(); ax.grid(True, alpha=0.3)
+plt.tight_layout(); plt.show()
+\end{lstlisting}
+\end{pythonbox}
+
+% ======================================================================
+\section*{Exercices Python autonomes --- Niveau avanc\'{e}}
+% ======================================================================
+
+% ----------------------------------------------------------------------
+\exercice{\exoavance\quad --- Perceptron from scratch vs scikit-learn \hfill\normalfont\small\textsf{[Python autonome]}}
+
+\'{E}crivez un programme Python complet qui :
+
+\begin{enumerate}[label=\alph*)]
+    \item Charge le dataset (2 features : exp\'{e}rience, nb\_langages) et la cible binaire (seuil 45\,k\texteuro).
+
+    \item \textbf{M\'{e}thode 1 --- From scratch :} impl\'{e}mentez le perceptron
+        ($\alpha = 0{,}1$, 100 \'{e}poques). Enregistrez l'accuracy \`{a} chaque \'{e}poque.
+
+    \item \textbf{M\'{e}thode 2 --- scikit-learn :}
+        \texttt{from sklearn.linear\_model import Perceptron}.
+        Entra\^{i}nez avec les m\^{e}mes donn\'{e}es.
+
+    \item Affichez un \textbf{tableau comparatif} :
+    \begin{center}
+    \renewcommand{\arraystretch}{1.2}
+    \begin{tabular}{l|c|c|c|c}
+        \toprule
+        \textbf{M\'{e}thode} & $w_1$ & $w_2$ & $b$ & Accuracy \\
+        \midrule
+        From scratch & ? & ? & ? & ? \\
+        scikit-learn & ? & ? & ? & ? \\
+        \bottomrule
+    \end{tabular}
+    \end{center}
+
+    \item Tracez un \textbf{unique graphique} montrant :
+        le nuage de points color\'{e}, la fronti\`{e}re from scratch (rouge),
+        la fronti\`{e}re scikit-learn (verte), une l\'{e}gende avec les accuracies.
+
+    \item Tracez la \textbf{courbe d'accuracy par \'{e}poque} du perceptron from scratch.
+        Combien d'\'{e}poques sont n\'{e}cessaires pour converger ?
+\end{enumerate}
+
+\begin{attentionbox}[Consignes]
+    Utilisez NumPy, Matplotlib et scikit-learn. Commentez en fran\c{c}ais.
+    Les deux fronti\`{e}res ne seront probablement pas identiques : expliquez pourquoi.
+\end{attentionbox}
+
+% ----------------------------------------------------------------------
+\exercice{\exoavance\quad --- Perceptron sur XOR + solution \hfill\normalfont\small\textsf{[Python autonome]}}
+
+\'{E}crivez un programme qui :
+
+\begin{enumerate}[label=\alph*)]
+    \item D\'{e}finit le dataset XOR (4 points, 2 classes).
+
+    \item Entra\^{i}ne un perceptron from scratch (200 \'{e}poques, $\alpha = 0{,}1$).
+        Enregistrez le nombre d'erreurs par \'{e}poque.
+
+    \item Tracez \textbf{deux graphiques} c\^{o}te \`{a} c\^{o}te :
+    \begin{itemize}
+        \item \`{A} gauche : les 4 points du XOR color\'{e}s + la derni\`{e}re fronti\`{e}re
+            tent\'{e}e par le perceptron.
+        \item \`{A} droite : le nombre d'erreurs par \'{e}poque (montrer l'oscillation).
+    \end{itemize}
+
+    \item Concluez : le perceptron converge-t-il ? Pourquoi ?
+
+    \item \textbf{Bonus --- Solution avec transformation de features :}
+        Ajoutez une 3\textsuperscript{e} feature $x_3 = x_1 \times x_2$ (le produit).
+        Le nouveau dataset est :
+
+    \begin{center}
+    \renewcommand{\arraystretch}{1.1}
+    \begin{tabular}{ccc|c}
+        \toprule
+        $x_1$ & $x_2$ & $x_3 = x_1 x_2$ & $y$ \\
+        \midrule
+        0 & 0 & 0 & 0 \\
+        0 & 1 & 0 & 1 \\
+        1 & 0 & 0 & 1 \\
+        1 & 1 & 1 & 0 \\
+        \bottomrule
+    \end{tabular}
+    \end{center}
+
+        Entra\^{i}nez le perceptron sur ce dataset augment\'{e}.
+        Converge-t-il cette fois ? Tracez le r\'{e}sultat.
+\end{enumerate}
+
+\begin{intuitionbox}[Indice]
+    La transformation $x_3 = x_1 x_2$ rend le probl\`{e}me \textbf{lin\'{e}airement s\'{e}parable}
+    dans $\mathbb{R}^3$. C'est l'id\'{e}e fondamentale des \textbf{r\'{e}seaux de neurones} :
+    les couches cach\'{e}es cr\'{e}ent automatiquement de nouvelles features.
+\end{intuitionbox}
+
+% ======================================================================
+\vfill
+\separateur
+
+\begin{center}
+    \small\sffamily
+    \textbf{R\'{e}partition :}\quad
+    4 exercices \starfull{ipssiVert} fondamentaux \quad
+    3 exercices \starfull{ipssiOrange}\starfull{ipssiOrange} interm\'{e}diaires \quad
+    3 guid\'{e}s Python \starfull{ipssiOrange}\starfull{ipssiOrange} \quad
+    2 autonomes \starfull{ipssiRouge}\starfull{ipssiRouge}\starfull{ipssiRouge}
+\end{center}
+
+\begin{center}
+    {\footnotesize\sffamily\textcolor{gray}{%
+        \textcopyright\ 2025 Mohamed EL AFRIT --- IPSSI \enspace\textbullet\enspace
+        \url{www.mohamedelafrit.com} \enspace\textbullet\enspace
+        CC BY-NC-SA 4.0
+    }}
+\end{center}
+
+\end{document}

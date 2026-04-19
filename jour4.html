@@ -1,0 +1,911 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Jour 4 — Réseaux de neurones — Maths IA</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,700;1,400&family=JetBrains+Mono:wght@400;500;700&family=Source+Serif+4:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; padding: 0; font-family: 'Source Serif 4', Georgia, serif; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+<script type="text/babel">
+// © 2025 Mohamed EL AFRIT// Ce contenu est distribué sous licence Creative Commons BY-NC-SA 4.0
+// https://creativecommons.org/licenses/by-nc-sa/4.0/deed.fr
+//
+// JOUR 4 — Réseaux de neurones
+
+const { useState, useEffect, createContext, useContext } = React;
+
+// ─── DATASET ──────────────────────────────────────────────────────────
+const DATASET_RAW = [
+  [0,2,3,150,80,28.0,0],[1,1,2,50,100,26.5,0],[1,3,4,800,40,35.0,0],[2,2,3,200,60,32.0,0],
+  [2,4,4,3000,20,38.0,0],[0,1,1,30,50,25.0,0],[3,3,3,100,80,34.5,0],[1,5,4,15,100,42.0,0],
+  [4,3,3,500,60,38.5,0],[5,4,4,1200,40,44.0,0],[5,3,3,300,80,41.0,0],[6,5,4,2000,30,48.0,1],
+  [6,4,3,150,90,43.5,0],[7,5,4,800,50,50.0,1],[7,3,2,80,70,39.0,0],[4,6,5,400,100,47.0,1],
+  [8,4,4,1500,40,51.0,1],[5,2,3,4000,10,40.0,0],[9,5,4,600,60,52.0,1],[10,6,4,2500,30,55.0,1],
+  [10,4,3,200,80,48.5,1],[11,5,5,1000,50,58.0,1],[12,7,4,3500,20,60.0,1],[9,3,3,60,90,42.0,0],
+  [13,6,4,800,70,62.0,1],[11,4,4,5000,10,54.0,1],[15,8,4,1200,50,65.0,1],[17,6,5,2000,40,68.0,1],
+  [20,7,4,500,60,72.0,1],[18,5,3,100,80,58.0,1],
+];
+
+// ─── SECTIONS ─────────────────────────────────────────────────────────
+const SECTIONS = [
+  { id: "transition", title: "1. Du perceptron au réseau", level: 1, children: [
+    { id: "trans-rappel", title: "1.1 Le perceptron ne suffit pas", level: 2 },
+    { id: "trans-idee", title: "1.2 Combiner plusieurs neurones", level: 2 },
+  ]},
+  { id: "neurone", title: "2. Le neurone artificiel", level: 1, children: [
+    { id: "neu-somme", title: "2.1 Somme pondérée", level: 2 },
+    { id: "neu-activation", title: "2.2 Fonction d'activation", level: 2 },
+    { id: "neu-python", title: "2.3 Calcul d'un neurone", level: 2 },
+  ]},
+  { id: "activations", title: "3. Fonctions d'activation", level: 1, children: [
+    { id: "act-sigmoide", title: "3.1 Sigmoïde", level: 2 },
+    { id: "act-relu", title: "3.2 ReLU", level: 2 },
+    { id: "act-pourquoi", title: "3.3 Pourquoi sont-elles indispensables", level: 2 },
+    { id: "act-python", title: "3.4 Tracer et comparer", level: 2 },
+  ]},
+  { id: "composition", title: "4. Composition de fonctions", level: 1, children: [
+    { id: "comp-intuition", title: "4.1 La chaîne de montage", level: 2 },
+    { id: "comp-formal", title: "4.2 Formalisation", level: 2 },
+    { id: "comp-exemple", title: "4.3 Exemple : 2 neurones en série", level: 2 },
+  ]},
+  { id: "mlp", title: "5. Réseau multicouche (MLP)", level: 1, children: [
+    { id: "mlp-archi", title: "5.1 Architecture", level: 2 },
+    { id: "mlp-schema", title: "5.2 Schéma du réseau", level: 2 },
+    { id: "mlp-forward", title: "5.3 Forward pass", level: 2 },
+    { id: "mlp-exemple", title: "5.4 Exemple numérique 2-2-1", level: 2 },
+    { id: "mlp-python", title: "5.5 Forward pass en Python", level: 2 },
+  ]},
+  { id: "apprentissage", title: "6. Perte et apprentissage", level: 1, children: [
+    { id: "app-perte", title: "6.1 Fonctions de perte", level: 2 },
+    { id: "app-backprop", title: "6.2 Backpropagation (intuition)", level: 2 },
+    { id: "app-python", title: "6.3 Entraîner un mini réseau", level: 2 },
+  ]},
+  { id: "application", title: "7. Application au dataset salaire", level: 1, children: [
+    { id: "appli-scratch", title: "7.1 Réseau from scratch", level: 2 },
+    { id: "appli-sklearn", title: "7.2 Avec scikit-learn", level: 2 },
+    { id: "appli-compare", title: "7.3 Perceptron vs réseau", level: 2 },
+    { id: "appli-xor", title: "7.4 Résoudre XOR !", level: 2 },
+  ]},
+  { id: "limites", title: "8. Limites et risques", level: 1, children: [
+    { id: "lim-overfit", title: "8.1 Surapprentissage", level: 2 },
+    { id: "lim-biais", title: "8.2 Biais dans les données", level: 2 },
+  ]},
+  { id: "synthese", title: "9. Synthèse globale (4 jours)", level: 1, children: [
+    { id: "syn-recap", title: "9.1 Du perceptron au réseau", level: 2 },
+    { id: "syn-4jours", title: "9.2 Les 4 jours en un tableau", level: 2 },
+  ]},
+];
+
+// ─── THEME ────────────────────────────────────────────────────────────
+const THEMES = {
+  light: {
+    bg: "#ffffff", bgAlt: "#fafafa", bgCode: "#f3f4f6",
+    text: "#1a1a2e", textSecondary: "#4b5563", textMuted: "#9ca3af",
+    border: "#e5e7eb", borderLight: "#f3f4f6",
+    definitionBg: "#eff6ff", definitionBorder: "#3b82f6", definitionTitle: "#1e40af",
+    retenirBg: "#f0fdf4", retenirBorder: "#22c55e", retenirTitle: "#166534",
+    attentionBg: "#fff7ed", attentionBorder: "#f97316", attentionTitle: "#c2410c",
+    intuitionBg: "#faf5ff", intuitionBorder: "#a855f7", intuitionTitle: "#7e22ce",
+    exempleBg: "#ecfeff", exempleBorder: "#06b6d4", exempleTitle: "#0e7490",
+    codeBg: "#f8f9fa", codeBorder: "#d1d5db", codeTitle: "#1f2937",
+    sidebarBg: "#f8f9fa", sidebarText: "#374151", sidebarActive: "#3b82f6", sidebarActiveBg: "#eff6ff",
+    link: "#3b82f6", accent: "#3b82f6",
+  },
+  dark: {
+    bg: "#0d1117", bgAlt: "#161b22", bgCode: "#1c2128",
+    text: "#c9d1d9", textSecondary: "#8b949e", textMuted: "#6e7681",
+    border: "#30363d", borderLight: "#21262d",
+    definitionBg: "#0d1f3c", definitionBorder: "#3b82f6", definitionTitle: "#93bbfc",
+    retenirBg: "#0a1f0d", retenirBorder: "#22c55e", retenirTitle: "#86efac",
+    attentionBg: "#1f1206", attentionBorder: "#f97316", attentionTitle: "#fdba74",
+    intuitionBg: "#1a0d2e", intuitionBorder: "#a855f7", intuitionTitle: "#d8b4fe",
+    exempleBg: "#0a1a1f", exempleBorder: "#06b6d4", exempleTitle: "#67e8f9",
+    codeBg: "#161b22", codeBorder: "#30363d", codeTitle: "#c9d1d9",
+    sidebarBg: "#161b22", sidebarText: "#8b949e", sidebarActive: "#58a6ff", sidebarActiveBg: "#1c2541",
+    link: "#58a6ff", accent: "#58a6ff",
+  },
+};
+
+const ThemeContext = createContext();
+
+function ThemeProvider({ children }) {
+  const [mode, setMode] = useState("light");
+  const toggle = () => setMode((m) => (m === "light" ? "dark" : "light"));
+  return (
+    <ThemeContext.Provider value={{ mode, theme: THEMES[mode], toggle }}>
+      {children}
+    </ThemeContext.Provider>
+  );
+}
+
+function useTheme() {
+  return useContext(ThemeContext);
+}
+
+// ─── KATEX ────────────────────────────────────────────────────────────
+function M({ t, d }) {
+  if (!window.katex) return <code style={{ fontSize: "0.9em" }}>{t}</code>;
+  try {
+    const html = window.katex.renderToString(t, { throwOnError: false, displayMode: !!d });
+    if (d) return <div style={{ margin: "20px 0", textAlign: "center", overflowX: "auto" }} dangerouslySetInnerHTML={{ __html: html }} />;
+    return <span dangerouslySetInnerHTML={{ __html: html }} />;
+  } catch (e) {
+    return <code>{t}</code>;
+  }
+}
+
+// ─── COMPONENTS ───────────────────────────────────────────────────────
+function ThemeToggle() {
+  const { mode, toggle } = useTheme();
+  return (
+    <button onClick={toggle} style={{ background: "none", border: "none", cursor: "pointer", fontSize: "1.3rem", padding: "6px 10px", borderRadius: "8px" }} aria-label="Basculer le thème">
+      {mode === "light" ? "🌙" : "☀️"}
+    </button>
+  );
+}
+
+const BOX_CONFIG = {
+  definition: { icon: "📐", label: "Définition", bg: "definitionBg", bd: "definitionBorder", tt: "definitionTitle" },
+  retenir: { icon: "⚡", label: "À retenir", bg: "retenirBg", bd: "retenirBorder", tt: "retenirTitle" },
+  attention: { icon: "⚠️", label: "Attention", bg: "attentionBg", bd: "attentionBorder", tt: "attentionTitle" },
+  intuition: { icon: "💡", label: "Intuition", bg: "intuitionBg", bd: "intuitionBorder", tt: "intuitionTitle" },
+  exemple: { icon: "📊", label: "Exemple", bg: "exempleBg", bd: "exempleBorder", tt: "exempleTitle" },
+  code: { icon: "🐍", label: "Code Python", bg: "codeBg", bd: "codeBorder", tt: "codeTitle" },
+};
+
+function Box({ type, title, children }) {
+  const { theme } = useTheme();
+  const cfg = BOX_CONFIG[type];
+  return (
+    <div style={{ background: theme[cfg.bg], borderLeft: `4px solid ${theme[cfg.bd]}`, borderRadius: "6px", padding: "16px 20px", margin: "20px 0" }}>
+      <div style={{ fontFamily: "'DM Sans',sans-serif", fontWeight: 700, color: theme[cfg.tt], marginBottom: "10px", fontSize: "0.95rem" }}>
+        {cfg.icon} {title || cfg.label}
+      </div>
+      <div style={{ color: theme.text, lineHeight: 1.7 }}>{children}</div>
+    </div>
+  );
+}
+
+function Sec({ id, title, level = 1, children }) {
+  const { theme } = useTheme();
+  const sizes = { 1: "1.7rem", 2: "1.3rem", 3: "1.1rem" };
+  const Tag = level === 1 ? "h2" : level === 2 ? "h3" : "h4";
+  return (
+    <section id={id} style={{ scrollMarginTop: "24px" }}>
+      <Tag style={{ fontFamily: "'DM Sans',sans-serif", fontSize: sizes[level], color: theme.text, fontWeight: 700, borderBottom: level === 1 ? `2px solid ${theme.accent}` : "none", paddingBottom: level === 1 ? "8px" : "0", marginTop: level === 1 ? "48px" : "28px", marginBottom: "16px" }}>
+        {title}
+      </Tag>
+      {children}
+    </section>
+  );
+}
+
+function PythonCell({ code: init, title = "Code Python" }) {
+  const { theme } = useTheme();
+  const [code, setCode] = useState(init);
+  const [output, setOutput] = useState("");
+  const [imgSrc, setImgSrc] = useState(null);
+  const [running, setRunning] = useState(false);
+  const [status, setStatus] = useState("idle");
+
+  const run = async () => {
+    setRunning(true); setOutput(""); setImgSrc(null);
+    try {
+      if (!window._pyodideReady) {
+        setStatus("loading");
+        if (!window._pyodideLoading) {
+          const s = document.createElement("script");
+          s.src = "https://cdn.jsdelivr.net/pyodide/v0.24.1/full/pyodide.js";
+          document.head.appendChild(s);
+          window._pyodideLoading = new Promise((res) => { s.onload = res; });
+        }
+        await window._pyodideLoading;
+        window._pyodideReady = await window.loadPyodide({ indexURL: "https://cdn.jsdelivr.net/pyodide/v0.24.1/full/" });
+        await window._pyodideReady.loadPackage(["numpy", "matplotlib"]);
+        setStatus("ready");
+      }
+      const py = window._pyodideReady;
+      py.runPython("import sys,io,base64\nimport matplotlib;matplotlib.use('AGG')\nimport matplotlib.pyplot as plt\n_cap=io.StringIO();sys.stdout=_cap");
+      py.runPython(code);
+      setOutput(py.runPython("_cap.getvalue()"));
+      const hasPlot = py.runPython("_buf=io.BytesIO();_fig=plt.gcf();_h=len(_fig.get_axes())>0\nif _h:_fig.savefig(_buf,format='png',dpi=120,bbox_inches='tight',facecolor='white');_buf.seek(0)\nplt.close('all');_h");
+      if (hasPlot) {
+        setImgSrc("data:image/png;base64," + py.runPython("base64.b64encode(_buf.getvalue()).decode()"));
+      }
+    } catch (e) {
+      setOutput("Erreur : " + e.message);
+    }
+    setRunning(false);
+  };
+
+  const btnLabel = running ? (status === "loading" ? "⏳ Chargement..." : "⏳ Exécution...") : "▶ Exécuter";
+
+  return (
+    <div style={{ border: `1px solid ${theme.codeBorder}`, borderRadius: "8px", overflow: "hidden", margin: "20px 0" }}>
+      <div style={{ background: theme.codeBg, padding: "8px 16px", display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: `1px solid ${theme.codeBorder}`, fontFamily: "'DM Sans',sans-serif", fontSize: "0.85rem", color: theme.codeTitle, fontWeight: 600 }}>
+        <span>🐍 {title}</span>
+        <button onClick={run} disabled={running} style={{ background: "#22c55e", color: "white", border: "none", padding: "4px 14px", borderRadius: "4px", cursor: "pointer", fontWeight: 600, fontSize: "0.85rem", opacity: running ? 0.6 : 1 }}>{btnLabel}</button>
+      </div>
+      <textarea value={code} onChange={(e) => setCode(e.target.value)} spellCheck={false} style={{ width: "100%", minHeight: "100px", fontFamily: "'JetBrains Mono',monospace", fontSize: "0.82rem", lineHeight: 1.6, background: theme.bgCode, color: theme.text, border: "none", padding: "14px", resize: "vertical", outline: "none", boxSizing: "border-box" }} />
+      {(output || imgSrc) && (
+        <div style={{ borderTop: `1px solid ${theme.codeBorder}`, padding: "12px 16px", background: theme.bgAlt, fontFamily: "'JetBrains Mono',monospace", fontSize: "0.8rem", color: theme.textSecondary, whiteSpace: "pre-wrap" }}>
+          {output && <pre style={{ margin: 0 }}>{output}</pre>}
+          {imgSrc && <img src={imgSrc} alt="Graphique" style={{ maxWidth: "100%", marginTop: "8px", borderRadius: "4px" }} />}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function P({ children, style = {} }) {
+  const { theme } = useTheme();
+  return <p style={{ color: theme.text, lineHeight: 1.8, marginBottom: "16px", fontFamily: "'Source Serif 4',Georgia,serif", fontSize: "1.05rem", ...style }}>{children}</p>;
+}
+function B({ children }) { return <strong style={{ fontWeight: 600 }}>{children}</strong>; }
+function DT({ rows, headers, max = 10 }) {
+  const { theme } = useTheme();
+  return (
+    <div style={{ overflowX: "auto", margin: "16px 0" }}>
+      <table style={{ borderCollapse: "collapse", width: "100%", fontFamily: "'JetBrains Mono',monospace", fontSize: "0.82rem" }}>
+        <thead><tr>{headers.map((h, i) => <th key={i} style={{ padding: "8px 12px", borderBottom: `2px solid ${theme.accent}`, textAlign: "left", fontFamily: "'DM Sans',sans-serif", fontWeight: 600, color: theme.text, whiteSpace: "nowrap" }}>{h}</th>)}</tr></thead>
+        <tbody>{rows.slice(0, max).map((row, i) => <tr key={i} style={{ background: i % 2 === 0 ? "transparent" : theme.bgAlt }}>{row.map((c, j) => <td key={j} style={{ padding: "6px 12px", borderBottom: `1px solid ${theme.borderLight}`, color: theme.textSecondary }}>{c}</td>)}</tr>)}</tbody>
+      </table>
+    </div>
+  );
+}
+
+// ─── SIDEBAR ──────────────────────────────────────────────────────────
+function Sidebar({ activeId }) {
+  const { theme } = useTheme();
+  const [collapsed, setCollapsed] = useState({});
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const [progress, setProgress] = useState(0);
+
+  useEffect(() => {
+    const fn = () => { const h = document.documentElement; setProgress(Math.min(1, Math.max(0, h.scrollTop / (h.scrollHeight - h.clientHeight)))); };
+    window.addEventListener("scroll", fn, { passive: true });
+    return () => window.removeEventListener("scroll", fn);
+  }, []);
+
+  const scrollTo = (id) => { document.getElementById(id)?.scrollIntoView({ behavior: "smooth" }); setMobileOpen(false); };
+  const tog = (id) => setCollapsed((c) => ({ ...c, [id]: !c[id] }));
+
+  return (
+    <>
+      <button onClick={() => setMobileOpen(!mobileOpen)} className="mob-btn" style={{ display: "none", position: "fixed", top: 10, left: 10, zIndex: 1001, background: theme.bgAlt, border: `1px solid ${theme.border}`, borderRadius: "8px", padding: "8px 10px", cursor: "pointer", fontSize: "1.2rem" }}>{mobileOpen ? "✕" : "☰"}</button>
+      <aside className="sidebar-el" style={{ position: "fixed", left: 0, top: 0, width: "280px", height: "100vh", background: theme.sidebarBg, borderRight: `1px solid ${theme.border}`, zIndex: 1000, overflowY: "hidden" }}>
+        <div style={{ display: "flex", flexDirection: "column", height: "100%", position: "relative" }}>
+          <div style={{ position: "absolute", left: 0, top: 0, width: "3px", height: "100%", background: theme.borderLight, zIndex: 1 }}>
+            <div style={{ width: "100%", height: `${progress * 100}%`, background: theme.accent, transition: "height 0.1s" }} />
+          </div>
+          <div style={{ padding: "20px 20px 14px", borderBottom: `1px solid ${theme.border}` }}>
+            <a href="index.html" style={{ display: "inline-flex", alignItems: "center", gap: "4px", fontFamily: "'DM Sans',sans-serif", fontSize: "0.75rem", color: theme.textMuted, textDecoration: "none", marginBottom: "8px" }}>← Accueil</a>
+            <div style={{ fontFamily: "'DM Sans',sans-serif", fontWeight: 700, fontSize: "1rem", color: theme.accent }}>Maths IA</div>
+            <div style={{ fontFamily: "'DM Sans',sans-serif", fontSize: "0.78rem", color: theme.textMuted, marginTop: "2px" }}>Jour 4 — Réseaux de neurones</div>
+            <div style={{ display: "flex", gap: "4px", marginTop: "10px" }}>
+              {[1, 2, 3, 4].map((j) => (
+                j === 4 ? <div key={j} style={{ flex: 1, textAlign: "center", padding: "3px 0", borderRadius: "4px", fontFamily: "'DM Sans',sans-serif", fontSize: "0.72rem", fontWeight: 700, background: theme.accent, color: "#fff", border: `1px solid ${theme.accent}` }}>J{j}</div>
+                : <a key={j} href={`jour${j}.html`} style={{ flex: 1, textAlign: "center", padding: "3px 0", borderRadius: "4px", fontFamily: "'DM Sans',sans-serif", fontSize: "0.72rem", fontWeight: 400, background: "transparent", color: theme.textMuted, textDecoration: "none", cursor: "pointer", border: `1px solid ${theme.border}` }}>J{j}</a>
+              ))}
+            </div>
+          </div>
+          <nav style={{ flex: 1, overflowY: "auto", padding: "8px 0" }}>
+            {SECTIONS.map((sec) => {
+              const isOpen = !collapsed[sec.id];
+              const isActive = activeId === sec.id || (sec.children && sec.children.some((c) => c.id === activeId));
+              return (
+                <div key={sec.id}>
+                  <div onClick={() => { scrollTo(sec.id); if (sec.children) tog(sec.id); }} style={{ display: "flex", alignItems: "center", gap: "6px", padding: "7px 14px 7px 18px", cursor: "pointer", background: isActive ? theme.sidebarActiveBg : "transparent", borderRight: isActive ? `3px solid ${theme.sidebarActive}` : "3px solid transparent", fontFamily: "'DM Sans',sans-serif", fontSize: "0.8rem", fontWeight: isActive ? 600 : 400, color: isActive ? theme.sidebarActive : theme.sidebarText }}>
+                    {sec.children && <span style={{ fontSize: "0.55rem", transition: "transform 0.2s", transform: isOpen ? "rotate(90deg)" : "rotate(0)", display: "inline-block" }}>▶</span>}
+                    <span style={{ flex: 1 }}>{sec.title}</span>
+                  </div>
+                  {sec.children && isOpen && sec.children.map((ch) => {
+                    const ca = activeId === ch.id;
+                    return <div key={ch.id} onClick={() => scrollTo(ch.id)} style={{ padding: "4px 14px 4px 42px", cursor: "pointer", fontFamily: "'DM Sans',sans-serif", fontSize: "0.76rem", color: ca ? theme.sidebarActive : theme.textMuted, fontWeight: ca ? 600 : 400 }}>{ch.title}</div>;
+                  })}
+                </div>
+              );
+            })}
+          </nav>
+          <div style={{ padding: "14px", borderTop: `1px solid ${theme.border}`, fontSize: "0.68rem", color: theme.textMuted, fontFamily: "'DM Sans',sans-serif", textAlign: "center", lineHeight: 1.6 }}>
+            © 2025 Mohamed EL AFRIT<br /><a href="https://www.mohamedelafrit.com" style={{ color: theme.link, textDecoration: "none" }}>www.mohamedelafrit.com</a><br /><a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.fr" style={{ color: theme.link, textDecoration: "none" }}>CC BY-NC-SA 4.0</a>
+          </div>
+        </div>
+      </aside>
+      {mobileOpen && <div onClick={() => setMobileOpen(false)} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.4)", zIndex: 999 }} />}
+    </>
+  );
+}
+
+// ─── CONTENT ──────────────────────────────────────────────────────────
+function Content() {
+  const { theme } = useTheme();
+
+  return (
+    <>
+      {/* ═══ 1. TRANSITION ═══ */}
+      <Sec id="transition" title="1. Du perceptron au réseau" level={1}>
+        <Sec id="trans-rappel" title="1.1 Le perceptron ne suffit pas" level={2}>
+          <P>Au Jour 3, nous avons vu que le perceptron ne peut résoudre que des problèmes <B>linéairement séparables</B>. Le XOR — un problème pourtant trivial — le met en échec. Aucune droite ne peut séparer les classes.</P>
+          <Box type="attention" title="Limite du perceptron">
+            <P style={{ marginBottom: 0 }}>Un seul neurone = une seule frontière linéaire. Pour des problèmes complexes (relations non linéaires, frontières courbes), il faut <B>combiner plusieurs neurones</B>.</P>
+          </Box>
+        </Sec>
+        <Sec id="trans-idee" title="1.2 Combiner plusieurs neurones" level={2}>
+          <Box type="intuition" title="L'idée fondamentale">
+            <P style={{ marginBottom: 0 }}>Imaginez une équipe de décideurs. Chacun analyse le problème sous un angle différent (un neurone = un point de vue). Ensuite, un « chef » combine leurs avis pour prendre la décision finale. C'est exactement ce que fait un <B>réseau de neurones</B> : plusieurs neurones travaillent en parallèle, puis leurs sorties alimentent d'autres neurones.</P>
+          </Box>
+        </Sec>
+      </Sec>
+
+      {/* ═══ 2. NEURONE ARTIFICIEL ═══ */}
+      <Sec id="neurone" title="2. Le neurone artificiel (version enrichie)" level={1}>
+        <Sec id="neu-somme" title="2.1 Somme pondérée" level={2}>
+          <P>Le neurone artificiel commence exactement comme le perceptron : une <B>somme pondérée</B> des entrées :</P>
+          <M d t={"z = \\mathbf{w}^T \\mathbf{x} + b = w_1 x_1 + w_2 x_2 + \\cdots + w_p x_p + b"} />
+        </Sec>
+        <Sec id="neu-activation" title="2.2 Fonction d'activation" level={2}>
+          <P>La différence clé : au lieu de la fonction signe (0 ou 1 brutalement), on applique une <B>fonction d'activation</B> <M t={"\\sigma"} /> plus souple :</P>
+          <Box type="definition" title="Neurone artificiel">
+            <M d t={"a = \\sigma(z) = \\sigma(\\mathbf{w}^T \\mathbf{x} + b)"} />
+            <P style={{ marginBottom: 0 }}>où <M t={"\\sigma"} /> est une fonction d'activation non linéaire (sigmoïde, ReLU, tanh…). La sortie <M t={"a"} /> (activation) est un nombre réel, pas juste 0 ou 1.</P>
+          </Box>
+        </Sec>
+        <Sec id="neu-python" title="2.3 Calcul d'un neurone" level={2}>
+          <PythonCell title="Calculer la sortie d'un neurone" code={`import numpy as np
+
+# Entrees : un developpeur (experience=5, langages=4)
+x = np.array([5.0, 4.0])
+
+# Poids et biais du neurone
+w = np.array([0.3, 0.5])
+b = -2.0
+
+# Etape 1 : somme ponderee
+z = w @ x + b
+print(f"Somme ponderee z = {z:.2f}")
+
+# Etape 2 : activation (sigmoide)
+def sigmoid(z):
+    return 1 / (1 + np.exp(-z))
+
+a = sigmoid(z)
+print(f"Activation a = sigmoid({z:.2f}) = {a:.4f}")
+print(f"\\nInterpretation : probabilite ~{a:.0%} d'etre classe 1")`} />
+        </Sec>
+      </Sec>
+
+      {/* ═══ 3. FONCTIONS D'ACTIVATION ═══ */}
+      <Sec id="activations" title="3. Fonctions d'activation" level={1}>
+        <Sec id="act-sigmoide" title="3.1 Sigmoïde" level={2}>
+          <Box type="definition" title="Sigmoïde">
+            <M d t={"\\sigma(z) = \\frac{1}{1 + e^{-z}}"} />
+            <P style={{ marginBottom: 0 }}>La sigmoïde « écrase » n'importe quel nombre réel dans l'intervalle <M t={"(0, 1)"} />. C'est un <B>interrupteur progressif</B> : au lieu de basculer brutalement de 0 à 1, elle fait une transition douce.</P>
+          </Box>
+          <Box type="intuition" title="L'interrupteur progressif">
+            <P style={{ marginBottom: 0 }}>Pensez à un variateur de lumière. Au lieu d'un interrupteur ON/OFF (le perceptron), la sigmoïde est un variateur qui peut régler la lumière à n'importe quelle intensité entre 0% et 100%.</P>
+          </Box>
+        </Sec>
+
+        <Sec id="act-relu" title="3.2 ReLU" level={2}>
+          <Box type="definition" title="ReLU (Rectified Linear Unit)">
+            <M d t={"\\text{ReLU}(z) = \\max(0, z) = \\begin{cases} z & \\text{si } z > 0 \\\\ 0 & \\text{si } z \\leq 0 \\end{cases}"} />
+            <P style={{ marginBottom: 0 }}>ReLU est la fonction d'activation la plus utilisée dans les réseaux modernes. Elle est simple, rapide, et fonctionne très bien en pratique.</P>
+          </Box>
+        </Sec>
+
+        <Sec id="act-pourquoi" title="3.3 Pourquoi sont-elles indispensables ?" level={2}>
+          <Box type="retenir" title="Sans activation, tout reste linéaire">
+            <P style={{ marginBottom: 0 }}>Si on empile des neurones <B>sans</B> fonction d'activation, le réseau entier est équivalent à un <B>seul</B> neurone linéaire (une composition de fonctions linéaires est linéaire). Les fonctions d'activation introduisent la <B>non-linéarité</B> qui permet au réseau de modéliser des relations complexes.</P>
+          </Box>
+        </Sec>
+
+        <Sec id="act-python" title="3.4 Tracer et comparer" level={2}>
+          <PythonCell title="Sigmoïde vs ReLU" code={`import numpy as np
+import matplotlib.pyplot as plt
+
+z = np.linspace(-6, 6, 200)
+
+sigmoid = 1 / (1 + np.exp(-z))
+relu = np.maximum(0, z)
+
+fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 4.5))
+
+ax1.plot(z, sigmoid, 'b-', lw=2.5, label='sigmoid(z)')
+ax1.axhline(0.5, color='gray', ls=':', alpha=0.5)
+ax1.axvline(0, color='gray', ls=':', alpha=0.5)
+ax1.set_title('Sigmoide : sortie dans (0, 1)')
+ax1.set_xlabel('z'); ax1.set_ylabel('sigma(z)')
+ax1.legend(); ax1.grid(True, alpha=0.3)
+
+ax2.plot(z, relu, 'r-', lw=2.5, label='ReLU(z)')
+ax2.axvline(0, color='gray', ls=':', alpha=0.5)
+ax2.set_title('ReLU : max(0, z)')
+ax2.set_xlabel('z'); ax2.set_ylabel('ReLU(z)')
+ax2.legend(); ax2.grid(True, alpha=0.3)
+
+plt.tight_layout(); plt.show()
+print("Sigmoide : sortie entre 0 et 1 (ideal pour probabilites)")
+print("ReLU : sortie >= 0, lineaire si z > 0 (rapide, efficace)")`} />
+        </Sec>
+      </Sec>
+
+      {/* ═══ 4. COMPOSITION ═══ */}
+      <Sec id="composition" title="4. Composition de fonctions" level={1}>
+        <Sec id="comp-intuition" title="4.1 La chaîne de montage" level={2}>
+          <Box type="intuition" title="La chaîne de montage">
+            <P style={{ marginBottom: 0 }}>Dans une usine, chaque poste transforme le produit : découpe → assemblage → peinture → emballage. La sortie d'un poste est l'entrée du suivant. Un réseau de neurones fonctionne pareil : la sortie d'un neurone alimente le suivant.</P>
+          </Box>
+        </Sec>
+        <Sec id="comp-formal" title="4.2 Formalisation" level={2}>
+          <Box type="definition" title="Composition de fonctions">
+            <M d t={"(f \\circ g)(x) = f(g(x))"} />
+            <P style={{ marginBottom: 0 }}>On applique d'abord <M t={"g"} />, puis <M t={"f"} /> au résultat. Dans un réseau : on applique d'abord le neurone de la couche 1, puis celui de la couche 2 à sa sortie.</P>
+          </Box>
+        </Sec>
+        <Sec id="comp-exemple" title="4.3 Exemple : 2 neurones en série" level={2}>
+          <Box type="exemple" title="Deux neurones enchaînés">
+            <P style={{ marginBottom: 8 }}>Neurone 1 : <M t={"z_1 = 0.5 \\times 3 + 0.8 \\times 4 - 2 = 2.7"} />, <M t={"a_1 = \\text{ReLU}(2.7) = 2.7"} /></P>
+            <P style={{ marginBottom: 8 }}>Neurone 2 (prend <M t={"a_1"} /> en entrée) : <M t={"z_2 = 0.6 \\times 2.7 - 1 = 0.62"} />, <M t={"a_2 = \\sigma(0.62) = 0.65"} /></P>
+            <P style={{ marginBottom: 0 }}>Le résultat final (0.65) est <B>non linéaire</B> par rapport aux entrées originales. C'est la composition des deux neurones qui crée cette non-linéarité.</P>
+          </Box>
+        </Sec>
+      </Sec>
+
+      {/* ═══ 5. MLP ═══ */}
+      <Sec id="mlp" title="5. Réseau multicouche (MLP)" level={1}>
+        <Sec id="mlp-archi" title="5.1 Architecture" level={2}>
+          <Box type="definition" title="Perceptron multicouche (MLP)">
+            <P style={{ marginBottom: 8 }}>Un <B>MLP</B> (Multi-Layer Perceptron) est composé de :</P>
+            <P style={{ marginBottom: 8 }}>
+              {"\u2022"} <B>Couche d'entrée</B> : reçoit les features <M t={"\\mathbf{x}"} /> (pas de calcul)<br />
+              {"\u2022"} <B>Couche(s) cachée(s)</B> : neurones qui transforment les données (création de nouvelles représentations)<br />
+              {"\u2022"} <B>Couche de sortie</B> : produit la prédiction finale
+            </P>
+            <P style={{ marginBottom: 0 }}>Chaque neurone d'une couche est connecté à <B>tous</B> les neurones de la couche suivante (réseau « fully connected »).</P>
+          </Box>
+        </Sec>
+
+        <Sec id="mlp-schema" title="5.2 Schéma du réseau" level={2}>
+          <Box type="exemple" title="Réseau 2-2-1 (2 entrées, 2 neurones cachés, 1 sortie)">
+            <P style={{ marginBottom: 8, fontFamily: "'JetBrains Mono',monospace", fontSize: "0.9rem", textAlign: "center", lineHeight: 2 }}>
+              <B>Entrée</B> {"        "} <B>Couche cachée</B> {"    "} <B>Sortie</B><br />
+              {"  "}x₁ ──→ [h₁] ──╲<br />
+              {"  "}{"     "}╲╱{"         "}╲<br />
+              {"  "}{"     "}╱╲{"         "}→ [out] → ŷ<br />
+              {"  "}x₂ ──→ [h₂] ──╱
+            </P>
+            <P style={{ marginBottom: 0 }}>Chaque flèche porte un poids. Les neurones h₁ et h₂ créent de nouvelles features à partir de x₁ et x₂.</P>
+          </Box>
+        </Sec>
+
+        <Sec id="mlp-forward" title="5.3 Forward pass (propagation avant)" level={2}>
+          <P>Le <B>forward pass</B> calcule la sortie du réseau couche par couche :</P>
+          <M d t={"\\mathbf{h} = \\sigma(\\mathbf{W}^{(1)} \\mathbf{x} + \\mathbf{b}^{(1)})"} />
+          <M d t={"\\hat{y} = \\sigma(\\mathbf{w}^{(2)T} \\mathbf{h} + b^{(2)})"} />
+          <P>où <M t={"\\mathbf{W}^{(1)}"} /> est la matrice de poids de la couche cachée et <M t={"\\mathbf{w}^{(2)}"} /> les poids de la couche de sortie.</P>
+        </Sec>
+
+        <Sec id="mlp-exemple" title="5.4 Exemple numérique : réseau 2-2-1" level={2}>
+          <Box type="exemple" title="Calcul complet d'un forward pass">
+            <P style={{ marginBottom: 8 }}>Entrée : <M t={"\\mathbf{x} = (5, 4)^T"} /> (expérience=5, langages=4)</P>
+            <P style={{ marginBottom: 8 }}><B>Couche cachée</B> (2 neurones, activation sigmoïde) :</P>
+            <P style={{ marginBottom: 8 }}>
+              <M t={"z_1 = 0.3 \\times 5 + 0.5 \\times 4 - 2 = 1.5"} /> → <M t={"h_1 = \\sigma(1.5) = 0.82"} /><br />
+              <M t={"z_2 = -0.2 \\times 5 + 0.4 \\times 4 + 0.5 = 1.1"} /> → <M t={"h_2 = \\sigma(1.1) = 0.75"} />
+            </P>
+            <P style={{ marginBottom: 8 }}><B>Couche de sortie</B> (1 neurone, activation sigmoïde) :</P>
+            <P style={{ marginBottom: 0 }}>
+              <M t={"z_{out} = 0.8 \\times 0.82 + 0.6 \\times 0.75 - 0.5 = 0.606"} /> → <M t={"\\hat{y} = \\sigma(0.606) = 0.647"} /><br />
+              Prédiction : probabilité de 64.7% d'être en classe 1 (salaire {">"} 45k€).
+            </P>
+          </Box>
+        </Sec>
+
+        <Sec id="mlp-python" title="5.5 Forward pass en Python" level={2}>
+          <PythonCell title="Forward pass d'un réseau 2-2-1" code={`import numpy as np
+
+def sigmoid(z):
+    return 1 / (1 + np.exp(-z))
+
+# Entree
+x = np.array([5.0, 4.0])
+
+# Couche cachee (2 neurones)
+W1 = np.array([[0.3, 0.5],     # poids neurone h1
+               [-0.2, 0.4]])   # poids neurone h2
+b1 = np.array([-2.0, 0.5])
+
+z1 = W1 @ x + b1
+h = sigmoid(z1)
+print(f"Couche cachee :")
+print(f"  z1 = {z1}")
+print(f"  h  = sigmoid(z1) = {np.round(h, 4)}")
+
+# Couche de sortie (1 neurone)
+w2 = np.array([0.8, 0.6])
+b2 = -0.5
+
+z2 = w2 @ h + b2
+y_pred = sigmoid(z2)
+print(f"\\nCouche de sortie :")
+print(f"  z2 = {z2:.4f}")
+print(f"  y_pred = sigmoid(z2) = {y_pred:.4f}")
+print(f"\\nPrediction : {y_pred:.1%} de probabilite classe 1")`} />
+        </Sec>
+      </Sec>
+
+      {/* ═══ 6. APPRENTISSAGE ═══ */}
+      <Sec id="apprentissage" title="6. Fonction de perte et apprentissage" level={1}>
+        <Sec id="app-perte" title="6.1 Fonctions de perte" level={2}>
+          <P>Pour la <B>régression</B>, on utilisait le MSE. Pour la <B>classification</B>, on utilise souvent la <B>cross-entropy</B> (entropie croisée) :</P>
+          <Box type="definition" title="Binary cross-entropy">
+            <M d t={"L = -\\frac{1}{n}\\sum_{i=1}^{n}\\left[ y_i \\ln(\\hat{y}_i) + (1-y_i)\\ln(1-\\hat{y}_i) \\right]"} />
+            <P style={{ marginBottom: 0 }}>Intuition : si le modèle prédit 0.9 pour une observation de classe 1, la perte est faible. S'il prédit 0.1 pour une classe 1, la perte est très élevée. La cross-entropy <B>pénalise fortement les erreurs confiantes</B>.</P>
+          </Box>
+        </Sec>
+
+        <Sec id="app-backprop" title="6.2 Backpropagation (intuition)" level={2}>
+          <Box type="intuition" title="Propager l'erreur en arrière">
+            <P style={{ marginBottom: 8 }}>Imaginez un relais de coureurs. Le dernier coureur arrive en retard (l'erreur). Comment répartir la responsabilité ? On remonte la chaîne : le dernier coureur était-il lent ? Le précédent lui a-t-il passé le témoin trop tard ?</P>
+            <P style={{ marginBottom: 0 }}>La <B>backpropagation</B> fait pareil : elle calcule la contribution de <B>chaque poids</B> à l'erreur finale, en remontant de la sortie vers l'entrée. Chaque poids est ensuite ajusté proportionnellement à sa responsabilité. C'est la <B>règle de la chaîne</B> (Jour 2) appliquée à chaque couche.</P>
+          </Box>
+          <Box type="retenir">
+            <P style={{ marginBottom: 0 }}>L'entraînement d'un réseau = <B>forward pass</B> (calculer la prédiction) + <B>backward pass</B> (propager l'erreur) + <B>mise à jour</B> (<M t={"\\theta \\leftarrow \\theta - \\alpha \\nabla L"} />). C'est la même boucle qu'au Jour 2, mais appliquée à toutes les couches.</P>
+          </Box>
+        </Sec>
+
+        <Sec id="app-python" title="6.3 Entraîner un mini réseau" level={2}>
+          <PythonCell title="Réseau 2-2-1 avec backpropagation (from scratch)" code={`import numpy as np
+
+def sigmoid(z):
+    return 1 / (1 + np.exp(-z))
+def sigmoid_deriv(a):
+    return a * (1 - a)
+
+np.random.seed(42)
+
+# Dataset XOR pour tester
+X = np.array([[0,0],[0,1],[1,0],[1,1]], dtype=float)
+y = np.array([[0],[1],[1],[0]], dtype=float)
+
+# Poids aleatoires
+W1 = np.random.randn(2, 2) * 0.5
+b1 = np.zeros((1, 2))
+W2 = np.random.randn(2, 1) * 0.5
+b2 = np.zeros((1, 1))
+
+alpha = 1.0
+for epoch in range(5000):
+    # Forward pass
+    z1 = X @ W1 + b1
+    h = sigmoid(z1)
+    z2 = h @ W2 + b2
+    out = sigmoid(z2)
+
+    # Loss (MSE)
+    loss = np.mean((y - out) ** 2)
+
+    # Backward pass
+    d_out = (out - y) * sigmoid_deriv(out)  # (4,1)
+    dW2 = h.T @ d_out / 4
+    db2 = np.mean(d_out, axis=0, keepdims=True)
+
+    d_h = d_out @ W2.T * sigmoid_deriv(h)  # (4,2)
+    dW1 = X.T @ d_h / 4
+    db1 = np.mean(d_h, axis=0, keepdims=True)
+
+    # Mise a jour
+    W2 -= alpha * dW2; b2 -= alpha * db2
+    W1 -= alpha * dW1; b1 -= alpha * db1
+
+    if epoch < 5 or epoch % 1000 == 999:
+        preds = (out > 0.5).astype(int).flatten()
+        acc = np.mean(preds == y.flatten())
+        print(f"Epoch {epoch+1:5d} : loss={loss:.4f}, acc={acc:.0%}")
+
+print(f"\\nPredictions finales : {out.flatten().round(3)}")
+print(f"Attendu             : {y.flatten()}")
+print("\\nLe reseau resout le XOR !")`} />
+        </Sec>
+      </Sec>
+
+      {/* ═══ 7. APPLICATION ═══ */}
+      <Sec id="application" title="7. Application au dataset salaire" level={1}>
+        <Sec id="appli-scratch" title="7.1 Réseau from scratch sur le dataset" level={2}>
+          <PythonCell title="MLP from scratch — classification salaire" code={`import numpy as np
+
+def sigmoid(z):
+    return 1 / (1 + np.exp(-np.clip(z, -500, 500)))
+def sigmoid_d(a):
+    return a * (1 - a)
+
+# Dataset (experience, nb_langages)
+data = np.array([
+    [0,2,28],[1,1,26.5],[1,3,35],[2,2,32],[2,4,38],[0,1,25],
+    [3,3,34.5],[1,5,42],[4,3,38.5],[5,4,44],[5,3,41],[6,5,48],
+    [6,4,43.5],[7,5,50],[7,3,39],[4,6,47],[8,4,51],[5,2,40],
+    [9,5,52],[10,6,55],[10,4,48.5],[11,5,58],[12,7,60],[9,3,42],
+    [13,6,62],[11,4,54],[15,8,65],[17,6,68],[20,7,72],[18,5,58]],
+    dtype=float)
+
+X_raw = data[:, :2]; y = (data[:, 2] > 45).astype(float).reshape(-1, 1)
+
+# Normalisation (important pour les reseaux !)
+X = (X_raw - X_raw.mean(axis=0)) / X_raw.std(axis=0)
+
+np.random.seed(42)
+W1 = np.random.randn(2, 4) * 0.5; b1 = np.zeros((1, 4))
+W2 = np.random.randn(4, 1) * 0.5; b2 = np.zeros((1, 1))
+alpha = 0.5
+
+for epoch in range(2000):
+    h = sigmoid(X @ W1 + b1)
+    out = sigmoid(h @ W2 + b2)
+    loss = np.mean((y - out) ** 2)
+
+    d_out = (out - y) * sigmoid_d(out)
+    W2 -= alpha * (h.T @ d_out) / len(y)
+    b2 -= alpha * np.mean(d_out, axis=0, keepdims=True)
+    d_h = (d_out @ W2.T) * sigmoid_d(h)
+    W1 -= alpha * (X.T @ d_h) / len(y)
+    b1 -= alpha * np.mean(d_h, axis=0, keepdims=True)
+
+    if epoch < 3 or epoch % 500 == 499:
+        acc = np.mean((out > 0.5).astype(int) == y)
+        print(f"Epoch {epoch+1:5d} : loss={loss:.4f}, acc={acc:.0%}")
+
+final_acc = np.mean((out > 0.5).astype(int) == y)
+print(f"\\nAccuracy finale : {final_acc:.0%}")
+print("Compare au perceptron Jour 3 (~87-90%)")`} />
+        </Sec>
+
+        <Sec id="appli-sklearn" title="7.2 Avec scikit-learn MLPClassifier" level={2}>
+          <PythonCell title="MLPClassifier scikit-learn" code={`import numpy as np
+from sklearn.neural_network import MLPClassifier
+from sklearn.preprocessing import StandardScaler
+
+data = np.array([
+    [0,2,28],[1,1,26.5],[1,3,35],[2,2,32],[2,4,38],[0,1,25],
+    [3,3,34.5],[1,5,42],[4,3,38.5],[5,4,44],[5,3,41],[6,5,48],
+    [6,4,43.5],[7,5,50],[7,3,39],[4,6,47],[8,4,51],[5,2,40],
+    [9,5,52],[10,6,55],[10,4,48.5],[11,5,58],[12,7,60],[9,3,42],
+    [13,6,62],[11,4,54],[15,8,65],[17,6,68],[20,7,72],[18,5,58]],
+    dtype=float)
+
+X = data[:, :2]; y = (data[:, 2] > 45).astype(int)
+
+# Normaliser les features
+scaler = StandardScaler()
+X_norm = scaler.fit_transform(X)
+
+# Reseau : 2 entrees -> 4 neurones caches -> 1 sortie
+mlp = MLPClassifier(hidden_layer_sizes=(4,), max_iter=2000,
+                     activation='logistic', random_state=42)
+mlp.fit(X_norm, y)
+
+acc = mlp.score(X_norm, y)
+print(f"Accuracy MLPClassifier : {acc:.0%}")
+print(f"Architecture : {[2]} -> {list(mlp.hidden_layer_sizes)} -> [1]")
+print(f"Nb parametres : {sum(c.size for c in mlp.coefs_) + sum(b.size for b in mlp.intercepts_)}")`} />
+        </Sec>
+
+        <Sec id="appli-compare" title="7.3 Perceptron vs réseau" level={2}>
+          <DT headers={["Modèle", "Architecture", "Accuracy", "Résout XOR ?"]} max={10} rows={[
+            ["Perceptron (J3)", "2 → 1", "~87-90%", "Non"],
+            ["MLP from scratch", "2 → 4 → 1", "~93-97%", "Oui"],
+            ["MLPClassifier sklearn", "2 → 4 → 1", "~93-97%", "Oui"],
+          ]} />
+          <Box type="retenir">
+            <P style={{ marginBottom: 0 }}>Le réseau multicouche améliore l'accuracy grâce à ses neurones cachés qui créent des <B>représentations non linéaires</B>. La couche cachée « invente » automatiquement de nouvelles features plus utiles pour la classification.</P>
+          </Box>
+        </Sec>
+
+        <Sec id="appli-xor" title="7.4 Résoudre XOR avec un réseau !" level={2}>
+          <PythonCell title="Le réseau résout XOR" code={`import numpy as np
+import matplotlib.pyplot as plt
+
+def sigmoid(z):
+    return 1 / (1 + np.exp(-z))
+def sigmoid_d(a):
+    return a * (1 - a)
+
+# XOR
+X = np.array([[0,0],[0,1],[1,0],[1,1]], dtype=float)
+y = np.array([[0],[1],[1],[0]], dtype=float)
+
+np.random.seed(42)
+W1 = np.random.randn(2, 4) * 0.5; b1 = np.zeros((1, 4))
+W2 = np.random.randn(4, 1) * 0.5; b2 = np.zeros((1, 1))
+
+for epoch in range(10000):
+    h = sigmoid(X @ W1 + b1)
+    out = sigmoid(h @ W2 + b2)
+    d_out = (out - y) * sigmoid_d(out)
+    W2 -= 1.0 * (h.T @ d_out) / 4
+    b2 -= 1.0 * np.mean(d_out, axis=0, keepdims=True)
+    d_h = (d_out @ W2.T) * sigmoid_d(h)
+    W1 -= 1.0 * (X.T @ d_h) / 4
+    b1 -= 1.0 * np.mean(d_h, axis=0, keepdims=True)
+
+preds = (out > 0.5).astype(int).flatten()
+print(f"Predictions : {out.flatten().round(3)}")
+print(f"Attendu     : {y.flatten().astype(int)}")
+print(f"Accuracy    : {np.mean(preds == y.flatten()):.0%}")
+
+# Visualisation de la surface de decision
+fig, ax = plt.subplots(figsize=(6, 5))
+xx, yy = np.meshgrid(np.linspace(-0.5, 1.5, 100),
+                       np.linspace(-0.5, 1.5, 100))
+grid = np.c_[xx.ravel(), yy.ravel()]
+h_grid = sigmoid(grid @ W1 + b1)
+z_grid = sigmoid(h_grid @ W2 + b2).reshape(xx.shape)
+ax.contourf(xx, yy, z_grid, levels=20, cmap='RdYlGn', alpha=0.6)
+ax.contour(xx, yy, z_grid, levels=[0.5], colors='black', linewidths=2)
+for c, col in [(0,'#e74c3c'),(1,'#2ecc71')]:
+    mask = y.flatten() == c
+    ax.scatter(X[mask,0], X[mask,1], c=col, s=200,
+               edgecolors='black', lw=2, zorder=3)
+ax.set_title("XOR resolu par un reseau 2-4-1 !")
+ax.set_xlabel("x1"); ax.set_ylabel("x2")
+plt.tight_layout(); plt.show()`} />
+        </Sec>
+      </Sec>
+
+      {/* ═══ 8. LIMITES ═══ */}
+      <Sec id="limites" title="8. Limites et risques" level={1}>
+        <Sec id="lim-overfit" title="8.1 Surapprentissage (overfitting)" level={2}>
+          <Box type="attention" title="Apprendre par cœur ≠ comprendre">
+            <P style={{ marginBottom: 8 }}>Un réseau trop gros (trop de neurones, trop de couches) peut <B>mémoriser</B> les données d'entraînement au lieu de <B>généraliser</B>. C'est comme un élève qui apprend ses fiches par cœur sans comprendre : il a 20/20 sur les exercices connus mais échoue face à un problème nouveau.</P>
+            <P style={{ marginBottom: 0 }}>Solutions : utiliser un <B>jeu de validation</B> (données non vues pendant l'entraînement), la <B>régularisation</B> (pénaliser les poids trop grands), le <B>dropout</B> (désactiver aléatoirement des neurones).</P>
+          </Box>
+        </Sec>
+        <Sec id="lim-biais" title="8.2 Biais dans les données → biais dans le modèle" level={2}>
+          <Box type="attention" title="Les réseaux ne sont pas magiques">
+            <P style={{ marginBottom: 0 }}>Un réseau de neurones ne fait qu'<B>apprendre les patterns présents dans les données</B>. Si les données contiennent des biais (discrimination liée au genre, à l'origine…), le modèle les reproduira. La responsabilité éthique incombe aux humains qui conçoivent le système, pas au modèle lui-même.</P>
+          </Box>
+        </Sec>
+      </Sec>
+
+      {/* ═══ 9. SYNTHÈSE ═══ */}
+      <Sec id="synthese" title="9. Synthèse globale (4 jours)" level={1}>
+        <Sec id="syn-recap" title="9.1 Du perceptron au réseau multicouche" level={2}>
+          <Box type="retenir" title="L'évolution en 4 jours">
+            <div style={{ textAlign: "center", fontFamily: "'DM Sans',sans-serif", fontSize: "1rem", padding: "12px 0" }}>
+              <B>Jour 1</B> Données & vecteurs → <B>Jour 2</B> Optimisation → <B>Jour 3</B> Classification → <B>Jour 4</B> Réseaux
+            </div>
+            <P style={{ marginBottom: 0 }}>Chaque jour s'est appuyé sur le précédent : les vecteurs et matrices (J1) ont servi à formaliser l'optimisation (J2), qui a permis d'entraîner le perceptron (J3), dont l'extension naturelle est le réseau de neurones (J4).</P>
+          </Box>
+        </Sec>
+
+        <Sec id="syn-4jours" title="9.2 Les 4 jours en un tableau" level={2}>
+          <DT headers={["Jour", "Thème", "Concept clé", "Formule phare", "Python"]} max={10} rows={[
+            ["1", "Représentation", "Vecteurs, matrices", "ŷ = wᵀx + b", "np.dot, @"],
+            ["2", "Optimisation", "Descente de gradient", "w ← w − α∇J", "boucle GD"],
+            ["3", "Classification", "Perceptron", "ŷ = signe(wᵀx + b)", "correction erreurs"],
+            ["4", "Réseaux", "MLP, backprop", "h = σ(W⁽¹⁾x + b⁽¹⁾)", "forward + backward"],
+          ]} />
+          <Box type="retenir" title="Ce que vous savez maintenant">
+            <P style={{ marginBottom: 0 }}>Vous avez les <B>fondations mathématiques</B> pour comprendre l'IA : comment les données sont représentées (vecteurs/matrices), comment un modèle apprend (optimisation), comment on classifie (perceptron), et comment les réseaux de neurones généralisent tout cela. Chaque framework moderne (TensorFlow, PyTorch) implémente exactement ces concepts — en plus rapide et plus grand.</P>
+          </Box>
+        </Sec>
+
+      </Sec>
+    </>
+  );
+}
+
+// ─── ROOT ─────────────────────────────────────────────────────────────
+function Jour4Page() {
+  const [activeId, setActiveId] = useState("");
+
+  useEffect(() => {
+    const ids = [];
+    SECTIONS.forEach((s) => {
+      ids.push(s.id);
+      if (s.children) s.children.forEach((c) => ids.push(c.id));
+    });
+    const obs = new IntersectionObserver(
+      (entries) => {
+        const vis = entries.filter((e) => e.isIntersecting).sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
+        if (vis.length > 0) setActiveId(vis[0].target.id);
+      },
+      { rootMargin: "-10% 0px -80% 0px" }
+    );
+    ids.forEach((id) => {
+      const el = document.getElementById(id);
+      if (el) obs.observe(el);
+    });
+    return () => obs.disconnect();
+  }, []);
+
+  return (
+    <ThemeProvider>
+      <Shell activeId={activeId} />
+    </ThemeProvider>
+  );
+}
+
+function Shell({ activeId }) {
+  const { theme } = useTheme();
+
+  return (
+    <div style={{ background: theme.bg, minHeight: "100vh", transition: "background 0.3s" }}>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,700;1,400&family=JetBrains+Mono:wght@400;500;700&family=Source+Serif+4:ital,wght@0,400;0,600;0,700;1,400&display=swap');
+        * { box-sizing: border-box; }
+        body { margin: 0; padding: 0; }
+        .main-content { margin-left: 280px; max-width: 860px; padding: 32px 48px 80px; }
+        @media (max-width: 768px) {
+          .sidebar-el { transform: translateX(-100%); }
+          .mob-btn { display: block !important; }
+          .main-content { margin-left: 0; padding: 20px 16px 60px; }
+        }
+        ::selection { background: ${theme.accent}33; }
+        a { color: ${theme.link}; }
+      `}</style>
+
+      <Sidebar activeId={activeId} />
+
+      <main className="main-content">
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "8px" }}>
+          <div>
+            <div style={{ fontFamily: "'DM Sans',sans-serif", fontSize: "0.85rem", color: theme.textMuted, fontWeight: 500 }}>Jour 4 — 5h45</div>
+            <h1 style={{ fontFamily: "'DM Sans',sans-serif", fontSize: "2rem", fontWeight: 700, color: theme.text, margin: "4px 0 0", lineHeight: 1.2 }}>
+              Réseaux de neurones
+            </h1>
+          </div>
+          <ThemeToggle />
+        </div>
+        <div style={{ height: "3px", background: `linear-gradient(90deg, ${theme.accent}, ${theme.accent}44)`, borderRadius: "2px", marginBottom: "32px" }} />
+
+        <Box type="retenir" title="Objectif du Jour 4">
+          <P style={{ marginBottom: 0 }}>Comprendre comment <B>empiler des neurones</B> pour créer un réseau capable de résoudre des problèmes non linéaires. À la fin, vous saurez implémenter un <B>réseau multicouche from scratch</B> et comprendre la backpropagation intuitivement.</P>
+        </Box>
+        <div style={{ display:'flex', gap:'8px', flexWrap:'wrap', margin:'20px 0' }}>
+          {[
+            {icon:'📊',label:'Colab',href:'https://drive.google.com/file/d/1h3Fyn4WCfmaH0eIPLC9o1jh2d7Rsh5yU/view?usp=sharing',bg:'#F9AB00',fg:'#1a1a2e'},
+            {icon:'📐',label:'Synthèse',href:'pdf/jour4_synthese.pdf',bg:theme.accent,fg:'#fff'},
+            {icon:'📝',label:'Exercices',href:'pdf/jour4_exercices.pdf',bg:'#f97316',fg:'#fff'},
+            {icon:'✅',label:'Corrections',href:'pdf/jour4_corrections.pdf',bg:'#22c55e',fg:'#fff'},
+            {icon:'🔬',label:'TP',href:'https://drive.google.com/file/d/1iPmvAunMGBVGXOC9hM2fQhrFlITBYT5M/view?usp=drive_link',bg:'#F9AB00',fg:'#1a1a2e'},
+            {icon:'❓',label:'QCM',href:'pdf/jour4_qcm.pdf',bg:'#8b5cf6',fg:'#fff'},
+          ].map((b,i)=>(
+            <a key={i} href={b.href} target="_blank" rel="noopener" style={{ display:'inline-flex', alignItems:'center', justifyContent:'center', gap:'5px', background:b.bg, color:b.fg,
+              padding:'9px 14px', borderRadius:'6px', fontFamily:"'DM Sans',sans-serif", fontSize:'0.85rem', fontWeight:600, textDecoration:'none' }}>
+              {b.icon} {b.label}
+            </a>
+          ))}
+        </div>
+
+        <Content />
+
+        <footer style={{ marginTop: "60px", padding: "24px 0", borderTop: `1px solid ${theme.border}`, textAlign: "center", fontFamily: "'DM Sans',sans-serif", fontSize: "0.8rem", color: theme.textMuted }}>
+          <p>© 2025 Mohamed EL AFRIT | <a href="https://www.mohamedelafrit.com" style={{ color: theme.link, textDecoration: "none" }}>www.mohamedelafrit.com</a></p>
+          <p><a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.fr" style={{ color: theme.link, textDecoration: "none" }}>CC BY-NC-SA 4.0</a></p>
+        </footer>
+      </main>
+    </div>
+  );
+}
+
+
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(React.createElement(Jour4Page));
+</script>
+</body>
+</html>
