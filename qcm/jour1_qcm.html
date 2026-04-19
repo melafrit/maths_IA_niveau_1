@@ -1,0 +1,1128 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Jour 1 — QCM — Maths IA</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,700;1,400&family=JetBrains+Mono:wght@400;500;700&family=Source+Serif+4:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; padding: 0; font-family: 'Source Serif 4', Georgia, serif; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+<script type="text/babel">
+// © 2025 Mohamed EL AFRIT
+// Ce contenu est distribué sous licence Creative Commons BY-NC-SA 4.0
+// https://creativecommons.org/licenses/by-nc-sa/4.0/deed.fr
+//
+// JOUR 1 — QCM (20 questions corrigées, difficulté progressive)
+// Mathématiques appliquées à l'Intelligence Artificielle
+
+const { useState, useEffect, createContext, useContext } = React;
+
+/* ============================================================================
+   SECTIONS — identiques à jour1.html pour garder la même sidebar
+============================================================================ */
+const SECTIONS = [
+  { id:'ia-fonction', title:"1. L'IA comme fonction mathématique", level:1, children:[
+    { id:'ia-accroche', title:'1.1 Comment Netflix vous recommande', level:2 },
+    { id:'ia-intuition', title:'1.2 Intuition : la machine à café', level:2 },
+    { id:'ia-formalisation', title:'1.3 Formalisation : ŷ = f(x)', level:2 },
+    { id:'ia-parametres', title:"1.4 Paramètres et apprentissage", level:2 },
+  ]},
+  { id:'dataset', title:'2. Dataset : observations et features', level:1, children:[
+    { id:'dataset-presentation', title:'2.1 Le dataset fil rouge', level:2 },
+    { id:'dataset-tableau', title:'2.2 Tableau des données', level:2 },
+    { id:'dataset-python', title:'2.3 Le dataset en NumPy', level:2 },
+  ]},
+  { id:'vecteurs', title:'3. Vecteurs', level:1, children:[
+    { id:'vecteurs-intuition', title:'3.1 Un développeur = un point', level:2 },
+    { id:'vecteurs-formalisation', title:'3.2 Formalisation', level:2 },
+    { id:'vecteurs-exemple', title:'3.3 Exemple numérique', level:2 },
+    { id:'vecteurs-python', title:'3.4 Vecteurs en NumPy', level:2 },
+  ]},
+  { id:'matrices', title:'4. Matrices', level:1, children:[
+    { id:'matrices-intuition', title:'4.1 Du tableau à la matrice', level:2 },
+    { id:'matrices-formalisation', title:'4.2 Formalisation', level:2 },
+    { id:'matrices-python', title:'4.3 Matrices en NumPy', level:2 },
+  ]},
+  { id:'produit-scalaire', title:'5. Produit scalaire', level:1, children:[
+    { id:'ps-intuition', title:'5.1 Pondérer les features', level:2 },
+    { id:'ps-formalisation', title:'5.2 Formalisation', level:2 },
+    { id:'ps-exemple', title:'5.3 Exemple numérique', level:2 },
+    { id:'ps-python', title:'5.4 Calcul en Python', level:2 },
+  ]},
+  { id:'mat-vec', title:'6. Multiplication matrice-vecteur', level:1, children:[
+    { id:'mv-intuition', title:'6.1 Prédire tous les salaires', level:2 },
+    { id:'mv-formalisation', title:'6.2 Formalisation', level:2 },
+    { id:'mv-python', title:'6.3 Calcul en Python', level:2 },
+  ]},
+  { id:'regression', title:'7. Régression linéaire', level:1, children:[
+    { id:'reg-accroche', title:'7.1 Tracer la meilleure droite', level:2 },
+    { id:'reg-intuition', title:'7.2 Moindres carrés', level:2 },
+    { id:'reg-formalisation', title:'7.3 Formalisation', level:2 },
+    { id:'reg-mse', title:'7.4 Erreur et MSE', level:2 },
+    { id:'reg-python', title:'7.5 Implémentation Python', level:2 },
+  ]},
+];
+
+/* ============================================================================
+   THEME SYSTEM — identique à jour1.html
+============================================================================ */
+const THEMES = {
+  light: {
+    bg:'#ffffff', bgAlt:'#fafafa', bgCode:'#f3f4f6',
+    text:'#1a1a2e', textSecondary:'#4b5563', textMuted:'#9ca3af',
+    border:'#e5e7eb', borderLight:'#f3f4f6',
+    definitionBg:'#eff6ff', definitionBorder:'#3b82f6', definitionTitle:'#1e40af',
+    retenirBg:'#f0fdf4', retenirBorder:'#22c55e', retenirTitle:'#166534',
+    attentionBg:'#fff7ed', attentionBorder:'#f97316', attentionTitle:'#c2410c',
+    intuitionBg:'#faf5ff', intuitionBorder:'#a855f7', intuitionTitle:'#7e22ce',
+    exempleBg:'#ecfeff', exempleBorder:'#06b6d4', exempleTitle:'#0e7490',
+    codeBg:'#f8f9fa', codeBorder:'#d1d5db', codeTitle:'#1f2937',
+    sidebarBg:'#f8f9fa', sidebarText:'#374151', sidebarActive:'#3b82f6',
+    sidebarActiveBg:'#eff6ff', sidebarHover:'#f3f4f6',
+    link:'#3b82f6', accent:'#3b82f6',
+    qcmCorrectBg:'#dcfce7', qcmCorrectBorder:'#22c55e', qcmCorrectText:'#14532d',
+    qcmWrongBg:'#fee2e2', qcmWrongBorder:'#ef4444', qcmWrongText:'#991b1b',
+    qcmSelectBg:'#dbeafe', qcmHintBg:'#fffbeb', qcmHintBorder:'#fcd34d',
+  },
+  dark: {
+    bg:'#0d1117', bgAlt:'#161b22', bgCode:'#1c2128',
+    text:'#c9d1d9', textSecondary:'#8b949e', textMuted:'#6e7681',
+    border:'#30363d', borderLight:'#21262d',
+    definitionBg:'#0d1f3c', definitionBorder:'#3b82f6', definitionTitle:'#93bbfc',
+    retenirBg:'#0a1f0d', retenirBorder:'#22c55e', retenirTitle:'#86efac',
+    attentionBg:'#1f1206', attentionBorder:'#f97316', attentionTitle:'#fdba74',
+    intuitionBg:'#1a0d2e', intuitionBorder:'#a855f7', intuitionTitle:'#d8b4fe',
+    exempleBg:'#0a1a1f', exempleBorder:'#06b6d4', exempleTitle:'#67e8f9',
+    codeBg:'#161b22', codeBorder:'#30363d', codeTitle:'#c9d1d9',
+    sidebarBg:'#161b22', sidebarText:'#8b949e', sidebarActive:'#58a6ff',
+    sidebarActiveBg:'#1c2541', sidebarHover:'#1c2128',
+    link:'#58a6ff', accent:'#58a6ff',
+    qcmCorrectBg:'#14291c', qcmCorrectBorder:'#22c55e', qcmCorrectText:'#86efac',
+    qcmWrongBg:'#2d1b1b', qcmWrongBorder:'#ef4444', qcmWrongText:'#fca5a5',
+    qcmSelectBg:'#1e3a5f', qcmHintBg:'#2d2000', qcmHintBorder:'#713f12',
+  },
+};
+
+const DIFF_COLORS = {
+  "🟢":{ bg:"#dcfce7", tx:"#15803d", bd:"#86efac", dbg:"#14291c", dtx:"#86efac" },
+  "🟡":{ bg:"#fef9c3", tx:"#854d0e", bd:"#fde047", dbg:"#2d2700", dtx:"#fde047" },
+  "🟠":{ bg:"#ffedd5", tx:"#9a3412", bd:"#fdba74", dbg:"#2d1b06", dtx:"#fdba74" },
+  "🔴":{ bg:"#fee2e2", tx:"#991b1b", bd:"#fca5a5", dbg:"#2d1414", dtx:"#fca5a5" },
+};
+
+const ThemeContext = createContext();
+function ThemeProvider({ children }) {
+  const [mode, setMode] = useState('light');
+  const theme = THEMES[mode];
+  const toggle = () => setMode(m => m === 'light' ? 'dark' : 'light');
+  return <ThemeContext.Provider value={{ mode, theme, toggle }}>{children}</ThemeContext.Provider>;
+}
+function useTheme() { return useContext(ThemeContext); }
+
+/* ============================================================================
+   MATH COMPONENT (KaTeX)
+============================================================================ */
+function M({ t, d }) {
+  if (!window.katex) return <code style={{ fontSize:'0.9em' }}>{t}</code>;
+  try {
+    const html = window.katex.renderToString(t, { throwOnError: false, displayMode: !!d });
+    if (d) return <div style={{ margin:'18px 0', textAlign:'center', overflowX:'auto' }} dangerouslySetInnerHTML={{ __html: html }} />;
+    return <span dangerouslySetInnerHTML={{ __html: html }} />;
+  } catch { return <code>{t}</code>; }
+}
+
+/* ============================================================================
+   REUSABLE COMPONENTS — identiques à jour1.html
+============================================================================ */
+function ThemeToggle() {
+  const { mode, toggle } = useTheme();
+  return (
+    <button onClick={toggle} style={{ background:'none', border:'none', cursor:'pointer', fontSize:'1.3rem', padding:'6px 10px', borderRadius:'8px' }}
+      title={mode==='light'?'Mode sombre':'Mode clair'} aria-label="Basculer le thème">
+      {mode==='light'?'🌙':'☀️'}
+    </button>
+  );
+}
+
+function Box({ type, title, children }) {
+  const { theme } = useTheme();
+  const C = {
+    definition:{icon:'📐',label:'Définition',bg:'definitionBg',bd:'definitionBorder',tt:'definitionTitle'},
+    retenir:{icon:'⚡',label:'À retenir',bg:'retenirBg',bd:'retenirBorder',tt:'retenirTitle'},
+    attention:{icon:'⚠️',label:'Attention',bg:'attentionBg',bd:'attentionBorder',tt:'attentionTitle'},
+    intuition:{icon:'💡',label:'Intuition',bg:'intuitionBg',bd:'intuitionBorder',tt:'intuitionTitle'},
+    exemple:{icon:'📊',label:'Exemple',bg:'exempleBg',bd:'exempleBorder',tt:'exempleTitle'},
+    code:{icon:'🐍',label:'Code Python',bg:'codeBg',bd:'codeBorder',tt:'codeTitle'},
+  }[type];
+  return (
+    <div style={{ background:theme[C.bg], borderLeft:`4px solid ${theme[C.bd]}`, borderRadius:'6px', padding:'16px 20px', margin:'18px 0' }}>
+      <div style={{ fontFamily:"'DM Sans',sans-serif", fontWeight:700, color:theme[C.tt], marginBottom:'8px', fontSize:'0.95rem' }}>
+        {C.icon} {title||C.label}
+      </div>
+      <div style={{ color:theme.text, lineHeight:1.7 }}>{children}</div>
+    </div>
+  );
+}
+
+function Sec({ id, title, level=1, children }) {
+  const { theme } = useTheme();
+  const sizes = { 1:'1.7rem', 2:'1.3rem', 3:'1.1rem' };
+  const Tag = level===1?'h2':level===2?'h3':'h4';
+  return (
+    <section id={id} style={{ scrollMarginTop:'24px' }}>
+      <Tag style={{ fontFamily:"'DM Sans',sans-serif", fontSize:sizes[level], color:theme.text, fontWeight:700,
+        borderBottom:level===1?`2px solid ${theme.accent}`:'none', paddingBottom:level===1?'8px':'0',
+        marginTop:level===1?'48px':'28px', marginBottom:'16px' }}>
+        {title}
+      </Tag>
+      {children}
+    </section>
+  );
+}
+
+/* ============================================================================
+   SIDEBAR — identique à jour1.html (J1 actif, sections de cours)
+============================================================================ */
+function Sidebar({ activeId }) {
+  const { theme } = useTheme();
+  const [collapsed, setCollapsed] = useState({});
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const [progress, setProgress] = useState(0);
+  useEffect(() => {
+    const fn = () => { const h=document.documentElement; setProgress(Math.min(1,Math.max(0,h.scrollTop/(h.scrollHeight-h.clientHeight)))); };
+    window.addEventListener('scroll', fn, { passive:true });
+    return () => window.removeEventListener('scroll', fn);
+  }, []);
+  const scrollTo = (id) => { document.getElementById(id)?.scrollIntoView({ behavior:'smooth' }); setMobileOpen(false); };
+  const tog = (id) => setCollapsed(c => ({ ...c, [id]: !c[id] }));
+  const nav = (
+    <div style={{ display:'flex', flexDirection:'column', height:'100%', position:'relative' }}>
+      <div style={{ position:'absolute', left:0, top:0, width:'3px', height:'100%', background:theme.borderLight, zIndex:1 }}>
+        <div style={{ width:'100%', height:`${progress*100}%`, background:theme.accent, transition:'height 0.1s' }} />
+      </div>
+      <div style={{ padding:'20px 20px 14px', borderBottom:`1px solid ${theme.border}` }}>
+        <a href="index.html" style={{ display:'inline-flex', alignItems:'center', gap:'4px', fontFamily:"'DM Sans',sans-serif", fontSize:'0.75rem', color:theme.textMuted, textDecoration:'none', marginBottom:'8px' }}>← Accueil</a>
+        <div style={{ fontFamily:"'DM Sans',sans-serif", fontWeight:700, fontSize:'1rem', color:theme.accent }}>Maths IA</div>
+        <div style={{ fontFamily:"'DM Sans',sans-serif", fontSize:'0.78rem', color:theme.textMuted, marginTop:'2px' }}>Jour 1 — QCM</div>
+        <div style={{ display:'flex', gap:'4px', marginTop:'10px' }}>
+          {[1,2,3,4].map(j=>(
+            j===1 ? <div key={j} style={{ flex:1, textAlign:'center', padding:'3px 0', borderRadius:'4px', fontFamily:"'DM Sans',sans-serif",
+              fontSize:'0.72rem', fontWeight:700, background:theme.accent, color:'#fff',
+              border:`1px solid ${theme.accent}` }}>J{j}</div>
+            : <a key={j} href={`jour${j}.html`} style={{ flex:1, textAlign:'center', padding:'3px 0', borderRadius:'4px', fontFamily:"'DM Sans',sans-serif",
+              fontSize:'0.72rem', fontWeight:400, background:'transparent', color:theme.textMuted, textDecoration:'none',
+              cursor:'pointer', border:`1px solid ${theme.border}` }}>J{j}</a>
+          ))}
+        </div>
+      </div>
+      <nav style={{ flex:1, overflowY:'auto', padding:'8px 0' }}>
+        {SECTIONS.map(sec => {
+          const isOpen = !collapsed[sec.id];
+          const isActive = activeId===sec.id || sec.children?.some(c=>c.id===activeId);
+          return (
+            <div key={sec.id}>
+              <div onClick={()=>{scrollTo(sec.id);if(sec.children)tog(sec.id);}}
+                style={{ display:'flex', alignItems:'center', gap:'6px', padding:'7px 14px 7px 18px', cursor:'pointer',
+                  background:isActive?theme.sidebarActiveBg:'transparent', borderRight:isActive?`3px solid ${theme.sidebarActive}`:'3px solid transparent',
+                  fontFamily:"'DM Sans',sans-serif", fontSize:'0.8rem', fontWeight:isActive?600:400,
+                  color:isActive?theme.sidebarActive:theme.sidebarText, transition:'all 0.15s' }}>
+                {sec.children&&<span style={{ fontSize:'0.55rem', transition:'transform 0.2s', transform:isOpen?'rotate(90deg)':'rotate(0)', display:'inline-block' }}>▶</span>}
+                <span style={{ flex:1 }}>{sec.title}</span>
+              </div>
+              {sec.children&&isOpen&&sec.children.map(ch=>{
+                const ca = activeId===ch.id;
+                return <div key={ch.id} onClick={()=>scrollTo(ch.id)} style={{ padding:'4px 14px 4px 42px', cursor:'pointer',
+                  fontFamily:"'DM Sans',sans-serif", fontSize:'0.76rem', color:ca?theme.sidebarActive:theme.textMuted, fontWeight:ca?600:400 }}>{ch.title}</div>;
+              })}
+            </div>
+          );
+        })}
+      </nav>
+      <div style={{ padding:'14px', borderTop:`1px solid ${theme.border}`, fontSize:'0.68rem', color:theme.textMuted, fontFamily:"'DM Sans',sans-serif", textAlign:'center', lineHeight:1.6 }}>
+        © 2025 Mohamed EL AFRIT<br/>
+        <a href="https://www.mohamedelafrit.com" style={{ color:theme.link, textDecoration:'none' }}>www.mohamedelafrit.com</a><br/>
+        <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.fr" style={{ color:theme.link, textDecoration:'none' }}>CC BY-NC-SA 4.0</a>
+      </div>
+    </div>
+  );
+  return (
+    <>
+      <button onClick={()=>setMobileOpen(!mobileOpen)} className="mob-btn"
+        style={{ display:'none', position:'fixed', top:10, left:10, zIndex:1001, background:theme.bgAlt, border:`1px solid ${theme.border}`, borderRadius:'8px', padding:'8px 10px', cursor:'pointer', fontSize:'1.2rem' }}>
+        {mobileOpen?'✕':'☰'}
+      </button>
+      <aside className="sidebar-el" style={{ position:'fixed', left:0, top:0, width:'280px', height:'100vh', background:theme.sidebarBg,
+        borderRight:`1px solid ${theme.border}`, zIndex:1000, overflowY:'hidden', transition:'transform 0.3s' }}>{nav}</aside>
+      {mobileOpen&&<div onClick={()=>setMobileOpen(false)} style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.4)', zIndex:999 }} />}
+    </>
+  );
+}
+
+/* ============================================================================
+   HELPERS
+============================================================================ */
+function P({ children, style={} }) {
+  const { theme } = useTheme();
+  return <p style={{ color:theme.text, lineHeight:1.8, marginBottom:'16px', fontFamily:"'Source Serif 4',Georgia,serif", fontSize:'1.05rem', ...style }}>{children}</p>;
+}
+function B({ children }) { return <strong style={{ fontWeight:600 }}>{children}</strong>; }
+
+/* ============================================================================
+   20 QUESTIONS — données
+============================================================================ */
+const QUESTIONS = [
+  /* ═══ SECTION 1 : IA comme fonction mathématique (Q1–Q3) ═══ */
+  {
+    id:1, sec:'ia-fonction', niv:'🟢 Fondamental', theme:'Notation de la prédiction',
+    en:"Quelle est la notation standard en machine learning pour la prédiction d'un modèle à partir d'un vecteur d'entrée ?",
+    opts:[
+      {l:'A', k:"y = g(\\mathbf{w})"},
+      {l:'B', k:"\\hat{y} = f(\\mathbf{x})"},
+      {l:'C', k:"\\mathbf{x} = h(y)"},
+      {l:'D', k:"b = \\mathbf{w} \\times \\mathbf{x}"},
+    ],
+    ok:'B',
+    expOk:"ŷ (y-chapeau) désigne la PRÉDICTION du modèle, qui se distingue ainsi de la vraie valeur y. La fonction f prend en entrée le vecteur de features x et produit ŷ. C'est la notation universelle en ML.",
+    expNok:{
+      A:"Inversion : c'est x qui est l'entrée de la fonction, pas w (qui est un paramètre). De plus, on note ŷ (avec chapeau) pour la prédiction, pas y.",
+      C:"Inversion totale : x est l'entrée, y est la sortie (ou ŷ sa prédiction). On ne calcule jamais l'entrée à partir de la sortie dans un modèle de prédiction.",
+      D:"Confusion : b est le biais (scalaire), pas la prédiction. Et la multiplication d'un vecteur par un vecteur n'est pas définie ainsi — on utilise le produit scalaire wᵀx.",
+    },
+    piege:"Le CHAPEAU sur ŷ est essentiel : il distingue la PRÉDICTION (ŷ, estimée par le modèle) de la VRAIE VALEUR (y, observée dans les données). L'erreur du modèle se calcule toujours comme y - ŷ.",
+  },
+  {
+    id:2, sec:'ia-fonction', niv:'🟢 Fondamental', theme:"Apprentissage",
+    en:"Que signifie \"apprendre\" pour un modèle d'intelligence artificielle ?",
+    opts:[
+      {l:'A', tx:"Mémoriser tous les exemples du dataset par cœur."},
+      {l:'B', kpre:"\\text{Ajuster ses paramètres }\\boldsymbol{\\theta}\\text{ pour minimiser l'erreur entre }\\hat{y}\\text{ et }y\\text{.}"},
+      {l:'C', tx:"Générer de nouvelles données à partir de rien."},
+      {l:'D', tx:"Exécuter le même calcul en boucle infinie jusqu'à convergence matérielle."},
+    ],
+    ok:'B',
+    expOk:"Apprendre = ajuster les paramètres θ (poids w + biais b) pour que les prédictions ŷ soient aussi proches que possible des vraies valeurs y. C'est un problème d'OPTIMISATION mathématique, que nous résoudrons au Jour 2 avec la descente de gradient.",
+    expNok:{
+      A:"Mémoriser n'est PAS apprendre. C'est même dangereux (phénomène de sur-apprentissage) : le modèle ne généraliserait pas à des cas nouveaux.",
+      C:"C'est le rôle de modèles GÉNÉRATIFS (GANs, GPT...), pas de la régression/classification. Ici, on apprend à PRÉDIRE à partir de données existantes.",
+      D:"L'apprentissage a une structure précise : il minimise une fonction coût. Une boucle infinie sans objectif n'a aucun sens mathématique.",
+    },
+    piege:"Retenir la phrase clé : APPRENDRE = AJUSTER LES PARAMÈTRES POUR MINIMISER L'ERREUR. Ce n'est ni mémoriser, ni deviner, ni boucler — c'est résoudre un problème d'optimisation.",
+  },
+  {
+    id:3, sec:'ia-fonction', niv:'🟠 Application', theme:'Régression linéaire formelle',
+    isK:true,
+    en:"\\text{Dans l'équation de la régression linéaire }\\hat{y} = \\mathbf{w}^T\\mathbf{x} + b\\text{, que représentent }\\mathbf{w}\\text{ et }b\\text{ ?}",
+    opts:[
+      {l:'A', tx:"w = vecteur des données d'entrée, b = sortie observée"},
+      {l:'B', tx:"w = vecteur de poids (weights), b = biais (bias)"},
+      {l:'C', tx:"w = erreur de prédiction, b = ajustement manuel"},
+      {l:'D', tx:"w = nombre d'observations n, b = nombre de features p"},
+    ],
+    ok:'B',
+    expOk:"w est le vecteur des POIDS (weights) : chaque composante wⱼ indique l'importance de la feature xⱼ pour la prédiction. b est le BIAIS (bias) : un terme constant qui décale la prédiction. Ensemble, w et b forment les paramètres θ du modèle à apprendre.",
+    expNok:{
+      A:"Confusion : x (pas w) est le vecteur d'entrée. y (pas b) est la sortie observée.",
+      C:"Les erreurs ne sont pas des paramètres du modèle : elles se mesurent A POSTERIORI (ex: MSE). w et b sont des paramètres que le modèle APPREND.",
+      D:"n et p sont des DIMENSIONS (entiers), pas des paramètres appris. w est un vecteur réel et b un scalaire réel.",
+    },
+    piege:"MÉMOTECHNIQUE : Weights = w, Bias = b. Retenir que dans wᵀx, chaque wⱼ pondère une feature xⱼ. Le biais b est un scalaire qui translate toute la prédiction.",
+  },
+
+  /* ═══ SECTION 2 : Dataset (Q4–Q5) ═══ */
+  {
+    id:4, sec:'dataset', niv:'🟢 Fondamental', theme:'Structure du dataset',
+    en:"Dans le dataset fil rouge, combien de développeurs (observations) et de features (caractéristiques) sont présents ?",
+    opts:[
+      {l:'A', tx:"5 développeurs, 30 features"},
+      {l:'B', tx:"30 développeurs, 5 features (+ le salaire comme variable cible)"},
+      {l:'C', tx:"30 développeurs, 6 features (toutes prédictives, salaire inclus)"},
+      {l:'D', tx:"15 développeurs, 10 features"},
+    ],
+    ok:'B',
+    expOk:"Le dataset contient 30 OBSERVATIONS (un par développeur) et 5 FEATURES prédictives : experience, nb_langages, niveau_etudes, taille_entreprise, remote. Le SALAIRE est la variable CIBLE (ce qu'on prédit), pas une feature d'entrée.",
+    expNok:{
+      A:"Inversion des dimensions. Rappel : ligne = observation (30), colonne = feature (5). Voir NumPy shape = (n, p) = (30, 5).",
+      C:"Erreur conceptuelle : le salaire NE PEUT PAS être à la fois feature d'entrée et cible à prédire. On le sépare toujours du reste des features.",
+      D:"Chiffres inventés. Vérifier dans le cours : 30 devs, 5 features.",
+    },
+    piege:"Distinguer toujours FEATURES d'ENTRÉE (x) et VARIABLE CIBLE (y). Inclure y dans les features serait du data leakage — le modèle \"tricherait\" en utilisant la réponse pour la calculer.",
+  },
+  {
+    id:5, sec:'dataset', niv:'🟡 Calcul', theme:'NumPy shape',
+    isK:true,
+    en:"\\text{Si }\\mathbf{X}\\text{ est la matrice du dataset (features uniquement) en NumPy, que retourne }\\texttt{X.shape}\\text{ ?}",
+    opts:[
+      {l:'A', k:"(5, 30)"},
+      {l:'B', k:"(30, 5)"},
+      {l:'C', k:"(1, 30)"},
+      {l:'D', k:"(30, 1)"},
+    ],
+    ok:'B',
+    expOk:"X.shape retourne (n, p) = (nombre de lignes, nombre de colonnes). Avec 30 observations (lignes) et 5 features (colonnes), X.shape = (30, 5). C'est la convention universelle en ML.",
+    expNok:{
+      A:"(5, 30) serait la TRANSPOSÉE Xᵀ. Utilisée parfois en statistiques classiques mais jamais en ML (scikit-learn, TensorFlow, PyTorch utilisent tous (n, p)).",
+      C:"(1, 30) serait un vecteur ligne à 30 composantes — aucun sens pour notre dataset.",
+      D:"(30, 1) serait un vecteur colonne, par exemple pour le vecteur salaire y seul. Ce n'est pas la forme de X.",
+    },
+    piege:"Mnémotechnique infaillible : X.shape[0] = nb d'exemples (n), X.shape[1] = nb de features (p). On peut vérifier : X[i, j] = j-ème feature du i-ème exemple.",
+  },
+
+  /* ═══ SECTION 3 : Vecteurs (Q6–Q8) ═══ */
+  {
+    id:6, sec:'vecteurs', niv:'🟢 Fondamental', theme:"Espace d'un vecteur de features",
+    isK:true,
+    en:"\\text{Dans notre dataset fil rouge, un vecteur de features }\\mathbf{x}\\text{ d'un développeur appartient à quel espace vectoriel ?}",
+    opts:[
+      {l:'A', k:"\\mathbb{R}\\;\\text{(scalaires)}"},
+      {l:'B', k:"\\mathbb{R}^{2}\\;\\text{(plan)}"},
+      {l:'C', k:"\\mathbb{R}^{5}\\;\\text{(5 dimensions)}"},
+      {l:'D', k:"\\mathbb{R}^{30}\\;\\text{(30 dimensions)}"},
+    ],
+    ok:'C',
+    expOk:"Chaque développeur est décrit par 5 features (experience, langages, études, taille_entreprise, remote). Donc x ∈ ℝ⁵. La dimension d'un vecteur de features = nombre de features (p), pas nombre d'observations (n).",
+    expNok:{
+      A:"ℝ serait un seul nombre. Un vecteur n'est jamais un scalaire (sauf cas trivial p=1).",
+      B:"ℝ² serait un point dans le plan (2 coordonnées). Notre espace a 5 features, donc 5 coordonnées.",
+      D:"ℝ³⁰ correspondrait à la dimension si on avait 30 features par développeur. Ici 30 est le NOMBRE d'observations (n), pas la dimension d'un vecteur.",
+    },
+    piege:"Confusion classique : n (nb de devs = 30) vs p (nb de features = 5). Un DEV individuel vit dans ℝᵖ = ℝ⁵. Le DATASET complet est dans ℝⁿˣᵖ = ℝ³⁰ˣ⁵.",
+  },
+  {
+    id:7, sec:'vecteurs', niv:'🟡 Compréhension', theme:'Composantes ordonnées',
+    isK:true,
+    en:"\\text{Soit }\\mathbf{x}_2 = (1, 3, 4, 800, 40)^T\\text{, le vecteur du développeur #2 du dataset.}\\\\\\text{Que représente la valeur }x_{2,4} = 800\\text{ ?}",
+    opts:[
+      {l:'A', tx:"Le salaire en euros"},
+      {l:'B', tx:"Le nombre d'années d'expérience"},
+      {l:'C', tx:"La taille de l'entreprise (800 employés)"},
+      {l:'D', tx:"Le pourcentage de remote work"},
+    ],
+    ok:'C',
+    expOk:"L'ordre des composantes est fixé par convention dans le dataset : x₁=experience, x₂=nb_langages, x₃=niveau_etudes, x₄=taille_entreprise, x₅=remote. Donc x₂,₄ = 800 = TAILLE DE L'ENTREPRISE (800 employés).",
+    expNok:{
+      A:"Le salaire n'est PAS dans le vecteur de features — c'est la variable cible y séparée. Le salaire du dev #2 est y₂ = 35 k€.",
+      B:"L'expérience est x₁ = 1 an pour le dev #2, pas 800.",
+      D:"Le remote est x₅ = 40% pour le dev #2, pas 800.",
+    },
+    piege:"RÈGLE D'OR : l'ORDRE des composantes est crucial en algèbre linéaire. (1, 3, 4, 800, 40) ≠ (40, 800, 4, 3, 1) — ce sont deux vecteurs différents dans ℝ⁵ même s'ils contiennent les mêmes nombres.",
+  },
+  {
+    id:8, sec:'vecteurs', niv:'🟠 Application', theme:'Opérations vectorielles',
+    isK:true,
+    en:"\\text{Soient }\\mathbf{x}_0 = (0, 2, 3, 150, 80)^T\\text{ et }\\mathbf{x}_2 = (1, 3, 4, 800, 40)^T\\text{.}\\\\\\text{Que vaut la combinaison linéaire }2\\mathbf{x}_0 + \\mathbf{x}_2\\text{ ?}",
+    opts:[
+      {l:'A', k:"(1,\\ 7,\\ 10,\\ 1100,\\ 200)^T"},
+      {l:'B', k:"(1,\\ 7,\\ 10,\\ 1100,\\ 120)^T"},
+      {l:'C', k:"(2,\\ 8,\\ 11,\\ 1100,\\ 200)^T"},
+      {l:'D', k:"(1,\\ 5,\\ 7,\\ 950,\\ 120)^T"},
+    ],
+    ok:'A',
+    steps:[
+      { s:"2\\times 0 + 1", r:"1" },
+      { s:"2\\times 2 + 3", r:"7" },
+      { s:"2\\times 3 + 4", r:"10" },
+      { s:"2\\times 150 + 800", r:"1100" },
+      { s:"2\\times 80 + 40", r:"200" },
+    ],
+    expOk:"Une combinaison linéaire se calcule composante par composante : (2·0+1, 2·2+3, 2·3+4, 2·150+800, 2·80+40) = (1, 7, 10, 1100, 200). Le résultat est bien un vecteur de ℝ⁵.",
+    expNok:{
+      B:"Erreur à la dernière composante : 2×80+40 = 200, pas 120. (Confusion avec 80+40=120 ? Mais on multiplie x₀ par 2.)",
+      C:"Erreur à la première composante : 2×0+1 = 1, pas 2. Piège : 2×0 = 0, PAS 2.",
+      D:"Erreur : le coefficient 2 s'applique uniquement à x₀, pas à x₂. Le calcul fait ici semble utiliser ½·x₂ au lieu de x₂.",
+    },
+    piege:"Ne JAMAIS oublier qu'un scalaire multiplie CHAQUE composante du vecteur. 2·(0,2,3) = (0,4,6), pas (0,2,3) ni (2,4,6).",
+  },
+
+  /* ═══ SECTION 4 : Matrices (Q9–Q10) ═══ */
+  {
+    id:9, sec:'matrices', niv:'🟢 Fondamental', theme:'Notation matrice de données',
+    isK:true,
+    en:"\\text{Comment note-t-on mathématiquement la matrice d'un dataset à }n\\text{ observations et }p\\text{ features ?}",
+    opts:[
+      {l:'A', k:"\\mathbf{X}\\in\\mathbb{R}^{n+p}"},
+      {l:'B', k:"\\mathbf{X}\\in\\mathbb{R}^{n\\times p}"},
+      {l:'C', k:"\\mathbf{X}\\in\\mathbb{R}^{p\\times n}"},
+      {l:'D', k:"\\mathbf{X}\\in\\mathbb{R}^{n\\cdot p}"},
+    ],
+    ok:'B',
+    expOk:"ℝⁿˣᵖ désigne l'ensemble des matrices à n lignes et p colonnes. Convention universelle en ML : lignes = observations (n), colonnes = features (p). Pour notre dataset : X ∈ ℝ³⁰ˣ⁵.",
+    expNok:{
+      A:"ℝⁿ⁺ᵖ = ℝⁿ⁺ᵖ est un espace de VECTEURS de dimension n+p (ex : ℝ³⁵), pas une matrice. L'opérateur entre n et p est × (produit cartésien), pas + (somme).",
+      C:"ℝᵖˣⁿ = ℝ⁵ˣ³⁰ est la transposée Xᵀ. Ordre inversé : cette convention existe en statistiques classiques mais pas en ML.",
+      D:"ℝⁿ·ᵖ = ℝ¹⁵⁰ serait un vecteur aplati (flatten). Valable après reshape, mais pas la forme matricielle naturelle.",
+    },
+    piege:"Le symbole entre n et p DOIT être × (cartésien). ℝⁿˣᵖ ≠ ℝⁿ⁺ᵖ ≠ ℝⁿ·ᵖ. Ces trois notations désignent des espaces complètement différents !",
+  },
+  {
+    id:10, sec:'matrices', niv:'🟡 Calcul NumPy', theme:'Extraction de colonne',
+    en:"Dans NumPy, quelle syntaxe extrait la COLONNE d'index 3 (toutes les lignes) de la matrice X ?",
+    opts:[
+      {l:'A', tx:"X[3]"},
+      {l:'B', tx:"X[3, :]"},
+      {l:'C', tx:"X[:, 3]"},
+      {l:'D', tx:"X[0:3]"},
+    ],
+    ok:'C',
+    expOk:"X[:, 3] : le `:` signifie \"toutes les lignes\", et `3` extrait la colonne d'index 3. Le résultat est un vecteur 1D de n composantes (une valeur par observation).",
+    expNok:{
+      A:"X[3] extrait la LIGNE d'index 3 (l'observation n°3), pas une colonne. En NumPy, l'indexation simple suit l'ordre des axes.",
+      B:"X[3, :] est équivalent à X[3] : c'est la LIGNE d'index 3. Le `:` est du côté des colonnes cette fois.",
+      D:"X[0:3] donne les 3 PREMIÈRES LIGNES (slicing), pas une colonne.",
+    },
+    piege:"En NumPy, la CONVENTION de slicing est : X[LIGNES, COLONNES]. Pour \"toutes les lignes d'une colonne j\" : X[:, j]. Pour \"ligne i\" : X[i] ou X[i, :]. Ne pas oublier la virgule !",
+  },
+
+  /* ═══ SECTION 5 : Produit scalaire (Q11–Q14) ═══ */
+  {
+    id:11, sec:'produit-scalaire', niv:'🟡 Calcul direct', theme:'Produit scalaire manuel',
+    isK:true,
+    en:"\\text{Calculez }\\langle\\mathbf{x},\\mathbf{w}\\rangle\\text{ avec }\\mathbf{x} = (2,\\ 1,\\ 4)^T\\text{ et }\\mathbf{w} = (3,\\ 5,\\ 0{,}5)^T",
+    opts:[
+      {l:'A', k:"\\langle\\mathbf{x},\\mathbf{w}\\rangle = 10"},
+      {l:'B', k:"\\langle\\mathbf{x},\\mathbf{w}\\rangle = 13"},
+      {l:'C', k:"\\langle\\mathbf{x},\\mathbf{w}\\rangle = 9{,}5"},
+      {l:'D', k:"\\langle\\mathbf{x},\\mathbf{w}\\rangle = 5{,}5"},
+    ],
+    ok:'B',
+    steps:[
+      { s:"2\\times 3", r:"6" },
+      { s:"1\\times 5", r:"5" },
+      { s:"4\\times 0{,}5", r:"2" },
+      { s:"\\text{Somme}", r:"6 + 5 + 2 = \\mathbf{13}" },
+    ],
+    expOk:"Le produit scalaire = somme des produits composante par composante : 2×3 + 1×5 + 4×0,5 = 6 + 5 + 2 = 13. Résultat : un SCALAIRE.",
+    expNok:{
+      A:"Erreur typique : oublier la 3e composante (4×0,5 = 2). On obtient 6+5 = 11, pas 10.",
+      C:"Calcul erroné : 9,5 pourrait venir de 2×3 + 1×0,5 + 4×? Il faut multiplier chaque xᵢ par le wᵢ CORRESPONDANT (même indice).",
+      D:"Erreur : 5,5 ne correspond à aucune combinaison correcte des 3 produits. Vérifier chaque multiplication.",
+    },
+    piege:"Le produit scalaire donne un SCALAIRE (un seul nombre), pas un vecteur. Ne PAS confondre avec le produit de Hadamard (terme à terme) qui donne un vecteur : (2,1,4)⊙(3,5,0.5) = (6,5,2).",
+  },
+  {
+    id:12, sec:'produit-scalaire', niv:'🟠 Application', theme:'Prédiction avec biais',
+    isK:true,
+    en:"\\text{Pour prédire le salaire du dev #2, on a }\\mathbf{x}_2 = (1,3,4,800,40)^T\\text{,}\\\\\\mathbf{w} = (2{,}0;\\ 1{,}5;\\ 3{,}0;\\ 0{,}005;\\ 0{,}02)^T\\text{ et }b = 15\\text{.}\\\\\\text{Quelle est la prédiction }\\hat{y}_2\\text{ ?}",
+    opts:[
+      {l:'A', k:"\\hat{y}_2 = 23{,}3\\text{ k€}"},
+      {l:'B', k:"\\hat{y}_2 = 38{,}3\\text{ k€}"},
+      {l:'C', k:"\\hat{y}_2 = 35{,}0\\text{ k€}"},
+      {l:'D', k:"\\hat{y}_2 = 52{,}5\\text{ k€}"},
+    ],
+    ok:'B',
+    calcStr:"\\langle\\mathbf{x}_2,\\mathbf{w}\\rangle = 1{\\cdot}2 + 3{\\cdot}1{,}5 + 4{\\cdot}3 + 800{\\cdot}0{,}005 + 40{\\cdot}0{,}02 = 2 + 4{,}5 + 12 + 4 + 0{,}8 = 23{,}3\\\\[4pt]\\hat{y}_2 = 23{,}3 + b = 23{,}3 + 15 = \\mathbf{38{,}3}\\text{ k€}",
+    expOk:"On calcule d'abord le produit scalaire ⟨x₂,w⟩ = 23,3 puis on ajoute le biais b = 15 : ŷ₂ = 23,3 + 15 = 38,3 k€. Comparé au vrai salaire y₂ = 35,0 k€, l'erreur est de +3,3 k€ (sur-estimation).",
+    expNok:{
+      A:"23,3 est uniquement le PRODUIT SCALAIRE wᵀx, sans le biais b. Oublier d'ajouter b = 15 est une erreur très courante.",
+      C:"35,0 k€ est le VRAI salaire y₂ (donnée observée), pas la prédiction. La prédiction est différente de la vraie valeur — c'est justement ce qui définit l'erreur du modèle.",
+      D:"52,5 k€ est une surestimation. Aucune combinaison correcte des valeurs données ne produit ce résultat.",
+    },
+    piege:"Ne JAMAIS oublier le biais b dans la prédiction : ŷ = wᵀx + b. Le biais est un paramètre à part entière, indispensable pour décaler la droite. Sans biais (b=0), la droite passerait forcément par l'origine.",
+  },
+  {
+    id:13, sec:'produit-scalaire', niv:'🟡 NumPy', theme:'Syntaxe produit scalaire',
+    en:"Quelle syntaxe NumPy calcule CORRECTEMENT le produit scalaire de deux vecteurs x et w ?",
+    opts:[
+      {l:'A', tx:"x × w"},
+      {l:'B', tx:"x * w"},
+      {l:'C', tx:"np.dot(x, w)  ou  x @ w"},
+      {l:'D', tx:"x + w"},
+    ],
+    ok:'C',
+    expOk:"Deux syntaxes équivalentes : np.dot(x, w) ou l'opérateur @ (introduit en Python 3.5). Les deux retournent un SCALAIRE : Σᵢ xᵢwᵢ. L'opérateur @ est préféré pour la lisibilité : y_pred = X @ w + b.",
+    expNok:{
+      A:"L'opérateur × N'EXISTE PAS en Python. Seulement *, /, +, -, **, //, %. Cette syntaxe produirait une erreur SyntaxError.",
+      B:"x * w en NumPy fait le produit ÉLÉMENT PAR ÉLÉMENT (Hadamard) : (2,1,4)*(3,5,0.5) = (6,5,2) — résultat est un VECTEUR, pas un scalaire. Attention : c'est un piège très fréquent !",
+      D:"x + w est l'ADDITION de vecteurs, composante par composante. Aucun rapport avec le produit scalaire.",
+    },
+    piege:"Le piège le plus courant : confondre `*` (Hadamard, résultat = vecteur) et `@` ou `np.dot` (produit scalaire, résultat = scalaire). Règle : si vous voulez UN NOMBRE → utilisez @ ou np.dot. Si vous voulez un vecteur de mêmes dimensions → utilisez *.",
+  },
+  {
+    id:14, sec:'produit-scalaire', niv:'🔴 Analyse', theme:'Condition de compatibilité',
+    en:"Pourquoi le produit scalaire exige-t-il que les deux vecteurs aient la MÊME DIMENSION ?",
+    opts:[
+      {l:'A', tx:"Parce que NumPy lève une ValueError arbitrairement."},
+      {l:'B', kpre:"\\text{Parce que la formule }\\langle\\mathbf{x},\\mathbf{w}\\rangle = \\sum_{i=1}^{p}x_i w_i\\text{ nécessite d'associer chaque }x_i\\text{ à un }w_i\\text{ de même indice — impossible si les longueurs diffèrent.}"},
+      {l:'C', tx:"Pour respecter une convention arbitraire des mathématiciens du 19e siècle."},
+      {l:'D', tx:"Parce que le résultat doit être un vecteur de taille min(p, q)."},
+    ],
+    ok:'B',
+    expOk:"La définition Σᵢ₌₁ᵖ xᵢwᵢ suppose une correspondance 1-à-1 entre les composantes. Si x ∈ ℝ⁵ et w ∈ ℝ³, les composantes x₄ et x₅ n'ont PAS d'équivalent dans w — l'opération est MATHÉMATIQUEMENT INDÉFINIE, pas juste conventionnellement interdite.",
+    expNok:{
+      A:"L'erreur NumPy n'est pas arbitraire : elle reflète une impossibilité mathématique de fond. NumPy fait bien de la signaler.",
+      C:"Aucune convention arbitraire ici : la contrainte vient directement de la définition de la somme.",
+      D:"Faux : le produit scalaire produit un SCALAIRE (un seul nombre), jamais un vecteur. Par ailleurs, il n'est pas défini pour des dimensions différentes.",
+    },
+    piege:"Bien comprendre qu'une opération mathématique peut être INDÉFINIE (pas seulement \"interdite\"). C'est un concept important : certaines opérations n'ont AUCUN SENS dans certains contextes, ce n'est pas un bug ou une restriction.",
+  },
+
+  /* ═══ SECTION 6 : Multiplication matrice-vecteur (Q15–Q16) ═══ */
+  {
+    id:15, sec:'mat-vec', niv:'🟢 Fondamental', theme:'Formule générale',
+    isK:true,
+    en:"\\text{Pour calculer TOUTES les prédictions }\\hat{\\mathbf{y}}\\text{ d'un dataset à }n\\text{ observations et }p\\text{ features, quelle formule utilise-t-on ?}",
+    opts:[
+      {l:'A', k:"\\hat{\\mathbf{y}} = \\mathbf{X} + \\mathbf{w}"},
+      {l:'B', k:"\\hat{\\mathbf{y}} = \\mathbf{X}\\mathbf{w}\\;\\in\\mathbb{R}^{n}"},
+      {l:'C', k:"\\hat{\\mathbf{y}} = \\mathbf{w}\\mathbf{X}"},
+      {l:'D', k:"\\hat{\\mathbf{y}} = \\mathbf{X}^T\\mathbf{w}^T"},
+    ],
+    ok:'B',
+    expOk:"X ∈ ℝⁿˣᵖ et w ∈ ℝᵖ. Le produit Xw ∈ ℝⁿ : un vecteur de n prédictions. Chaque composante ŷᵢ est le produit scalaire de la ligne i de X avec w. On peut ajouter le biais : ŷ = Xw + b (b scalaire diffusé sur toutes les composantes).",
+    expNok:{
+      A:"Xw n'est pas une addition : c'est un produit. De plus, les dimensions ne correspondent pas (X est 2D, w est 1D) — l'addition serait mal définie.",
+      C:"wX est INCOMPATIBLE : w ∈ ℝᵖ (1×p) et X ∈ ℝⁿˣᵖ, donc wX nécessiterait que le nombre de colonnes de w (= p) égale le nombre de lignes de X (= n). Faux en général.",
+      D:"Xᵀwᵀ : Xᵀ ∈ ℝᵖˣⁿ et wᵀ est encore un vecteur ligne de ℝᵖ. L'opération est mal définie — les dimensions ne se combinent pas.",
+    },
+    piege:"Règle des dimensions pour le produit matriciel : (a×b)(b×c) = (a×c). Le nombre de COLONNES de la première doit égaler le nombre de LIGNES de la seconde. X(n×p) × w(p×1) = (n×1) ✓.",
+  },
+  {
+    id:16, sec:'mat-vec', niv:'🟠 Application', theme:'Calcul 3×2',
+    isK:true,
+    en:"\\text{Calculez : }\\begin{pmatrix}1 & 2\\\\3 & 4\\\\5 & 6\\end{pmatrix}\\begin{pmatrix}0{,}5\\\\0{,}3\\end{pmatrix}",
+    opts:[
+      {l:'A', k:"(1{,}1;\\ 2{,}7;\\ 4{,}3)^T"},
+      {l:'B', k:"(0{,}8;\\ 2{,}1;\\ 3{,}3)^T"},
+      {l:'C', k:"\\text{(1,1 ; 2,3 ; 4,3 ; ...) — vecteur de 4 composantes}"},
+      {l:'D', k:"(0{,}5;\\ 0{,}9;\\ 2{,}0)^T"},
+    ],
+    ok:'A',
+    steps:[
+      { s:"\\text{ligne 1 : }1\\times 0{,}5 + 2\\times 0{,}3", r:"0{,}5 + 0{,}6 = 1{,}1" },
+      { s:"\\text{ligne 2 : }3\\times 0{,}5 + 4\\times 0{,}3", r:"1{,}5 + 1{,}2 = 2{,}7" },
+      { s:"\\text{ligne 3 : }5\\times 0{,}5 + 6\\times 0{,}3", r:"2{,}5 + 1{,}8 = 4{,}3" },
+    ],
+    expOk:"Chaque composante résultat = produit scalaire de la LIGNE correspondante avec le vecteur colonne. 3 lignes ⇒ vecteur résultat ∈ ℝ³. (1×0,5+2×0,3 ; 3×0,5+4×0,3 ; 5×0,5+6×0,3) = (1,1 ; 2,7 ; 4,3).",
+    expNok:{
+      B:"Erreur : il semble que seule la première colonne est utilisée. On DOIT utiliser les 2 composantes de w pour chaque ligne.",
+      C:"Impossible : 3 lignes dans X donnent exactement 3 composantes. Une matrice (3×2) fois un vecteur (2×1) donne un vecteur (3×1), pas (4×1).",
+      D:"Semble utiliser seulement w (0,5 et 0,3) ou des demi-valeurs. Le calcul complet doit combiner les DEUX colonnes.",
+    },
+    piege:"Le nombre de COMPOSANTES du vecteur résultat = nombre de LIGNES de la matrice (n), pas le nombre de colonnes (p). Une matrice (n×p) fois un vecteur (p) donne un vecteur (n).",
+  },
+
+  /* ═══ SECTION 7 : Régression linéaire (Q17–Q20) ═══ */
+  {
+    id:17, sec:'regression', niv:'🟡 Interprétation', theme:'Coefficient du modèle',
+    isK:true,
+    en:"\\text{La droite de régression du dataset fil rouge est : }\\hat{y} = 2{,}07\\times\\texttt{experience} + 31{,}27\\text{.}\\\\[4pt]\\text{Quelle est l'interprétation CONCRÈTE du coefficient }31{,}27\\text{ ?}",
+    opts:[
+      {l:'A', tx:"Le nombre moyen d'années d'expérience dans le dataset."},
+      {l:'B', tx:"Le salaire prédit (en k€) pour un dev avec 0 an d'expérience."},
+      {l:'C', tx:"La pente de la droite de régression."},
+      {l:'D', tx:"L'erreur moyenne (MSE) du modèle."},
+    ],
+    ok:'B',
+    expOk:"31,27 est le BIAIS b (ordonnée à l'origine). C'est la valeur de ŷ quand x = 0. Concrètement : le modèle prédit qu'un junior débutant (0 an) touche environ 31,27 k€. 2,07 est la PENTE w (impact par année supplémentaire).",
+    expNok:{
+      A:"Ne pas confondre : dans la droite y = wx+b, le coefficient b n'a rien à voir avec une moyenne de x. C'est une valeur de y quand x = 0.",
+      C:"La pente, c'est le coefficient 2,07 (multiplicateur de experience), pas 31,27.",
+      D:"La MSE = 20,46 (k€)², pas 31,27. Ce sont deux quantités distinctes.",
+    },
+    piege:"Dans ŷ = wx + b : w = pente (impact d'une unité de x), b = ordonnée à l'origine (valeur de ŷ quand x=0). Ne JAMAIS confondre ces deux paramètres — ils ont des rôles mathématiques et des interprétations métier très différents.",
+  },
+  {
+    id:18, sec:'regression', niv:'🟠 Analyse MSE', theme:'Choix de la fonction coût',
+    isK:true,
+    en:"\\text{Pourquoi élève-t-on les erreurs au CARRÉ dans }\\text{MSE} = \\frac{1}{n}\\sum_{i=1}^n(y_i-\\hat{y}_i)^2\\text{ plutôt que de prendre leur valeur absolue ?}",
+    opts:[
+      {l:'A', tx:"C'est une convention historique sans justification mathématique."},
+      {l:'B', tx:"Pour éviter que les erreurs positives et négatives ne s'annulent ET pour pénaliser davantage les grosses erreurs."},
+      {l:'C', kpre:"\\text{Parce que }x^2\\text{ est dérivable partout, alors que }|x|\\text{ ne l'est pas en 0 — crucial pour la descente de gradient.}"},
+      {l:'D', tx:"Les réponses B ET C sont toutes deux correctes."},
+    ],
+    ok:'D',
+    expOk:"DEUX raisons complémentaires, toutes deux valides : (B) le carré élimine le signe ET pénalise plus fortement les grosses erreurs (une erreur de 10 pèse 100 — soit 4× plus qu'une erreur de 5 qui pèse 25). (C) x² est dérivable partout, permettant la descente de gradient (Jour 2). La valeur absolue |x| n'est pas dérivable en 0, posant des problèmes numériques.",
+    expNok:{
+      A:"C'est l'inverse : le choix du carré a des justifications mathématiques PROFONDES (liens avec la variance, solutions analytiques, dérivabilité).",
+      B:"Réponse vraie mais INCOMPLÈTE. La raison C (dérivabilité) est tout aussi importante, voire plus dans le contexte du ML.",
+      C:"Réponse vraie mais INCOMPLÈTE. La raison B (annulation + pondération) est aussi une justification fondamentale.",
+    },
+    piege:"Quand plusieurs explications sont valides simultanément, la meilleure réponse est souvent \"toutes les précédentes\". Ne pas se précipiter sur la première option qui semble correcte — lire TOUTES les options avant de choisir.",
+  },
+  {
+    id:19, sec:'regression', niv:'🔴 Analyse critique', theme:'Corrélation vs causalité',
+    en:"Dans notre dataset, la corrélation entre expérience et salaire est forte (r ≈ 0,927). Peut-on en déduire que \"gagner de l'expérience CAUSE une augmentation de salaire\" ?",
+    opts:[
+      {l:'A', tx:"Oui, c'est la conclusion directe d'une régression linéaire avec corrélation forte."},
+      {l:'B', tx:"Non — corrélation n'est PAS causalité. D'autres variables cachées (âge, réseau professionnel, évolution du marché) pourraient expliquer les deux phénomènes."},
+      {l:'C', tx:"Oui, car le coefficient 2,07 est par définition un \"effet causal\" sur le salaire."},
+      {l:'D', tx:"Non, car r < 1, donc la relation n'est pas exacte."},
+    ],
+    ok:'B',
+    expOk:"Une forte corrélation ne PROUVE JAMAIS la causalité. Des variables cachées (confounders) peuvent influencer simultanément expérience ET salaire : l'âge, l'évolution du marché, le réseau professionnel, la montée en responsabilités. Pour prouver une causalité, il faudrait une expérience contrôlée (souvent impossible en pratique en data science). C'est un piège EXTRÊMEMENT fréquent.",
+    expNok:{
+      A:"La régression linéaire mesure une ASSOCIATION STATISTIQUE, jamais une causalité. C'est une distinction fondamentale en statistique et data science.",
+      C:"Les coefficients de régression NE sont PAS des \"effets causaux\". Ce sont des estimations d'association, sensibles aux variables omises et aux biais de sélection.",
+      D:"r < 1 n'a rien à voir avec la causalité. Même avec r = 1 (corrélation parfaite), on ne peut conclure à une causalité sans information supplémentaire.",
+    },
+    piege:"Phrase à graver : \"Correlation is not causation.\" Même une corrélation de 0,99 n'implique PAS de causalité. Exemple classique : le nombre de crèmes glacées vendues est fortement corrélé au nombre de noyades — mais l'une ne cause PAS l'autre (la chaleur cause les deux).",
+  },
+  {
+    id:20, sec:'regression', niv:'🟠 Code', theme:'Formule analytique',
+    en:"Dans l'implémentation d'une régression linéaire from scratch, la ligne Python w = np.sum((x - xm) * (y - ym)) / np.sum((x - xm)**2) représente :",
+    opts:[
+      {l:'A', tx:"Le calcul de la MSE (erreur quadratique moyenne)."},
+      {l:'B', tx:"La formule analytique des moindres carrés pour la pente w."},
+      {l:'C', tx:"La dérivée partielle de la fonction coût par rapport à w."},
+      {l:'D', tx:"Une itération unique de la descente de gradient."},
+    ],
+    ok:'B',
+    calcStr:"w = \\frac{\\sum_{i=1}^{n}(x_i - \\bar{x})(y_i - \\bar{y})}{\\sum_{i=1}^{n}(x_i - \\bar{x})^2}",
+    expOk:"C'est la FORMULE ANALYTIQUE (close-form) des moindres carrés pour la pente d'une régression linéaire simple. Elle provient de l'annulation de la dérivée de la MSE : ∂MSE/∂w = 0 ⟹ cette expression. Avantage : calcul exact en une seule étape, sans itération.",
+    expNok:{
+      A:"La MSE se calcule APRÈS avoir obtenu w et b : mse = np.mean((y - y_pred)**2). Ce n'est pas cette formule.",
+      C:"La dérivée partielle est une ÉTAPE INTERMÉDIAIRE pour DÉRIVER cette formule, mais la dérivée elle-même est : ∂MSE/∂w = -(2/n)·Σ(yᵢ-ŷᵢ)·xᵢ. Différent de la formule donnée.",
+      D:"Une itération de descente de gradient serait : w -= learning_rate * gradient. Ici on calcule w DIRECTEMENT, sans itération, sans learning rate.",
+    },
+    piege:"Deux grandes familles de résolution : (1) FORMULE ANALYTIQUE (quand elle existe, comme pour la régression linéaire simple) — exacte, rapide. (2) DESCENTE DE GRADIENT (Jour 2) — itérative, approximative, mais nécessaire pour modèles complexes sans formule fermée (réseaux de neurones).",
+  },
+];
+
+/* ============================================================================
+   QCM QUESTION COMPONENT
+============================================================================ */
+function QCMQuestion({ q, answers, setAnswers, revealed, setRevealed }) {
+  const { theme, mode } = useTheme();
+  const chosen = answers[q.id];
+  const rev = revealed[q.id];
+  const em = q.niv.split(' ')[0];
+  const dc = DIFF_COLORS[em] || {};
+
+  return (
+    <div id={"q"+q.id} style={{
+      marginBottom:'28px', background:theme.bgAlt, border:`1px solid ${theme.border}`,
+      borderRadius:'12px', overflow:'hidden', scrollMarginTop:'24px',
+      boxShadow: mode==='dark' ? '0 2px 10px rgba(0,0,0,0.4)' : '0 2px 10px rgba(0,0,0,0.05)'
+    }}>
+      {/* En-tête question */}
+      <div style={{ padding:'14px 22px 0', display:'flex', flexWrap:'wrap', gap:'8px', alignItems:'center' }}>
+        <span style={{
+          background:theme.accent, color:'#fff', borderRadius:'50%', width:'30px', height:'30px',
+          display:'flex', alignItems:'center', justifyContent:'center',
+          fontFamily:"'DM Sans',sans-serif", fontWeight:800, fontSize:'0.88rem', flexShrink:0
+        }}>{q.id}</span>
+        <span style={{
+          background: mode==='dark' ? dc.dbg : dc.bg,
+          color: mode==='dark' ? dc.dtx : dc.tx,
+          border:`1px solid ${dc.bd}`, borderRadius:'12px', padding:'3px 11px',
+          fontSize:'0.75rem', fontFamily:"'DM Sans',sans-serif", fontWeight:600
+        }}>{q.niv}</span>
+        <span style={{
+          background:theme.bgCode, color:theme.textMuted, borderRadius:'8px',
+          padding:'3px 10px', fontSize:'0.72rem', fontFamily:"'DM Sans',sans-serif",
+          marginLeft:'auto'
+        }}>{q.theme}</span>
+      </div>
+
+      {/* Énoncé */}
+      <div style={{ padding:'12px 22px', lineHeight:1.8, fontSize:'1rem', color:theme.text }}>
+        {q.isK ? <M t={q.en} d /> : <span>{q.en}</span>}
+      </div>
+
+      {/* Options */}
+      <div style={{ padding:'0 22px 16px', display:'flex', flexDirection:'column', gap:'8px' }}>
+        {q.opts.map(opt => {
+          const sel = chosen===opt.l;
+          const bon = opt.l===q.ok;
+          let bg = theme.bg, bd = theme.border, tc = theme.text;
+          if (sel && !rev) { bg = theme.qcmSelectBg; bd = theme.accent; }
+          if (rev && bon)  { bg = theme.qcmCorrectBg; bd = theme.qcmCorrectBorder; tc = theme.qcmCorrectText; }
+          if (rev && sel && !bon) { bg = theme.qcmWrongBg; bd = theme.qcmWrongBorder; tc = theme.qcmWrongText; }
+
+          return (
+            <button
+              key={opt.l}
+              onClick={() => !rev && setAnswers(p => ({ ...p, [q.id]: opt.l }))}
+              style={{
+                display:'flex', alignItems:'flex-start', gap:'12px',
+                background:bg, border:`2px solid ${bd}`, borderRadius:'8px',
+                padding:'11px 14px', cursor:rev?'default':'pointer',
+                textAlign:'left', transition:'all 0.2s', color:tc, width:'100%',
+                fontFamily:"'Source Serif 4',Georgia,serif"
+              }}
+            >
+              <span style={{
+                minWidth:'28px', height:'28px', borderRadius:'50%',
+                border:`2px solid ${bd}`, display:'flex', alignItems:'center',
+                justifyContent:'center', fontFamily:"'DM Sans',sans-serif",
+                fontWeight:700, fontSize:'0.82rem', flexShrink:0,
+                background:(sel||(rev&&bon))?bd:'transparent',
+                color:(sel||(rev&&bon))?'#fff':tc
+              }}>{opt.l}</span>
+              <span style={{ lineHeight:1.6, fontSize:'0.94rem', flex:1 }}>
+                {opt.k ? <M t={opt.k} /> : (opt.kpre ? <M t={opt.kpre} /> : opt.tx)}
+                {rev && bon && <span style={{ marginLeft:'8px' }}>✓</span>}
+                {rev && sel && !bon && <span style={{ marginLeft:'8px' }}>✗</span>}
+              </span>
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Bouton révéler */}
+      {!rev && (
+        <div style={{ padding:'0 22px 18px' }}>
+          <button
+            onClick={() => setRevealed(p => ({ ...p, [q.id]: true }))}
+            style={{
+              background:theme.accent, color:'#fff', border:'none', borderRadius:'8px',
+              padding:'9px 22px', fontFamily:"'DM Sans',sans-serif", fontWeight:600,
+              cursor:'pointer', fontSize:'0.88rem'
+            }}
+          >
+            📖 Voir la correction détaillée
+          </button>
+        </div>
+      )}
+
+      {/* Correction */}
+      {rev && (
+        <div style={{ borderTop:`1px solid ${theme.border}`, background:theme.bg, padding:'18px 22px 22px' }}>
+          {/* Bonne réponse */}
+          <div style={{
+            background:theme.qcmCorrectBg, border:`1px solid ${theme.qcmCorrectBorder}`,
+            borderRadius:'8px', padding:'12px 16px', marginBottom:'14px'
+          }}>
+            <p style={{
+              margin:'0 0 6px', fontFamily:"'DM Sans',sans-serif",
+              fontWeight:700, color:'#15803d', fontSize:'0.8rem'
+            }}>✅ BONNE RÉPONSE — {q.ok}</p>
+            <p style={{
+              margin:0, fontSize:'0.93rem', lineHeight:1.7, color:theme.qcmCorrectText
+            }}>{q.expOk}</p>
+          </div>
+
+          {/* Calcul étape par étape */}
+          {q.steps && (
+            <div style={{
+              background:theme.bgAlt, border:`1px solid ${theme.border}`,
+              borderRadius:'8px', padding:'14px 16px', marginBottom:'14px'
+            }}>
+              <p style={{
+                margin:'0 0 10px', fontFamily:"'DM Sans',sans-serif", fontWeight:700,
+                fontSize:'0.75rem', color:theme.textMuted,
+                textTransform:'uppercase', letterSpacing:'0.06em'
+              }}>📐 Calcul étape par étape</p>
+              <table style={{ borderCollapse:'collapse', width:'100%' }}>
+                <tbody>
+                  {q.steps.map((s, i) => (
+                    <tr key={i} style={{
+                      borderBottom: i < q.steps.length-1 ? `1px solid ${theme.borderLight}` : 'none'
+                    }}>
+                      <td style={{
+                        padding:'6px 12px 6px 0', fontFamily:"'DM Sans',sans-serif",
+                        fontSize:'0.75rem', color:theme.textMuted, whiteSpace:'nowrap'
+                      }}>Étape {i+1}</td>
+                      <td style={{ padding:'6px 16px 6px 0', color:theme.text }}>
+                        <M t={s.s} />
+                      </td>
+                      <td style={{ padding:'6px 0', color:theme.accent, fontWeight:700 }}>
+                        <M t={"=\\ "+s.r} />
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+
+          {/* Calcul formule directe */}
+          {q.calcStr && (
+            <div style={{
+              background:theme.bgAlt, border:`1px solid ${theme.border}`,
+              borderRadius:'8px', padding:'14px 20px', marginBottom:'14px'
+            }}>
+              <p style={{
+                margin:'0 0 10px', fontFamily:"'DM Sans',sans-serif", fontWeight:700,
+                fontSize:'0.75rem', color:theme.textMuted,
+                textTransform:'uppercase', letterSpacing:'0.06em'
+              }}>📐 Calcul détaillé</p>
+              <M t={q.calcStr} d />
+            </div>
+          )}
+
+          {/* Mauvaises réponses */}
+          <p style={{
+            margin:'0 0 8px', fontFamily:"'DM Sans',sans-serif", fontWeight:700,
+            fontSize:'0.75rem', color:theme.textMuted,
+            textTransform:'uppercase', letterSpacing:'0.06em'
+          }}>❌ Pourquoi les autres réponses sont incorrectes</p>
+          {Object.entries(q.expNok).map(([letter, text]) => (
+            <div key={letter} style={{
+              marginBottom:'8px', padding:'10px 14px',
+              background:theme.qcmWrongBg, border:`1px solid ${theme.qcmWrongBorder}44`,
+              borderRadius:'6px', fontSize:'0.9rem', lineHeight:1.65,
+              color:theme.text
+            }}>
+              <strong style={{ fontFamily:"'DM Sans',sans-serif", color:theme.qcmWrongBorder }}>Réponse {letter} : </strong>
+              {text}
+            </div>
+          ))}
+
+          {/* Piège */}
+          <div style={{
+            marginTop:'14px', padding:'12px 16px',
+            background:theme.qcmHintBg, border:`1px solid ${theme.qcmHintBorder}`,
+            borderRadius:'8px', fontSize:'0.9rem', lineHeight:1.65, color:theme.text
+          }}>
+            <span style={{ fontFamily:"'DM Sans',sans-serif", fontWeight:700, color:'#d97706' }}>⚠️ Piège à éviter : </span>
+            {q.piege}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ============================================================================
+   QCM CONTENT — organisé par section (mêmes IDs que jour1.html)
+============================================================================ */
+function QCMContent({ answers, setAnswers, revealed, setRevealed }) {
+  const { theme } = useTheme();
+  const sectionTitles = {
+    'ia-fonction':"1. L'IA comme fonction mathématique",
+    'dataset':"2. Dataset : observations et features",
+    'vecteurs':"3. Vecteurs",
+    'matrices':"4. Matrices",
+    'produit-scalaire':"5. Produit scalaire",
+    'mat-vec':"6. Multiplication matrice-vecteur",
+    'regression':"7. Régression linéaire",
+  };
+
+  // Grouper par section dans l'ordre
+  const groups = {};
+  QUESTIONS.forEach(q => {
+    if (!groups[q.sec]) groups[q.sec] = [];
+    groups[q.sec].push(q);
+  });
+
+  return (
+    <>
+      {Object.keys(sectionTitles).map(secId => (
+        <Sec key={secId} id={secId} title={sectionTitles[secId]} level={1}>
+          <P style={{ color:theme.textMuted, fontSize:'0.92rem', marginBottom:'20px' }}>
+            <em>{groups[secId]?.length || 0} question{(groups[secId]?.length || 0) > 1 ? 's' : ''} sur ce chapitre</em>
+          </P>
+          {groups[secId]?.map(q => (
+            <QCMQuestion
+              key={q.id}
+              q={q}
+              answers={answers}
+              setAnswers={setAnswers}
+              revealed={revealed}
+              setRevealed={setRevealed}
+            />
+          ))}
+        </Sec>
+      ))}
+    </>
+  );
+}
+
+/* ============================================================================
+   SCORE BAR (fixe en haut pendant qu'on répond)
+============================================================================ */
+function ScoreBar({ answers, revealed }) {
+  const { theme } = useTheme();
+  const answered = Object.keys(answers).length;
+  const reveals = Object.keys(revealed).length;
+  const correct = Object.entries(answers).filter(([id, a]) => QUESTIONS.find(q => q.id === +id)?.ok === a).length;
+  const total = QUESTIONS.length;
+
+  if (answered === 0) return null;
+
+  return (
+    <div style={{
+      position:'sticky', top:'0', zIndex:50,
+      background:theme.bgAlt, borderBottom:`1px solid ${theme.border}`,
+      padding:'10px 20px', marginBottom:'24px', borderRadius:'8px',
+      display:'flex', alignItems:'center', gap:'14px', flexWrap:'wrap',
+      boxShadow: `0 2px 8px ${theme.bg}99`
+    }}>
+      <span style={{
+        color:theme.accent, fontWeight:700, fontSize:'0.9rem',
+        fontFamily:"'DM Sans',sans-serif"
+      }}>
+        Score : {correct} / {total}
+      </span>
+      <div style={{ flex:1, minWidth:'120px', height:'7px', background:theme.border, borderRadius:'4px' }}>
+        <div style={{
+          width:`${(correct/total)*100}%`, height:'100%',
+          background: correct===total ? '#22c55e' : theme.accent,
+          borderRadius:'4px', transition:'width 0.4s'
+        }} />
+      </div>
+      <span style={{
+        fontSize:'0.8rem', color:theme.textMuted,
+        fontFamily:"'DM Sans',sans-serif", whiteSpace:'nowrap'
+      }}>
+        {answered}/{total} répondues · {reveals}/{total} corrigées
+      </span>
+    </div>
+  );
+}
+
+/* ============================================================================
+   FINAL BILAN (affiché quand tout est révélé)
+============================================================================ */
+function FinalBilan({ answers, revealed }) {
+  const { theme } = useTheme();
+  if (Object.keys(revealed).length !== QUESTIONS.length) return null;
+
+  const correct = Object.entries(answers).filter(([id, a]) => QUESTIONS.find(q => q.id === +id)?.ok === a).length;
+  const total = QUESTIONS.length;
+  const pct = (correct/total)*100;
+
+  let msg, mood;
+  if (correct === total) { msg = "🎉 Parfait ! Vous maîtrisez le Jour 1 à 100%."; mood = 'retenir'; }
+  else if (pct >= 80) { msg = "👏 Très bien ! Quelques points à approfondir."; mood = 'retenir'; }
+  else if (pct >= 60) { msg = "👍 Bien ! Relisez les sections où vous avez fait des erreurs."; mood = 'intuition'; }
+  else if (pct >= 40) { msg = "📚 À retravailler — revenez sur la fiche de synthèse."; mood = 'attention'; }
+  else { msg = "⚠️ Reprenez les chapitres 1 à 7 avant de passer au Jour 2."; mood = 'attention'; }
+
+  return (
+    <Box type={mood} title="Bilan final">
+      <div style={{ textAlign:'center' }}>
+        <p style={{
+          margin:'0 0 12px', fontFamily:"'DM Sans',sans-serif",
+          fontSize:'1.05rem', fontWeight:700, color:theme.text
+        }}>{msg}</p>
+        <p style={{
+          margin:'0 0 12px', fontFamily:"'DM Sans',sans-serif",
+          fontSize:'2.6rem', fontWeight:800, color:theme.accent, lineHeight:1
+        }}>{correct} / {total}</p>
+        <p style={{
+          margin:0, fontFamily:"'DM Sans',sans-serif",
+          fontSize:'0.85rem', color:theme.textMuted
+        }}>
+          {pct >= 70
+            ? "Prêt·e pour le Jour 2 — Optimisation et descente de gradient !"
+            : "Relisez la fiche de synthèse du Jour 1 avant de continuer."}
+        </p>
+      </div>
+    </Box>
+  );
+}
+
+/* ============================================================================
+   ROOT — structure identique à jour1.html
+============================================================================ */
+function Jour1QCMPage() {
+  const [activeId, setActiveId] = useState('');
+  const [answers, setAnswers] = useState({});
+  const [revealed, setRevealed] = useState({});
+
+  useEffect(() => {
+    const ids = [];
+    SECTIONS.forEach(s => { ids.push(s.id); s.children?.forEach(c => ids.push(c.id)); });
+    const obs = new IntersectionObserver(entries => {
+      const vis = entries.filter(e => e.isIntersecting).sort((a,b) => a.boundingClientRect.top - b.boundingClientRect.top);
+      if (vis.length) setActiveId(vis[0].target.id);
+    }, { rootMargin: '-10% 0px -80% 0px' });
+    ids.forEach(id => { const el = document.getElementById(id); if (el) obs.observe(el); });
+    return () => obs.disconnect();
+  }, []);
+
+  return (
+    <ThemeProvider>
+      <Shell
+        activeId={activeId}
+        answers={answers} setAnswers={setAnswers}
+        revealed={revealed} setRevealed={setRevealed}
+      />
+    </ThemeProvider>
+  );
+}
+
+function Shell({ activeId, answers, setAnswers, revealed, setRevealed }) {
+  const { theme } = useTheme();
+  return (
+    <div style={{ background:theme.bg, minHeight:'100vh', transition:'background 0.3s' }}>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,700;1,400&family=JetBrains+Mono:wght@400;500;700&family=Source+Serif+4:ital,wght@0,400;0,600;0,700;1,400&display=swap');
+        *{box-sizing:border-box} body{margin:0;padding:0}
+        .main-content{margin-left:280px;max-width:860px;padding:32px 48px 80px}
+        @media(max-width:768px){.sidebar-el{transform:translateX(-100%)}.mob-btn{display:block!important}.main-content{margin-left:0;padding:20px 16px 60px}}
+        ::selection{background:${theme.accent}33} a{color:${theme.link}}
+      `}</style>
+      <Sidebar activeId={activeId} />
+      <main className="main-content">
+        {/* Header (identique à jour1.html avec titre adapté) */}
+        <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', marginBottom:'8px' }}>
+          <div>
+            <div style={{ fontFamily:"'DM Sans',sans-serif", fontSize:'0.85rem', color:theme.textMuted, fontWeight:500 }}>Jour 1 — QCM</div>
+            <h1 style={{ fontFamily:"'DM Sans',sans-serif", fontSize:'2rem', fontWeight:700, color:theme.text, margin:'4px 0 0', lineHeight:1.2 }}>
+              20 questions corrigées — Données et représentation
+            </h1>
+          </div>
+          <ThemeToggle />
+        </div>
+        <div style={{ height:'3px', background:`linear-gradient(90deg, ${theme.accent}, ${theme.accent}44)`, borderRadius:'2px', marginBottom:'32px' }} />
+
+        {/* Objectif */}
+        <Box type="retenir" title="Objectif du QCM Jour 1">
+          <P style={{marginBottom:0}}>Vérifier votre maîtrise des concepts fondamentaux : <B>vecteurs</B>, <B>matrices</B>,
+          <B> produit scalaire</B>, <B>multiplication matrice-vecteur</B> et <B>régression linéaire</B>.
+          20 questions de difficulté progressive (🟢 Fondamental → 🔴 Analyse critique), toutes corrigées
+          avec explications détaillées et pièges à éviter.</P>
+        </Box>
+
+        {/* Boutons — identiques à jour1.html, sauf QCM → Cours */}
+        <div style={{ display:'flex', gap:'8px', flexWrap:'wrap', margin:'20px 0' }}>
+          {[
+            {icon:'📊',label:'Colab',href:'https://drive.google.com/file/d/1DubkVIhdURBkIPkdtfRHPnmWpUr80tXp/view?usp=sharing',bg:'#F9AB00',fg:'#1a1a2e',ext:true},
+            {icon:'📐',label:'Synthèse',href:'pdf/jour1_synthese.pdf',bg:theme.accent,fg:'#fff',ext:true},
+            {icon:'📝',label:'Exercices',href:'pdf/jour1_exercices.pdf',bg:'#f97316',fg:'#fff',ext:true},
+            {icon:'✅',label:'Corrections',href:'pdf/jour1_corrections.pdf',bg:'#22c55e',fg:'#fff',ext:true},
+            {icon:'🔬',label:'TP',href:'https://drive.google.com/file/d/11LjtKUgZkqKw_3rJFUgc_77udLX-1Qjh/view?usp=sharing',bg:'#F9AB00',fg:'#1a1a2e',ext:true},
+            {icon:'📘',label:'Cours',href:'../jour1.html',bg:'#8b5cf6',fg:'#fff',ext:false},
+          ].map((b,i)=>(
+            <a key={i} href={b.href} {...(b.ext ? { target:'_blank', rel:'noopener' } : {})} style={{ display:'inline-flex', alignItems:'center', justifyContent:'center', gap:'5px', background:b.bg, color:b.fg,
+              padding:'9px 14px', borderRadius:'6px', fontFamily:"'DM Sans',sans-serif", fontSize:'0.85rem', fontWeight:600, textDecoration:'none' }}>
+              {b.icon} {b.label}
+            </a>
+          ))}
+        </div>
+
+        {/* Barre de score (sticky) */}
+        <ScoreBar answers={answers} revealed={revealed} />
+
+        {/* 20 Questions organisées par section */}
+        <QCMContent
+          answers={answers} setAnswers={setAnswers}
+          revealed={revealed} setRevealed={setRevealed}
+        />
+
+        {/* Bilan final */}
+        <div style={{ marginTop:'40px' }}>
+          <FinalBilan answers={answers} revealed={revealed} />
+        </div>
+
+        <footer style={{ marginTop:'60px', padding:'24px 0', borderTop:`1px solid ${theme.border}`, textAlign:'center',
+          fontFamily:"'DM Sans',sans-serif", fontSize:'0.8rem', color:theme.textMuted }}>
+          <p>© 2025 Mohamed EL AFRIT | <a href="https://www.mohamedelafrit.com" style={{ color:theme.link, textDecoration:'none' }}>www.mohamedelafrit.com</a></p>
+          <p><a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.fr" style={{ color:theme.link, textDecoration:'none' }}>CC BY-NC-SA 4.0</a></p>
+        </footer>
+      </main>
+    </div>
+  );
+}
+
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(React.createElement(Jour1QCMPage));
+</script>
+</body>
+</html>

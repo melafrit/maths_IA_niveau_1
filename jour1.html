@@ -856,14 +856,14 @@ function Shell({ activeId }) {
         </Box>
         <div style={{ display:'flex', gap:'8px', flexWrap:'wrap', margin:'20px 0' }}>
           {[
-            {icon:'📊',label:'Colab',href:'https://drive.google.com/file/d/1DubkVIhdURBkIPkdtfRHPnmWpUr80tXp/view?usp=sharing',bg:'#F9AB00',fg:'#1a1a2e'},
-            {icon:'📐',label:'Synthèse',href:'pdf/jour1_synthese.pdf',bg:theme.accent,fg:'#fff'},
-            {icon:'📝',label:'Exercices',href:'pdf/jour1_exercices.pdf',bg:'#f97316',fg:'#fff'},
-            {icon:'✅',label:'Corrections',href:'pdf/jour1_corrections.pdf',bg:'#22c55e',fg:'#fff'},
-            {icon:'🔬',label:'TP',href:'https://drive.google.com/file/d/11LjtKUgZkqKw_3rJFUgc_77udLX-1Qjh/view?usp=sharing',bg:'#F9AB00',fg:'#1a1a2e'},
-            {icon:'❓',label:'QCM',href:'pdf/jour1_qcm.pdf',bg:'#8b5cf6',fg:'#fff'},
+            {icon:'📊',label:'Colab',href:'https://drive.google.com/file/d/1DubkVIhdURBkIPkdtfRHPnmWpUr80tXp/view?usp=sharing',bg:'#F9AB00',fg:'#1a1a2e',ext:true},
+            {icon:'📐',label:'Synthèse',href:'pdf/jour1_synthese.pdf',bg:theme.accent,fg:'#fff',ext:true},
+            {icon:'📝',label:'Exercices',href:'pdf/jour1_exercices.pdf',bg:'#f97316',fg:'#fff',ext:true},
+            {icon:'✅',label:'Corrections',href:'pdf/jour1_corrections.pdf',bg:'#22c55e',fg:'#fff',ext:true},
+            {icon:'🔬',label:'TP',href:'https://drive.google.com/file/d/11LjtKUgZkqKw_3rJFUgc_77udLX-1Qjh/view?usp=sharing',bg:'#F9AB00',fg:'#1a1a2e',ext:true},
+            {icon:'❓',label:'QCM',href:'qcm/jour1_qcm.html',bg:'#8b5cf6',fg:'#fff',ext:false},
           ].map((b,i)=>(
-            <a key={i} href={b.href} target="_blank" rel="noopener" style={{ display:'inline-flex', alignItems:'center', justifyContent:'center', gap:'5px', background:b.bg, color:b.fg,
+            <a key={i} href={b.href} {...(b.ext ? { target:'_blank', rel:'noopener' } : {})} style={{ display:'inline-flex', alignItems:'center', justifyContent:'center', gap:'5px', background:b.bg, color:b.fg,
               padding:'9px 14px', borderRadius:'6px', fontFamily:"'DM Sans',sans-serif", fontSize:'0.85rem', fontWeight:600, textDecoration:'none' }}>
               {b.icon} {b.label}
             </a>
