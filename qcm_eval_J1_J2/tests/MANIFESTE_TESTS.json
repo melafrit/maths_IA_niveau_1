@@ -1,0 +1,144 @@
+{
+  "csv_tests": [
+    {
+      "filename": "IPSSI_ALLEGRE_Emma_QCM_J1J2_20260426.csv",
+      "description": "Excellente etudiante, maitrise totale.",
+      "attendu": {
+        "nom": "ALLEGRE",
+        "prenom": "Emma",
+        "email": "emma.allegre@eleve.ipssi.fr",
+        "note_sur_20": 18.48,
+        "nb_correct": 47,
+        "points_obtenus": 85,
+        "duree_sec": 3720,
+        "signature_valide": true
+      }
+    },
+    {
+      "filename": "IPSSI_BERNARD_Louis_QCM_J1J2_20260426.csv",
+      "description": "Bon eleve, equilibre entre J1 et J2.",
+      "attendu": {
+        "nom": "BERNARD",
+        "prenom": "Louis",
+        "email": "louis.bernard@eleve.ipssi.fr",
+        "note_sur_20": 17.17,
+        "nb_correct": 42,
+        "points_obtenus": 79,
+        "duree_sec": 3300,
+        "signature_valide": true
+      }
+    },
+    {
+      "filename": "IPSSI_CHEVALIER_Nora_QCM_J1J2_20260426.csv",
+      "description": "Bonne en J2 mais faible en J1 (calculs vectoriels).",
+      "attendu": {
+        "nom": "CHEVALIER",
+        "prenom": "Nora",
+        "email": "nora.chevalier@eleve.ipssi.fr",
+        "note_sur_20": 12.83,
+        "nb_correct": 33,
+        "points_obtenus": 59,
+        "duree_sec": 4080,
+        "signature_valide": true
+      }
+    },
+    {
+      "filename": "IPSSI_DURAND_Paul_QCM_J1J2_20260426.csv",
+      "description": "Eleve moyen, comprehension partielle des concepts.",
+      "attendu": {
+        "nom": "DURAND",
+        "prenom": "Paul",
+        "email": "paul.durand@eleve.ipssi.fr",
+        "note_sur_20": 11.96,
+        "nb_correct": 31,
+        "points_obtenus": 55,
+        "duree_sec": 3000,
+        "signature_valide": true
+      }
+    },
+    {
+      "filename": "IPSSI_FABRE_Sarah_QCM_J1J2_20260426.csv",
+      "description": "Moyenne, mais bloque sur l'optimisation (J2).",
+      "attendu": {
+        "nom": "FABRE",
+        "prenom": "Sarah",
+        "email": "sarah.fabre@eleve.ipssi.fr",
+        "note_sur_20": 10.65,
+        "nb_correct": 29,
+        "points_obtenus": 49,
+        "duree_sec": 4320,
+        "signature_valide": true
+      }
+    },
+    {
+      "filename": "IPSSI_GARNIER_Tom_QCM_J1J2_20260426.csv",
+      "description": "Tout juste passable, bases fragiles.",
+      "attendu": {
+        "nom": "GARNIER",
+        "prenom": "Tom",
+        "email": "tom.garnier@eleve.ipssi.fr",
+        "note_sur_20": 9.57,
+        "nb_correct": 23,
+        "points_obtenus": 44,
+        "duree_sec": 2700,
+        "signature_valide": true
+      }
+    },
+    {
+      "filename": "IPSSI_HENRY_Julie_QCM_J1J2_20260426.csv",
+      "description": "En grande difficulte, beaucoup de questions blanches.",
+      "attendu": {
+        "nom": "HENRY",
+        "prenom": "Julie",
+        "email": "julie.henry@eleve.ipssi.fr",
+        "note_sur_20": 5.65,
+        "nb_correct": 13,
+        "points_obtenus": 26,
+        "duree_sec": 2280,
+        "signature_valide": true
+      }
+    },
+    {
+      "filename": "IPSSI_ISAAC_Mathis_QCM_J1J2_20260426.csv",
+      "description": "Cas limite : 20/20 parfait.",
+      "attendu": {
+        "nom": "ISAAC",
+        "prenom": "Mathis",
+        "email": "mathis.isaac@eleve.ipssi.fr",
+        "note_sur_20": 20.0,
+        "nb_correct": 50,
+        "points_obtenus": 92,
+        "duree_sec": 2880,
+        "signature_valide": true
+      }
+    },
+    {
+      "filename": "IPSSI_JACQUES_Lea_QCM_J1J2_20260426.csv",
+      "description": "Cas limite : 0/20, toutes mauvaises.",
+      "attendu": {
+        "nom": "JACQUES",
+        "prenom": "Lea",
+        "email": "lea.jacques@eleve.ipssi.fr",
+        "note_sur_20": 0.0,
+        "nb_correct": 0,
+        "points_obtenus": 0,
+        "duree_sec": 1680,
+        "signature_valide": true
+      }
+    },
+    {
+      "filename": "IPSSI_KAHN_Samuel_QCM_J1J2_20260426.csv",
+      "description": "CSV modifie manuellement apres export -> signature invalide.",
+      "attendu": {
+        "nom": "KAHN",
+        "prenom": "Samuel",
+        "email": "samuel.kahn@eleve.ipssi.fr",
+        "note_sur_20": 10.22,
+        "nb_correct": 26,
+        "points_obtenus": 47,
+        "duree_sec": 3240,
+        "signature_valide": false
+      }
+    }
+  ]
+}

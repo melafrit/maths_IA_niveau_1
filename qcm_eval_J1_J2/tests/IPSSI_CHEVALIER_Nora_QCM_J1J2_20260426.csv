@@ -1,0 +1,71 @@
+# CSV d'evaluation QCM Jours 1-2 - IPSSI Bachelor 2 Info
+# Fichier de test genere automatiquement
+#
+# SECTION: METADATA
+cle,valeur
+Nom,CHEVALIER
+Prenom,Nora
+Email,nora.chevalier@eleve.ipssi.fr
+DateDebut,2026-04-26T15:52:00.000Z
+DateFin,2026-04-26T17:00:00.000Z
+DureeSec,4080
+NbQuestions,50
+Version,1.0
+SaltVersion,IPSSI_SALT_2026
+#
+# SECTION: REPONSES
+Ordre,IDQuestion,Difficulte,Type,Jour,EnonceTronque,PermutationPropositions,LettreChoisie,IndexOriginalChoisi
+1,Q25,orange,formule,1,"Parmi les formules suivantes, laquelle est une ecriture correcte du produit scalaire entre deux vecteurs [formule] et [formule] de [formule] ?",3|1|0|2,C,0
+2,Q42,vert,code,2,Quelle boucle Python implemente correctement une descente de gradient avec 100 iterations ?,2|0|3|1,B,0
+3,Q12,jaune,calcul,1,"Avec [formule], quelle est la difference de salaire predit entre un developpeur avec 8 ans d'experience et un developpeur avec 3 ans d'experience ?",1|3|2|0,,
+4,Q33,vert,calcul,2,"Avec [formule], [formule], gradient [formule], que vaut [formule] apres une iteration ?",1|2|0|3,C,0
+5,Q44,jaune,code,2,Quelle expression NumPy calcule correctement le gradient MSE par rapport a [formule] : [formule] ?,2|1|0|3,C,0
+6,Q28,jaune,conceptuel,2,Quelle analogie illustre le mieux le principe de la descente de gradient ?,3|2|0|1,C,0
+7,Q19,jaune,code,1,Quelle est la prediction affichee par le code ? [code],1|2|0|3,,
+8,Q18,vert,code,1,Quelle est la valeur de [code] apres execution du code suivant ? [code],1|3|0|2,C,0
+9,Q30,orange,conceptuel,2,On entraine un modele avec un taux d'apprentissage [formule] tres grand. Que risque-t-il de se passer ?,1|3|0|2,C,0
+10,Q24,jaune,formule,1,Quelle est la formule correcte du MSE (Mean Squared Error) ?,2|3|1|0,A,2
+11,Q15,jaune,calcul,1,Soit la matrice [formule] et le vecteur [formule]. Que vaut [formule] ?,2|3|1|0,D,0
+12,Q21,orange,code,1,Considerons ce code : [code] Quelle est la valeur de [code] ?,0|3|2|1,B,3
+13,Q35,jaune,calcul,2,"On effectue une mise a jour simultanee de [formule] et [formule] avec [formule]. Etat courant : [formule], [formule], [formule], [formule]. Quelles sont les nouvelles valeurs ?",2|3|1|0,A,2
+14,Q38,orange,calcul,2,"On double le taux d'apprentissage [formule] (de [formule] a [formule]) pour une descente de gradient. Pour une meme iteration avec un gradient donne, comment change la taille du p…",3|0|2|1,B,0
+15,Q04,jaune,conceptuel,1,Pourquoi utilise-t-on le MSE (Mean Squared Error) plutot que la simple somme des erreurs [formule] comme mesure de qualite d'un modele ?,3|2|1|0,C,1
+16,Q36,vert,calcul,2,"Avec [formule], [formule], et supposons que le gradient soit constant egal a [formule] a chaque iteration. Que vaut [formule] (apres 3 iterations) ?",2|3|0|1,D,1
+17,Q29,jaune,conceptuel,2,Que represente geometriquement le gradient [formule] d'une fonction de cout ?,0|1|3|2,A,0
+18,Q39,jaune,calcul,2,"Pour le dataset fil rouge avec [formule] developpeurs, la formule du gradient MSE par rapport a [formule] est [formule]. Si a une iteration on a [formule], que vaut le gradient ?",3|1|0|2,C,0
+19,Q07,vert,calcul,1,Soit le vecteur [formule]. Quelle est sa norme euclidienne [formule] ?,2|0|1|3,A,2
+20,Q32,vert,calcul,2,"On a [formule], [formule] et [formule]. Quelle est la nouvelle valeur de [formule] apres une iteration de descente de gradient ?",0|3|1|2,A,0
+21,Q02,vert,conceptuel,1,Le dataset fil rouge contient 30 developpeurs avec 5 features. Quelle est la dimension de la matrice [formule] representant ce dataset ?,2|1|3|0,C,3
+22,Q09,vert,calcul,1,Soient [formule] et [formule]. Que vaut [formule] ?,0|2|3|1,A,0
+23,Q14,orange,calcul,1,"Sur 4 observations, on a les erreurs residuelles [formule] : [formule]. Que vaut le MSE ?",2|3|1|0,C,1
+24,Q22,jaune,code,1,"Pour le tableau [code], quelle est la sortie de [code] ?",0|2|3|1,A,0
+25,Q20,jaune,code,1,Que fait precisement ce code ? [code],1|0|3|2,B,0
+26,Q01,vert,conceptuel,1,"Dans le contexte du machine learning, qu'est-ce qu'un vecteur de features d'un developpeur ?",0|3|1|2,C,1
+27,Q10,jaune,calcul,1,Soient [formule] et [formule]. Que vaut le produit scalaire [formule] ?,3|1|2|0,D,0
+28,Q49,jaune,formule,2,"Pour une regression lineaire simple [formule] avec [formule], quelle est la derivee [formule] ?",0|2|3|1,A,0
+29,Q05,orange,conceptuel,1,"On ajuste un modele de regression lineaire sur le dataset fil rouge et on obtient [formule], [formule], [formule]. Que peut-on conclure de la valeur du MSE ?",0|3|2|1,A,0
+30,Q47,vert,code,2,Quelle strategie d'initialisation de [formule] et [formule] est la plus couramment utilisee pour un probleme de regression lineaire simple ?,3|0|1|2,B,0
+31,Q23,vert,formule,1,Quelle est la formule correcte de la regression lineaire simple (une seule feature) ?,3|2|0|1,D,1
+32,Q08,vert,calcul,1,"Avec le modele [formule] (k€), quelle est la prediction de salaire pour un developpeur avec [formule] ans d'experience ?",0|1|3|2,A,0
+33,Q50,orange,formule,2,"Pour le meme probleme, quelle est la derivee [formule] ?",3|2|1|0,D,0
+34,Q41,rouge,calcul,2,"Dataset fil rouge simplifie a 3 dev. [formule] = [formule]. Initialisation [formule], [formule], [formule]. Apres UNE iteration sur le batch complet avec les gradients analytiques…",2|3|0|1,C,0
+35,Q43,vert,code,2,Que fait la ligne [code] dans une boucle de descente de gradient ?,2|0|3|1,B,0
+36,Q46,jaune,code,2,On compare deux implementations du gradient MSE : **Version A** : [code] **Version B** : [code] Quelle affirmation est correcte ?,2|0|1|3,B,0
+37,Q31,vert,conceptuel,2,"Dans une iteration de descente de gradient [formule], quelle affirmation est exacte ?",0|3|2|1,A,0
+38,Q27,vert,conceptuel,2,Quel est l'objectif principal de la descente de gradient ?,0|1|3|2,B,1
+39,Q11,vert,calcul,1,On a 3 observations : [formule] et les predictions [formule]. Que vaut le MSE ?,0|3|2|1,A,0
+40,Q26,vert,conceptuel,2,A quoi sert une fonction de cout [formule] en machine learning ?,1|0|3|2,B,0
+41,Q34,jaune,calcul,2,"Pour une regression simple [formule] avec une seule observation [formule] et les parametres initiaux [formule], [formule], que vaut la derivee partielle [formule] ? (Utiliser [for…",1|2|0|3,C,0
+42,Q45,jaune,code,2,Quelle condition d'arret premature ajouter dans une boucle de descente de gradient pour eviter des iterations inutiles si on a converge ?,2|1|3|0,A,2
+43,Q17,vert,code,1,Quelle instruction Python cree correctement un vecteur NumPy [formule] ?,0|1|3|2,A,0
+44,Q40,orange,calcul,2,On compare 3 taux d'apprentissage pour la meme initialisation et le meme gradient initial non nul. Apres 100 iterations : [formule] donne [formule] ; [formule] donne [formule] ; […,2|0|3|1,A,2
+45,Q37,jaune,calcul,2,"Un etudiant observe : [formule], [formule], [formule], [formule]. Que peut-on conclure ?",0|2|1|3,B,2
+46,Q06,vert,conceptuel,1,"Dans le dataset fil rouge, on considere la regression simple : salaire = [formule] × experience + [formule]. Laquelle de ces affirmations est correcte ?",0|2|3|1,A,0
+47,Q13,jaune,calcul,1,"Un developpeur a 6 ans d'experience et un salaire reel de [formule] k€. Avec [formule], quelle est l'erreur de prediction [formule] ?",1|0|2|3,B,0
+48,Q48,vert,formule,2,Quelle est la regle correcte de mise a jour des parametres en descente de gradient ?,3|0|2|1,B,0
+49,Q16,rouge,calcul,1,"On compare deux modeles sur les memes 3 donnees [formule]. Modele A predit [formule] et modele B predit [formule]. Lequel est meilleur selon le MSE, et quel est son MSE ?",1|3|2|0,B,3
+50,Q03,jaune,conceptuel,1,"Dans l'equation de regression lineaire simple [formule] appliquee a la prediction de salaire, que represente le parametre [formule] ?",1|2|0|3,C,0
+#
+# SECTION: SIGNATURE
+champ,valeur
+SHA256,7a03912434ec8928335fe771a9d36f831bb476fc0e6a9dd24fd348ba99a31dac
