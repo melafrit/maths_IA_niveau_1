@@ -1,817 +1,1113 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>QCM — Jour 2 · Optimisation · Mathématiques appliquées à l'IA · IPSSI</title>
-
-  <!-- React + Babel -->
-  <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
-  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
-  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-
-  <!-- KaTeX -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css"/>
-  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"
-          onload="window._katexReady=true"></script>
-
-  <!-- Google Fonts -->
-  <link rel="preconnect" href="https://fonts.googleapis.com"/>
-  <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@400;600;700;800&display=swap" rel="stylesheet"/>
-
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    body { background: #f8fafc; font-family: 'Source Serif 4', Georgia, serif; }
-    .katex-display { overflow-x: auto; overflow-y: hidden; }
-    html { scroll-behavior: smooth; }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QCM — Jour 2 — Optimisation — Maths IA IPSSI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,700;1,400&family=JetBrains+Mono:wght@400;500;700&family=Source+Serif+4:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; padding: 0; font-family: 'Source Serif 4', Georgia, serif; }
+</style>
 </head>
 <body>
-  <div id="root"></div>
+<div id="root"></div>
 
-  <script type="text/babel">
-    const { useState, useEffect, useRef } = React;
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
-    /* ── KaTeX helper ── */
-    function M({ t, d = false }) {
-      const [ready, setReady] = useState(!!window.katex);
-      useEffect(() => {
-        if (ready) return;
-        const id = setInterval(() => { if (window.katex) { setReady(true); clearInterval(id); } }, 100);
-        return () => clearInterval(id);
-      }, []);
-      if (!ready) return <code style={{ fontFamily: "monospace", fontSize: "0.9em" }}>{t}</code>;
-      try {
-        const html = window.katex.renderToString(t, { displayMode: d, throwOnError: false });
-        return <span dangerouslySetInnerHTML={{ __html: html }} />;
-      } catch { return <span>{t}</span>; }
-    }
+<script type="text/babel">
+// © 2025 Mohamed EL AFRIT — IPSSI
+// Ce contenu est distribué sous licence Creative Commons BY-NC-SA 4.0
+// https://creativecommons.org/licenses/by-nc-sa/4.0/deed.fr
+//
+// JOUR 2 — QCM — Optimisation
+// 20 questions corrigées avec corrections détaillées et pièges à éviter
 
-    /* ── Couleurs de difficulté ── */
-    const DIFF = {
-      "🟢": { bg: "#dcfce7", tx: "#15803d", bd: "#86efac" },
-      "🟡": { bg: "#fef9c3", tx: "#854d0e", bd: "#fde047" },
-      "🟠": { bg: "#ffedd5", tx: "#9a3412", bd: "#fdba74" },
-      "🔴": { bg: "#fee2e2", tx: "#991b1b", bd: "#fca5a5" },
+const { useState, useEffect, createContext, useContext } = React;
+
+/* ============================================================================
+   SECTIONS (pour la sidebar)
+   ============================================================================ */
+const SECTIONS = [
+  { id:'intro', title:'Introduction', level:1 },
+  { id:'niveau-1', title:'🟢 Niveau 1 — Fondamental', level:1, children:[
+    { id:'q1', title:'Q1 · Formule MSE', level:2 },
+    { id:'q2', title:'Q2 · Dérivée d\'une constante', level:2 },
+    { id:'q3', title:'Q3 · Règle de (x−a)²', level:2 },
+    { id:'q4', title:'Q4 · Condition de minimum', level:2 },
+    { id:'q5', title:'Q5 · Règle de mise à jour', level:2 },
+  ]},
+  { id:'niveau-2', title:'🟡 Niveau 2 — Calcul / Compréhension', level:1, children:[
+    { id:'q6',  title:'Q6 · Calcul de MSE', level:2 },
+    { id:'q7',  title:'Q7 · Dérivée polynomiale', level:2 },
+    { id:'q8',  title:'Q8 · Valeur de J\'(0)', level:2 },
+    { id:'q9',  title:'Q9 · α trop petit', level:2 },
+    { id:'q10', title:'Q10 · α trop grand', level:2 },
+    { id:'q11', title:'Q11 · Gradient ∂J/∂w₁', level:2 },
+  ]},
+  { id:'niveau-3', title:'🟠 Niveau 3 — Application', level:1, children:[
+    { id:'q12', title:'Q12 · Itération complète', level:2 },
+    { id:'q13', title:'Q13 · Diagnostic divergence', level:2 },
+    { id:'q14', title:'Q14 · Erreur dataset salaire', level:2 },
+    { id:'q15', title:'Q15 · Lecture courbe J(iter)', level:2 },
+    { id:'q16', title:'Q16 · Gradient mini-dataset', level:2 },
+  ]},
+  { id:'niveau-4', title:'🔴 Niveau 4 — Analyse critique', level:1, children:[
+    { id:'q17', title:'Q17 · Convexité et minimum', level:2 },
+    { id:'q18', title:'Q18 · GD vs formule analytique', level:2 },
+    { id:'q19', title:'Q19 · α = 0,5 optimal', level:2 },
+    { id:'q20', title:'Q20 · Trajectoire oscillante', level:2 },
+  ]},
+  { id:'bilan', title:'Bilan final', level:1 },
+];
+
+/* ============================================================================
+   THEME — Identique à jour2.html
+   ============================================================================ */
+const THEMES = {
+  light: {
+    bg:'#ffffff', bgAlt:'#fafafa', bgCode:'#f3f4f6',
+    text:'#1a1a2e', textSecondary:'#4b5563', textMuted:'#9ca3af',
+    border:'#e5e7eb', borderLight:'#f3f4f6',
+    definitionBg:'#eff6ff', definitionBorder:'#3b82f6', definitionTitle:'#1e40af',
+    retenirBg:'#f0fdf4', retenirBorder:'#22c55e', retenirTitle:'#166534',
+    attentionBg:'#fff7ed', attentionBorder:'#f97316', attentionTitle:'#c2410c',
+    intuitionBg:'#faf5ff', intuitionBorder:'#a855f7', intuitionTitle:'#7e22ce',
+    exempleBg:'#ecfeff', exempleBorder:'#06b6d4', exempleTitle:'#0e7490',
+    codeBg:'#f8f9fa', codeBorder:'#d1d5db', codeTitle:'#1f2937',
+    sidebarBg:'#f8f9fa', sidebarText:'#374151', sidebarActive:'#3b82f6',
+    sidebarActiveBg:'#eff6ff', sidebarHover:'#f3f4f6',
+    link:'#3b82f6', accent:'#3b82f6',
+    goodBg:'#dcfce7', goodBorder:'#22c55e', goodText:'#15803d',
+    badBg:'#fee2e2', badBorder:'#ef4444', badText:'#991b1b',
+    pickBg:'#dbeafe', pickBorder:'#3b82f6',
+    pioegeBg:'#fffbeb', piegeBorder:'#fcd34d', piegeText:'#d97706',
+  },
+  dark: {
+    bg:'#0d1117', bgAlt:'#161b22', bgCode:'#1c2128',
+    text:'#c9d1d9', textSecondary:'#8b949e', textMuted:'#6e7681',
+    border:'#30363d', borderLight:'#21262d',
+    definitionBg:'#0d1f3c', definitionBorder:'#3b82f6', definitionTitle:'#93bbfc',
+    retenirBg:'#0a1f0d', retenirBorder:'#22c55e', retenirTitle:'#86efac',
+    attentionBg:'#1f1206', attentionBorder:'#f97316', attentionTitle:'#fdba74',
+    intuitionBg:'#1a0d2e', intuitionBorder:'#a855f7', intuitionTitle:'#d8b4fe',
+    exempleBg:'#0a1a1f', exempleBorder:'#06b6d4', exempleTitle:'#67e8f9',
+    codeBg:'#161b22', codeBorder:'#30363d', codeTitle:'#c9d1d9',
+    sidebarBg:'#161b22', sidebarText:'#8b949e', sidebarActive:'#58a6ff',
+    sidebarActiveBg:'#1c2541', sidebarHover:'#1c2128',
+    link:'#58a6ff', accent:'#58a6ff',
+    goodBg:'#0a1f0d', goodBorder:'#22c55e', goodText:'#86efac',
+    badBg:'#2d1b1b', badBorder:'#ef4444', badText:'#fca5a5',
+    pickBg:'#1c2541', pickBorder:'#58a6ff',
+    pioegeBg:'#2d2000', piegeBorder:'#713f12', piegeText:'#fbbf24',
+  },
+};
+
+const ThemeContext = createContext();
+function ThemeProvider({ children }) {
+  const [mode, setMode] = useState('light');
+  return <ThemeContext.Provider value={{ mode, theme:THEMES[mode], toggle:()=>setMode(m=>m==='light'?'dark':'light') }}>{children}</ThemeContext.Provider>;
+}
+function useTheme() { return useContext(ThemeContext); }
+
+/* ============================================================================
+   KATEX
+   ============================================================================ */
+function M({ t, d }) {
+  if (!window.katex) return <code style={{fontSize:'0.9em'}}>{t}</code>;
+  try {
+    const h = window.katex.renderToString(t, { throwOnError:false, displayMode:!!d });
+    return d
+      ? <div style={{margin:'20px 0',textAlign:'center',overflowX:'auto'}} dangerouslySetInnerHTML={{__html:h}} />
+      : <span dangerouslySetInnerHTML={{__html:h}} />;
+  } catch { return <code>{t}</code>; }
+}
+
+/* ============================================================================
+   SHARED COMPONENTS — Identiques à jour2.html
+   ============================================================================ */
+function ThemeToggle() {
+  const { mode, toggle } = useTheme();
+  return (
+    <button
+      onClick={toggle}
+      style={{background:'none',border:'none',cursor:'pointer',fontSize:'1.3rem',padding:'6px 10px',borderRadius:'8px'}}
+      aria-label="Basculer le thème"
+    >
+      {mode==='light'?'🌙':'☀️'}
+    </button>
+  );
+}
+
+function Box({ type, title, children }) {
+  const { theme } = useTheme();
+  const C = {
+    definition: {icon:'📐',label:'Définition',bg:'definitionBg',bd:'definitionBorder',tt:'definitionTitle'},
+    retenir:    {icon:'⚡',label:'À retenir',bg:'retenirBg',bd:'retenirBorder',tt:'retenirTitle'},
+    attention:  {icon:'⚠️',label:'Attention',bg:'attentionBg',bd:'attentionBorder',tt:'attentionTitle'},
+    intuition:  {icon:'💡',label:'Intuition',bg:'intuitionBg',bd:'intuitionBorder',tt:'intuitionTitle'},
+    exemple:    {icon:'📊',label:'Exemple',bg:'exempleBg',bd:'exempleBorder',tt:'exempleTitle'},
+    code:       {icon:'🐍',label:'Code Python',bg:'codeBg',bd:'codeBorder',tt:'codeTitle'},
+  }[type];
+  return (
+    <div style={{background:theme[C.bg],borderLeft:`4px solid ${theme[C.bd]}`,borderRadius:'6px',padding:'16px 20px',margin:'20px 0'}}>
+      <div style={{fontFamily:"'DM Sans',sans-serif",fontWeight:700,color:theme[C.tt],marginBottom:'10px',fontSize:'0.95rem'}}>
+        {C.icon} {title||C.label}
+      </div>
+      <div style={{color:theme.text,lineHeight:1.7}}>{children}</div>
+    </div>
+  );
+}
+
+function Sec({ id, title, level=1, children }) {
+  const { theme } = useTheme();
+  const s = {1:'1.7rem',2:'1.3rem',3:'1.1rem'};
+  const Tag = level===1?'h2':level===2?'h3':'h4';
+  return (
+    <section id={id} style={{scrollMarginTop:'24px'}}>
+      <Tag style={{
+        fontFamily:"'DM Sans',sans-serif",
+        fontSize:s[level],
+        color:theme.text,
+        fontWeight:700,
+        borderBottom:level===1?`2px solid ${theme.accent}`:'none',
+        paddingBottom:level===1?'8px':'0',
+        marginTop:level===1?'48px':'28px',
+        marginBottom:'16px',
+      }}>{title}</Tag>
+      {children}
+    </section>
+  );
+}
+
+function P({ children, style={} }) {
+  const { theme } = useTheme();
+  return (
+    <p style={{
+      color:theme.text,lineHeight:1.8,marginBottom:'16px',
+      fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.05rem',
+      ...style
+    }}>{children}</p>
+  );
+}
+function B({ children }) { return <strong style={{fontWeight:600}}>{children}</strong>; }
+
+/* ============================================================================
+   SIDEBAR — Identique à jour2.html
+   ============================================================================ */
+function Sidebar({ activeId }) {
+  const { theme } = useTheme();
+  const [collapsed, setCollapsed] = useState({});
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const [progress, setProgress] = useState(0);
+
+  useEffect(() => {
+    const fn = () => {
+      const h = document.documentElement;
+      setProgress(Math.min(1, Math.max(0, h.scrollTop / (h.scrollHeight - h.clientHeight))));
     };
+    window.addEventListener('scroll', fn, { passive:true });
+    return () => window.removeEventListener('scroll', fn);
+  }, []);
 
-    /* ═══════════════════════════════════════════════════════════════
-       20 QCM — Jour 2 · Optimisation
-       ═══════════════════════════════════════════════════════════════ */
-    const QS = [
+  const scrollTo = (id) => {
+    document.getElementById(id)?.scrollIntoView({ behavior:'smooth' });
+    setMobileOpen(false);
+  };
+  const tog = (id) => setCollapsed(c => ({ ...c, [id]: !c[id] }));
 
-      /* ━━━━━━━━ 🟢 NIVEAU FONDAMENTAL ━━━━━━━━ */
-
-      {
-        id: 1,
-        niv: "🟢 Niveau 1 — Fondamental",
-        theme: "Fonction de coût (MSE)",
-        enonce: "Quelle est la formule correcte de l'erreur quadratique moyenne (MSE) utilisée comme fonction de coût en régression linéaire ?",
-        opts: [
-          { l: "A", k: "J = \\sum_{i=1}^{n}(y_i - \\hat{y}_i)" },
-          { l: "B", k: "J = \\frac{1}{n}\\sum_{i=1}^{n}(y_i - \\hat{y}_i)^2" },
-          { l: "C", k: "J = \\frac{1}{n}\\sum_{i=1}^{n}|y_i - \\hat{y}_i|" },
-          { l: "D", k: "J = \\max_{i}|y_i - \\hat{y}_i|" },
-        ],
-        bonne: "B",
-        expB: "✅ Le MSE (Mean Squared Error) = moyenne des carrés des erreurs. Le carré a deux effets : il rend toujours l'erreur positive, et il pénalise davantage les grandes erreurs. Cette fonction est convexe, ce qui garantit un minimum unique.",
-        expA: { l: "A", tx: "C'est la somme des erreurs signées. Elles peuvent se compenser (+2 et -2 donnent 0). Ce n'est pas une mesure d'erreur valide." },
-        expC: { l: "C", tx: "C'est la MAE (Mean Absolute Error). Elle est valide mais moins utilisée pour l'optimisation car non dérivable en 0 (angle). Le MSE est préféré pour son caractère lisse." },
-        expD: { l: "D", tx: "C'est l'erreur maximale (L∞). Elle ne tient compte que du pire point, pas de l'ensemble. Non utilisée en régression classique." },
-        piege: "Ne pas confondre MSE (carrés), MAE (valeurs absolues) et somme brute. En ML, le MSE est le choix standard car il est convexe, dérivable partout et pénalise les gros écarts.",
-      },
-
-      {
-        id: 2,
-        niv: "🟢 Niveau 1 — Fondamental",
-        theme: "Dérivée d'une constante",
-        isK: true,
-        enonce: "\\text{Que vaut la dérivée de la fonction } f(x) = 7 \\text{ ?}",
-        opts: [
-          { l: "A", k: "f'(x) = 7" },
-          { l: "B", k: "f'(x) = x" },
-          { l: "C", k: "f'(x) = 0" },
-          { l: "D", k: "f'(x) = 1" },
-        ],
-        bonne: "C",
-        expB: "✅ La dérivée mesure le taux de variation. Une constante ne varie pas — sa courbe est une droite horizontale, de pente nulle partout. Donc f'(x) = 0, quelle que soit la valeur de la constante (7, -15, 1000...).",
-        expA: { l: "A", tx: "Erreur classique : confondre la valeur de la fonction et sa dérivée. f(x)=7 signifie que la fonction vaut 7, mais ne DIT RIEN sur sa pente." },
-        expB2: { l: "B", tx: "x est la dérivée de x²/2, pas d'une constante." },
-        expD: { l: "D", tx: "1 est la dérivée de x (la fonction identité), pas d'une constante." },
-        piege: "La constante disparaît toujours en dérivant : (f + c)' = f' + 0 = f'. C'est pour cela que dans ŷ = wx + b, la dérivée par rapport à w ne voit plus le biais b.",
-      },
-
-      {
-        id: 3,
-        niv: "🟢 Niveau 1 — Fondamental",
-        theme: "Règle de dérivation de (x-a)²",
-        isK: true,
-        enonce: "\\text{Que vaut la dérivée de } f(x) = (x - 5)^2 \\text{ ?}",
-        opts: [
-          { l: "A", k: "f'(x) = 2(x - 5)" },
-          { l: "B", k: "f'(x) = x - 5" },
-          { l: "C", k: "f'(x) = (x - 5)^2" },
-          { l: "D", k: "f'(x) = 2x - 5" },
-        ],
-        bonne: "A",
-        expB: "✅ Règle de la chaîne : (u²)' = 2u·u'. Ici u = x−5 et u' = 1, donc f'(x) = 2(x−5)·1 = 2(x−5). C'est la règle la plus utilisée en descente de gradient car la MSE contient des termes en (yᵢ − ŷᵢ)².",
-        expA: { l: "B", tx: "Oubli du facteur 2 issu de la règle (u²)' = 2u·u'. Erreur très fréquente en début d'apprentissage." },
-        expC: { l: "C", tx: "Confusion entre la fonction et sa dérivée : (x−5)² est f(x), pas f'(x)." },
-        expD: { l: "D", tx: "Mauvaise application de la règle : on ne peut pas distribuer la dérivée à l'intérieur du carré de cette façon. Il faut utiliser la règle de la chaîne." },
-        piege: "Mémo : ((x−a)²)' = 2(x−a). Ne jamais oublier le facteur 2 — il intervient systématiquement dans les gradients du MSE.",
-      },
-
-      {
-        id: 4,
-        niv: "🟢 Niveau 1 — Fondamental",
-        theme: "Condition de minimum",
-        enonce: "Pour une fonction de coût J(w) convexe (en forme de U), à quelle condition le point w* correspond-il au minimum ?",
-        opts: [
-          { l: "A", k: "J(w^*) = 0" },
-          { l: "B", k: "J'(w^*) = 1" },
-          { l: "C", k: "J'(w^*) = 0" },
-          { l: "D", k: "J(w^*) \\text{ est maximal}" },
-        ],
-        bonne: "C",
-        expB: "✅ Au fond de la vallée, la pente est horizontale : la dérivée s'annule. Pour une fonction convexe (comme la MSE), c'est même l'unique point où J'(w)=0, et c'est donc le minimum global.",
-        expA: { l: "A", tx: "Confusion entre J(w)=0 (la fonction vaut 0, c'est-à-dire erreur nulle) et J'(w)=0 (pente nulle). Le MSE peut très bien avoir un minimum > 0 si le modèle ne peut pas atteindre zéro erreur." },
-        expB2: { l: "B", tx: "Aucune valeur particulière de J' ne caractérise le minimum — sauf 0." },
-        expD: { l: "D", tx: "Le maximum correspond au sommet d'une fonction concave, pas au minimum d'une fonction convexe." },
-        piege: "Retenir : MINIMUM ⟺ PENTE NULLE ⟺ J'(w)=0. Et pour une fonction CONVEXE, ce minimum est unique et global — c'est ce qui rend la descente de gradient si puissante sur le MSE.",
-      },
-
-      {
-        id: 5,
-        niv: "🟢 Niveau 1 — Fondamental",
-        theme: "Règle de mise à jour",
-        enonce: "Quelle est la règle de mise à jour correcte de la descente de gradient ?",
-        opts: [
-          { l: "A", k: "w \\leftarrow w + \\alpha \\cdot J'(w)" },
-          { l: "B", k: "w \\leftarrow w - \\alpha \\cdot J'(w)" },
-          { l: "C", k: "w \\leftarrow \\alpha \\cdot J'(w)" },
-          { l: "D", k: "w \\leftarrow J(w) - \\alpha \\cdot w" },
-        ],
-        bonne: "B",
-        expB: "✅ Le signe MOINS est essentiel : il fait aller dans le sens OPPOSÉ de la pente, donc vers le bas. Si J'>0 (pente montante), w diminue ; si J'<0 (pente descendante), w augmente. Dans les deux cas, on se rapproche du minimum.",
-        expA: { l: "A", tx: "Avec un +, on monterait la pente au lieu de la descendre ! On s'éloignerait du minimum à chaque itération — exactement l'inverse de ce qu'on veut." },
-        expC: { l: "C", tx: "Il manque le terme w courant : la mise à jour est incrémentale (on corrige w), pas un remplacement total." },
-        expD: { l: "D", tx: "Formule incohérente : on utilise J (le coût, un scalaire) au lieu de J' (la dérivée). On ne se sert pas directement du coût pour mettre à jour, mais de sa pente." },
-        piege: "Moyen mnémotechnique : « descente » → on descend → on soustrait. Le signe MOINS est ce qui transforme l'algorithme en descente (et non en montée).",
-      },
-
-      /* ━━━━━━━━ 🟡 NIVEAU CALCUL / COMPRÉHENSION ━━━━━━━━ */
-
-      {
-        id: 6,
-        niv: "🟡 Niveau 2 — Calcul direct",
-        theme: "Calcul de MSE",
-        enonce: "Un modèle a produit les prédictions ŷ = [33, 40, 52, 44] pour les vraies valeurs y = [30, 42, 55, 38]. Quel est le MSE ?",
-        opts: [
-          { l: "A", k: "J = 14{,}5" },
-          { l: "B", k: "J = 3{,}5" },
-          { l: "C", k: "J = 58" },
-          { l: "D", k: "J = 29" },
-        ],
-        bonne: "A",
-        steps: [
-          { s: "e_1 = 30 - 33", r: "-3 \\Rightarrow e_1^2 = 9" },
-          { s: "e_2 = 42 - 40", r: "\\phantom{-}2 \\Rightarrow e_2^2 = 4" },
-          { s: "e_3 = 55 - 52", r: "\\phantom{-}3 \\Rightarrow e_3^2 = 9" },
-          { s: "e_4 = 38 - 44", r: "-6 \\Rightarrow e_4^2 = 36" },
-          { s: "J = \\frac{9+4+9+36}{4}", r: "\\frac{58}{4} = \\mathbf{14{,}5}" },
-        ],
-        expB: "✅ On calcule les erreurs yᵢ−ŷᵢ, on les élève au carré, puis on fait la moyenne. Somme des carrés = 9+4+9+36 = 58. MSE = 58/4 = 14,5. L'observation 4 (erreur −6) contribue à elle seule 36/58 ≈ 62 % du coût.",
-        expA: { l: "B", tx: "3,5 ≈ moyenne des |erreurs| (MAE = (3+2+3+6)/4 = 3,5). C'est la MAE, pas le MSE. Le carré amplifie les grandes erreurs." },
-        expC: { l: "C", tx: "58 est la SOMME des carrés. On oublie la division par n=4 pour obtenir la MOYENNE." },
-        expD: { l: "D", tx: "29 = somme/2 : mauvaise division (on a divisé par 2 au lieu de par n=4)." },
-        piege: "Toujours 4 étapes : (1) erreurs signées, (2) erreurs au carré, (3) somme, (4) division par n. Une observation avec une grosse erreur peut dominer le MSE.",
-      },
-
-      {
-        id: 7,
-        niv: "🟡 Niveau 2 — Calcul direct",
-        theme: "Dérivée polynomiale",
-        isK: true,
-        enonce: "\\text{Que vaut la dérivée de } f(x) = 3x^2 - 6x + 9 \\text{ ?}",
-        opts: [
-          { l: "A", k: "f'(x) = 6x - 6" },
-          { l: "B", k: "f'(x) = 3x - 6" },
-          { l: "C", k: "f'(x) = 6x^2 - 6" },
-          { l: "D", k: "f'(x) = 6x + 6" },
-        ],
-        bonne: "A",
-        steps: [
-          { s: "(3x^2)'", r: "6x" },
-          { s: "(-6x)'", r: "-6" },
-          { s: "(9)'", r: "\\phantom{-}0" },
-          { s: "f'(x)", r: "6x - 6" },
-        ],
-        expB: "✅ On dérive terme à terme. (ax²)' = 2ax ⟹ (3x²)' = 6x. (ax+b)' = a ⟹ (−6x)' = −6. (c)' = 0 ⟹ (9)' = 0. Total : f'(x) = 6x − 6.",
-        expA: { l: "B", tx: "Oubli du facteur 2 dans la dérivée de ax² (on obtient 2ax, pas ax)." },
-        expC: { l: "C", tx: "Erreur sur l'exposant : dériver abaisse l'exposant de 1 (x² → x), pas l'inverse. 6x² serait la dérivée de 2x³." },
-        expD: { l: "D", tx: "Erreur de signe sur le terme −6x : sa dérivée est −6, pas +6." },
-        piege: "Règles clés : (xⁿ)' = n·xⁿ⁻¹ ; la dérivée est linéaire (somme = somme des dérivées) ; la constante disparaît. Dériver ≠ primitiver.",
-      },
-
-      {
-        id: 8,
-        niv: "🟡 Niveau 2 — Calcul direct",
-        theme: "Valeur de la dérivée en un point",
-        isK: true,
-        enonce: "\\text{Soit } J(w) = (w-4)^2.\\\\[4pt]\\text{Que vaut } J'(0) \\text{, et que nous dit le signe de cette valeur ?}",
-        opts: [
-          { l: "A", k: "J'(0) = +8 \\text{, la pente est positive}" },
-          { l: "B", k: "J'(0) = -8 \\text{, la pente est négative : la fonction descend vers la droite}" },
-          { l: "C", k: "J'(0) = \\phantom{-}4 \\text{, on est proche du minimum}" },
-          { l: "D", k: "J'(0) = \\phantom{-}0 \\text{, on est au minimum}" },
-        ],
-        bonne: "B",
-        calcStr: "J'(w) = 2(w-4)\\quad\\Rightarrow\\quad J'(0) = 2(0-4) = \\mathbf{-8}",
-        expB: "✅ J'(w) = 2(w−4), donc J'(0) = 2×(0−4) = −8. Le signe négatif signifie que la pente descend : si on avance un peu vers la droite (w augmente), J diminue. La descente de gradient va donc augmenter w (w ← w − α·(−8) = w + 8α).",
-        expA: { l: "A", tx: "Erreur de signe : 2×(0−4) = 2×(−4) = −8, pas +8. Bien respecter les parenthèses." },
-        expC: { l: "C", tx: "+4 n'est pas la bonne valeur. De plus, proche du minimum, |J'| doit être FAIBLE, pas égale à 4." },
-        expD: { l: "D", tx: "Si J'(0)=0, on serait au minimum. Or le minimum de (w−4)² est en w=4, pas en w=0." },
-        piege: "Signe de la dérivée = direction à prendre pour que le coût AUGMENTE. La descente de gradient part toujours dans le sens opposé (grâce au signe moins dans la mise à jour).",
-      },
-
-      {
-        id: 9,
-        niv: "🟡 Niveau 2 — Compréhension",
-        theme: "Taux d'apprentissage trop petit",
-        enonce: "Que se passe-t-il typiquement si le taux d'apprentissage α est choisi trop petit (par exemple α = 10⁻⁶) ?",
-        opts: [
-          { l: "A", tx: "Le coût augmente à chaque itération (divergence)." },
-          { l: "B", tx: "L'algorithme oscille autour du minimum sans jamais l'atteindre." },
-          { l: "C", tx: "La convergence est très lente : il faudrait des milliers voire millions d'itérations pour approcher le minimum." },
-          { l: "D", tx: "L'algorithme ne peut pas fonctionner mathématiquement." },
-        ],
-        bonne: "C",
-        expB: "✅ Avec un α très petit, chaque pas −α·J' est minuscule. On avance bien dans la bonne direction, mais très lentement. La convergence reste garantie (pour une fonction convexe), mais pratiquement inutilisable : le coût en temps de calcul devient prohibitif.",
-        expA: { l: "A", tx: "Au contraire : un α petit garantit que le coût diminue ou reste stable à chaque itération. La divergence est causée par un α TROP GRAND, jamais trop petit." },
-        expB2: { l: "B", tx: "Les oscillations sont le symptôme d'un α trop grand (on saute par-dessus le minimum). Un α trop petit produit des pas monotones mais minuscules." },
-        expD: { l: "D", tx: "Mathématiquement, l'algorithme fonctionne parfaitement. Le problème est purement pratique (temps de calcul)." },
-        piege: "Petit α ⟹ convergence lente mais sûre. Grand α ⟹ risque d'oscillation ou de divergence. Recette standard : commencer à α = 0,01 et ajuster en observant la courbe J(iter).",
-      },
-
-      {
-        id: 10,
-        niv: "🟡 Niveau 2 — Compréhension",
-        theme: "Taux d'apprentissage trop grand",
-        enonce: "Que se passe-t-il si le taux d'apprentissage α est choisi trop grand dans une descente de gradient ?",
-        opts: [
-          { l: "A", tx: "L'algorithme converge plus rapidement vers le minimum." },
-          { l: "B", tx: "Le coût J peut osciller, augmenter, voire exploser : c'est la divergence." },
-          { l: "C", tx: "L'algorithme trouve plus facilement le minimum global au lieu d'un minimum local." },
-          { l: "D", tx: "Toutes les dérivées deviennent nulles." },
-        ],
-        bonne: "B",
-        expB: "✅ Un α trop grand fait des pas si grands qu'on saute par-dessus le minimum et on atterrit plus haut que le point de départ. À l'itération suivante, on repart d'un point où J'(w) est encore plus grand en valeur absolue, donc on s'éloigne encore plus. C'est la divergence.",
-        expA: { l: "A", tx: "Illusion trompeuse : on croit aller plus vite en faisant de grands pas, mais si les pas dépassent la largeur de la vallée, on ne descend plus." },
-        expC: { l: "C", tx: "Le choix de α ne change pas la nature du minimum trouvé (local ou global). C'est la topologie de la fonction de coût qui la détermine." },
-        expD: { l: "D", tx: "Les dérivées continuent d'être calculées normalement — c'est justement le problème : elles restent grandes et entretiennent la divergence." },
-        piege: "Diagnostic : si la courbe J(iter) monte, c'est α trop grand. Solution standard : DIVISER α par 10 et relancer. Préférer toujours un α un peu trop petit (lent) qu'un peu trop grand (divergent).",
-      },
-
-      {
-        id: 11,
-        niv: "🟡 Niveau 2 — Compréhension",
-        theme: "Dérivée partielle du MSE",
-        isK: true,
-        enonce: "\\text{Pour la régression linéaire simple } \\hat{y}_i = w_1 x_i + w_0,\\\\[4pt]\\text{que vaut la dérivée partielle } \\frac{\\partial J}{\\partial w_1} \\text{ du MSE ?}",
-        opts: [
-          { l: "A", k: "\\frac{\\partial J}{\\partial w_1} = \\frac{2}{n}\\sum_{i=1}^{n} x_i" },
-          { l: "B", k: "\\frac{\\partial J}{\\partial w_1} = \\frac{-2}{n}\\sum_{i=1}^{n}(y_i - \\hat{y}_i)" },
-          { l: "C", k: "\\frac{\\partial J}{\\partial w_1} = \\frac{-2}{n}\\sum_{i=1}^{n} x_i\\cdot(y_i - \\hat{y}_i)" },
-          { l: "D", k: "\\frac{\\partial J}{\\partial w_1} = \\frac{1}{n}\\sum_{i=1}^{n} x_i^2" },
-        ],
-        bonne: "C",
-        expB: "✅ On dérive J = (1/n)·Σ(yᵢ−w₁xᵢ−w₀)² par rapport à w₁. Règle de la chaîne : (u²)'=2u·u'. Ici u=yᵢ−w₁xᵢ−w₀ et u'=−xᵢ. D'où ∂J/∂w₁ = (1/n)·Σ 2u·(−xᵢ) = (−2/n)·Σ xᵢ·(yᵢ−ŷᵢ).",
-        expA: { l: "A", tx: "Pas de facteur (yᵢ−ŷᵢ) dans l'expression — et mauvais signe. Cette formule n'a aucun sens physique (elle ne dépend pas de l'erreur)." },
-        expB2: { l: "B", tx: "C'est ∂J/∂w₀ (dérivée par rapport au BIAIS), pas ∂J/∂w₁. Ici manque le facteur xᵢ qui vient de la règle de la chaîne (car ∂ŷᵢ/∂w₁ = xᵢ)." },
-        expD: { l: "D", tx: "Cette formule ne dépend pas des erreurs yᵢ−ŷᵢ, donc ne peut pas indiquer comment corriger w₁." },
-        piege: "Deux formules à ne pas confondre : ∂J/∂w₁ = (−2/n)·Σxᵢ·eᵢ (pente) et ∂J/∂w₀ = (−2/n)·Σeᵢ (biais). La différence : la pente inclut xᵢ en facteur, le biais non.",
-      },
-
-      /* ━━━━━━━━ 🟠 NIVEAU APPLICATION ━━━━━━━━ */
-
-      {
-        id: 12,
-        niv: "🟠 Niveau 3 — Application",
-        theme: "Une itération complète",
-        isK: true,
-        enonce: "\\text{On minimise } J(w) = (w - 3)^2 \\text{ avec } w_0 = 0 \\text{ et } \\alpha = 0{,}1.\\\\[4pt]\\text{Quelle est la valeur de } w_1 \\text{ après une itération ?}",
-        opts: [
-          { l: "A", k: "w_1 = 0{,}6" },
-          { l: "B", k: "w_1 = -0{,}6" },
-          { l: "C", k: "w_1 = 0{,}3" },
-          { l: "D", k: "w_1 = 6" },
-        ],
-        bonne: "A",
-        steps: [
-          { s: "J'(w) = 2(w-3)", r: "\\text{(règle }(u^2)' = 2u\\cdot u')" },
-          { s: "J'(w_0) = J'(0) = 2(0-3)", r: "-6" },
-          { s: "w_1 = w_0 - \\alpha\\cdot J'(w_0)", r: "0 - 0{,}1\\times(-6)" },
-          { s: "w_1", r: "0 + 0{,}6 = \\mathbf{0{,}6}" },
-        ],
-        expB: "✅ On applique la formule w ← w − α·J'(w). La dérivée en w=0 est négative (−6), donc le signe moins dans la mise à jour fait AUGMENTER w. On passe de 0 à 0,6 — on s'est rapproché du minimum w*=3. Le coût passe de J(0)=9 à J(0,6)=5,76.",
-        expA: { l: "B", tx: "Erreur de signe : 0 − 0,1×(−6) = 0 + 0,6 = +0,6 (pas −0,6). Double négation." },
-        expC: { l: "C", tx: "0,3 correspondrait à α = 0,05. Avec α = 0,1, le résultat est 0,6." },
-        expD: { l: "D", tx: "6 correspondrait à α = 1 (sans α ou avec α = 1). Mais ici α = 0,1, le pas est 10 fois plus petit." },
-        piege: "Rigueur sur les signes : J'(0) = 2×(0−3) = −6 (négatif). Le produit −α·J' = −0,1×(−6) = +0,6 (positif). Toujours poser le calcul étape par étape.",
-      },
-
-      {
-        id: 13,
-        niv: "🟠 Niveau 3 — Diagnostic",
-        theme: "Coût qui augmente",
-        enonce: "Vous lancez une descente de gradient et observez les coûts suivants : J(iter 0) = 25, J(iter 1) = 49, J(iter 2) = 100, J(iter 3) = 400. Quel est le problème le plus probable ?",
-        opts: [
-          { l: "A", tx: "Le gradient est mal calculé (signe inversé)." },
-          { l: "B", tx: "Le taux d'apprentissage α est trop grand : il y a divergence." },
-          { l: "C", tx: "La fonction de coût est mal choisie (pas convexe)." },
-          { l: "D", tx: "L'algorithme fonctionne correctement, il faut juste plus d'itérations." },
-        ],
-        bonne: "B",
-        expB: "✅ Le coût CROIT de manière monotone et accélérée (×2, puis ×2, puis ×4) : c'est exactement le comportement de divergence causé par un α trop grand. On saute par-dessus le minimum à chaque pas, et on atterrit à chaque fois plus loin. Solution immédiate : diviser α par 10.",
-        expA: { l: "A", tx: "Un signe inversé (+α au lieu de −α) donnerait effectivement une divergence similaire. Mais c'est une erreur rare (faute de programmation) alors qu'un α mal réglé est le problème #1 en pratique — c'est la cause la plus probable." },
-        expC: { l: "C", tx: "Une fonction non convexe peut causer des minima locaux, mais pas une divergence explosive comme celle-ci. De plus, le MSE en régression linéaire est toujours convexe." },
-        expD: { l: "D", tx: "Erreur dangereuse : le coût EXPLOSE, il ne va pas se stabiliser. Plus on itère, plus on s'éloigne. Il faut INTERVENIR." },
-        piege: "Règle d'or : la courbe J(iter) doit toujours décroître. Si elle monte : STOP, diminuer α. Si elle oscille : diminuer α. Si elle descend trop lentement : augmenter α.",
-      },
-
-      {
-        id: 14,
-        niv: "🟠 Niveau 3 — Dataset salaire",
-        theme: "Calcul d'erreur de prédiction",
-        isK: true,
-        enonce: "\\text{Un développeur du dataset a }x = 3\\text{ ans d'expérience et un salaire réel } y = 35\\text{ k€.}\\\\[4pt]\\text{Avec la droite } \\hat{y} = 2{,}07x + 31{,}27,\\text{ quelle est l'erreur de prédiction } e = y - \\hat{y}\\text{ ?}",
-        opts: [
-          { l: "A", k: "e = +2{,}48\\text{ k€}" },
-          { l: "B", k: "e = -2{,}48\\text{ k€}" },
-          { l: "C", k: "e = +37{,}48\\text{ k€}" },
-          { l: "D", k: "e = 0\\text{ k€ (la prédiction est parfaite)}" },
-        ],
-        bonne: "B",
-        steps: [
-          { s: "\\hat{y} = 2{,}07\\times 3 + 31{,}27", r: "6{,}21 + 31{,}27 = 37{,}48" },
-          { s: "e = y - \\hat{y}", r: "35 - 37{,}48" },
-          { s: "e", r: "\\mathbf{-2{,}48}\\text{ k€}" },
-        ],
-        expB: "✅ ŷ = 2,07×3 + 31,27 = 37,48 k€. Erreur signée = y − ŷ = 35 − 37,48 = −2,48 k€. Le signe négatif signifie que le modèle SURESTIME le salaire de ce développeur (il prédit plus que la réalité). Cette erreur contribuera (−2,48)² = 6,15 au numérateur du MSE.",
-        expA: { l: "A", tx: "Signe inversé. Convention universelle : e = y − ŷ (réel moins prédit). Ici le réel (35) est inférieur au prédit (37,48), donc e est négatif." },
-        expC: { l: "C", tx: "37,48 k€ est la valeur de ŷ (la prédiction), pas l'erreur. Ne pas confondre prédiction et écart." },
-        expD: { l: "D", tx: "Une prédiction parfaite donnerait ŷ exactement égal à y=35. Ici ŷ=37,48 ≠ 35, donc il y a bien une erreur non nulle." },
-        piege: "Fixer une convention : e = y − ŷ. Avec cette convention, e > 0 signifie modèle sous-estime, e < 0 signifie modèle surestime. Dans la formule du gradient ∂J/∂w₁ = (−2/n)·Σxᵢ·eᵢ, le signe de l'erreur est crucial.",
-      },
-
-      {
-        id: 15,
-        niv: "🟠 Niveau 3 — Interprétation",
-        theme: "Lecture d'une courbe de convergence",
-        enonce: "Vous tracez la courbe J(iter) et observez qu'elle descend TRÈS lentement mais de manière parfaitement stable et monotone. Quelle action concrète prendre ?",
-        opts: [
-          { l: "A", tx: "Diminuer α (par exemple α ← α / 10)." },
-          { l: "B", tx: "Augmenter α (par exemple α ← α × 3 ou α × 10)." },
-          { l: "C", tx: "Changer de fonction de coût (remplacer MSE par MAE)." },
-          { l: "D", tx: "Remettre w à zéro et relancer à l'identique." },
-        ],
-        bonne: "B",
-        expB: "✅ Stable + lent = α trop petit. La stabilité montre qu'on n'est pas en divergence, donc on peut se permettre des pas plus grands pour accélérer. Règle pratique : multiplier α par 3 ou 10, et vérifier que la stabilité est conservée. Répéter jusqu'à trouver le sweet spot.",
-        expA: { l: "A", tx: "Diminuer α aggraverait la lenteur. On ne diminue α QUE si on observe des oscillations ou une divergence." },
-        expC: { l: "C", tx: "Changer la fonction de coût est un choix méthodologique fort, pas une solution à un problème de lenteur. La lenteur est un problème d'hyperparamètre, pas de fonction de coût." },
-        expD: { l: "D", tx: "Relancer à l'identique donnerait le même résultat (l'algorithme est déterministe avec les mêmes paramètres initiaux)." },
-        piege: "Diagnostic à mémoriser : lent + stable ⟹ augmenter α ; rapide + oscillation/explosion ⟹ diminuer α. Les optimiseurs modernes (Adam, RMSProp) automatisent ce réglage.",
-      },
-
-      {
-        id: 16,
-        niv: "🟠 Niveau 3 — Calcul complet",
-        theme: "Gradient sur un mini-dataset",
-        isK: true,
-        enonce: "\\text{Soient 2 observations : } (x_1=1, y_1=3)\\text{ et } (x_2=2, y_2=5).\\\\[4pt]\\text{Avec } \\hat{y} = wx \\text{ (biais fixé à 0) et } w = 1,\\text{ que vaut } \\frac{\\partial J}{\\partial w} \\text{ ?}",
-        opts: [
-          { l: "A", k: "\\frac{\\partial J}{\\partial w} = -8" },
-          { l: "B", k: "\\frac{\\partial J}{\\partial w} = +8" },
-          { l: "C", k: "\\frac{\\partial J}{\\partial w} = -4" },
-          { l: "D", k: "\\frac{\\partial J}{\\partial w} = -16" },
-        ],
-        bonne: "A",
-        steps: [
-          { s: "\\hat{y}_1 = 1\\cdot 1 = 1,\\ e_1 = 3-1", r: "2" },
-          { s: "\\hat{y}_2 = 1\\cdot 2 = 2,\\ e_2 = 5-2", r: "3" },
-          { s: "\\sum x_i e_i = 1\\cdot 2 + 2\\cdot 3", r: "8" },
-          { s: "\\frac{\\partial J}{\\partial w} = \\frac{-2}{n}\\sum x_i e_i = \\frac{-2}{2}\\cdot 8", r: "\\mathbf{-8}" },
-        ],
-        expB: "✅ Formule : ∂J/∂w = (−2/n)·Σxᵢ·eᵢ. Étape 1 : calculer les prédictions (1 et 2). Étape 2 : les erreurs (2 et 3). Étape 3 : Σxᵢ·eᵢ = 1×2 + 2×3 = 8. Étape 4 : (−2/2)×8 = −8. Le signe négatif dit : augmenter w pour diminuer J (cohérent car w=1 sous-estime).",
-        expA: { l: "B", tx: "Signe oublié. Le −2/n de la formule donne un signe négatif (puisque Σxᵢ·eᵢ = 8 est positif ici)." },
-        expC: { l: "C", tx: "−4 = −8/2 : mauvaise division supplémentaire, ou oubli d'une observation." },
-        expD: { l: "D", tx: "−16 = −8×2 : peut-être un oubli de division par n=2 (on a calculé −2·Σ sans diviser par n)." },
-        piege: "Chaque gradient nécessite 4 étapes : (1) prédire ŷᵢ, (2) calculer eᵢ = yᵢ−ŷᵢ, (3) sommer xᵢ·eᵢ, (4) multiplier par −2/n. Chaque étape est une source d'erreur — ralentissez et vérifiez !",
-      },
-
-      /* ━━━━━━━━ 🔴 NIVEAU ANALYSE CRITIQUE ━━━━━━━━ */
-
-      {
-        id: 17,
-        niv: "🔴 Niveau 4 — Analyse critique",
-        theme: "Convexité et minimum global",
-        enonce: "Que peut-on affirmer concernant la descente de gradient appliquée au MSE d'une régression linéaire ?",
-        opts: [
-          { l: "A", tx: "Elle peut rester bloquée dans un minimum local si l'initialisation est mauvaise." },
-          { l: "B", tx: "Avec un α bien choisi, elle converge toujours vers le minimum global (unique), indépendamment du point de départ." },
-          { l: "C", tx: "Elle nécessite obligatoirement un autre algorithme (comme Newton) pour trouver le minimum." },
-          { l: "D", tx: "Elle ne converge jamais en pratique — on ne fait qu'approcher le vrai minimum." },
-        ],
-        bonne: "B",
-        expB: "✅ Le MSE d'une régression linéaire est STRICTEMENT CONVEXE : il n'a qu'un seul minimum, qui est global. Avec un α suffisamment petit, la descente de gradient converge toujours vers ce minimum, quel que soit le point de départ. C'est une propriété essentielle. En DEEP LEARNING, en revanche, les fonctions de coût sont non convexes — l'initialisation devient alors cruciale.",
-        expA: { l: "A", tx: "Pas de minimum local sur une fonction convexe ! C'est justement ce qui fait la puissance du MSE : on est sûr que ce qu'on trouve est le meilleur." },
-        expC: { l: "C", tx: "La descente de gradient suffit amplement. Newton converge effectivement plus vite mais demande la dérivée seconde (matrice hessienne), coûteuse à calculer sur de grands modèles." },
-        expD: { l: "D", tx: "Elle approche le minimum asymptotiquement : à chaque itération, on s'en rapproche. En pratique, on arrête quand |J'(w)| < ε, une tolérance choisie." },
-        piege: "Convexité du MSE = minimum unique garanti. Cette garantie DISPARAÎT dès qu'on passe aux réseaux de neurones profonds. C'est pourquoi l'initialisation (Xavier, He) devient importante en deep learning.",
-      },
-
-      {
-        id: 18,
-        niv: "🔴 Niveau 4 — Analyse critique",
-        theme: "GD vs formule analytique",
-        enonce: "Pour la régression linéaire, il existe une formule analytique (moindres carrés) qui donne directement la solution optimale. Pourquoi utilise-t-on quand même la descente de gradient en pratique ?",
-        opts: [
-          { l: "A", tx: "La descente de gradient est toujours plus rapide que la formule analytique." },
-          { l: "B", tx: "La descente de gradient évite de calculer des dérivées, alors que la formule analytique en nécessite." },
-          { l: "C", tx: "La descente de gradient se généralise à tous types de modèles (réseaux de neurones, SVM...) pour lesquels il n'existe PAS de formule analytique." },
-          { l: "D", tx: "La descente de gradient donne des solutions plus précises que la formule analytique." },
-        ],
-        bonne: "C",
-        expB: "✅ La formule analytique (X^T X)^(-1) X^T y est exacte ET rapide POUR la régression linéaire. Mais elle n'existe plus dès qu'on a un modèle non linéaire : logistic regression, SVM, réseaux de neurones... La descente de gradient est une méthode UNIVERSELLE : elle fonctionne dès qu'on sait calculer les dérivées. C'est pour cela qu'on l'enseigne comme fondement du deep learning.",
-        expA: { l: "A", tx: "Faux : pour la régression linéaire, la formule analytique est souvent PLUS rapide (calcul direct en O(p³)). La descente de gradient itérative peut être plus lente." },
-        expB2: { l: "B", tx: "Au contraire : la descente de gradient REPOSE sur le calcul de dérivées à chaque itération ! La formule analytique, elle, ne nécessite plus de dérivée (elle l'a déjà résolue symboliquement)." },
-        expD: { l: "D", tx: "La formule analytique est EXACTE (à la précision machine près). La descente de gradient est itérative et donc s'approche de la solution — elle est donc légèrement moins précise." },
-        piege: "La valeur pédagogique de la descente de gradient ≠ ses performances sur la régression linéaire. On l'enseigne parce qu'elle est UNIVERSELLE. Pour la régression linéaire en production, scikit-learn utilise la formule analytique.",
-      },
-
-      {
-        id: 19,
-        niv: "🔴 Niveau 4 — Analyse critique",
-        theme: "Taux d'apprentissage optimal",
-        isK: true,
-        enonce: "\\text{Pour } J(w) = (w - a)^2,\\text{ on peut montrer que la descente de gradient converge si et seulement si }\\\\[4pt]0 < \\alpha < 1.\\text{ Que se passe-t-il SI on choisit exactement } \\alpha = 0{,}5 \\text{ ?}",
-        opts: [
-          { l: "A", tx: "Le coût décroît lentement puis se stabilise en de nombreuses itérations." },
-          { l: "B", tx: "Convergence en UNE SEULE itération, quelle que soit la valeur initiale w₀." },
-          { l: "C", tx: "Le coût oscille indéfiniment autour du minimum sans jamais l'atteindre." },
-          { l: "D", tx: "Le coût diverge et tend vers l'infini." },
-        ],
-        bonne: "B",
-        steps: [
-          { s: "J'(w) = 2(w-a)", r: "" },
-          { s: "w_{n+1} = w_n - \\alpha\\cdot 2(w_n - a)", r: "" },
-          { s: "\\text{Avec } \\alpha = 0{,}5 : w_{n+1} = w_n - (w_n - a)", r: "a" },
-          { s: "\\text{donc } w_1 = a \\text{ quel que soit } w_0", r: "\\mathbf{\\text{convergence en 1 itération}}" },
-        ],
-        expB: "✅ Avec α = 0,5, la mise à jour devient w ← w − 2·0,5·(w − a) = w − (w − a) = a. On atteint le minimum en UN SEUL pas, quelle que soit l'initialisation ! C'est la valeur OPTIMALE pour cette fonction spécifique — elle correspond à une étape de la méthode de Newton. En pratique, la fonction de coût est inconnue analytiquement, donc on ne peut pas calculer cet α optimal.",
-        expA: { l: "A", tx: "Lent et stable décrit un α petit (ex : 0,01). Avec α = 0,5, la convergence est TRÈS rapide (immédiate)." },
-        expC: { l: "C", tx: "Oscillation indéfinie demanderait |1 − 2α| ≥ 1, soit α ≥ 1 ou α ≤ 0. Avec α = 0,5, la récurrence est exacte." },
-        expD: { l: "D", tx: "Divergence exige α > 1 (pour cette fonction précise). 0,5 est largement à l'intérieur de la plage de convergence." },
-        piege: "Pour J(w) = (w−a)², α = 0,5 est optimal (Newton exact). Pour des fonctions plus complexes, on ne peut pas calculer cet α optimal analytiquement — d'où l'importance du réglage empirique.",
-      },
-
-      {
-        id: 20,
-        niv: "🔴 Niveau 4 — Analyse critique",
-        theme: "Trajectoire oscillante convergente",
-        isK: true,
-        enonce: "\\text{On minimise } J(w) = (w-3)^2 \\text{ et on observe la trajectoire :}\\\\[4pt]w_0 = 0,\\ w_1 = 5{,}4,\\ w_2 = 1{,}08,\\ w_3 = 4{,}54,\\ w_4 = 1{,}77,\\ w_5 = 3{,}79\\ldots\\\\[4pt]\\text{Quelle interprétation est la plus juste ?}",
-        opts: [
-          { l: "A", tx: "L'algorithme diverge : les valeurs oscillent et s'éloignent du minimum." },
-          { l: "B", tx: "α est grand (proche du seuil critique), mais l'algorithme converge en oscillant autour du minimum w* = 3." },
-          { l: "C", tx: "α est trop petit : la convergence est trop lente, il faudrait augmenter α." },
-          { l: "D", tx: "La fonction n'est pas convexe — l'algorithme ne peut pas converger." },
-        ],
-        bonne: "B",
-        steps: [
-          { s: "|w_0 - 3| = 3", r: "" },
-          { s: "|w_1 - 3| = 2{,}4", r: "\\text{(oscille mais se rapproche)}" },
-          { s: "|w_2 - 3| = 1{,}92", r: "" },
-          { s: "|w_3 - 3| = 1{,}54", r: "" },
-          { s: "|w_4 - 3| = 1{,}23", r: "" },
-          { s: "|w_5 - 3| = 0{,}79", r: "\\mathbf{\\text{convergence confirmée}}" },
-        ],
-        expB: "✅ Les valeurs ALTERNENT autour de w*=3 (sous, au-dessus, sous, au-dessus...) mais la distance |wₙ − 3| diminue à chaque itération : 3 → 2,4 → 1,92 → 1,54 → 1,23 → 0,79. C'est une convergence OSCILLANTE, typique d'un α grand mais encore dans la zone de convergence (ici α ≈ 0,9). Pour (w−a)², la convergence est garantie tant que α < 1.",
-        expA: { l: "A", tx: "Divergence ⟹ |wₙ − 3| CROÎT. Ici elle décroît : 3 → 2,4 → 1,92 → ... C'est au contraire une convergence (oscillante)." },
-        expC: { l: "C", tx: "α petit ⟹ trajectoire MONOTONE (w₀ < w₁ < w₂ < ... < w*). Ici les valeurs oscillent, c'est le signe d'un α GRAND." },
-        expD: { l: "D", tx: "(w−3)² est strictement convexe (parabole en U). La convergence (ou non) dépend du choix de α, pas de la convexité." },
-        piege: "Distinguer 3 régimes selon α : (1) petit : convergence monotone lente ; (2) moyen : convergence monotone rapide ; (3) grand mais < seuil critique : convergence oscillante ; (4) > seuil critique : divergence. Les régimes (2) et (3) convergent tous les deux, mais avec des « allures » très différentes.",
-      },
-    ];
-
-    /* ═══════════════════════════════════════════════════════════════
-       Composant principal
-       ═══════════════════════════════════════════════════════════════ */
-    function QCMJour2() {
-      const [answers, setAnswers] = useState({});
-      const [revealed, setRevealed] = useState({});
-      const [dark, setDark] = useState(false);
-      const [filter, setFilter] = useState("all");
-
-      const D = dark;
-      const BG     = D ? "#0d1117" : "#f8fafc";
-      const CARD   = D ? "#161b22" : "#ffffff";
-      const TEXT   = D ? "#c9d1d9" : "#1a1a2e";
-      const BORDER = D ? "#30363d" : "#e5e7eb";
-      const SUBTLE = D ? "#21262d" : "#f9fafb";
-      const ACC    = "#22c55e";  // vert pour Jour 2 (optimisation)
-      const ACC_HEAD = D ? "#161b22" : "#14532d";
-
-      const visibleQS = filter === "all"
-        ? QS
-        : QS.filter(q => q.niv.startsWith(filter));
-
-      const score = Object.entries(answers).filter(
-        ([id, a]) => QS.find(q => q.id === +id)?.bonne === a
-      ).length;
-
-      const scoreByLevel = (emoji) => {
-        const levelQs = QS.filter(q => q.niv.startsWith(emoji));
-        const good = levelQs.filter(q => answers[q.id] === q.bonne).length;
-        return { good, total: levelQs.length };
-      };
-
-      const resetAll = () => {
-        if (window.confirm("Réinitialiser toutes les réponses et corrections ?")) {
-          setAnswers({});
-          setRevealed({});
-        }
-      };
-
-      return (
-        <div style={{ minHeight: "100vh", background: BG, color: TEXT, fontFamily: "'Source Serif 4', Georgia, serif", transition: "all 0.3s" }}>
-
-          {/* ── HEADER ── */}
-          <div style={{ background: ACC_HEAD, color: "#fff", padding: "28px 24px 24px", position: "relative" }}>
-            <div style={{ position: "absolute", top: 16, right: 20, display: "flex", gap: 8 }}>
-              <a href="../jour2.html" style={{ background: "rgba(255,255,255,0.15)", border: "none", borderRadius: 20, padding: "6px 14px", color: "#fff", cursor: "pointer", fontFamily: "'DM Sans', sans-serif", fontSize: "0.82rem", textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 4 }}>📘 Cours</a>
-              <button
-                onClick={() => setDark(!D)}
-                style={{ background: "rgba(255,255,255,0.15)", border: "none", borderRadius: 20, padding: "6px 14px", color: "#fff", cursor: "pointer", fontFamily: "'DM Sans', sans-serif", fontSize: "0.82rem" }}
+  const nav = (
+    <div style={{display:'flex',flexDirection:'column',height:'100%',position:'relative'}}>
+      <div style={{position:'absolute',left:0,top:0,width:'3px',height:'100%',background:theme.borderLight,zIndex:1}}>
+        <div style={{width:'100%',height:`${progress*100}%`,background:theme.accent,transition:'height 0.1s'}} />
+      </div>
+      <div style={{padding:'20px 20px 14px',borderBottom:`1px solid ${theme.border}`}}>
+        <a href="index.html" style={{display:'inline-flex',alignItems:'center',gap:'4px',fontFamily:"'DM Sans',sans-serif",fontSize:'0.75rem',color:theme.textMuted,textDecoration:'none',marginBottom:'8px'}}>← Accueil</a>
+        <div style={{fontFamily:"'DM Sans',sans-serif",fontWeight:700,fontSize:'1rem',color:theme.accent}}>Maths IA — IPSSI</div>
+        <div style={{fontFamily:"'DM Sans',sans-serif",fontSize:'0.78rem',color:theme.textMuted,marginTop:'2px'}}>Jour 2 — QCM Optimisation</div>
+        <div style={{display:'flex',gap:'4px',marginTop:'10px'}}>
+          {[1,2,3,4].map(j => (
+            j === 2
+              ? <div key={j} style={{flex:1,textAlign:'center',padding:'3px 0',borderRadius:'4px',fontFamily:"'DM Sans',sans-serif",fontSize:'0.72rem',fontWeight:700,background:theme.accent,color:'#fff',border:`1px solid ${theme.accent}`}}>J{j}</div>
+              : <a key={j} href={`../jour${j}.html`} style={{flex:1,textAlign:'center',padding:'3px 0',borderRadius:'4px',fontFamily:"'DM Sans',sans-serif",fontSize:'0.72rem',fontWeight:400,background:'transparent',color:theme.textMuted,textDecoration:'none',cursor:'pointer',border:`1px solid ${theme.border}`}}>J{j}</a>
+          ))}
+        </div>
+        <a href="../jour2.html" style={{display:'inline-block',marginTop:'10px',fontFamily:"'DM Sans',sans-serif",fontSize:'0.72rem',color:theme.link,textDecoration:'none',padding:'4px 8px',border:`1px solid ${theme.border}`,borderRadius:'4px'}}>📘 Retour au cours</a>
+      </div>
+      <nav style={{flex:1,overflowY:'auto',padding:'8px 0'}}>
+        {SECTIONS.map(sec => {
+          const isOpen = !collapsed[sec.id];
+          const isActive = activeId === sec.id || sec.children?.some(c => c.id === activeId);
+          return (
+            <div key={sec.id}>
+              <div
+                onClick={() => { scrollTo(sec.id); if (sec.children) tog(sec.id); }}
+                style={{
+                  display:'flex',alignItems:'center',gap:'6px',
+                  padding:'7px 14px 7px 18px',cursor:'pointer',
+                  background:isActive?theme.sidebarActiveBg:'transparent',
+                  borderRight:isActive?`3px solid ${theme.sidebarActive}`:'3px solid transparent',
+                  fontFamily:"'DM Sans',sans-serif",fontSize:'0.8rem',
+                  fontWeight:isActive?600:400,
+                  color:isActive?theme.sidebarActive:theme.sidebarText,
+                  transition:'all 0.15s',
+                }}
               >
-                {D ? "☀️ Mode clair" : "🌙 Mode sombre"}
-              </button>
-            </div>
-            <p style={{ margin: "0 0 4px", fontSize: "0.75rem", opacity: 0.6, fontFamily: "'DM Sans', sans-serif" }}>
-              IPSSI — Bachelor 2 Informatique · Mathématiques appliquées à l'IA
-            </p>
-            <h1 style={{ margin: "0 0 4px", fontSize: "1.6rem", fontFamily: "'DM Sans', sans-serif", fontWeight: 800 }}>
-              QCM — Jour 2
-            </h1>
-            <p style={{ margin: 0, opacity: 0.8, fontSize: "0.92rem", fontFamily: "'DM Sans', sans-serif" }}>
-              Optimisation · 20 questions · Difficulté progressive
-            </p>
-            <div style={{ marginTop: 14, display: "flex", gap: 10, flexWrap: "wrap" }}>
-              <span style={{ background: "rgba(255,255,255,0.12)", padding: "3px 11px", borderRadius: 20, fontSize: "0.72rem", fontFamily: "'DM Sans', sans-serif" }}>🟢 Fondamental · 5 Q</span>
-              <span style={{ background: "rgba(255,255,255,0.12)", padding: "3px 11px", borderRadius: 20, fontSize: "0.72rem", fontFamily: "'DM Sans', sans-serif" }}>🟡 Calcul / Compréhension · 6 Q</span>
-              <span style={{ background: "rgba(255,255,255,0.12)", padding: "3px 11px", borderRadius: 20, fontSize: "0.72rem", fontFamily: "'DM Sans', sans-serif" }}>🟠 Application · 5 Q</span>
-              <span style={{ background: "rgba(255,255,255,0.12)", padding: "3px 11px", borderRadius: 20, fontSize: "0.72rem", fontFamily: "'DM Sans', sans-serif" }}>🔴 Analyse critique · 4 Q</span>
-            </div>
-          </div>
-
-          {/* ── BARRE STICKY : SCORE + FILTRE ── */}
-          <div style={{ position: "sticky", top: 0, zIndex: 10, background: D ? "#1c2128" : "#eff6ff", borderBottom: `1px solid ${BORDER}`, padding: "10px 20px", fontFamily: "'DM Sans', sans-serif" }}>
-            <div style={{ maxWidth: 900, margin: "0 auto", display: "flex", alignItems: "center", gap: 14, flexWrap: "wrap" }}>
-              <span style={{ color: ACC, fontWeight: 700, fontSize: "0.88rem", whiteSpace: "nowrap" }}>
-                Score : {score} / {QS.length}
-              </span>
-              <div style={{ flex: "1 1 200px", height: 7, background: BORDER, borderRadius: 4, minWidth: 140 }}>
-                <div style={{ width: `${(score / QS.length) * 100}%`, height: "100%", background: score === QS.length ? "#16a34a" : ACC, borderRadius: 4, transition: "width 0.4s" }} />
+                {sec.children && (
+                  <span style={{fontSize:'0.55rem',transition:'transform 0.2s',transform:isOpen?'rotate(90deg)':'rotate(0)',display:'inline-block'}}>▶</span>
+                )}
+                <span style={{flex:1}}>{sec.title}</span>
               </div>
-              <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-                {[
-                  { val: "all", label: "Toutes" },
-                  { val: "🟢", label: "🟢" },
-                  { val: "🟡", label: "🟡" },
-                  { val: "🟠", label: "🟠" },
-                  { val: "🔴", label: "🔴" },
-                ].map(b => (
-                  <button
-                    key={b.val}
-                    onClick={() => setFilter(b.val)}
+              {sec.children && isOpen && sec.children.map(ch => {
+                const ca = activeId === ch.id;
+                return (
+                  <div
+                    key={ch.id}
+                    onClick={() => scrollTo(ch.id)}
                     style={{
-                      background: filter === b.val ? ACC : "transparent",
-                      color: filter === b.val ? "#fff" : (D ? "#c9d1d9" : "#1a1a2e"),
-                      border: `1px solid ${filter === b.val ? ACC : BORDER}`,
-                      borderRadius: 6, padding: "4px 10px", cursor: "pointer",
-                      fontFamily: "'DM Sans', sans-serif", fontSize: "0.78rem", fontWeight: 600,
+                      padding:'4px 14px 4px 42px',cursor:'pointer',
+                      fontFamily:"'DM Sans',sans-serif",fontSize:'0.76rem',
+                      color:ca?theme.sidebarActive:theme.textMuted,
+                      fontWeight:ca?600:400,
                     }}
                   >
-                    {b.label}
-                  </button>
-                ))}
-                {Object.keys(answers).length > 0 && (
-                  <button
-                    onClick={resetAll}
-                    style={{ background: "transparent", color: D ? "#8b949e" : "#6b7280", border: `1px solid ${BORDER}`, borderRadius: 6, padding: "4px 10px", cursor: "pointer", fontFamily: "'DM Sans', sans-serif", fontSize: "0.78rem" }}
-                  >
-                    🔄 Reset
-                  </button>
-                )}
+                    {ch.title}
+                  </div>
+                );
+              })}
+            </div>
+          );
+        })}
+      </nav>
+      <div style={{padding:'14px',borderTop:`1px solid ${theme.border}`,fontSize:'0.68rem',color:theme.textMuted,fontFamily:"'DM Sans',sans-serif",textAlign:'center',lineHeight:1.6}}>
+        © 2025 Mohamed EL AFRIT<br/>
+        <a href="https://www.mohamedelafrit.com" style={{color:theme.link,textDecoration:'none'}}>www.mohamedelafrit.com</a><br/>
+        <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.fr" style={{color:theme.link,textDecoration:'none'}}>CC BY-NC-SA 4.0</a>
+      </div>
+    </div>
+  );
+
+  return (
+    <>
+      <button
+        onClick={() => setMobileOpen(!mobileOpen)}
+        className="mob-btn"
+        style={{display:'none',position:'fixed',top:10,left:10,zIndex:1001,background:theme.bgAlt,border:`1px solid ${theme.border}`,borderRadius:'8px',padding:'8px 10px',cursor:'pointer',fontSize:'1.2rem'}}
+      >
+        {mobileOpen ? '✕' : '☰'}
+      </button>
+      <aside
+        className="sidebar-el"
+        style={{position:'fixed',left:0,top:0,width:'280px',height:'100vh',background:theme.sidebarBg,borderRight:`1px solid ${theme.border}`,zIndex:1000,overflowY:'hidden',transition:'transform 0.3s'}}
+      >
+        {nav}
+      </aside>
+      {mobileOpen && (
+        <div
+          onClick={() => setMobileOpen(false)}
+          style={{position:'fixed',inset:0,background:'rgba(0,0,0,0.4)',zIndex:999}}
+        />
+      )}
+    </>
+  );
+}
+
+/* ============================================================================
+   DIFF COLORS (niveaux de difficulté)
+   ============================================================================ */
+const DIFF = {
+  "🟢": { bg:'#dcfce7', tx:'#15803d', bd:'#86efac', bgDark:'#0a1f0d', txDark:'#86efac' },
+  "🟡": { bg:'#fef9c3', tx:'#854d0e', bd:'#fde047', bgDark:'#1f1a00', txDark:'#fde047' },
+  "🟠": { bg:'#ffedd5', tx:'#9a3412', bd:'#fdba74', bgDark:'#1f1206', txDark:'#fdba74' },
+  "🔴": { bg:'#fee2e2', tx:'#991b1b', bd:'#fca5a5', bgDark:'#2d1b1b', txDark:'#fca5a5' },
+};
+
+/* ============================================================================
+   DONNÉES DES 20 QCM
+   ============================================================================ */
+const QS = [
+  /* ━━━━━━━━ 🟢 NIVEAU FONDAMENTAL ━━━━━━━━ */
+  {
+    id:1, niv:"🟢 Niveau 1 — Fondamental", theme:"Fonction de coût (MSE)",
+    enonce:"Quelle est la formule correcte de l'erreur quadratique moyenne (MSE) utilisée comme fonction de coût en régression linéaire ?",
+    opts:[
+      {l:"A", k:"J = \\sum_{i=1}^{n}(y_i - \\hat{y}_i)"},
+      {l:"B", k:"J = \\frac{1}{n}\\sum_{i=1}^{n}(y_i - \\hat{y}_i)^2"},
+      {l:"C", k:"J = \\frac{1}{n}\\sum_{i=1}^{n}|y_i - \\hat{y}_i|"},
+      {l:"D", k:"J = \\max_{i}|y_i - \\hat{y}_i|"},
+    ],
+    bonne:"B",
+    expB:"✅ Le MSE (Mean Squared Error) = moyenne des carrés des erreurs. Le carré a deux effets : il rend toujours l'erreur positive, et il pénalise davantage les grandes erreurs. Cette fonction est convexe, ce qui garantit un minimum unique.",
+    expA:{l:"A", tx:"C'est la somme des erreurs signées. Elles peuvent se compenser (+2 et −2 donnent 0). Ce n'est pas une mesure d'erreur valide."},
+    expC:{l:"C", tx:"C'est la MAE (Mean Absolute Error). Elle est valide mais moins utilisée pour l'optimisation car non dérivable en 0 (angle). Le MSE est préféré pour son caractère lisse."},
+    expD:{l:"D", tx:"C'est l'erreur maximale (L∞). Elle ne tient compte que du pire point, pas de l'ensemble. Non utilisée en régression classique."},
+    piege:"Ne pas confondre MSE (carrés), MAE (valeurs absolues) et somme brute. En ML, le MSE est le choix standard car il est convexe, dérivable partout et pénalise les gros écarts.",
+  },
+  {
+    id:2, niv:"🟢 Niveau 1 — Fondamental", theme:"Dérivée d'une constante", isK:true,
+    enonce:"\\text{Que vaut la dérivée de la fonction } f(x) = 7 \\text{ ?}",
+    opts:[
+      {l:"A", k:"f'(x) = 7"},
+      {l:"B", k:"f'(x) = x"},
+      {l:"C", k:"f'(x) = 0"},
+      {l:"D", k:"f'(x) = 1"},
+    ],
+    bonne:"C",
+    expB:"✅ La dérivée mesure le taux de variation. Une constante ne varie pas — sa courbe est une droite horizontale, de pente nulle partout. Donc f'(x) = 0, quelle que soit la valeur de la constante (7, −15, 1000...).",
+    expA:{l:"A", tx:"Erreur classique : confondre la valeur de la fonction et sa dérivée. f(x)=7 signifie que la fonction vaut 7, mais ne DIT RIEN sur sa pente."},
+    expC:{l:"B", tx:"x est la dérivée de x²/2, pas d'une constante."},
+    expD:{l:"D", tx:"1 est la dérivée de x (la fonction identité), pas d'une constante."},
+    piege:"La constante disparaît toujours en dérivant : (f + c)' = f' + 0 = f'. C'est pour cela que dans ŷ = wx + b, la dérivée par rapport à w ne voit plus le biais b.",
+  },
+  {
+    id:3, niv:"🟢 Niveau 1 — Fondamental", theme:"Règle de dérivation de (x−a)²", isK:true,
+    enonce:"\\text{Que vaut la dérivée de } f(x) = (x - 5)^2 \\text{ ?}",
+    opts:[
+      {l:"A", k:"f'(x) = 2(x - 5)"},
+      {l:"B", k:"f'(x) = x - 5"},
+      {l:"C", k:"f'(x) = (x - 5)^2"},
+      {l:"D", k:"f'(x) = 2x - 5"},
+    ],
+    bonne:"A",
+    expB:"✅ Règle de la chaîne : (u²)' = 2u·u'. Ici u = x−5 et u' = 1, donc f'(x) = 2(x−5)·1 = 2(x−5). C'est la règle la plus utilisée en descente de gradient car la MSE contient des termes en (yᵢ − ŷᵢ)².",
+    expA:{l:"B", tx:"Oubli du facteur 2 issu de la règle (u²)' = 2u·u'. Erreur très fréquente en début d'apprentissage."},
+    expC:{l:"C", tx:"Confusion entre la fonction et sa dérivée : (x−5)² est f(x), pas f'(x)."},
+    expD:{l:"D", tx:"Mauvaise application de la règle : on ne peut pas distribuer la dérivée à l'intérieur du carré de cette façon. Il faut utiliser la règle de la chaîne."},
+    piege:"Mémo : ((x−a)²)' = 2(x−a). Ne jamais oublier le facteur 2 — il intervient systématiquement dans les gradients du MSE.",
+  },
+  {
+    id:4, niv:"🟢 Niveau 1 — Fondamental", theme:"Condition de minimum",
+    enonce:"Pour une fonction de coût J(w) convexe (en forme de U), à quelle condition le point w* correspond-il au minimum ?",
+    opts:[
+      {l:"A", k:"J(w^*) = 0"},
+      {l:"B", k:"J'(w^*) = 1"},
+      {l:"C", k:"J'(w^*) = 0"},
+      {l:"D", k:"J(w^*) \\text{ est maximal}"},
+    ],
+    bonne:"C",
+    expB:"✅ Au fond de la vallée, la pente est horizontale : la dérivée s'annule. Pour une fonction convexe (comme la MSE), c'est même l'unique point où J'(w)=0, et c'est donc le minimum global.",
+    expA:{l:"A", tx:"Confusion entre J(w)=0 (la fonction vaut 0, c'est-à-dire erreur nulle) et J'(w)=0 (pente nulle). Le MSE peut très bien avoir un minimum > 0 si le modèle ne peut pas atteindre zéro erreur."},
+    expC:{l:"B", tx:"Aucune valeur particulière de J' ne caractérise le minimum — sauf 0."},
+    expD:{l:"D", tx:"Le maximum correspond au sommet d'une fonction concave, pas au minimum d'une fonction convexe."},
+    piege:"Retenir : MINIMUM ⟺ PENTE NULLE ⟺ J'(w)=0. Et pour une fonction CONVEXE, ce minimum est unique et global — c'est ce qui rend la descente de gradient si puissante sur le MSE.",
+  },
+  {
+    id:5, niv:"🟢 Niveau 1 — Fondamental", theme:"Règle de mise à jour",
+    enonce:"Quelle est la règle de mise à jour correcte de la descente de gradient ?",
+    opts:[
+      {l:"A", k:"w \\leftarrow w + \\alpha \\cdot J'(w)"},
+      {l:"B", k:"w \\leftarrow w - \\alpha \\cdot J'(w)"},
+      {l:"C", k:"w \\leftarrow \\alpha \\cdot J'(w)"},
+      {l:"D", k:"w \\leftarrow J(w) - \\alpha \\cdot w"},
+    ],
+    bonne:"B",
+    expB:"✅ Le signe MOINS est essentiel : il fait aller dans le sens OPPOSÉ de la pente, donc vers le bas. Si J'>0 (pente montante), w diminue ; si J'<0 (pente descendante), w augmente. Dans les deux cas, on se rapproche du minimum.",
+    expA:{l:"A", tx:"Avec un +, on monterait la pente au lieu de la descendre ! On s'éloignerait du minimum à chaque itération — exactement l'inverse de ce qu'on veut."},
+    expC:{l:"C", tx:"Il manque le terme w courant : la mise à jour est incrémentale (on corrige w), pas un remplacement total."},
+    expD:{l:"D", tx:"Formule incohérente : on utilise J (le coût, un scalaire) au lieu de J' (la dérivée). On ne se sert pas directement du coût pour mettre à jour, mais de sa pente."},
+    piege:"Moyen mnémotechnique : « descente » → on descend → on soustrait. Le signe MOINS est ce qui transforme l'algorithme en descente (et non en montée).",
+  },
+
+  /* ━━━━━━━━ 🟡 NIVEAU CALCUL / COMPRÉHENSION ━━━━━━━━ */
+  {
+    id:6, niv:"🟡 Niveau 2 — Calcul direct", theme:"Calcul de MSE",
+    enonce:"Un modèle a produit les prédictions ŷ = [33, 40, 52, 44] pour les vraies valeurs y = [30, 42, 55, 38]. Quel est le MSE ?",
+    opts:[
+      {l:"A", k:"J = 14{,}5"},
+      {l:"B", k:"J = 3{,}5"},
+      {l:"C", k:"J = 58"},
+      {l:"D", k:"J = 29"},
+    ],
+    bonne:"A",
+    steps:[
+      {s:"e_1 = 30 - 33", r:"-3 \\Rightarrow e_1^2 = 9"},
+      {s:"e_2 = 42 - 40", r:"\\phantom{-}2 \\Rightarrow e_2^2 = 4"},
+      {s:"e_3 = 55 - 52", r:"\\phantom{-}3 \\Rightarrow e_3^2 = 9"},
+      {s:"e_4 = 38 - 44", r:"-6 \\Rightarrow e_4^2 = 36"},
+      {s:"J = \\frac{9+4+9+36}{4}", r:"\\frac{58}{4} = \\mathbf{14{,}5}"},
+    ],
+    expB:"✅ On calcule les erreurs yᵢ−ŷᵢ, on les élève au carré, puis on fait la moyenne. Somme des carrés = 9+4+9+36 = 58. MSE = 58/4 = 14,5. L'observation 4 (erreur −6) contribue à elle seule 36/58 ≈ 62 % du coût.",
+    expA:{l:"B", tx:"3,5 ≈ moyenne des |erreurs| (MAE = (3+2+3+6)/4 = 3,5). C'est la MAE, pas le MSE. Le carré amplifie les grandes erreurs."},
+    expC:{l:"C", tx:"58 est la SOMME des carrés. On oublie la division par n=4 pour obtenir la MOYENNE."},
+    expD:{l:"D", tx:"29 = somme/2 : mauvaise division (on a divisé par 2 au lieu de par n=4)."},
+    piege:"Toujours 4 étapes : (1) erreurs signées, (2) erreurs au carré, (3) somme, (4) division par n. Une observation avec une grosse erreur peut dominer le MSE.",
+  },
+  {
+    id:7, niv:"🟡 Niveau 2 — Calcul direct", theme:"Dérivée polynomiale", isK:true,
+    enonce:"\\text{Que vaut la dérivée de } f(x) = 3x^2 - 6x + 9 \\text{ ?}",
+    opts:[
+      {l:"A", k:"f'(x) = 6x - 6"},
+      {l:"B", k:"f'(x) = 3x - 6"},
+      {l:"C", k:"f'(x) = 6x^2 - 6"},
+      {l:"D", k:"f'(x) = 6x + 6"},
+    ],
+    bonne:"A",
+    steps:[
+      {s:"(3x^2)'", r:"6x"},
+      {s:"(-6x)'", r:"-6"},
+      {s:"(9)'", r:"\\phantom{-}0"},
+      {s:"f'(x)", r:"6x - 6"},
+    ],
+    expB:"✅ On dérive terme à terme. (ax²)' = 2ax ⟹ (3x²)' = 6x. (ax+b)' = a ⟹ (−6x)' = −6. (c)' = 0 ⟹ (9)' = 0. Total : f'(x) = 6x − 6.",
+    expA:{l:"B", tx:"Oubli du facteur 2 dans la dérivée de ax² (on obtient 2ax, pas ax)."},
+    expC:{l:"C", tx:"Erreur sur l'exposant : dériver abaisse l'exposant de 1 (x² → x), pas l'inverse. 6x² serait la dérivée de 2x³."},
+    expD:{l:"D", tx:"Erreur de signe sur le terme −6x : sa dérivée est −6, pas +6."},
+    piege:"Règles clés : (xⁿ)' = n·xⁿ⁻¹ ; la dérivée est linéaire (somme = somme des dérivées) ; la constante disparaît. Dériver ≠ primitiver.",
+  },
+  {
+    id:8, niv:"🟡 Niveau 2 — Calcul direct", theme:"Valeur de la dérivée en un point", isK:true,
+    enonce:"\\text{Soit } J(w) = (w-4)^2.\\\\[4pt]\\text{Que vaut } J'(0) \\text{, et que nous dit le signe de cette valeur ?}",
+    opts:[
+      {l:"A", k:"J'(0) = +8 \\text{, la pente est positive}"},
+      {l:"B", k:"J'(0) = -8 \\text{, la pente est négative : la fonction descend vers la droite}"},
+      {l:"C", k:"J'(0) = \\phantom{-}4 \\text{, on est proche du minimum}"},
+      {l:"D", k:"J'(0) = \\phantom{-}0 \\text{, on est au minimum}"},
+    ],
+    bonne:"B",
+    calcStr:"J'(w) = 2(w-4)\\quad\\Rightarrow\\quad J'(0) = 2(0-4) = \\mathbf{-8}",
+    expB:"✅ J'(w) = 2(w−4), donc J'(0) = 2×(0−4) = −8. Le signe négatif signifie que la pente descend : si on avance un peu vers la droite (w augmente), J diminue. La descente de gradient va donc augmenter w (w ← w − α·(−8) = w + 8α).",
+    expA:{l:"A", tx:"Erreur de signe : 2×(0−4) = 2×(−4) = −8, pas +8. Bien respecter les parenthèses."},
+    expC:{l:"C", tx:"+4 n'est pas la bonne valeur. De plus, proche du minimum, |J'| doit être FAIBLE, pas égale à 4."},
+    expD:{l:"D", tx:"Si J'(0)=0, on serait au minimum. Or le minimum de (w−4)² est en w=4, pas en w=0."},
+    piege:"Signe de la dérivée = direction à prendre pour que le coût AUGMENTE. La descente de gradient part toujours dans le sens opposé (grâce au signe moins dans la mise à jour).",
+  },
+  {
+    id:9, niv:"🟡 Niveau 2 — Compréhension", theme:"Taux d'apprentissage trop petit",
+    enonce:"Que se passe-t-il typiquement si le taux d'apprentissage α est choisi trop petit (par exemple α = 10⁻⁶) ?",
+    opts:[
+      {l:"A", tx:"Le coût augmente à chaque itération (divergence)."},
+      {l:"B", tx:"L'algorithme oscille autour du minimum sans jamais l'atteindre."},
+      {l:"C", tx:"La convergence est très lente : il faudrait des milliers voire millions d'itérations pour approcher le minimum."},
+      {l:"D", tx:"L'algorithme ne peut pas fonctionner mathématiquement."},
+    ],
+    bonne:"C",
+    expB:"✅ Avec un α très petit, chaque pas −α·J' est minuscule. On avance bien dans la bonne direction, mais très lentement. La convergence reste garantie (pour une fonction convexe), mais pratiquement inutilisable : le coût en temps de calcul devient prohibitif.",
+    expA:{l:"A", tx:"Au contraire : un α petit garantit que le coût diminue ou reste stable à chaque itération. La divergence est causée par un α TROP GRAND, jamais trop petit."},
+    expC:{l:"B", tx:"Les oscillations sont le symptôme d'un α trop grand (on saute par-dessus le minimum). Un α trop petit produit des pas monotones mais minuscules."},
+    expD:{l:"D", tx:"Mathématiquement, l'algorithme fonctionne parfaitement. Le problème est purement pratique (temps de calcul)."},
+    piege:"Petit α ⟹ convergence lente mais sûre. Grand α ⟹ risque d'oscillation ou de divergence. Recette standard : commencer à α = 0,01 et ajuster en observant la courbe J(iter).",
+  },
+  {
+    id:10, niv:"🟡 Niveau 2 — Compréhension", theme:"Taux d'apprentissage trop grand",
+    enonce:"Que se passe-t-il si le taux d'apprentissage α est choisi trop grand dans une descente de gradient ?",
+    opts:[
+      {l:"A", tx:"L'algorithme converge plus rapidement vers le minimum."},
+      {l:"B", tx:"Le coût J peut osciller, augmenter, voire exploser : c'est la divergence."},
+      {l:"C", tx:"L'algorithme trouve plus facilement le minimum global au lieu d'un minimum local."},
+      {l:"D", tx:"Toutes les dérivées deviennent nulles."},
+    ],
+    bonne:"B",
+    expB:"✅ Un α trop grand fait des pas si grands qu'on saute par-dessus le minimum et on atterrit plus haut que le point de départ. À l'itération suivante, on repart d'un point où J'(w) est encore plus grand en valeur absolue, donc on s'éloigne encore plus. C'est la divergence.",
+    expA:{l:"A", tx:"Illusion trompeuse : on croit aller plus vite en faisant de grands pas, mais si les pas dépassent la largeur de la vallée, on ne descend plus."},
+    expC:{l:"C", tx:"Le choix de α ne change pas la nature du minimum trouvé (local ou global). C'est la topologie de la fonction de coût qui la détermine."},
+    expD:{l:"D", tx:"Les dérivées continuent d'être calculées normalement — c'est justement le problème : elles restent grandes et entretiennent la divergence."},
+    piege:"Diagnostic : si la courbe J(iter) monte, c'est α trop grand. Solution standard : DIVISER α par 10 et relancer. Préférer toujours un α un peu trop petit (lent) qu'un peu trop grand (divergent).",
+  },
+  {
+    id:11, niv:"🟡 Niveau 2 — Compréhension", theme:"Dérivée partielle du MSE", isK:true,
+    enonce:"\\text{Pour la régression linéaire simple } \\hat{y}_i = w_1 x_i + w_0,\\\\[4pt]\\text{que vaut la dérivée partielle } \\frac{\\partial J}{\\partial w_1} \\text{ du MSE ?}",
+    opts:[
+      {l:"A", k:"\\frac{\\partial J}{\\partial w_1} = \\frac{2}{n}\\sum_{i=1}^{n} x_i"},
+      {l:"B", k:"\\frac{\\partial J}{\\partial w_1} = \\frac{-2}{n}\\sum_{i=1}^{n}(y_i - \\hat{y}_i)"},
+      {l:"C", k:"\\frac{\\partial J}{\\partial w_1} = \\frac{-2}{n}\\sum_{i=1}^{n} x_i\\cdot(y_i - \\hat{y}_i)"},
+      {l:"D", k:"\\frac{\\partial J}{\\partial w_1} = \\frac{1}{n}\\sum_{i=1}^{n} x_i^2"},
+    ],
+    bonne:"C",
+    expB:"✅ On dérive J = (1/n)·Σ(yᵢ−w₁xᵢ−w₀)² par rapport à w₁. Règle de la chaîne : (u²)'=2u·u'. Ici u=yᵢ−w₁xᵢ−w₀ et u'=−xᵢ. D'où ∂J/∂w₁ = (1/n)·Σ 2u·(−xᵢ) = (−2/n)·Σ xᵢ·(yᵢ−ŷᵢ).",
+    expA:{l:"A", tx:"Pas de facteur (yᵢ−ŷᵢ) dans l'expression — et mauvais signe. Cette formule n'a aucun sens physique (elle ne dépend pas de l'erreur)."},
+    expC:{l:"B", tx:"C'est ∂J/∂w₀ (dérivée par rapport au BIAIS), pas ∂J/∂w₁. Ici manque le facteur xᵢ qui vient de la règle de la chaîne (car ∂ŷᵢ/∂w₁ = xᵢ)."},
+    expD:{l:"D", tx:"Cette formule ne dépend pas des erreurs yᵢ−ŷᵢ, donc ne peut pas indiquer comment corriger w₁."},
+    piege:"Deux formules à ne pas confondre : ∂J/∂w₁ = (−2/n)·Σxᵢ·eᵢ (pente) et ∂J/∂w₀ = (−2/n)·Σeᵢ (biais). La différence : la pente inclut xᵢ en facteur, le biais non.",
+  },
+
+  /* ━━━━━━━━ 🟠 NIVEAU APPLICATION ━━━━━━━━ */
+  {
+    id:12, niv:"🟠 Niveau 3 — Application", theme:"Une itération complète", isK:true,
+    enonce:"\\text{On minimise } J(w) = (w - 3)^2 \\text{ avec } w_0 = 0 \\text{ et } \\alpha = 0{,}1.\\\\[4pt]\\text{Quelle est la valeur de } w_1 \\text{ après une itération ?}",
+    opts:[
+      {l:"A", k:"w_1 = 0{,}6"},
+      {l:"B", k:"w_1 = -0{,}6"},
+      {l:"C", k:"w_1 = 0{,}3"},
+      {l:"D", k:"w_1 = 6"},
+    ],
+    bonne:"A",
+    steps:[
+      {s:"J'(w) = 2(w-3)", r:"\\text{(règle }(u^2)' = 2u\\cdot u')"},
+      {s:"J'(w_0) = J'(0) = 2(0-3)", r:"-6"},
+      {s:"w_1 = w_0 - \\alpha\\cdot J'(w_0)", r:"0 - 0{,}1\\times(-6)"},
+      {s:"w_1", r:"0 + 0{,}6 = \\mathbf{0{,}6}"},
+    ],
+    expB:"✅ On applique la formule w ← w − α·J'(w). La dérivée en w=0 est négative (−6), donc le signe moins dans la mise à jour fait AUGMENTER w. On passe de 0 à 0,6 — on s'est rapproché du minimum w*=3. Le coût passe de J(0)=9 à J(0,6)=5,76.",
+    expA:{l:"B", tx:"Erreur de signe : 0 − 0,1×(−6) = 0 + 0,6 = +0,6 (pas −0,6). Double négation."},
+    expC:{l:"C", tx:"0,3 correspondrait à α = 0,05. Avec α = 0,1, le résultat est 0,6."},
+    expD:{l:"D", tx:"6 correspondrait à α = 1 (sans α ou avec α = 1). Mais ici α = 0,1, le pas est 10 fois plus petit."},
+    piege:"Rigueur sur les signes : J'(0) = 2×(0−3) = −6 (négatif). Le produit −α·J' = −0,1×(−6) = +0,6 (positif). Toujours poser le calcul étape par étape.",
+  },
+  {
+    id:13, niv:"🟠 Niveau 3 — Diagnostic", theme:"Coût qui augmente",
+    enonce:"Vous lancez une descente de gradient et observez les coûts suivants : J(iter 0) = 25, J(iter 1) = 49, J(iter 2) = 100, J(iter 3) = 400. Quel est le problème le plus probable ?",
+    opts:[
+      {l:"A", tx:"Le gradient est mal calculé (signe inversé)."},
+      {l:"B", tx:"Le taux d'apprentissage α est trop grand : il y a divergence."},
+      {l:"C", tx:"La fonction de coût est mal choisie (pas convexe)."},
+      {l:"D", tx:"L'algorithme fonctionne correctement, il faut juste plus d'itérations."},
+    ],
+    bonne:"B",
+    expB:"✅ Le coût CROIT de manière monotone et accélérée (×2, puis ×2, puis ×4) : c'est exactement le comportement de divergence causé par un α trop grand. On saute par-dessus le minimum à chaque pas, et on atterrit à chaque fois plus loin. Solution immédiate : diviser α par 10.",
+    expA:{l:"A", tx:"Un signe inversé (+α au lieu de −α) donnerait effectivement une divergence similaire. Mais c'est une erreur rare (faute de programmation) alors qu'un α mal réglé est le problème #1 en pratique — c'est la cause la plus probable."},
+    expC:{l:"C", tx:"Une fonction non convexe peut causer des minima locaux, mais pas une divergence explosive comme celle-ci. De plus, le MSE en régression linéaire est toujours convexe."},
+    expD:{l:"D", tx:"Erreur dangereuse : le coût EXPLOSE, il ne va pas se stabiliser. Plus on itère, plus on s'éloigne. Il faut INTERVENIR."},
+    piege:"Règle d'or : la courbe J(iter) doit toujours décroître. Si elle monte : STOP, diminuer α. Si elle oscille : diminuer α. Si elle descend trop lentement : augmenter α.",
+  },
+  {
+    id:14, niv:"🟠 Niveau 3 — Dataset salaire", theme:"Calcul d'erreur de prédiction", isK:true,
+    enonce:"\\text{Un développeur du dataset a }x = 3\\text{ ans d'expérience et un salaire réel } y = 35\\text{ k€.}\\\\[4pt]\\text{Avec la droite } \\hat{y} = 2{,}07x + 31{,}27,\\text{ quelle est l'erreur de prédiction } e = y - \\hat{y}\\text{ ?}",
+    opts:[
+      {l:"A", k:"e = +2{,}48\\text{ k€}"},
+      {l:"B", k:"e = -2{,}48\\text{ k€}"},
+      {l:"C", k:"e = +37{,}48\\text{ k€}"},
+      {l:"D", k:"e = 0\\text{ k€ (la prédiction est parfaite)}"},
+    ],
+    bonne:"B",
+    steps:[
+      {s:"\\hat{y} = 2{,}07\\times 3 + 31{,}27", r:"6{,}21 + 31{,}27 = 37{,}48"},
+      {s:"e = y - \\hat{y}", r:"35 - 37{,}48"},
+      {s:"e", r:"\\mathbf{-2{,}48}\\text{ k€}"},
+    ],
+    expB:"✅ ŷ = 2,07×3 + 31,27 = 37,48 k€. Erreur signée = y − ŷ = 35 − 37,48 = −2,48 k€. Le signe négatif signifie que le modèle SURESTIME le salaire de ce développeur (il prédit plus que la réalité). Cette erreur contribuera (−2,48)² = 6,15 au numérateur du MSE.",
+    expA:{l:"A", tx:"Signe inversé. Convention universelle : e = y − ŷ (réel moins prédit). Ici le réel (35) est inférieur au prédit (37,48), donc e est négatif."},
+    expC:{l:"C", tx:"37,48 k€ est la valeur de ŷ (la prédiction), pas l'erreur. Ne pas confondre prédiction et écart."},
+    expD:{l:"D", tx:"Une prédiction parfaite donnerait ŷ exactement égal à y=35. Ici ŷ=37,48 ≠ 35, donc il y a bien une erreur non nulle."},
+    piege:"Fixer une convention : e = y − ŷ. Avec cette convention, e > 0 signifie modèle sous-estime, e < 0 signifie modèle surestime. Dans la formule du gradient ∂J/∂w₁ = (−2/n)·Σxᵢ·eᵢ, le signe de l'erreur est crucial.",
+  },
+  {
+    id:15, niv:"🟠 Niveau 3 — Interprétation", theme:"Lecture d'une courbe de convergence",
+    enonce:"Vous tracez la courbe J(iter) et observez qu'elle descend TRÈS lentement mais de manière parfaitement stable et monotone. Quelle action concrète prendre ?",
+    opts:[
+      {l:"A", tx:"Diminuer α (par exemple α ← α / 10)."},
+      {l:"B", tx:"Augmenter α (par exemple α ← α × 3 ou α × 10)."},
+      {l:"C", tx:"Changer de fonction de coût (remplacer MSE par MAE)."},
+      {l:"D", tx:"Remettre w à zéro et relancer à l'identique."},
+    ],
+    bonne:"B",
+    expB:"✅ Stable + lent = α trop petit. La stabilité montre qu'on n'est pas en divergence, donc on peut se permettre des pas plus grands pour accélérer. Règle pratique : multiplier α par 3 ou 10, et vérifier que la stabilité est conservée. Répéter jusqu'à trouver le sweet spot.",
+    expA:{l:"A", tx:"Diminuer α aggraverait la lenteur. On ne diminue α QUE si on observe des oscillations ou une divergence."},
+    expC:{l:"C", tx:"Changer la fonction de coût est un choix méthodologique fort, pas une solution à un problème de lenteur. La lenteur est un problème d'hyperparamètre, pas de fonction de coût."},
+    expD:{l:"D", tx:"Relancer à l'identique donnerait le même résultat (l'algorithme est déterministe avec les mêmes paramètres initiaux)."},
+    piege:"Diagnostic à mémoriser : lent + stable ⟹ augmenter α ; rapide + oscillation/explosion ⟹ diminuer α. Les optimiseurs modernes (Adam, RMSProp) automatisent ce réglage.",
+  },
+  {
+    id:16, niv:"🟠 Niveau 3 — Calcul complet", theme:"Gradient sur un mini-dataset", isK:true,
+    enonce:"\\text{Soient 2 observations : } (x_1=1, y_1=3)\\text{ et } (x_2=2, y_2=5).\\\\[4pt]\\text{Avec } \\hat{y} = wx \\text{ (biais fixé à 0) et } w = 1,\\text{ que vaut } \\frac{\\partial J}{\\partial w} \\text{ ?}",
+    opts:[
+      {l:"A", k:"\\frac{\\partial J}{\\partial w} = -8"},
+      {l:"B", k:"\\frac{\\partial J}{\\partial w} = +8"},
+      {l:"C", k:"\\frac{\\partial J}{\\partial w} = -4"},
+      {l:"D", k:"\\frac{\\partial J}{\\partial w} = -16"},
+    ],
+    bonne:"A",
+    steps:[
+      {s:"\\hat{y}_1 = 1\\cdot 1 = 1,\\ e_1 = 3-1", r:"2"},
+      {s:"\\hat{y}_2 = 1\\cdot 2 = 2,\\ e_2 = 5-2", r:"3"},
+      {s:"\\sum x_i e_i = 1\\cdot 2 + 2\\cdot 3", r:"8"},
+      {s:"\\frac{\\partial J}{\\partial w} = \\frac{-2}{n}\\sum x_i e_i = \\frac{-2}{2}\\cdot 8", r:"\\mathbf{-8}"},
+    ],
+    expB:"✅ Formule : ∂J/∂w = (−2/n)·Σxᵢ·eᵢ. Étape 1 : calculer les prédictions (1 et 2). Étape 2 : les erreurs (2 et 3). Étape 3 : Σxᵢ·eᵢ = 1×2 + 2×3 = 8. Étape 4 : (−2/2)×8 = −8. Le signe négatif dit : augmenter w pour diminuer J (cohérent car w=1 sous-estime).",
+    expA:{l:"B", tx:"Signe oublié. Le −2/n de la formule donne un signe négatif (puisque Σxᵢ·eᵢ = 8 est positif ici)."},
+    expC:{l:"C", tx:"−4 = −8/2 : mauvaise division supplémentaire, ou oubli d'une observation."},
+    expD:{l:"D", tx:"−16 = −8×2 : peut-être un oubli de division par n=2 (on a calculé −2·Σ sans diviser par n)."},
+    piege:"Chaque gradient nécessite 4 étapes : (1) prédire ŷᵢ, (2) calculer eᵢ = yᵢ−ŷᵢ, (3) sommer xᵢ·eᵢ, (4) multiplier par −2/n. Chaque étape est une source d'erreur — ralentissez et vérifiez !",
+  },
+
+  /* ━━━━━━━━ 🔴 NIVEAU ANALYSE CRITIQUE ━━━━━━━━ */
+  {
+    id:17, niv:"🔴 Niveau 4 — Analyse critique", theme:"Convexité et minimum global",
+    enonce:"Que peut-on affirmer concernant la descente de gradient appliquée au MSE d'une régression linéaire ?",
+    opts:[
+      {l:"A", tx:"Elle peut rester bloquée dans un minimum local si l'initialisation est mauvaise."},
+      {l:"B", tx:"Avec un α bien choisi, elle converge toujours vers le minimum global (unique), indépendamment du point de départ."},
+      {l:"C", tx:"Elle nécessite obligatoirement un autre algorithme (comme Newton) pour trouver le minimum."},
+      {l:"D", tx:"Elle ne converge jamais en pratique — on ne fait qu'approcher le vrai minimum."},
+    ],
+    bonne:"B",
+    expB:"✅ Le MSE d'une régression linéaire est STRICTEMENT CONVEXE : il n'a qu'un seul minimum, qui est global. Avec un α suffisamment petit, la descente de gradient converge toujours vers ce minimum, quel que soit le point de départ. C'est une propriété essentielle. En DEEP LEARNING, en revanche, les fonctions de coût sont non convexes — l'initialisation devient alors cruciale.",
+    expA:{l:"A", tx:"Pas de minimum local sur une fonction convexe ! C'est justement ce qui fait la puissance du MSE : on est sûr que ce qu'on trouve est le meilleur."},
+    expC:{l:"C", tx:"La descente de gradient suffit amplement. Newton converge effectivement plus vite mais demande la dérivée seconde (matrice hessienne), coûteuse à calculer sur de grands modèles."},
+    expD:{l:"D", tx:"Elle approche le minimum asymptotiquement : à chaque itération, on s'en rapproche. En pratique, on arrête quand |J'(w)| < ε, une tolérance choisie."},
+    piege:"Convexité du MSE = minimum unique garanti. Cette garantie DISPARAÎT dès qu'on passe aux réseaux de neurones profonds. C'est pourquoi l'initialisation (Xavier, He) devient importante en deep learning.",
+  },
+  {
+    id:18, niv:"🔴 Niveau 4 — Analyse critique", theme:"GD vs formule analytique",
+    enonce:"Pour la régression linéaire, il existe une formule analytique (moindres carrés) qui donne directement la solution optimale. Pourquoi utilise-t-on quand même la descente de gradient en pratique ?",
+    opts:[
+      {l:"A", tx:"La descente de gradient est toujours plus rapide que la formule analytique."},
+      {l:"B", tx:"La descente de gradient évite de calculer des dérivées, alors que la formule analytique en nécessite."},
+      {l:"C", tx:"La descente de gradient se généralise à tous types de modèles (réseaux de neurones, SVM...) pour lesquels il n'existe PAS de formule analytique."},
+      {l:"D", tx:"La descente de gradient donne des solutions plus précises que la formule analytique."},
+    ],
+    bonne:"C",
+    expB:"✅ La formule analytique (XᵀX)⁻¹Xᵀy est exacte ET rapide POUR la régression linéaire. Mais elle n'existe plus dès qu'on a un modèle non linéaire : logistic regression, SVM, réseaux de neurones... La descente de gradient est une méthode UNIVERSELLE : elle fonctionne dès qu'on sait calculer les dérivées. C'est pour cela qu'on l'enseigne comme fondement du deep learning.",
+    expA:{l:"A", tx:"Faux : pour la régression linéaire, la formule analytique est souvent PLUS rapide (calcul direct en O(p³)). La descente de gradient itérative peut être plus lente."},
+    expC:{l:"B", tx:"Au contraire : la descente de gradient REPOSE sur le calcul de dérivées à chaque itération ! La formule analytique, elle, ne nécessite plus de dérivée (elle l'a déjà résolue symboliquement)."},
+    expD:{l:"D", tx:"La formule analytique est EXACTE (à la précision machine près). La descente de gradient est itérative et donc s'approche de la solution — elle est donc légèrement moins précise."},
+    piege:"La valeur pédagogique de la descente de gradient ≠ ses performances sur la régression linéaire. On l'enseigne parce qu'elle est UNIVERSELLE. Pour la régression linéaire en production, scikit-learn utilise la formule analytique.",
+  },
+  {
+    id:19, niv:"🔴 Niveau 4 — Analyse critique", theme:"Taux d'apprentissage optimal", isK:true,
+    enonce:"\\text{Pour } J(w) = (w - a)^2,\\text{ on peut montrer que la descente de gradient converge si et seulement si }\\\\[4pt]0 < \\alpha < 1.\\text{ Que se passe-t-il SI on choisit exactement } \\alpha = 0{,}5 \\text{ ?}",
+    opts:[
+      {l:"A", tx:"Le coût décroît lentement puis se stabilise en de nombreuses itérations."},
+      {l:"B", tx:"Convergence en UNE SEULE itération, quelle que soit la valeur initiale w₀."},
+      {l:"C", tx:"Le coût oscille indéfiniment autour du minimum sans jamais l'atteindre."},
+      {l:"D", tx:"Le coût diverge et tend vers l'infini."},
+    ],
+    bonne:"B",
+    steps:[
+      {s:"J'(w) = 2(w-a)", r:""},
+      {s:"w_{n+1} = w_n - \\alpha\\cdot 2(w_n - a)", r:""},
+      {s:"\\text{Avec } \\alpha = 0{,}5 : w_{n+1} = w_n - (w_n - a)", r:"a"},
+      {s:"\\text{donc } w_1 = a \\text{ quel que soit } w_0", r:"\\mathbf{\\text{convergence en 1 itération}}"},
+    ],
+    expB:"✅ Avec α = 0,5, la mise à jour devient w ← w − 2·0,5·(w − a) = w − (w − a) = a. On atteint le minimum en UN SEUL pas, quelle que soit l'initialisation ! C'est la valeur OPTIMALE pour cette fonction spécifique — elle correspond à une étape de la méthode de Newton. En pratique, la fonction de coût est inconnue analytiquement, donc on ne peut pas calculer cet α optimal.",
+    expA:{l:"A", tx:"Lent et stable décrit un α petit (ex : 0,01). Avec α = 0,5, la convergence est TRÈS rapide (immédiate)."},
+    expC:{l:"C", tx:"Oscillation indéfinie demanderait |1 − 2α| ≥ 1, soit α ≥ 1 ou α ≤ 0. Avec α = 0,5, la récurrence est exacte."},
+    expD:{l:"D", tx:"Divergence exige α > 1 (pour cette fonction précise). 0,5 est largement à l'intérieur de la plage de convergence."},
+    piege:"Pour J(w) = (w−a)², α = 0,5 est optimal (Newton exact). Pour des fonctions plus complexes, on ne peut pas calculer cet α optimal analytiquement — d'où l'importance du réglage empirique.",
+  },
+  {
+    id:20, niv:"🔴 Niveau 4 — Analyse critique", theme:"Trajectoire oscillante convergente", isK:true,
+    enonce:"\\text{On minimise } J(w) = (w-3)^2 \\text{ et on observe la trajectoire :}\\\\[4pt]w_0 = 0,\\ w_1 = 5{,}4,\\ w_2 = 1{,}08,\\ w_3 = 4{,}54,\\ w_4 = 1{,}77,\\ w_5 = 3{,}79\\ldots\\\\[4pt]\\text{Quelle interprétation est la plus juste ?}",
+    opts:[
+      {l:"A", tx:"L'algorithme diverge : les valeurs oscillent et s'éloignent du minimum."},
+      {l:"B", tx:"α est grand (proche du seuil critique), mais l'algorithme converge en oscillant autour du minimum w* = 3."},
+      {l:"C", tx:"α est trop petit : la convergence est trop lente, il faudrait augmenter α."},
+      {l:"D", tx:"La fonction n'est pas convexe — l'algorithme ne peut pas converger."},
+    ],
+    bonne:"B",
+    steps:[
+      {s:"|w_0 - 3| = 3", r:""},
+      {s:"|w_1 - 3| = 2{,}4", r:"\\text{(oscille mais se rapproche)}"},
+      {s:"|w_2 - 3| = 1{,}92", r:""},
+      {s:"|w_3 - 3| = 1{,}54", r:""},
+      {s:"|w_4 - 3| = 1{,}23", r:""},
+      {s:"|w_5 - 3| = 0{,}79", r:"\\mathbf{\\text{convergence confirmée}}"},
+    ],
+    expB:"✅ Les valeurs ALTERNENT autour de w*=3 (sous, au-dessus, sous, au-dessus...) mais la distance |wₙ − 3| diminue à chaque itération : 3 → 2,4 → 1,92 → 1,54 → 1,23 → 0,79. C'est une convergence OSCILLANTE, typique d'un α grand mais encore dans la zone de convergence (ici α ≈ 0,9). Pour (w−a)², la convergence est garantie tant que α < 1.",
+    expA:{l:"A", tx:"Divergence ⟹ |wₙ − 3| CROÎT. Ici elle décroît : 3 → 2,4 → 1,92 → ... C'est au contraire une convergence (oscillante)."},
+    expC:{l:"C", tx:"α petit ⟹ trajectoire MONOTONE (w₀ < w₁ < w₂ < ... < w*). Ici les valeurs oscillent, c'est le signe d'un α GRAND."},
+    expD:{l:"D", tx:"(w−3)² est strictement convexe (parabole en U). La convergence (ou non) dépend du choix de α, pas de la convexité."},
+    piege:"Distinguer 3 régimes selon α : (1) petit : convergence monotone lente ; (2) moyen : convergence monotone rapide ; (3) grand mais < seuil critique : convergence oscillante ; (4) > seuil critique : divergence. Les régimes (2) et (3) convergent tous les deux, mais avec des « allures » très différentes.",
+  },
+];
+
+/* ============================================================================
+   COMPOSANT QUESTION
+   ============================================================================ */
+function Question({ q, answers, setAnswers, revealed, setRevealed }) {
+  const { theme, mode } = useTheme();
+  const chosen = answers[q.id];
+  const rev = revealed[q.id];
+  const em = q.niv.split(" ")[0];
+  const dc = DIFF[em] || {};
+  const dcBg = mode === 'dark' ? dc.bgDark : dc.bg;
+  const dcTx = mode === 'dark' ? dc.txDark : dc.tx;
+
+  return (
+    <Sec id={`q${q.id}`} title="" level={2}>
+      <div style={{
+        background:theme.bgAlt,
+        border:`1px solid ${theme.border}`,
+        borderRadius:12,
+        overflow:'hidden',
+        boxShadow: mode==='dark' ? '0 2px 12px rgba(0,0,0,0.5)' : '0 2px 12px rgba(0,0,0,0.05)',
+        marginTop:'-8px'
+      }}>
+        {/* en-tête question */}
+        <div style={{padding:'16px 22px 0',display:'flex',flexWrap:'wrap',gap:8,alignItems:'center'}}>
+          <span style={{background:theme.accent,color:'#fff',borderRadius:'50%',width:30,height:30,display:'flex',alignItems:'center',justifyContent:'center',fontWeight:800,fontSize:'0.88rem',fontFamily:"'DM Sans',sans-serif",flexShrink:0}}>
+            {q.id}
+          </span>
+          <span style={{background:dcBg,color:dcTx,border:`1px solid ${dc.bd}`,borderRadius:12,padding:'3px 11px',fontSize:'0.75rem',fontFamily:"'DM Sans',sans-serif",fontWeight:600}}>
+            {q.niv}
+          </span>
+          <span style={{background:theme.bgCode,color:theme.textMuted,borderRadius:8,padding:'3px 10px',fontSize:'0.72rem',fontFamily:"'DM Sans',sans-serif",marginLeft:'auto'}}>
+            {q.theme}
+          </span>
+        </div>
+
+        {/* énoncé */}
+        <div style={{padding:'14px 22px',lineHeight:1.8,fontSize:'1rem',color:theme.text,fontFamily:"'Source Serif 4',Georgia,serif"}}>
+          {q.isK ? <M t={q.enonce} d={true} /> : <span>{q.enonce}</span>}
+        </div>
+
+        {/* options */}
+        <div style={{padding:'0 22px 18px',display:'flex',flexDirection:'column',gap:9}}>
+          {q.opts.map(opt => {
+            const sel = chosen === opt.l;
+            const bon = opt.l === q.bonne;
+            let bg = theme.bgCode;
+            let bd = theme.border;
+            let tc = theme.text;
+            if (sel && !rev) { bg = theme.pickBg; bd = theme.pickBorder; }
+            if (rev && bon) { bg = theme.goodBg; bd = theme.goodBorder; tc = theme.goodText; }
+            if (rev && sel && !bon) { bg = theme.badBg; bd = theme.badBorder; tc = theme.badText; }
+
+            return (
+              <button
+                key={opt.l}
+                onClick={() => !rev && setAnswers(p => ({ ...p, [q.id]: opt.l }))}
+                style={{display:'flex',alignItems:'center',gap:12,background:bg,border:`2px solid ${bd}`,borderRadius:8,padding:'11px 14px',cursor:rev?'default':'pointer',textAlign:'left',transition:'all 0.2s',color:tc,width:'100%',fontFamily:"'Source Serif 4',Georgia,serif"}}
+              >
+                <span style={{minWidth:28,height:28,borderRadius:'50%',border:`2px solid ${bd}`,display:'flex',alignItems:'center',justifyContent:'center',fontFamily:"'DM Sans',sans-serif",fontWeight:700,fontSize:'0.82rem',flexShrink:0,background:(sel||(rev&&bon))?bd:'transparent',color:(sel||(rev&&bon))?'#fff':tc}}>
+                  {opt.l}
+                </span>
+                <span style={{lineHeight:1.6,fontSize:'0.95rem'}}>
+                  {opt.k ? <M t={opt.k} /> : opt.tx}
+                  {rev && bon && <span style={{marginLeft:8}}>✓</span>}
+                  {rev && sel && !bon && <span style={{marginLeft:8}}>✗</span>}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+
+        {/* bouton correction */}
+        {!rev && (
+          <div style={{padding:'0 22px 20px'}}>
+            <button
+              onClick={() => setRevealed(p => ({ ...p, [q.id]: true }))}
+              style={{background:theme.accent,color:'#fff',border:'none',borderRadius:8,padding:'9px 22px',fontFamily:"'DM Sans',sans-serif",fontWeight:600,cursor:'pointer',fontSize:'0.88rem'}}
+            >
+              📖 Voir la correction détaillée
+            </button>
+          </div>
+        )}
+
+        {/* correction */}
+        {rev && (
+          <div style={{borderTop:`1px solid ${theme.border}`,background:theme.bg,padding:'18px 22px 24px'}}>
+            {/* bonne réponse */}
+            <div style={{background:theme.goodBg,border:`1px solid ${theme.goodBorder}`,borderRadius:8,padding:'12px 16px',marginBottom:14}}>
+              <p style={{margin:'0 0 6px',fontFamily:"'DM Sans',sans-serif",fontWeight:700,color:theme.goodText,fontSize:'0.8rem'}}>
+                ✅ BONNE RÉPONSE — {q.bonne}
+              </p>
+              <p style={{margin:0,fontSize:'0.94rem',lineHeight:1.7,color:theme.goodText,fontFamily:"'Source Serif 4',Georgia,serif"}}>
+                {q.expB}
+              </p>
+            </div>
+
+            {/* calcul étape par étape */}
+            {q.steps && (
+              <div style={{background:theme.bgAlt,border:`1px solid ${theme.border}`,borderRadius:8,padding:'14px 16px',marginBottom:14}}>
+                <p style={{margin:'0 0 10px',fontFamily:"'DM Sans',sans-serif",fontWeight:700,fontSize:'0.75rem',color:theme.textMuted,textTransform:'uppercase',letterSpacing:'0.06em'}}>
+                  📐 Calcul étape par étape
+                </p>
+                <table style={{borderCollapse:'collapse',width:'100%'}}>
+                  <tbody>
+                    {q.steps.map((s, i) => (
+                      <tr key={i} style={{borderBottom:i<q.steps.length-1?`1px solid ${theme.border}`:'none'}}>
+                        <td style={{padding:'6px 12px 6px 0',fontFamily:"'DM Sans',sans-serif",fontSize:'0.75rem',color:theme.textMuted,whiteSpace:'nowrap',verticalAlign:'middle'}}>
+                          Étape {i + 1}
+                        </td>
+                        <td style={{padding:'6px 16px 6px 0',color:theme.text,verticalAlign:'middle'}}>
+                          <M t={s.s} />
+                        </td>
+                        <td style={{padding:'6px 0',color:theme.accent,fontWeight:700,verticalAlign:'middle'}}>
+                          {s.r && <M t={"=\\ " + s.r} />}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
+            )}
+
+            {/* calcul direct */}
+            {q.calcStr && (
+              <div style={{background:theme.bgAlt,border:`1px solid ${theme.border}`,borderRadius:8,padding:'14px 20px',marginBottom:14,textAlign:'center'}}>
+                <p style={{margin:'0 0 10px',fontFamily:"'DM Sans',sans-serif",fontWeight:700,fontSize:'0.75rem',color:theme.textMuted,textTransform:'uppercase',letterSpacing:'0.06em'}}>
+                  📐 Calcul détaillé
+                </p>
+                <M t={q.calcStr} d={true} />
+              </div>
+            )}
+
+            {/* mauvaises réponses */}
+            <p style={{margin:'0 0 8px',fontFamily:"'DM Sans',sans-serif",fontWeight:700,fontSize:'0.75rem',color:theme.textMuted,textTransform:'uppercase',letterSpacing:'0.06em'}}>
+              ❌ Pourquoi les autres réponses sont incorrectes
+            </p>
+            {[q.expA, q.expC, q.expD].filter(Boolean).map(e => (
+              <div key={e.l} style={{marginBottom:8,padding:'10px 14px',background:theme.badBg,border:`1px solid ${theme.badBorder}`,borderRadius:6,fontSize:'0.92rem',lineHeight:1.65,color:theme.text,fontFamily:"'Source Serif 4',Georgia,serif"}}>
+                <strong style={{fontFamily:"'DM Sans',sans-serif",color:theme.badBorder}}>Réponse {e.l} : </strong>
+                {e.tx}
+              </div>
+            ))}
+
+            {/* piège */}
+            <div style={{marginTop:14,padding:'12px 16px',background:theme.pioegeBg,border:`1px solid ${theme.piegeBorder}`,borderRadius:8,fontSize:'0.92rem',lineHeight:1.65,color:theme.text,fontFamily:"'Source Serif 4',Georgia,serif"}}>
+              <span style={{fontFamily:"'DM Sans',sans-serif",fontWeight:700,color:theme.piegeText}}>⚠️ Piège à éviter : </span>
+              {q.piege}
             </div>
           </div>
+        )}
+      </div>
+    </Sec>
+  );
+}
 
-          {/* ── QUESTIONS ── */}
-          <div style={{ maxWidth: 860, margin: "0 auto", padding: "28px 18px 60px" }}>
-            {visibleQS.map(q => {
-              const chosen = answers[q.id];
-              const rev    = revealed[q.id];
-              const em     = q.niv.split(" ")[0];
-              const dc     = DIFF[em] || {};
+/* ============================================================================
+   CONTENT
+   ============================================================================ */
+function Content({ answers, setAnswers, revealed, setRevealed, setFilter, filter }) {
+  const { theme } = useTheme();
+  const score = Object.entries(answers).filter(
+    ([id, a]) => QS.find(q => q.id === +id)?.bonne === a
+  ).length;
+  const scoreByLevel = (emoji) => {
+    const levelQs = QS.filter(q => q.niv.startsWith(emoji));
+    const good = levelQs.filter(q => answers[q.id] === q.bonne).length;
+    return { good, total: levelQs.length };
+  };
 
-              return (
-                <div key={q.id} id={`q${q.id}`} style={{ marginBottom: 28, background: CARD, border: `1px solid ${BORDER}`, borderRadius: 12, overflow: "hidden", boxShadow: D ? "0 2px 12px rgba(0,0,0,0.5)" : "0 2px 12px rgba(0,0,0,0.07)", scrollMarginTop: 70 }}>
+  const renderLevel = (emoji, title, secId) => {
+    const levelQs = QS.filter(q => q.niv.startsWith(emoji));
+    if (filter !== "all" && filter !== emoji) return null;
+    return (
+      <Sec id={secId} title={title} level={1}>
+        {levelQs.map(q => (
+          <Question key={q.id} q={q} answers={answers} setAnswers={setAnswers} revealed={revealed} setRevealed={setRevealed} />
+        ))}
+      </Sec>
+    );
+  };
 
-                  {/* en-tête question */}
-                  <div style={{ padding: "16px 22px 0", display: "flex", flexWrap: "wrap", gap: 8, alignItems: "center" }}>
-                    <span style={{ background: ACC, color: "#fff", borderRadius: "50%", width: 30, height: 30, display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, fontSize: "0.88rem", fontFamily: "'DM Sans', sans-serif", flexShrink: 0 }}>
-                      {q.id}
-                    </span>
-                    <span style={{ background: dc.bg || "#f3f4f6", color: dc.tx || "#374151", border: `1px solid ${dc.bd || "#e5e7eb"}`, borderRadius: 12, padding: "3px 11px", fontSize: "0.75rem", fontFamily: "'DM Sans', sans-serif", fontWeight: 600 }}>
-                      {q.niv}
-                    </span>
-                    <span style={{ background: D ? "#21262d" : "#f1f5f9", color: D ? "#8b949e" : "#64748b", borderRadius: 8, padding: "3px 10px", fontSize: "0.72rem", fontFamily: "'DM Sans', sans-serif", marginLeft: "auto" }}>
-                      {q.theme}
-                    </span>
-                  </div>
+  return (
+    <>
+      {/* Introduction */}
+      <Sec id="intro" title="Introduction" level={1}>
+        <Box type="retenir" title="Mode d'emploi">
+          <P style={{marginBottom:8}}>
+            Ce QCM couvre les <B>notions clés du Jour 2 — Optimisation</B> : fonction de coût MSE,
+            dérivée, descente de gradient, taux d'apprentissage. Il contient <B>20 questions</B>
+            réparties en 4 niveaux de difficulté.
+          </P>
+          <P style={{marginBottom:0}}>
+            Sélectionnez une réponse pour chaque question, puis cliquez sur <B>« Voir la correction détaillée »</B>
+            pour afficher la justification, le calcul pas à pas et le piège classique à éviter.
+          </P>
+        </Box>
 
-                  {/* énoncé */}
-                  <div style={{ padding: "14px 22px", lineHeight: 1.8, fontSize: "0.97rem" }}>
-                    {q.isK
-                      ? <M t={q.enonce} d={true} />
-                      : <span>{q.enonce}</span>
-                    }
-                  </div>
-
-                  {/* options */}
-                  <div style={{ padding: "0 22px 18px", display: "flex", flexDirection: "column", gap: 9 }}>
-                    {q.opts.map(opt => {
-                      const sel = chosen === opt.l;
-                      const bon = opt.l === q.bonne;
-                      let bg = D ? SUBTLE : "#f9fafb";
-                      let bd = BORDER;
-                      let tc = TEXT;
-                      if (sel && !rev) { bg = D ? "#14291c" : "#dcfce7"; bd = ACC; }
-                      if (rev && bon) { bg = D ? "#14291c" : "#dcfce7"; bd = "#22c55e"; tc = D ? "#86efac" : "#15803d"; }
-                      if (rev && sel && !bon) { bg = D ? "#2d1b1b" : "#fee2e2"; bd = "#ef4444"; tc = D ? "#fca5a5" : "#991b1b"; }
-
-                      return (
-                        <button
-                          key={opt.l}
-                          onClick={() => !rev && setAnswers(p => ({ ...p, [q.id]: opt.l }))}
-                          style={{ display: "flex", alignItems: "center", gap: 12, background: bg, border: `2px solid ${bd}`, borderRadius: 8, padding: "11px 14px", cursor: rev ? "default" : "pointer", textAlign: "left", transition: "all 0.2s", color: tc, width: "100%" }}
-                        >
-                          <span style={{ minWidth: 28, height: 28, borderRadius: "50%", border: `2px solid ${bd}`, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'DM Sans', sans-serif", fontWeight: 700, fontSize: "0.82rem", flexShrink: 0, background: (sel || (rev && bon)) ? bd : "transparent", color: (sel || (rev && bon)) ? "#fff" : tc }}>
-                            {opt.l}
-                          </span>
-                          <span style={{ lineHeight: 1.6, fontSize: "0.93rem" }}>
-                            {opt.k ? <M t={opt.k} /> : opt.tx}
-                            {rev && bon && <span style={{ marginLeft: 8 }}>✓</span>}
-                            {rev && sel && !bon && <span style={{ marginLeft: 8 }}>✗</span>}
-                          </span>
-                        </button>
-                      );
-                    })}
-                  </div>
-
-                  {/* bouton correction */}
-                  {!rev && (
-                    <div style={{ padding: "0 22px 20px" }}>
-                      <button
-                        onClick={() => setRevealed(p => ({ ...p, [q.id]: true }))}
-                        style={{ background: ACC, color: "#fff", border: "none", borderRadius: 8, padding: "9px 22px", fontFamily: "'DM Sans', sans-serif", fontWeight: 600, cursor: "pointer", fontSize: "0.88rem" }}
-                      >
-                        📖 Voir la correction détaillée
-                      </button>
-                    </div>
-                  )}
-
-                  {/* ── CORRECTION ── */}
-                  {rev && (
-                    <div style={{ borderTop: `1px solid ${BORDER}`, background: D ? "#0d1117" : "#f8fafc", padding: "18px 22px 24px" }}>
-
-                      {/* bonne réponse */}
-                      <div style={{ background: D ? "#14291c" : "#dcfce7", border: "1px solid #22c55e", borderRadius: 8, padding: "12px 16px", marginBottom: 14 }}>
-                        <p style={{ margin: "0 0 6px", fontFamily: "'DM Sans', sans-serif", fontWeight: 700, color: "#15803d", fontSize: "0.8rem" }}>
-                          ✅ BONNE RÉPONSE — {q.bonne}
-                        </p>
-                        <p style={{ margin: 0, fontSize: "0.93rem", lineHeight: 1.7, color: D ? "#86efac" : "#14532d" }}>
-                          {q.expB}
-                        </p>
-                      </div>
-
-                      {/* calcul étape par étape */}
-                      {q.steps && (
-                        <div style={{ background: D ? "#161b22" : "#fff", border: `1px solid ${BORDER}`, borderRadius: 8, padding: "14px 16px", marginBottom: 14 }}>
-                          <p style={{ margin: "0 0 10px", fontFamily: "'DM Sans', sans-serif", fontWeight: 700, fontSize: "0.75rem", color: D ? "#8b949e" : "#64748b", textTransform: "uppercase", letterSpacing: "0.06em" }}>
-                            📐 Calcul étape par étape
-                          </p>
-                          <table style={{ borderCollapse: "collapse", width: "100%" }}>
-                            <tbody>
-                              {q.steps.map((s, i) => (
-                                <tr key={i} style={{ borderBottom: i < q.steps.length - 1 ? `1px solid ${BORDER}` : "none" }}>
-                                  <td style={{ padding: "6px 12px 6px 0", fontFamily: "'DM Sans', sans-serif", fontSize: "0.75rem", color: D ? "#8b949e" : "#9ca3af", whiteSpace: "nowrap", verticalAlign: "middle" }}>
-                                    Étape {i + 1}
-                                  </td>
-                                  <td style={{ padding: "6px 16px 6px 0", verticalAlign: "middle" }}><M t={s.s} /></td>
-                                  <td style={{ padding: "6px 0", color: ACC, fontWeight: 700, verticalAlign: "middle" }}>{s.r && <M t={"=\\ " + s.r} />}</td>
-                                </tr>
-                              ))}
-                            </tbody>
-                          </table>
-                        </div>
-                      )}
-
-                      {/* calcul formule directe */}
-                      {q.calcStr && (
-                        <div style={{ background: D ? "#161b22" : "#fff", border: `1px solid ${BORDER}`, borderRadius: 8, padding: "14px 20px", marginBottom: 14, textAlign: "center" }}>
-                          <p style={{ margin: "0 0 10px", fontFamily: "'DM Sans', sans-serif", fontWeight: 700, fontSize: "0.75rem", color: D ? "#8b949e" : "#64748b", textTransform: "uppercase", letterSpacing: "0.06em" }}>
-                            📐 Calcul détaillé
-                          </p>
-                          <M t={q.calcStr} d={true} />
-                        </div>
-                      )}
-
-                      {/* mauvaises réponses */}
-                      <p style={{ margin: "0 0 8px", fontFamily: "'DM Sans', sans-serif", fontWeight: 700, fontSize: "0.75rem", color: D ? "#8b949e" : "#64748b", textTransform: "uppercase", letterSpacing: "0.06em" }}>
-                        ❌ Pourquoi les autres réponses sont incorrectes
-                      </p>
-                      {[q.expA, q.expB2, q.expC, q.expD].filter(Boolean).map(e => (
-                        <div key={e.l} style={{ marginBottom: 8, padding: "10px 14px", background: D ? "#2d1b1b" : "#fff7f7", border: `1px solid ${D ? "#3d1f1f" : "#fecaca"}`, borderRadius: 6, fontSize: "0.9rem", lineHeight: 1.65 }}>
-                          <strong style={{ fontFamily: "'DM Sans', sans-serif", color: "#ef4444" }}>Réponse {e.l} : </strong>
-                          {e.tx}
-                        </div>
-                      ))}
-
-                      {/* piège */}
-                      <div style={{ marginTop: 14, padding: "12px 16px", background: D ? "#2d2000" : "#fffbeb", border: `1px solid ${D ? "#713f12" : "#fcd34d"}`, borderRadius: 8, fontSize: "0.9rem", lineHeight: 1.65 }}>
-                        <span style={{ fontFamily: "'DM Sans', sans-serif", fontWeight: 700, color: "#d97706" }}>⚠️ Piège à éviter : </span>
-                        {q.piege}
-                      </div>
-
-                    </div>
-                  )}
-                </div>
-              );
-            })}
-
-            {visibleQS.length === 0 && (
-              <div style={{ textAlign: "center", padding: "60px 20px", fontFamily: "'DM Sans', sans-serif", color: D ? "#8b949e" : "#6b7280" }}>
-                Aucune question ne correspond à ce filtre.
-              </div>
-            )}
-
-            {/* ── BILAN FINAL ── */}
-            {Object.keys(revealed).length === QS.length && (
-              <div style={{ background: CARD, border: `2px solid ${ACC}`, borderRadius: 12, padding: "28px 32px", textAlign: "center", marginBottom: 28 }}>
-                <p style={{ margin: "0 0 8px", fontFamily: "'DM Sans', sans-serif", fontSize: "1.1rem", fontWeight: 700 }}>
-                  {score === QS.length ? "🎉 Parfait !" : score >= 16 ? "👏 Excellent !" : score >= 12 ? "👍 Bien !" : score >= 8 ? "🙂 Correct" : "📚 À retravailler"}
-                </p>
-                <p style={{ margin: "0 0 14px", fontFamily: "'DM Sans', sans-serif", fontSize: "2.6rem", fontWeight: 800, color: ACC }}>
-                  {score} / {QS.length}
-                </p>
-                <div style={{ display: "flex", justifyContent: "center", flexWrap: "wrap", gap: 10, marginBottom: 14 }}>
-                  {["🟢", "🟡", "🟠", "🔴"].map(e => {
-                    const s = scoreByLevel(e);
-                    return (
-                      <span key={e} style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "0.85rem", background: D ? "#21262d" : "#f1f5f9", padding: "6px 12px", borderRadius: 8 }}>
-                        {e} <strong>{s.good}</strong>/{s.total}
-                      </span>
-                    );
-                  })}
-                </div>
-                <p style={{ margin: 0, fontFamily: "'DM Sans', sans-serif", fontSize: "0.85rem", opacity: 0.65 }}>
-                  {score < 10
-                    ? "Relisez la fiche de synthèse du Jour 2 et refaites les exercices crayon-papier."
-                    : score < 16
-                    ? "Bon niveau — entraînez-vous sur les questions rouges pour consolider votre compréhension critique."
-                    : "Vous maîtrisez l'optimisation — prêt·e pour le Jour 3 : Probabilités et classification !"}
-                </p>
-              </div>
-            )}
-
-            {/* ── FOOTER LICENCE ── */}
-            <div style={{ textAlign: "center", fontFamily: "'DM Sans', sans-serif", fontSize: "0.72rem", color: D ? "#484f58" : "#9ca3af", lineHeight: 2, marginTop: 32 }}>
-              © 2025 Mohamed EL AFRIT — IPSSI<br />
-              Ce contenu est distribué sous licence{" "}
-              <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.fr" style={{ color: ACC }}>
-                Creative Commons BY-NC-SA 4.0
-              </a>
+        {/* BARRE DE SCORE + FILTRE */}
+        <div style={{background:theme.bgAlt,border:`1px solid ${theme.border}`,borderRadius:10,padding:'14px 18px',margin:'20px 0',fontFamily:"'DM Sans',sans-serif"}}>
+          <div style={{display:'flex',alignItems:'center',gap:14,flexWrap:'wrap',marginBottom:10}}>
+            <span style={{color:theme.accent,fontWeight:700,fontSize:'0.95rem'}}>
+              Score : {score} / {QS.length}
+            </span>
+            <div style={{flex:'1 1 200px',height:8,background:theme.border,borderRadius:4,minWidth:140}}>
+              <div style={{width:`${(score/QS.length)*100}%`,height:'100%',background:score===QS.length?'#16a34a':theme.accent,borderRadius:4,transition:'width 0.4s'}} />
             </div>
+            <span style={{fontSize:'0.82rem',color:theme.textMuted}}>
+              {Object.keys(answers).length} / {QS.length} répondues
+            </span>
+          </div>
+          <div style={{display:'flex',gap:6,flexWrap:'wrap'}}>
+            {[
+              {val:"all", label:"Toutes"},
+              {val:"🟢", label:"🟢 Fondamental"},
+              {val:"🟡", label:"🟡 Calcul"},
+              {val:"🟠", label:"🟠 Application"},
+              {val:"🔴", label:"🔴 Analyse"},
+            ].map(b => (
+              <button
+                key={b.val}
+                onClick={() => setFilter(b.val)}
+                style={{
+                  background: filter===b.val ? theme.accent : 'transparent',
+                  color: filter===b.val ? '#fff' : theme.text,
+                  border: `1px solid ${filter===b.val ? theme.accent : theme.border}`,
+                  borderRadius:6, padding:'4px 11px', cursor:'pointer',
+                  fontFamily:"'DM Sans',sans-serif", fontSize:'0.78rem', fontWeight:600,
+                }}
+              >
+                {b.label}
+              </button>
+            ))}
           </div>
         </div>
-      );
-    }
 
-    /* ── Montage ── */
-    const root = ReactDOM.createRoot(document.getElementById("root"));
-    root.render(<QCMJour2 />);
-  </script>
+        <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit, minmax(160px, 1fr))',gap:10,margin:'18px 0'}}>
+          {[
+            {em:"🟢", label:"Fondamental", count:5, col:"#22c55e"},
+            {em:"🟡", label:"Calcul / Compréhension", count:6, col:"#eab308"},
+            {em:"🟠", label:"Application", count:5, col:"#f97316"},
+            {em:"🔴", label:"Analyse critique", count:4, col:"#ef4444"},
+          ].map(c => (
+            <div key={c.em} style={{background:theme.bgAlt,border:`1px solid ${theme.border}`,borderLeft:`4px solid ${c.col}`,borderRadius:6,padding:'10px 14px',fontFamily:"'DM Sans',sans-serif"}}>
+              <div style={{fontSize:'1.3rem',marginBottom:2}}>{c.em}</div>
+              <div style={{fontSize:'0.85rem',fontWeight:600,color:theme.text}}>{c.label}</div>
+              <div style={{fontSize:'0.75rem',color:theme.textMuted,marginTop:2}}>{c.count} questions</div>
+            </div>
+          ))}
+        </div>
+      </Sec>
+
+      {/* Les 4 niveaux */}
+      {renderLevel("🟢", "🟢 Niveau 1 — Fondamental", "niveau-1")}
+      {renderLevel("🟡", "🟡 Niveau 2 — Calcul / Compréhension", "niveau-2")}
+      {renderLevel("🟠", "🟠 Niveau 3 — Application", "niveau-3")}
+      {renderLevel("🔴", "🔴 Niveau 4 — Analyse critique", "niveau-4")}
+
+      {/* Bilan */}
+      <Sec id="bilan" title="Bilan final" level={1}>
+        {Object.keys(revealed).length === QS.length ? (
+          <Box type="retenir" title={
+            score === QS.length ? "🎉 Parfait !" :
+            score >= 16 ? "👏 Excellent !" :
+            score >= 12 ? "👍 Bien !" :
+            score >= 8 ? "🙂 Correct" : "📚 À retravailler"
+          }>
+            <div style={{textAlign:'center',marginBottom:16}}>
+              <div style={{fontFamily:"'DM Sans',sans-serif",fontSize:'3rem',fontWeight:800,color:theme.accent}}>
+                {score} / {QS.length}
+              </div>
+            </div>
+            <div style={{display:'flex',justifyContent:'center',flexWrap:'wrap',gap:10,marginBottom:14}}>
+              {["🟢","🟡","🟠","🔴"].map(e => {
+                const s = scoreByLevel(e);
+                return (
+                  <span key={e} style={{fontFamily:"'DM Sans',sans-serif",fontSize:'0.88rem',background:theme.bgCode,padding:'6px 14px',borderRadius:8,color:theme.text}}>
+                    {e} <strong>{s.good}</strong>/{s.total}
+                  </span>
+                );
+              })}
+            </div>
+            <P style={{marginBottom:0,textAlign:'center'}}>
+              {score < 10
+                ? "Relisez la fiche de synthèse du Jour 2 et refaites les exercices crayon-papier avant de passer au Jour 3."
+                : score < 16
+                ? "Bon niveau — consolidez sur les questions rouges (analyse critique) pour une compréhension complète."
+                : "Vous maîtrisez l'optimisation — prêt·e pour le Jour 3 : Probabilités et classification !"}
+            </P>
+          </Box>
+        ) : (
+          <Box type="intuition" title="Complétez toutes les questions pour voir votre bilan final">
+            <P style={{marginBottom:0}}>
+              Répondez et consultez la correction des <B>{QS.length} questions</B> pour débloquer votre bilan détaillé
+              par niveau de difficulté.
+              <br/>
+              <span style={{color:theme.textMuted,fontSize:'0.9rem'}}>
+                Progression : {Object.keys(revealed).length} / {QS.length} corrections consultées.
+              </span>
+            </P>
+          </Box>
+        )}
+
+        <div style={{display:'flex',gap:10,flexWrap:'wrap',marginTop:20,justifyContent:'center'}}>
+          <a href="../jour2.html" style={{display:'inline-flex',alignItems:'center',gap:6,background:theme.accent,color:'#fff',padding:'10px 20px',borderRadius:6,fontFamily:"'DM Sans',sans-serif",fontSize:'0.9rem',fontWeight:600,textDecoration:'none'}}>
+            📘 Retour au cours Jour 2
+          </a>
+          <a href="../jour3.html" style={{display:'inline-flex',alignItems:'center',gap:6,background:'#f97316',color:'#fff',padding:'10px 20px',borderRadius:6,fontFamily:"'DM Sans',sans-serif",fontSize:'0.9rem',fontWeight:600,textDecoration:'none'}}>
+            ➡️ Passer au Jour 3
+          </a>
+        </div>
+      </Sec>
+    </>
+  );
+}
+
+/* ============================================================================
+   ROOT
+   ============================================================================ */
+function QcmJour2Page() {
+  const [activeId, setActiveId] = useState('');
+  const [answers, setAnswers] = useState({});
+  const [revealed, setRevealed] = useState({});
+  const [filter, setFilter] = useState("all");
+
+  useEffect(() => {
+    const ids = [];
+    SECTIONS.forEach(s => { ids.push(s.id); s.children?.forEach(c => ids.push(c.id)); });
+    const obs = new IntersectionObserver(entries => {
+      const vis = entries.filter(e => e.isIntersecting).sort((a,b) => a.boundingClientRect.top - b.boundingClientRect.top);
+      if (vis.length) setActiveId(vis[0].target.id);
+    }, { rootMargin: '-10% 0px -80% 0px' });
+    ids.forEach(id => { const el = document.getElementById(id); if (el) obs.observe(el); });
+    return () => obs.disconnect();
+  }, [filter]);
+
+  return (
+    <ThemeProvider>
+      <Shell
+        activeId={activeId}
+        answers={answers} setAnswers={setAnswers}
+        revealed={revealed} setRevealed={setRevealed}
+        filter={filter} setFilter={setFilter}
+      />
+    </ThemeProvider>
+  );
+}
+
+function Shell({ activeId, answers, setAnswers, revealed, setRevealed, filter, setFilter }) {
+  const { theme } = useTheme();
+  return (
+    <div style={{background:theme.bg,minHeight:'100vh',transition:'background 0.3s'}}>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,700;1,400&family=JetBrains+Mono:wght@400;500;700&family=Source+Serif+4:ital,wght@0,400;0,600;0,700;1,400&display=swap');
+        *{box-sizing:border-box} body{margin:0;padding:0}
+        .main-content{margin-left:280px;max-width:860px;padding:32px 48px 80px}
+        @media(max-width:768px){.sidebar-el{transform:translateX(-100%)}.mob-btn{display:block!important}.main-content{margin-left:0;padding:20px 16px 60px}}
+        ::selection{background:${theme.accent}33} a{color:${theme.link}}
+      `}</style>
+      <Sidebar activeId={activeId} />
+      <main className="main-content">
+        <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',marginBottom:'8px'}}>
+          <div>
+            <div style={{fontFamily:"'DM Sans',sans-serif",fontSize:'0.85rem',color:theme.textMuted,fontWeight:500}}>Jour 2 — QCM</div>
+            <h1 style={{fontFamily:"'DM Sans',sans-serif",fontSize:'2rem',fontWeight:700,color:theme.text,margin:'4px 0 0',lineHeight:1.2}}>
+              Optimisation — 20 questions corrigées
+            </h1>
+          </div>
+          <ThemeToggle />
+        </div>
+        <div style={{height:'3px',background:`linear-gradient(90deg, ${theme.accent}, ${theme.accent}44)`,borderRadius:'2px',marginBottom:'32px'}} />
+
+        <div style={{display:'flex',gap:'10px',flexWrap:'wrap',margin:'20px 0'}}>
+          <a href="../jour2.html" style={{display:'inline-flex',alignItems:'center',justifyContent:'center',gap:'6px',background:theme.accent,color:'#fff',padding:'10px 18px',minWidth:'140px',borderRadius:'6px',fontFamily:"'DM Sans',sans-serif",fontSize:'0.9rem',fontWeight:600,textDecoration:'none'}}>
+            📘 Retour au cours
+          </a>
+          <a href="../pdf/jour2_synthese.pdf" target="_blank" rel="noopener" style={{display:'inline-flex',alignItems:'center',justifyContent:'center',gap:'6px',background:'#3b82f6',color:'#fff',padding:'10px 18px',minWidth:'140px',borderRadius:'6px',fontFamily:"'DM Sans',sans-serif",fontSize:'0.9rem',fontWeight:600,textDecoration:'none'}}>
+            📐 Synthèse PDF
+          </a>
+          <a href="../pdf/jour2_exercices.pdf" target="_blank" rel="noopener" style={{display:'inline-flex',alignItems:'center',justifyContent:'center',gap:'6px',background:'#f97316',color:'#fff',padding:'10px 18px',minWidth:'140px',borderRadius:'6px',fontFamily:"'DM Sans',sans-serif",fontSize:'0.9rem',fontWeight:600,textDecoration:'none'}}>
+            📝 Exercices PDF
+          </a>
+          <a href="../pdf/jour2_corrections.pdf" target="_blank" rel="noopener" style={{display:'inline-flex',alignItems:'center',justifyContent:'center',gap:'6px',background:'#22c55e',color:'#fff',padding:'10px 18px',minWidth:'140px',borderRadius:'6px',fontFamily:"'DM Sans',sans-serif",fontSize:'0.9rem',fontWeight:600,textDecoration:'none'}}>
+            ✅ Corrections PDF
+          </a>
+        </div>
+
+        <Content
+          answers={answers} setAnswers={setAnswers}
+          revealed={revealed} setRevealed={setRevealed}
+          filter={filter} setFilter={setFilter}
+        />
+
+        <footer style={{marginTop:'60px',padding:'24px 0',borderTop:`1px solid ${theme.border}`,textAlign:'center',fontFamily:"'DM Sans',sans-serif",fontSize:'0.8rem',color:theme.textMuted}}>
+          <p>© 2025 Mohamed EL AFRIT — IPSSI | <a href="https://www.mohamedelafrit.com" style={{color:theme.link,textDecoration:'none'}}>www.mohamedelafrit.com</a></p>
+          <p><a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.fr" style={{color:theme.link,textDecoration:'none'}}>CC BY-NC-SA 4.0</a></p>
+        </footer>
+      </main>
+    </div>
+  );
+}
+
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(React.createElement(QcmJour2Page));
+</script>
 </body>
 </html>
