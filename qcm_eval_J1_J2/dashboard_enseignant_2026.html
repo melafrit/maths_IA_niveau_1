@@ -1,0 +1,1813 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex,nofollow">
+<title>Dashboard enseignant — QCM Jours 1 et 2 — IPSSI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,700;1,400&family=JetBrains+Mono:wght@400;500;700&family=Source+Serif+4:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; padding: 0; font-family: 'Source Serif 4', Georgia, serif; }
+  @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+<script type="text/babel">
+// © 2025 Mohamed EL AFRIT — IPSSI
+// Ce contenu est distribué sous licence Creative Commons BY-NC-SA 4.0
+// https://creativecommons.org/licenses/by-nc-sa/4.0/deed.fr
+//
+// Dashboard enseignant — QCM d'évaluation Jours 1 et 2
+// Page d'administration : upload multi-CSV, tableau, statistiques, exports.
+// URL : NON RÉFÉRENCÉE depuis le site public (meta noindex/nofollow).
+
+const { useState, useEffect, useRef, useMemo, useCallback, createContext, useContext } = React;
+
+/* ============================================================================
+   CONFIGURATION
+   ============================================================================ */
+const CONFIG = {
+  QUESTIONS_URL:   'questions.json',
+  CORRECTIONS_URL: 'corrections.json',
+  SALT:            'IPSSI_SALT_2026',
+  EMAIL_CONTACT:   'm.elafrit@ecole-ipssi.net',
+  LETTRES:         ['A', 'B', 'C', 'D'],
+  BAREME:          { vert: 1, jaune: 2, orange: 3, rouge: 4 },
+  POINTS_MAX:      92,
+  NOTE_SUR:        20,
+  STORAGE_PREFIX:  'qcm_dash_j1j2_v1_',
+  PAGE_SIZE:       30,
+};
+
+const DIFFICULTE_META = {
+  vert:   { emoji: '🟢', label: 'Facile',    points: 1, color: '#22c55e' },
+  jaune:  { emoji: '🟡', label: 'Moyen',     points: 2, color: '#eab308' },
+  orange: { emoji: '🟠', label: 'Difficile', points: 3, color: '#f97316' },
+  rouge:  { emoji: '🔴', label: 'Expert',    points: 4, color: '#ef4444' },
+};
+
+/* ============================================================================
+   SYSTÈME DE THÈME
+   ============================================================================ */
+const THEMES = {
+  light: {
+    bg: '#ffffff', bgAlt: '#fafafa', bgCode: '#f3f4f6',
+    text: '#1a1a2e', textSecondary: '#4b5563', textMuted: '#9ca3af',
+    border: '#e5e7eb', borderLight: '#f3f4f6',
+    definitionBg: '#eff6ff', definitionBorder: '#3b82f6', definitionTitle: '#1e40af',
+    retenirBg: '#f0fdf4', retenirBorder: '#22c55e', retenirTitle: '#166534',
+    attentionBg: '#fff7ed', attentionBorder: '#f97316', attentionTitle: '#c2410c',
+    intuitionBg: '#faf5ff', intuitionBorder: '#a855f7', intuitionTitle: '#7e22ce',
+    exempleBg: '#ecfeff', exempleBorder: '#06b6d4', exempleTitle: '#0e7490',
+    codeBg: '#f8f9fa',
+    link: '#3b82f6', accent: '#3b82f6',
+    danger: '#ef4444', success: '#22c55e', warning: '#f59e0b',
+    gradeGreen: '#22c55e',  // >=14
+    gradeBlue: '#3b82f6',   // >=12
+    gradeOrange: '#f59e0b', // >=10
+    gradeRed: '#ef4444',    // <10
+    chartBar: '#3b82f6', chartBarAlt: '#60a5fa',
+    chartSuccess: '#22c55e', chartDanger: '#ef4444',
+    j1Color: '#3b82f6', j2Color: '#22c55e',
+  },
+  dark: {
+    bg: '#0d1117', bgAlt: '#161b22', bgCode: '#1c2128',
+    text: '#c9d1d9', textSecondary: '#8b949e', textMuted: '#6e7681',
+    border: '#30363d', borderLight: '#21262d',
+    definitionBg: '#0d1f3c', definitionBorder: '#3b82f6', definitionTitle: '#93bbfc',
+    retenirBg: '#0a1f0d', retenirBorder: '#22c55e', retenirTitle: '#86efac',
+    attentionBg: '#1f1206', attentionBorder: '#f97316', attentionTitle: '#fdba74',
+    intuitionBg: '#1a0d2e', intuitionBorder: '#a855f7', intuitionTitle: '#d8b4fe',
+    exempleBg: '#0a1a1f', exempleBorder: '#06b6d4', exempleTitle: '#67e8f9',
+    codeBg: '#161b22',
+    link: '#58a6ff', accent: '#58a6ff',
+    danger: '#f87171', success: '#4ade80', warning: '#fbbf24',
+    gradeGreen: '#4ade80', gradeBlue: '#60a5fa', gradeOrange: '#fbbf24', gradeRed: '#f87171',
+    chartBar: '#58a6ff', chartBarAlt: '#93c5fd',
+    chartSuccess: '#4ade80', chartDanger: '#f87171',
+    j1Color: '#58a6ff', j2Color: '#4ade80',
+  },
+};
+
+const ThemeContext = createContext();
+
+function ThemeProvider({ children }) {
+  const [mode, setMode] = useState(() => {
+    try { return localStorage.getItem(CONFIG.STORAGE_PREFIX + 'theme') === 'dark' ? 'dark' : 'light'; }
+    catch { return 'light'; }
+  });
+  const theme = THEMES[mode];
+  const toggle = () => {
+    const next = mode === 'light' ? 'dark' : 'light';
+    setMode(next);
+    try { localStorage.setItem(CONFIG.STORAGE_PREFIX + 'theme', next); } catch {}
+  };
+  return <ThemeContext.Provider value={{ mode, theme, toggle }}>{children}</ThemeContext.Provider>;
+}
+
+const useTheme = () => useContext(ThemeContext);
+
+/* ============================================================================
+   UTILITAIRES
+   ============================================================================ */
+function M({ t, d }) {
+  if (!window.katex) return <code>{t}</code>;
+  try {
+    const html = window.katex.renderToString(t, { throwOnError: false, displayMode: !!d });
+    if (d) return <div style={{ textAlign: 'center', overflowX: 'auto', margin: '12px 0' }}
+                       dangerouslySetInnerHTML={{ __html: html }} />;
+    return <span dangerouslySetInnerHTML={{ __html: html }} />;
+  } catch { return <code>{t}</code>; }
+}
+
+function RichText({ text }) {
+  if (!text) return null;
+  const parts = text.split(/(\$[^$]+\$)/g);
+  return <>{parts.map((p, i) =>
+    p.startsWith('$') && p.endsWith('$') && p.length >= 2
+      ? <M key={i} t={p.slice(1, -1)} />
+      : <React.Fragment key={i}>{p}</React.Fragment>
+  )}</>;
+}
+
+async function sha256Hex(str) {
+  const data = new TextEncoder().encode(str);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+  return Array.from(new Uint8Array(hashBuffer))
+    .map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+function formatDuration(seconds) {
+  const h = Math.floor(seconds / 3600);
+  const m = Math.floor((seconds % 3600) / 60);
+  const s = Math.floor(seconds % 60);
+  if (h > 0) return `${h}h${m.toString().padStart(2, '0')}`;
+  return `${m}m${s.toString().padStart(2, '0')}s`;
+}
+
+function formatDate(iso) {
+  if (!iso) return '—';
+  const d = new Date(iso);
+  if (isNaN(d)) return iso;
+  return d.toLocaleString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+}
+
+function formatNote(noteSur20) {
+  if (noteSur20 === null || noteSur20 === undefined || isNaN(noteSur20)) return '—';
+  return noteSur20.toFixed(2).replace('.', ',');
+}
+
+function parseCsvLine(line) {
+  const out = []; let cur = ''; let inQuotes = false;
+  for (let i = 0; i < line.length; i++) {
+    const c = line[i];
+    if (inQuotes) {
+      if (c === '"') {
+        if (line[i + 1] === '"') { cur += '"'; i++; }
+        else inQuotes = false;
+      } else cur += c;
+    } else {
+      if (c === '"') inQuotes = true;
+      else if (c === ',') { out.push(cur); cur = ''; }
+      else cur += c;
+    }
+  }
+  out.push(cur);
+  return out;
+}
+
+function parseCsv(text) {
+  if (text.charCodeAt(0) === 0xFEFF) text = text.slice(1);
+  const lines = text.split(/\r?\n/);
+  const metadata = {}; const answers = []; let signature = null;
+  let section = null; let headersRead = false;
+  for (const raw of lines) {
+    if (!raw.trim()) continue;
+    const t = raw.trim();
+    if (t.startsWith('#')) {
+      if (/SECTION\s*:\s*METADATA/i.test(t))   { section = 'meta';    headersRead = false; }
+      else if (/SECTION\s*:\s*REPONSES/i.test(t)) { section = 'answers'; headersRead = false; }
+      else if (/SECTION\s*:\s*SIGNATURE/i.test(t)){ section = 'sig';     headersRead = false; }
+      continue;
+    }
+    if (!section) continue;
+    const row = parseCsvLine(raw);
+    if (!headersRead) { headersRead = true; continue; }
+    if (section === 'meta') metadata[row[0]] = row[1];
+    else if (section === 'answers' && row.length >= 9) {
+      answers.push({
+        ordre:       parseInt(row[0], 10),
+        id:          row[1],
+        difficulte:  row[2],
+        type:        row[3],
+        jour:        parseInt(row[4], 10),
+        enonceTronque: row[5],
+        permutation: row[6].split('|').map(n => parseInt(n, 10)),
+        lettreChoisie: row[7] || '',
+        indexOriginalChoisi: row[8] === '' ? null : parseInt(row[8], 10),
+      });
+    } else if (section === 'sig' && row[0] === 'SHA256') signature = row[1];
+  }
+  return { metadata, answers, signature };
+}
+
+async function recomputeSignature(parsed) {
+  const m = parsed.metadata;
+  const dataToSign = [
+    m.Nom || '', m.Prenom || '', m.Email || '',
+    m.DateDebut || '', m.DateFin || '', String(m.DureeSec || ''),
+    String(m.NbQuestions || ''), CONFIG.SALT,
+    ...parsed.answers.map(a => `${a.ordre}|${a.id}|${a.permutation.join('|')}|${a.indexOriginalChoisi === null ? '' : a.indexOriginalChoisi}`),
+  ].join('||');
+  return await sha256Hex(dataToSign);
+}
+
+function csvCell(v) {
+  if (v === null || v === undefined) return '';
+  const s = String(v);
+  return /[",\n\r]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+}
+
+function downloadBlob(blob, filename) {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = filename;
+  document.body.appendChild(a); a.click();
+  document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+/* ============================================================================
+   CONSTRUCTION D'UN RAPPORT ÉTUDIANT À PARTIR D'UN CSV PARSÉ
+   ============================================================================ */
+async function buildReport({ parsed, filename, questionsById, correctionsById }) {
+  // Vérification signature
+  let signatureOk = false;
+  let signatureMessage = '';
+  if (!parsed.signature) {
+    signatureMessage = 'Pas de signature';
+  } else {
+    try {
+      const expected = await recomputeSignature(parsed);
+      signatureOk = (expected.toLowerCase() === parsed.signature.toLowerCase());
+      signatureMessage = signatureOk ? 'Valide' : 'Invalide';
+    } catch (e) {
+      signatureMessage = 'Erreur calcul';
+    }
+  }
+
+  // Calcul de la note et des stats
+  let pointsObtenus = 0;
+  let nbCorrect = 0;
+  let j1C = 0, j1T = 0, j2C = 0, j2T = 0;
+  // Agrégat par question pour statistiques de classe (renvoyé dans answers)
+  const enrichedAnswers = parsed.answers.map(ans => {
+    const cor = correctionsById[ans.id];
+    const q = questionsById[ans.id];
+    // IMPORTANT : difficulté et jour authoritatifs depuis corrections.json,
+    // PAS depuis le CSV (qui pourrait avoir été modifié manuellement)
+    const authDifficulte = cor ? cor.difficulte : ans.difficulte;
+    const authJour = cor ? cor.jour : ans.jour;
+    const authType = cor ? cor.type : ans.type;
+    const pts = (DIFFICULTE_META[authDifficulte] || {}).points || 0;
+    const isCorrect = cor && ans.indexOriginalChoisi !== null && ans.indexOriginalChoisi === cor.bonne_reponse_index;
+    if (isCorrect) { pointsObtenus += pts; nbCorrect++; }
+    if (authJour === 1) { j1T++; if (isCorrect) j1C++; }
+    if (authJour === 2) { j2T++; if (isCorrect) j2C++; }
+    return {
+      ...ans,
+      difficulte: authDifficulte,   // on remplace par la valeur authoritative
+      jour: authJour,
+      type: authType,
+      isCorrect: !!isCorrect,
+      pointsObtenus: isCorrect ? pts : 0,
+      pointsMax: pts,
+    };
+  });
+
+  const noteSur20 = (pointsObtenus / CONFIG.POINTS_MAX) * CONFIG.NOTE_SUR;
+
+  return {
+    id: (parsed.metadata.Email || '') + '_' + (parsed.metadata.DateFin || filename),
+    filename,
+    metadata: parsed.metadata,
+    answers: enrichedAnswers,
+    signature: parsed.signature,
+    signatureOk,
+    signatureMessage,
+    stats: {
+      pointsObtenus,
+      nbCorrect,
+      nbTotal: parsed.answers.length,
+      noteSur20,
+      j1Correct: j1C, j1Total: j1T, j1Pct: j1T > 0 ? (j1C / j1T) * 100 : 0,
+      j2Correct: j2C, j2Total: j2T, j2Pct: j2T > 0 ? (j2C / j2T) * 100 : 0,
+      dureeSec: parseInt(parsed.metadata.DureeSec || 0, 10),
+    },
+  };
+}
+
+/* ============================================================================
+   COMPOSANTS UI DE BASE
+   ============================================================================ */
+function ThemeToggle() {
+  const { mode, toggle } = useTheme();
+  return (
+    <button onClick={toggle} style={{
+      background: 'none', border: 'none', cursor: 'pointer',
+      fontSize: '1.3rem', padding: '6px 10px', borderRadius: '8px',
+    }} title={mode === 'light' ? 'Mode sombre' : 'Mode clair'}>
+      {mode === 'light' ? '🌙' : '☀️'}
+    </button>
+  );
+}
+
+function Box({ type, title, children, style = {} }) {
+  const { theme } = useTheme();
+  const C = {
+    definition: { icon: '📐', bg: 'definitionBg', bd: 'definitionBorder', tt: 'definitionTitle' },
+    retenir:    { icon: '⚡', bg: 'retenirBg',    bd: 'retenirBorder',    tt: 'retenirTitle' },
+    attention:  { icon: '⚠️', bg: 'attentionBg',  bd: 'attentionBorder',  tt: 'attentionTitle' },
+    intuition:  { icon: '💡', bg: 'intuitionBg',  bd: 'intuitionBorder',  tt: 'intuitionTitle' },
+    exemple:    { icon: '📊', bg: 'exempleBg',    bd: 'exempleBorder',    tt: 'exempleTitle' },
+  }[type] || { icon: '', bg: 'bgAlt', bd: 'border', tt: 'text' };
+  return (
+    <div style={{
+      background: theme[C.bg], borderLeft: `4px solid ${theme[C.bd]}`,
+      borderRadius: '6px', padding: '14px 18px', margin: '16px 0', ...style,
+    }}>
+      {title && (
+        <div style={{
+          fontFamily: "'DM Sans', sans-serif", fontWeight: 700,
+          color: theme[C.tt], marginBottom: '8px', fontSize: '0.9rem',
+        }}>{C.icon} {title}</div>
+      )}
+      <div style={{ color: theme.text, lineHeight: 1.65, fontSize: '0.95rem' }}>{children}</div>
+    </div>
+  );
+}
+
+function Button({ variant = 'primary', onClick, disabled, children, icon, size, style = {} }) {
+  const { theme } = useTheme();
+  const variants = {
+    primary:   { bg: theme.accent,  fg: '#ffffff', bdr: theme.accent },
+    secondary: { bg: theme.bgAlt,   fg: theme.text, bdr: theme.border },
+    success:   { bg: theme.success, fg: '#ffffff', bdr: theme.success },
+    danger:    { bg: theme.danger,  fg: '#ffffff', bdr: theme.danger },
+    ghost:     { bg: 'transparent', fg: theme.text, bdr: theme.border },
+  };
+  const v = variants[variant] || variants.primary;
+  const pad = size === 'sm' ? '6px 12px' : '10px 18px';
+  const fs = size === 'sm' ? '0.85rem' : '0.95rem';
+  return (
+    <button onClick={onClick} disabled={disabled} style={{
+      background: disabled ? theme.textMuted : v.bg, color: v.fg,
+      border: `1px solid ${disabled ? theme.textMuted : v.bdr}`,
+      padding: pad, borderRadius: '6px',
+      fontFamily: "'DM Sans', sans-serif", fontSize: fs, fontWeight: 600,
+      cursor: disabled ? 'not-allowed' : 'pointer',
+      opacity: disabled ? 0.6 : 1, transition: 'all 0.15s', ...style,
+    }}>
+      {icon && <span style={{ marginRight: '6px' }}>{icon}</span>}
+      {children}
+    </button>
+  );
+}
+
+function Input({ value, onChange, placeholder, type = 'text', style = {} }) {
+  const { theme } = useTheme();
+  return (
+    <input type={type} value={value} onChange={onChange} placeholder={placeholder}
+      style={{
+        padding: '8px 12px', background: theme.bgAlt, color: theme.text,
+        border: `1px solid ${theme.border}`, borderRadius: '6px',
+        fontFamily: "'Source Serif 4', serif", fontSize: '0.95rem',
+        outline: 'none', ...style,
+      }} />
+  );
+}
+
+// ============================================================================
+//   COMPOSANTS CHARTS (SVG natif)
+// ============================================================================
+
+// Histogramme de distribution des notes (barres par tranche de 2 points, 0-20)
+function HistogramNotes({ notes }) {
+  const { theme } = useTheme();
+  // Tranches : [0-2[, [2-4[, [4-6[, ..., [18-20]
+  const bins = Array.from({ length: 10 }, (_, i) => ({ min: i * 2, max: (i + 1) * 2, count: 0 }));
+  notes.forEach(n => {
+    const idx = Math.min(9, Math.floor(n / 2));
+    bins[idx].count++;
+  });
+  const maxCount = Math.max(1, ...bins.map(b => b.count));
+  const W = 560, H = 220, P = { t: 20, r: 20, b: 40, l: 40 };
+  const innerW = W - P.l - P.r, innerH = H - P.t - P.b;
+  const barW = innerW / bins.length;
+
+  return (
+    <svg viewBox={`0 0 ${W} ${H}`} style={{ width: '100%', maxWidth: W, height: 'auto' }}>
+      {/* axe Y - ticks */}
+      {[0, 0.25, 0.5, 0.75, 1].map((pct, i) => {
+        const val = Math.round(maxCount * pct);
+        const y = P.t + innerH - innerH * pct;
+        return (
+          <g key={i}>
+            <line x1={P.l} y1={y} x2={P.l + innerW} y2={y}
+                  stroke={theme.border} strokeDasharray={i === 0 ? '0' : '3,3'} strokeWidth="1" />
+            <text x={P.l - 6} y={y + 4} textAnchor="end"
+                  style={{ fontFamily: "'DM Sans', sans-serif", fontSize: '10px', fill: theme.textMuted }}>
+              {val}
+            </text>
+          </g>
+        );
+      })}
+      {/* barres */}
+      {bins.map((b, i) => {
+        const h = (b.count / maxCount) * innerH;
+        const x = P.l + i * barW + barW * 0.15;
+        const w = barW * 0.7;
+        const y = P.t + innerH - h;
+        // Couleur selon la tranche
+        const color = b.min >= 14 ? theme.gradeGreen
+                    : b.min >= 12 ? theme.gradeBlue
+                    : b.min >= 10 ? theme.gradeOrange
+                    : theme.gradeRed;
+        return (
+          <g key={i}>
+            {b.count > 0 && (
+              <rect x={x} y={y} width={w} height={h} rx="3" fill={color} opacity="0.85" />
+            )}
+            {b.count > 0 && (
+              <text x={x + w/2} y={y - 4} textAnchor="middle"
+                    style={{ fontFamily: "'DM Sans', sans-serif", fontSize: '11px', fill: theme.text, fontWeight: 600 }}>
+                {b.count}
+              </text>
+            )}
+            <text x={x + w/2} y={P.t + innerH + 16} textAnchor="middle"
+                  style={{ fontFamily: "'DM Sans', sans-serif", fontSize: '10px', fill: theme.textSecondary }}>
+              {b.min === 18 ? '18-20' : `${b.min}-${b.max}`}
+            </text>
+          </g>
+        );
+      })}
+      <text x={W/2} y={H - 4} textAnchor="middle"
+            style={{ fontFamily: "'DM Sans', sans-serif", fontSize: '11px', fill: theme.textMuted }}>
+        Tranche de note (/20)
+      </text>
+    </svg>
+  );
+}
+
+// Grille des 50 questions, couleur selon taux de réussite global
+function GridSuccessPerQuestion({ questionStats, onClickQuestion }) {
+  const { theme } = useTheme();
+  // questionStats: [{ id, jour, pctCorrect, nbAnswered, ... }]
+  const cellSize = 48;
+  const cols = 10;
+
+  const colorFor = (pct) => {
+    if (pct >= 80) return theme.gradeGreen;
+    if (pct >= 60) return theme.gradeBlue;
+    if (pct >= 40) return theme.gradeOrange;
+    return theme.gradeRed;
+  };
+
+  return (
+    <div style={{
+      display: 'grid',
+      gridTemplateColumns: `repeat(${cols}, 1fr)`,
+      gap: '4px', maxWidth: `${cols * (cellSize + 4)}px`,
+    }}>
+      {questionStats.map((q) => {
+        const bg = colorFor(q.pctCorrect);
+        return (
+          <div key={q.id} onClick={() => onClickQuestion?.(q)}
+            title={`${q.id} (J${q.jour}) — ${q.pctCorrect.toFixed(0)}% de réussite`}
+            style={{
+              background: bg, color: '#ffffff',
+              borderRadius: '4px', padding: '4px',
+              textAlign: 'center', cursor: onClickQuestion ? 'pointer' : 'default',
+              fontFamily: "'DM Sans', sans-serif",
+              transition: 'transform 0.15s',
+            }}
+            onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.08)'}
+            onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}>
+            <div style={{ fontSize: '0.65rem', opacity: 0.85, fontWeight: 500 }}>{q.id}</div>
+            <div style={{ fontSize: '0.85rem', fontWeight: 700 }}>{q.pctCorrect.toFixed(0)}%</div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+// Mini-camembert SVG pour la répartition des réponses d'une question
+function MiniPieChart({ slices, size = 120 }) {
+  const { theme } = useTheme();
+  const total = slices.reduce((s, sl) => s + sl.value, 0);
+  if (total === 0) {
+    return (
+      <div style={{
+        width: size, height: size, borderRadius: '50%',
+        background: theme.bgAlt, display: 'flex',
+        alignItems: 'center', justifyContent: 'center',
+        color: theme.textMuted, fontSize: '0.8rem', border: `1px solid ${theme.border}`,
+      }}>Aucune donnée</div>
+    );
+  }
+  const cx = size / 2, cy = size / 2, r = size / 2 - 4;
+  let angle = -Math.PI / 2;
+  const paths = slices.map((sl, i) => {
+    if (sl.value === 0) return null;
+    const pct = sl.value / total;
+    const endAngle = angle + pct * 2 * Math.PI;
+    const x1 = cx + r * Math.cos(angle);
+    const y1 = cy + r * Math.sin(angle);
+    const x2 = cx + r * Math.cos(endAngle);
+    const y2 = cy + r * Math.sin(endAngle);
+    const largeArc = pct > 0.5 ? 1 : 0;
+    const d = pct === 1
+      ? `M ${cx - r} ${cy} a ${r} ${r} 0 1 0 ${r * 2} 0 a ${r} ${r} 0 1 0 ${-r * 2} 0 Z`
+      : `M ${cx} ${cy} L ${x1} ${y1} A ${r} ${r} 0 ${largeArc} 1 ${x2} ${y2} Z`;
+    angle = endAngle;
+    return <path key={i} d={d} fill={sl.color} stroke={theme.bg} strokeWidth="1" />;
+  });
+  return (
+    <svg viewBox={`0 0 ${size} ${size}`} style={{ width: size, height: size }}>
+      {paths}
+    </svg>
+  );
+}
+
+// Comparaison J1 vs J2 en bar chart horizontal
+function BarComparisonJ1J2({ j1Pct, j2Pct }) {
+  const { theme } = useTheme();
+  const rows = [
+    { label: 'Jour 1', pct: j1Pct, color: theme.j1Color },
+    { label: 'Jour 2', pct: j2Pct, color: theme.j2Color },
+  ];
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+      {rows.map((r, i) => (
+        <div key={i}>
+          <div style={{
+            display: 'flex', justifyContent: 'space-between',
+            fontFamily: "'DM Sans', sans-serif", fontSize: '0.85rem',
+            color: theme.text, marginBottom: '4px',
+          }}>
+            <span>{r.label}</span>
+            <span style={{ fontWeight: 700, color: r.color }}>{r.pct.toFixed(1)}%</span>
+          </div>
+          <div style={{ background: theme.bgAlt, borderRadius: '4px', height: '18px', overflow: 'hidden' }}>
+            <div style={{
+              width: `${r.pct}%`, height: '100%', background: r.color,
+              transition: 'width 0.6s', display: 'flex', alignItems: 'center',
+              justifyContent: 'flex-end', paddingRight: '6px',
+              color: '#ffffff', fontSize: '0.7rem', fontFamily: "'DM Sans', sans-serif", fontWeight: 600,
+            }}>
+              {r.pct >= 15 ? `${r.pct.toFixed(0)}%` : ''}
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+/* ============================================================================
+   ÉCRAN 1 — UPLOAD MULTI-CSV
+   ============================================================================ */
+function UploadScreen({ onFilesLoaded, loading, ready, errorMsg }) {
+  const { theme } = useTheme();
+  const [dragOver, setDragOver] = useState(false);
+  const inputRef = useRef(null);
+
+  const handleFiles = (fileList) => {
+    if (!fileList || fileList.length === 0) return;
+    const files = Array.from(fileList).filter(f => /\.csv$/i.test(f.name));
+    if (files.length === 0) {
+      onFilesLoaded([], 'Aucun fichier .csv détecté dans la sélection.');
+      return;
+    }
+    // Lecture de tous les fichiers
+    Promise.all(files.map(f => new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onload = (e) => resolve({ name: f.name, content: e.target.result });
+      reader.onerror = () => resolve({ name: f.name, content: null, error: 'Lecture échouée' });
+      reader.readAsText(f, 'UTF-8');
+    }))).then(results => onFilesLoaded(results, null));
+  };
+
+  const onDrop = (e) => {
+    e.preventDefault();
+    setDragOver(false);
+    handleFiles(e.dataTransfer.files);
+  };
+
+  return (
+    <div style={{ maxWidth: '820px', margin: '0 auto', padding: '40px 24px 80px' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+        <div>
+          <div style={{
+            fontFamily: "'DM Sans', sans-serif", fontSize: '0.85rem',
+            color: theme.textMuted, fontWeight: 500, letterSpacing: '0.03em', textTransform: 'uppercase',
+          }}>
+            IPSSI — Usage enseignant uniquement
+          </div>
+          <h1 style={{
+            fontFamily: "'DM Sans', sans-serif", fontSize: '2rem',
+            fontWeight: 700, color: theme.text, margin: '4px 0 4px',
+          }}>
+            📊 Dashboard enseignant
+          </h1>
+          <div style={{
+            fontFamily: "'DM Sans', sans-serif", fontSize: '1rem',
+            color: theme.textSecondary, fontWeight: 500,
+          }}>
+            QCM d'évaluation — Jours 1 et 2
+          </div>
+        </div>
+        <ThemeToggle />
+      </div>
+      <div style={{
+        height: '3px', background: `linear-gradient(90deg, ${theme.accent}, ${theme.accent}44)`,
+        borderRadius: '2px', marginTop: '16px', marginBottom: '28px',
+      }} />
+
+      <Box type="definition" title="Correction automatique de plusieurs copies">
+        <p style={{ margin: '0 0 8px 0' }}>
+          Cette page permet d'uploader <strong>plusieurs CSV d'étudiants</strong> simultanément pour
+          obtenir : le tableau des notes, les statistiques de classe, le détail par question, et
+          des exports consolidés (CSV Yparéo + XLSX multi-onglets).
+        </p>
+        <p style={{ margin: 0, fontSize: '0.9rem', color: theme.textSecondary }}>
+          Chaque CSV est vérifié cryptographiquement (SHA-256) et signalé si falsifié.
+        </p>
+      </Box>
+
+      <div
+        onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
+        onDragLeave={() => setDragOver(false)}
+        onDrop={onDrop}
+        onClick={() => inputRef.current?.click()}
+        style={{
+          marginTop: '24px',
+          border: `3px dashed ${dragOver ? theme.accent : theme.border}`,
+          borderRadius: '12px', padding: '48px 24px', textAlign: 'center',
+          background: dragOver ? `${theme.accent}11` : theme.bgAlt,
+          cursor: 'pointer', transition: 'all 0.2s',
+        }}>
+        <div style={{ fontSize: '3rem', marginBottom: '8px' }}>
+          {loading ? '⏳' : '📁'}
+        </div>
+        <div style={{
+          fontFamily: "'DM Sans', sans-serif", fontSize: '1.1rem',
+          fontWeight: 600, color: theme.text, marginBottom: '6px',
+        }}>
+          {loading ? 'Traitement en cours…' : 'Glissez-déposez plusieurs fichiers CSV ici'}
+        </div>
+        <div style={{
+          fontFamily: "'DM Sans', sans-serif", fontSize: '0.9rem',
+          color: theme.textSecondary,
+        }}>
+          ou <strong>cliquez pour sélectionner</strong> (Ctrl/Cmd + clic pour choisir plusieurs fichiers)
+        </div>
+        <input ref={inputRef} type="file" accept=".csv,text/csv" multiple
+          onChange={(e) => handleFiles(e.target.files)}
+          style={{ display: 'none' }} />
+      </div>
+
+      {!ready && (
+        <Box type="intuition" style={{ marginTop: '24px' }}>
+          <p style={{ margin: 0 }}><strong>Chargement des données de correction…</strong></p>
+        </Box>
+      )}
+
+      {errorMsg && (
+        <Box type="attention" title="Erreur" style={{ marginTop: '24px' }}>
+          <p style={{ margin: 0 }}>{errorMsg}</p>
+        </Box>
+      )}
+
+      <Box type="attention" title="Traitement 100 % local">
+        <p style={{ margin: 0 }}>
+          Aucun fichier n'est envoyé à un serveur. Tout est traité dans votre navigateur.
+          La page n'est <strong>pas référencée</strong> depuis le site public.
+        </p>
+      </Box>
+
+      <div style={{
+        marginTop: '48px', padding: '20px 0', borderTop: `1px solid ${theme.border}`,
+        textAlign: 'center', fontFamily: "'DM Sans', sans-serif",
+        fontSize: '0.8rem', color: theme.textMuted,
+      }}>
+        <p style={{ margin: '4px 0' }}>© 2025 Mohamed EL AFRIT — IPSSI — Licence CC BY-NC-SA 4.0</p>
+      </div>
+    </div>
+  );
+}
+
+/* ============================================================================
+   CALCUL DES STATS DE CLASSE
+   ============================================================================ */
+function computeClassStats(reports, questionsData, correctionsData) {
+  const validReports = reports.filter(r => r.signatureOk);
+  const nReports = reports.length;
+  const nValid = validReports.length;
+
+  // Stats des notes
+  const notes = reports.map(r => r.stats.noteSur20).sort((a, b) => a - b);
+  const mean = notes.length > 0 ? notes.reduce((s, n) => s + n, 0) / notes.length : 0;
+  const median = notes.length > 0
+    ? (notes.length % 2 === 0 ? (notes[notes.length/2 - 1] + notes[notes.length/2]) / 2 : notes[Math.floor(notes.length/2)])
+    : 0;
+  const min = notes.length > 0 ? notes[0] : 0;
+  const max = notes.length > 0 ? notes[notes.length - 1] : 0;
+  const variance = notes.length > 0 ? notes.reduce((s, n) => s + (n - mean) ** 2, 0) / notes.length : 0;
+  const stddev = Math.sqrt(variance);
+
+  // Taux moyens J1 vs J2
+  const j1PctAvg = reports.length > 0 ? reports.reduce((s, r) => s + r.stats.j1Pct, 0) / reports.length : 0;
+  const j2PctAvg = reports.length > 0 ? reports.reduce((s, r) => s + r.stats.j2Pct, 0) / reports.length : 0;
+
+  // Stats par question : pour chacune des 50 questions, calculer le taux de réussite et la répartition
+  const questionStats = questionsData.questions.map(q => {
+    const cor = correctionsData.corrections.find(c => c.id === q.id);
+    const bonneIdx = cor?.bonne_reponse_index;
+    let nbAnswered = 0;
+    let nbCorrect = 0;
+    // Répartition des réponses (par index original, 0-3) + unanswered
+    const repartition = { 0: 0, 1: 0, 2: 0, 3: 0, nonRepondue: 0 };
+    reports.forEach(r => {
+      const a = r.answers.find(aa => aa.id === q.id);
+      if (!a) return;
+      if (a.indexOriginalChoisi === null) { repartition.nonRepondue++; return; }
+      nbAnswered++;
+      repartition[a.indexOriginalChoisi]++;
+      if (a.indexOriginalChoisi === bonneIdx) nbCorrect++;
+    });
+    const pctCorrect = (nbAnswered + repartition.nonRepondue) > 0
+      ? (nbCorrect / (nbAnswered + repartition.nonRepondue)) * 100
+      : 0;
+    return {
+      id: q.id, jour: q.jour, difficulte: q.difficulte, type: q.type,
+      enonce: q.enonce, propositions: q.propositions,
+      bonneReponseIndex: bonneIdx,
+      nbAnswered, nbCorrect,
+      pctCorrect,
+      repartition,
+    };
+  });
+
+  // Top 5 des questions les plus ratées (% réussite le plus bas)
+  const top5Failed = [...questionStats]
+    .filter(q => q.nbAnswered + q.repartition.nonRepondue > 0)
+    .sort((a, b) => a.pctCorrect - b.pctCorrect)
+    .slice(0, 5);
+
+  return {
+    nReports, nValid, nInvalid: nReports - nValid,
+    mean, median, min, max, stddev, variance,
+    notes,
+    j1PctAvg, j2PctAvg,
+    questionStats,
+    top5Failed,
+  };
+}
+
+/* ============================================================================
+   TABLEAU DES ÉTUDIANTS
+   ============================================================================ */
+function StudentsTable({ reports, onClickRow }) {
+  const { theme } = useTheme();
+  const [sortKey, setSortKey] = useState('noteSur20');
+  const [sortDir, setSortDir] = useState('desc');
+  const [query, setQuery] = useState('');
+  const [filterNote, setFilterNote] = useState(''); // '', '<10', '10-12', '12-14', '14-16', '>=16'
+  const [page, setPage] = useState(1);
+
+  const columns = [
+    { key: 'rang',         label: 'Rang',      align: 'center', sortable: false },
+    { key: 'Nom',          label: 'Nom',       align: 'left',   sortable: true, get: r => (r.metadata.Nom || '').toUpperCase() },
+    { key: 'Prenom',       label: 'Prénom',    align: 'left',   sortable: true, get: r => r.metadata.Prenom || '' },
+    { key: 'Email',        label: 'Email',     align: 'left',   sortable: true, get: r => r.metadata.Email || '' },
+    { key: 'DateFin',      label: 'Date',      align: 'center', sortable: true, get: r => r.metadata.DateFin || '' },
+    { key: 'dureeSec',     label: 'Durée',     align: 'center', sortable: true, get: r => r.stats.dureeSec },
+    { key: 'noteSur20',    label: 'Note /20',  align: 'center', sortable: true, get: r => r.stats.noteSur20 },
+    { key: 'pointsObtenus',label: 'Pts /92',   align: 'center', sortable: true, get: r => r.stats.pointsObtenus },
+    { key: 'j1Pct',        label: '% J1',      align: 'center', sortable: true, get: r => r.stats.j1Pct },
+    { key: 'j2Pct',        label: '% J2',      align: 'center', sortable: true, get: r => r.stats.j2Pct },
+    { key: 'signature',    label: 'Sig.',      align: 'center', sortable: true, get: r => r.signatureOk ? 1 : 0 },
+  ];
+
+  const matchesFilter = (r) => {
+    const n = r.stats.noteSur20;
+    if (filterNote === '<10') return n < 10;
+    if (filterNote === '10-12') return n >= 10 && n < 12;
+    if (filterNote === '12-14') return n >= 12 && n < 14;
+    if (filterNote === '14-16') return n >= 14 && n < 16;
+    if (filterNote === '>=16') return n >= 16;
+    return true;
+  };
+
+  const matchesQuery = (r) => {
+    if (!query.trim()) return true;
+    const q = query.toLowerCase();
+    return (r.metadata.Nom || '').toLowerCase().includes(q)
+        || (r.metadata.Prenom || '').toLowerCase().includes(q)
+        || (r.metadata.Email || '').toLowerCase().includes(q);
+  };
+
+  // Tri initial par note décroissante pour calculer le rang
+  const rankedByNote = [...reports].sort((a, b) => b.stats.noteSur20 - a.stats.noteSur20);
+  const rangById = new Map();
+  let currentRank = 0;
+  let prevNote = null;
+  rankedByNote.forEach((r, idx) => {
+    if (r.stats.noteSur20 !== prevNote) { currentRank = idx + 1; prevNote = r.stats.noteSur20; }
+    rangById.set(r.id, currentRank);
+  });
+
+  const filtered = reports.filter(r => matchesFilter(r) && matchesQuery(r));
+  const col = columns.find(c => c.key === sortKey);
+  const sorted = col?.get ? [...filtered].sort((a, b) => {
+    const va = col.get(a); const vb = col.get(b);
+    const cmp = typeof va === 'number' && typeof vb === 'number'
+      ? va - vb
+      : String(va).localeCompare(String(vb), 'fr');
+    return sortDir === 'asc' ? cmp : -cmp;
+  }) : filtered;
+
+  const totalPages = Math.max(1, Math.ceil(sorted.length / CONFIG.PAGE_SIZE));
+  const displayedPage = Math.min(page, totalPages);
+  const pageRows = sorted.slice((displayedPage - 1) * CONFIG.PAGE_SIZE, displayedPage * CONFIG.PAGE_SIZE);
+
+  const colorForNote = (n) =>
+      n >= 14 ? theme.gradeGreen
+    : n >= 12 ? theme.gradeBlue
+    : n >= 10 ? theme.gradeOrange
+    : theme.gradeRed;
+
+  const handleSort = (key) => {
+    if (!columns.find(c => c.key === key)?.sortable) return;
+    if (key === sortKey) setSortDir(d => d === 'asc' ? 'desc' : 'asc');
+    else { setSortKey(key); setSortDir('desc'); }
+  };
+
+  return (
+    <div>
+      <div style={{
+        display: 'flex', gap: '12px', flexWrap: 'wrap',
+        alignItems: 'center', marginBottom: '12px',
+      }}>
+        <Input value={query} onChange={e => setQuery(e.target.value)}
+          placeholder="🔍 Rechercher nom, prénom ou email…" style={{ flex: '1 1 220px', minWidth: '200px' }} />
+        <select value={filterNote} onChange={e => { setFilterNote(e.target.value); setPage(1); }}
+          style={{
+            padding: '8px 12px', background: theme.bgAlt, color: theme.text,
+            border: `1px solid ${theme.border}`, borderRadius: '6px',
+            fontFamily: "'Source Serif 4', serif", fontSize: '0.95rem',
+          }}>
+          <option value="">📊 Toutes les notes</option>
+          <option value="<10">❌ Moins de 10</option>
+          <option value="10-12">🟧 De 10 à 12</option>
+          <option value="12-14">🟦 De 12 à 14</option>
+          <option value="14-16">🟩 De 14 à 16</option>
+          <option value=">=16">⭐ 16 et plus</option>
+        </select>
+        <div style={{
+          fontFamily: "'DM Sans', sans-serif", fontSize: '0.85rem',
+          color: theme.textSecondary,
+        }}>
+          {filtered.length} / {reports.length} étudiant{reports.length > 1 ? 's' : ''}
+        </div>
+      </div>
+
+      <div style={{ overflowX: 'auto', border: `1px solid ${theme.border}`, borderRadius: '8px' }}>
+        <table style={{ width: '100%', borderCollapse: 'collapse', fontFamily: "'Source Serif 4', serif" }}>
+          <thead>
+            <tr style={{ background: theme.bgAlt }}>
+              {columns.map(c => (
+                <th key={c.key}
+                  onClick={() => handleSort(c.key)}
+                  style={{
+                    padding: '10px 12px', textAlign: c.align || 'left',
+                    fontFamily: "'DM Sans', sans-serif", fontSize: '0.82rem',
+                    fontWeight: 700, color: theme.textSecondary,
+                    cursor: c.sortable ? 'pointer' : 'default',
+                    borderBottom: `2px solid ${theme.border}`,
+                    whiteSpace: 'nowrap', userSelect: 'none',
+                  }}>
+                  {c.label} {c.sortable && (sortKey === c.key ? (sortDir === 'asc' ? '▲' : '▼') : '⇅')}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {pageRows.map((r, i) => {
+              const rang = rangById.get(r.id);
+              return (
+                <tr key={r.id}
+                  onClick={() => onClickRow?.(r)}
+                  style={{
+                    cursor: 'pointer',
+                    background: i % 2 === 0 ? theme.bg : theme.bgAlt,
+                    borderBottom: `1px solid ${theme.borderLight}`,
+                    transition: 'background 0.15s',
+                  }}
+                  onMouseEnter={e => e.currentTarget.style.background = `${theme.accent}22`}
+                  onMouseLeave={e => e.currentTarget.style.background = i % 2 === 0 ? theme.bg : theme.bgAlt}>
+                  <td style={{ padding: '10px 12px', textAlign: 'center', fontSize: '0.85rem', color: theme.textSecondary }}>
+                    #{rang}
+                  </td>
+                  <td style={{ padding: '10px 12px', fontWeight: 600 }}>{(r.metadata.Nom || '').toUpperCase()}</td>
+                  <td style={{ padding: '10px 12px' }}>{r.metadata.Prenom || ''}</td>
+                  <td style={{ padding: '10px 12px', fontSize: '0.85rem', color: theme.textSecondary,
+                              maxWidth: '200px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    {r.metadata.Email || ''}
+                  </td>
+                  <td style={{ padding: '10px 12px', textAlign: 'center', fontSize: '0.82rem', color: theme.textSecondary }}>
+                    {formatDate(r.metadata.DateFin)}
+                  </td>
+                  <td style={{ padding: '10px 12px', textAlign: 'center', fontSize: '0.85rem', fontFamily: "'JetBrains Mono', monospace" }}>
+                    {formatDuration(r.stats.dureeSec)}
+                  </td>
+                  <td style={{ padding: '10px 12px', textAlign: 'center' }}>
+                    <span style={{
+                      display: 'inline-block', padding: '3px 10px', borderRadius: '12px',
+                      background: colorForNote(r.stats.noteSur20), color: '#ffffff',
+                      fontFamily: "'DM Sans', sans-serif", fontWeight: 700, fontSize: '0.9rem',
+                      minWidth: '54px',
+                    }}>
+                      {formatNote(r.stats.noteSur20)}
+                    </span>
+                  </td>
+                  <td style={{ padding: '10px 12px', textAlign: 'center', fontFamily: "'JetBrains Mono', monospace", fontSize: '0.85rem' }}>
+                    {r.stats.pointsObtenus}
+                  </td>
+                  <td style={{ padding: '10px 12px', textAlign: 'center', fontSize: '0.85rem', color: theme.j1Color, fontWeight: 600 }}>
+                    {r.stats.j1Pct.toFixed(0)}%
+                  </td>
+                  <td style={{ padding: '10px 12px', textAlign: 'center', fontSize: '0.85rem', color: theme.j2Color, fontWeight: 600 }}>
+                    {r.stats.j2Pct.toFixed(0)}%
+                  </td>
+                  <td style={{ padding: '10px 12px', textAlign: 'center', fontSize: '0.8rem' }}>
+                    {r.signatureOk ? (
+                      <span style={{ color: theme.success }} title="Signature SHA-256 valide">✅</span>
+                    ) : (
+                      <span style={{ color: theme.danger }} title={'Signature ' + r.signatureMessage}>❌</span>
+                    )}
+                  </td>
+                </tr>
+              );
+            })}
+            {pageRows.length === 0 && (
+              <tr><td colSpan={columns.length} style={{
+                padding: '24px', textAlign: 'center', color: theme.textMuted,
+                fontFamily: "'DM Sans', sans-serif",
+              }}>Aucun étudiant correspondant aux filtres.</td></tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+
+      {totalPages > 1 && (
+        <div style={{
+          display: 'flex', justifyContent: 'center', alignItems: 'center',
+          gap: '8px', marginTop: '14px', fontFamily: "'DM Sans', sans-serif",
+        }}>
+          <Button size="sm" variant="ghost" disabled={displayedPage === 1} onClick={() => setPage(p => p - 1)}>
+            ← Précédent
+          </Button>
+          <span style={{ fontSize: '0.9rem', color: theme.textSecondary, minWidth: '100px', textAlign: 'center' }}>
+            Page {displayedPage} / {totalPages}
+          </span>
+          <Button size="sm" variant="ghost" disabled={displayedPage === totalPages} onClick={() => setPage(p => p + 1)}>
+            Suivant →
+          </Button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ============================================================================
+   MODAL DE DÉTAIL PAR ÉTUDIANT
+   ============================================================================ */
+function StudentDetailModal({ report, questionsById, correctionsById, onClose }) {
+  const { theme } = useTheme();
+  useEffect(() => {
+    const onEsc = (e) => { if (e.key === 'Escape') onClose(); };
+    window.addEventListener('keydown', onEsc);
+    return () => window.removeEventListener('keydown', onEsc);
+  }, [onClose]);
+
+  return (
+    <div style={{
+      position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.55)',
+      display: 'flex', alignItems: 'flex-start', justifyContent: 'center',
+      zIndex: 1000, padding: '24px', overflowY: 'auto',
+    }} onClick={onClose}>
+      <div style={{
+        background: theme.bg, border: `1px solid ${theme.border}`,
+        borderRadius: '12px', maxWidth: '960px', width: '100%',
+        boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
+        animation: 'slideDown 0.2s',
+      }} onClick={e => e.stopPropagation()}>
+        <div style={{
+          padding: '18px 24px', borderBottom: `1px solid ${theme.border}`,
+          display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+          position: 'sticky', top: 0, background: theme.bg, zIndex: 1, borderRadius: '12px 12px 0 0',
+        }}>
+          <div>
+            <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: '0.82rem', color: theme.textMuted }}>
+              Détail étudiant
+            </div>
+            <h2 style={{
+              fontFamily: "'DM Sans', sans-serif", fontSize: '1.4rem',
+              fontWeight: 700, color: theme.text, margin: '2px 0 0',
+            }}>
+              {(report.metadata.Nom || '').toUpperCase()} {report.metadata.Prenom}
+            </h2>
+            <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: '0.85rem', color: theme.textSecondary, marginTop: '2px' }}>
+              {report.metadata.Email}
+            </div>
+          </div>
+          <button onClick={onClose} style={{
+            background: 'none', border: 'none', cursor: 'pointer',
+            fontSize: '1.5rem', color: theme.text, padding: '4px 12px',
+          }} aria-label="Fermer">✕</button>
+        </div>
+
+        <div style={{ padding: '24px' }}>
+          {/* Résumé */}
+          <div style={{
+            display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(110px, 1fr))',
+            gap: '10px', marginBottom: '20px',
+          }}>
+            {[
+              { label: 'Note', value: formatNote(report.stats.noteSur20) + ' /20', color: theme.accent },
+              { label: 'Points', value: `${report.stats.pointsObtenus} /92` },
+              { label: 'Correctes', value: `${report.stats.nbCorrect} /${report.stats.nbTotal}` },
+              { label: '% J1', value: `${report.stats.j1Pct.toFixed(0)}%` },
+              { label: '% J2', value: `${report.stats.j2Pct.toFixed(0)}%` },
+              { label: 'Durée', value: formatDuration(report.stats.dureeSec) },
+              { label: 'Signature', value: report.signatureOk ? '✅' : '❌', color: report.signatureOk ? theme.success : theme.danger },
+            ].map((s, i) => (
+              <div key={i} style={{
+                background: theme.bgAlt, border: `1px solid ${theme.border}`,
+                borderRadius: '8px', padding: '10px 12px', textAlign: 'center',
+              }}>
+                <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: '0.7rem', color: theme.textMuted, textTransform: 'uppercase' }}>
+                  {s.label}
+                </div>
+                <div style={{
+                  fontFamily: "'DM Sans', sans-serif", fontSize: '1.1rem',
+                  fontWeight: 700, color: s.color || theme.text, marginTop: '2px',
+                }}>
+                  {s.value}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Liste compacte des 50 questions avec statut */}
+          <h3 style={{
+            fontFamily: "'DM Sans', sans-serif", fontSize: '1rem',
+            color: theme.text, margin: '0 0 10px 0',
+          }}>
+            Réponses détaillées (ordre vu par l'étudiant)
+          </h3>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+            {report.answers.map((ans, idx) => {
+              const q = questionsById[ans.id];
+              const cor = correctionsById[ans.id];
+              const bonneLettreOriginal = cor ? CONFIG.LETTRES[cor.bonne_reponse_index] : '?';
+              const bonneLettreVue = cor ? CONFIG.LETTRES[ans.permutation.indexOf(cor.bonne_reponse_index)] : '?';
+              const statut = ans.indexOriginalChoisi === null ? 'nonRepondu' : (ans.isCorrect ? 'correct' : 'incorrect');
+              const statutBg = statut === 'correct' ? `${theme.success}22`
+                             : statut === 'incorrect' ? `${theme.danger}22`
+                             : `${theme.warning}22`;
+              const statutText = statut === 'correct' ? '✅' : statut === 'incorrect' ? '❌' : '❓';
+              const diff = DIFFICULTE_META[ans.difficulte] || {};
+              return (
+                <div key={idx} style={{
+                  background: statutBg,
+                  border: `1px solid ${theme.border}`, borderRadius: '6px',
+                  padding: '8px 12px',
+                  display: 'grid', gridTemplateColumns: '30px 60px auto 1fr 120px', gap: '10px',
+                  alignItems: 'center', fontFamily: "'Source Serif 4', serif", fontSize: '0.85rem',
+                }}>
+                  <span style={{ textAlign: 'center' }}>{statutText}</span>
+                  <span style={{ fontFamily: "'JetBrains Mono', monospace", color: theme.textMuted, fontSize: '0.8rem' }}>
+                    #{idx + 1} {ans.id}
+                  </span>
+                  <span style={{ fontSize: '0.75rem', color: theme.textSecondary }}>
+                    {diff.emoji} {diff.label} · J{ans.jour}
+                  </span>
+                  <span style={{ color: theme.text, fontSize: '0.82rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    {q?.enonce.slice(0, 80).replace(/\$[^$]*\$/g, '[…]')}…
+                  </span>
+                  <span style={{
+                    fontFamily: "'DM Sans', sans-serif", fontSize: '0.8rem',
+                    textAlign: 'right', color: theme.textSecondary,
+                  }}>
+                    Choisi : <strong style={{ color: theme.text }}>{ans.lettreChoisie || '—'}</strong>
+                    {' · '}Bonne : <strong style={{ color: theme.success }}>{bonneLettreVue}</strong>
+                    {' · '}{ans.pointsObtenus}/{ans.pointsMax} pt
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+
+          {!report.signatureOk && (
+            <Box type="attention" title="⚠️ Signature invalide">
+              <p style={{ margin: 0 }}>
+                Le CSV de cet étudiant a échoué à la vérification cryptographique.
+                Le fichier a probablement été modifié manuellement après export.
+                Message : {report.signatureMessage}.
+              </p>
+            </Box>
+          )}
+
+          <div style={{ marginTop: '16px', textAlign: 'right' }}>
+            <Button variant="ghost" onClick={onClose}>Fermer (ESC)</Button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ============================================================================
+   EXPORTS CSV ET XLSX
+   ============================================================================ */
+function exportCsvSynthese(reports) {
+  const lines = [];
+  lines.push('Nom,Prenom,Email,Note,PointsObtenus,PointsMax,PctJ1,PctJ2,DureeSec,DateFin,SignatureValide');
+  const sorted = [...reports].sort((a, b) => b.stats.noteSur20 - a.stats.noteSur20);
+  sorted.forEach(r => {
+    lines.push([
+      csvCell((r.metadata.Nom || '').toUpperCase()),
+      csvCell(r.metadata.Prenom || ''),
+      csvCell(r.metadata.Email || ''),
+      csvCell(r.stats.noteSur20.toFixed(2).replace('.', ',')),
+      r.stats.pointsObtenus,
+      CONFIG.POINTS_MAX,
+      r.stats.j1Pct.toFixed(1).replace('.', ','),
+      r.stats.j2Pct.toFixed(1).replace('.', ','),
+      r.stats.dureeSec,
+      csvCell(r.metadata.DateFin || ''),
+      r.signatureOk ? 'OUI' : 'NON',
+    ].join(','));
+  });
+  const blob = new Blob(['\ufeff' + lines.join('\n') + '\n'], { type: 'text/csv;charset=utf-8;' });
+  const today = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+  downloadBlob(blob, `IPSSI_QCM_J1J2_Resultats_${today}.csv`);
+}
+
+function exportXlsx(reports, classStats, questionsById, correctionsById) {
+  if (!window.XLSX) {
+    alert('Librairie XLSX non chargée — vérifiez votre connexion.');
+    return;
+  }
+  const wb = XLSX.utils.book_new();
+
+  // ----- Feuille 1 : Résultats -----
+  const sorted = [...reports].sort((a, b) => b.stats.noteSur20 - a.stats.noteSur20);
+  const resultats = [[
+    'Rang', 'Nom', 'Prenom', 'Email', 'Note /20', 'Points /92',
+    '% J1', '% J2', 'Correctes /50', 'Duree (mm:ss)', 'Date fin', 'Signature',
+  ]];
+  let rang = 0, prev = null;
+  sorted.forEach((r, idx) => {
+    if (r.stats.noteSur20 !== prev) { rang = idx + 1; prev = r.stats.noteSur20; }
+    resultats.push([
+      rang,
+      (r.metadata.Nom || '').toUpperCase(),
+      r.metadata.Prenom || '',
+      r.metadata.Email || '',
+      Math.round(r.stats.noteSur20 * 100) / 100,
+      r.stats.pointsObtenus,
+      Math.round(r.stats.j1Pct * 10) / 10,
+      Math.round(r.stats.j2Pct * 10) / 10,
+      r.stats.nbCorrect,
+      formatDuration(r.stats.dureeSec),
+      r.metadata.DateFin || '',
+      r.signatureOk ? 'OUI' : 'NON',
+    ]);
+  });
+  const ws1 = XLSX.utils.aoa_to_sheet(resultats);
+  ws1['!cols'] = [{wch:6},{wch:16},{wch:14},{wch:28},{wch:9},{wch:11},{wch:7},{wch:7},{wch:11},{wch:12},{wch:20},{wch:9}];
+  XLSX.utils.book_append_sheet(wb, ws1, 'Resultats');
+
+  // ----- Feuille 2 : Statistiques de classe -----
+  const statsArr = [
+    ['Metrique', 'Valeur'],
+    ['Nombre d\'etudiants corriges', classStats.nReports],
+    ['Dont signatures valides', classStats.nValid],
+    ['Dont signatures invalides', classStats.nInvalid],
+    [],
+    ['Statistiques des notes (/20)', ''],
+    ['Moyenne', (Math.round(classStats.mean * 100) / 100).toString().replace('.', ',')],
+    ['Mediane', (Math.round(classStats.median * 100) / 100).toString().replace('.', ',')],
+    ['Minimum', (Math.round(classStats.min * 100) / 100).toString().replace('.', ',')],
+    ['Maximum', (Math.round(classStats.max * 100) / 100).toString().replace('.', ',')],
+    ['Ecart-type', (Math.round(classStats.stddev * 100) / 100).toString().replace('.', ',')],
+    [],
+    ['Taux de reussite par jour', ''],
+    ['Moyenne % J1', (Math.round(classStats.j1PctAvg * 10) / 10) + '%'],
+    ['Moyenne % J2', (Math.round(classStats.j2PctAvg * 10) / 10) + '%'],
+    [],
+    ['Distribution des notes', 'Nombre d\'etudiants'],
+  ];
+  // Distribution
+  const dist = Array.from({ length: 10 }, (_, i) => ({ min: i * 2, max: (i + 1) * 2, count: 0 }));
+  classStats.notes.forEach(n => { dist[Math.min(9, Math.floor(n / 2))].count++; });
+  dist.forEach(b => {
+    statsArr.push([`[${b.min}-${b.max}${b.min === 18 ? ']' : '['}`, b.count]);
+  });
+  const ws2 = XLSX.utils.aoa_to_sheet(statsArr);
+  ws2['!cols'] = [{wch:36},{wch:20}];
+  XLSX.utils.book_append_sheet(wb, ws2, 'Stats classe');
+
+  // ----- Feuille 3 : Détail par question -----
+  const qArr = [[
+    'ID', 'Jour', 'Difficulte', 'Type', 'Enonce (debut)',
+    '% Reussite global', 'Nb correctes', 'Nb repondues', 'Nb etudiants',
+    'Bonne reponse (index)', 'Bonne reponse (lettre)',
+    'Choix A', 'Choix B', 'Choix C', 'Choix D', 'Non repondu',
+  ]];
+  classStats.questionStats.forEach(q => {
+    qArr.push([
+      q.id, q.jour, q.difficulte, q.type,
+      q.enonce.slice(0, 110).replace(/\s+/g, ' '),
+      Math.round(q.pctCorrect * 10) / 10,
+      q.nbCorrect, q.nbAnswered,
+      q.nbAnswered + q.repartition.nonRepondue,
+      q.bonneReponseIndex,
+      CONFIG.LETTRES[q.bonneReponseIndex] || '?',
+      q.repartition[0], q.repartition[1], q.repartition[2], q.repartition[3], q.repartition.nonRepondue,
+    ]);
+  });
+  const ws3 = XLSX.utils.aoa_to_sheet(qArr);
+  ws3['!cols'] = [{wch:7},{wch:6},{wch:10},{wch:12},{wch:50},{wch:15},{wch:12},{wch:12},{wch:12},{wch:9},{wch:9},{wch:7},{wch:7},{wch:7},{wch:7},{wch:12}];
+  XLSX.utils.book_append_sheet(wb, ws3, 'Detail par question');
+
+  // Écriture
+  const today = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+  XLSX.writeFile(wb, `IPSSI_QCM_J1J2_Rapport_${today}.xlsx`);
+}
+
+/* ============================================================================
+   ÉCRAN 2 — DASHBOARD PRINCIPAL
+   ============================================================================ */
+function DashboardScreen({ reports, questionsData, correctionsData, questionsById, correctionsById, onReset }) {
+  const { theme } = useTheme();
+  const [selectedReport, setSelectedReport] = useState(null);
+  const [selectedQuestionStat, setSelectedQuestionStat] = useState(null);
+
+  const classStats = useMemo(
+    () => computeClassStats(reports, questionsData, correctionsData),
+    [reports, questionsData, correctionsData]
+  );
+
+  return (
+    <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '24px 24px 80px' }}>
+      {/* HEADER */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '12px' }}>
+        <div>
+          <div style={{
+            fontFamily: "'DM Sans', sans-serif", fontSize: '0.82rem',
+            color: theme.textMuted, fontWeight: 500, letterSpacing: '0.03em', textTransform: 'uppercase',
+          }}>
+            Dashboard enseignant — Usage restreint
+          </div>
+          <h1 style={{
+            fontFamily: "'DM Sans', sans-serif", fontSize: '1.8rem',
+            fontWeight: 700, color: theme.text, margin: '2px 0 0',
+          }}>
+            📊 QCM Jours 1 et 2 — Résultats de la classe
+          </h1>
+        </div>
+        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+          <Button variant="ghost" onClick={onReset} icon="🔄">Nouveau chargement</Button>
+          <ThemeToggle />
+        </div>
+      </div>
+      <div style={{
+        height: '3px', background: `linear-gradient(90deg, ${theme.accent}, ${theme.accent}44)`,
+        borderRadius: '2px', marginTop: '14px', marginBottom: '24px',
+      }} />
+
+      {/* KPI CARDS */}
+      <div style={{
+        display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))',
+        gap: '10px', marginBottom: '24px',
+      }}>
+        {[
+          { label: 'Étudiants', value: classStats.nReports, color: theme.accent },
+          { label: 'Moyenne /20', value: formatNote(classStats.mean), color: theme.accent },
+          { label: 'Médiane /20', value: formatNote(classStats.median) },
+          { label: 'Min /20', value: formatNote(classStats.min), color: theme.danger },
+          { label: 'Max /20', value: formatNote(classStats.max), color: theme.success },
+          { label: 'Écart-type', value: formatNote(classStats.stddev) },
+          { label: 'Signatures ❌', value: classStats.nInvalid, color: classStats.nInvalid > 0 ? theme.danger : theme.success },
+        ].map((k, i) => (
+          <div key={i} style={{
+            background: theme.bgAlt, border: `1px solid ${theme.border}`,
+            borderRadius: '8px', padding: '12px 14px',
+          }}>
+            <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: '0.7rem', color: theme.textMuted, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+              {k.label}
+            </div>
+            <div style={{
+              fontFamily: "'DM Sans', sans-serif", fontSize: '1.4rem',
+              fontWeight: 700, color: k.color || theme.text, marginTop: '2px',
+            }}>
+              {k.value}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* BOUTONS D'EXPORT */}
+      <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', marginBottom: '24px' }}>
+        <Button variant="success" onClick={() => exportCsvSynthese(reports)} icon="📄">
+          Export CSV (Yparéo)
+        </Button>
+        <Button variant="success" onClick={() => exportXlsx(reports, classStats, questionsById, correctionsById)} icon="📊">
+          Export XLSX multi-onglets
+        </Button>
+      </div>
+
+      {/* DISTRIBUTION DES NOTES */}
+      <SectionTitle>📈 Distribution des notes</SectionTitle>
+      <div style={{
+        background: theme.bgAlt, border: `1px solid ${theme.border}`,
+        borderRadius: '8px', padding: '16px', marginBottom: '24px',
+      }}>
+        {classStats.notes.length > 0 ? (
+          <HistogramNotes notes={classStats.notes} />
+        ) : (
+          <div style={{ textAlign: 'center', color: theme.textMuted }}>Aucune donnée</div>
+        )}
+      </div>
+
+      {/* J1 vs J2 */}
+      <SectionTitle>⚖️ Comparaison Jour 1 vs Jour 2 (taux de réussite moyen)</SectionTitle>
+      <div style={{
+        background: theme.bgAlt, border: `1px solid ${theme.border}`,
+        borderRadius: '8px', padding: '20px 24px', marginBottom: '24px',
+      }}>
+        <BarComparisonJ1J2 j1Pct={classStats.j1PctAvg} j2Pct={classStats.j2PctAvg} />
+      </div>
+
+      {/* TAUX PAR QUESTION (GRID) */}
+      <SectionTitle>🎯 Taux de réussite par question (50 questions)</SectionTitle>
+      <div style={{
+        background: theme.bgAlt, border: `1px solid ${theme.border}`,
+        borderRadius: '8px', padding: '16px', marginBottom: '24px',
+      }}>
+        <div style={{
+          fontFamily: "'DM Sans', sans-serif", fontSize: '0.85rem',
+          color: theme.textSecondary, marginBottom: '12px',
+        }}>
+          Couleur par tranche : <span style={{ color: theme.gradeRed }}>● &lt;40 %</span>
+          <span style={{ margin: '0 8px' }}>·</span>
+          <span style={{ color: theme.gradeOrange }}>● 40–60 %</span>
+          <span style={{ margin: '0 8px' }}>·</span>
+          <span style={{ color: theme.gradeBlue }}>● 60–80 %</span>
+          <span style={{ margin: '0 8px' }}>·</span>
+          <span style={{ color: theme.gradeGreen }}>● ≥80 %</span>
+          <span style={{ margin: '0 12px', color: theme.textMuted }}>|</span>
+          <em>Cliquez sur une cellule pour voir la répartition des réponses.</em>
+        </div>
+        <GridSuccessPerQuestion questionStats={classStats.questionStats} onClickQuestion={setSelectedQuestionStat} />
+      </div>
+
+      {/* TOP 5 RATÉES */}
+      <SectionTitle>🔥 Top 5 des questions les plus ratées</SectionTitle>
+      <div style={{
+        display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+        gap: '12px', marginBottom: '24px',
+      }}>
+        {classStats.top5Failed.map((q, i) => (
+          <QuestionFailedCard key={q.id} rank={i + 1} questionStat={q} />
+        ))}
+      </div>
+
+      {/* TABLEAU PRINCIPAL */}
+      <SectionTitle>👥 Tableau des étudiants</SectionTitle>
+      <StudentsTable reports={reports} onClickRow={setSelectedReport} />
+
+      {/* FOOTER */}
+      <div style={{
+        marginTop: '48px', padding: '20px 0', borderTop: `1px solid ${theme.border}`,
+        textAlign: 'center', fontFamily: "'DM Sans', sans-serif",
+        fontSize: '0.8rem', color: theme.textMuted,
+      }}>
+        <p style={{ margin: '4px 0' }}>© 2025 Mohamed EL AFRIT — IPSSI — Licence CC BY-NC-SA 4.0</p>
+      </div>
+
+      {/* MODAL DÉTAIL ÉTUDIANT */}
+      {selectedReport && (
+        <StudentDetailModal
+          report={selectedReport}
+          questionsById={questionsById}
+          correctionsById={correctionsById}
+          onClose={() => setSelectedReport(null)} />
+      )}
+
+      {/* MODAL DÉTAIL QUESTION */}
+      {selectedQuestionStat && (
+        <QuestionStatModal questionStat={selectedQuestionStat} onClose={() => setSelectedQuestionStat(null)} />
+      )}
+    </div>
+  );
+}
+
+function SectionTitle({ children }) {
+  const { theme } = useTheme();
+  return (
+    <h2 style={{
+      fontFamily: "'DM Sans', sans-serif", fontSize: '1.15rem',
+      color: theme.text, fontWeight: 700,
+      borderBottom: `2px solid ${theme.accent}`, paddingBottom: '6px',
+      marginTop: '32px', marginBottom: '14px',
+    }}>{children}</h2>
+  );
+}
+
+// Carte Top-5 avec mini camembert
+function QuestionFailedCard({ rank, questionStat }) {
+  const { theme } = useTheme();
+  const q = questionStat;
+  const total = (q.repartition[0] + q.repartition[1] + q.repartition[2] + q.repartition[3] + q.repartition.nonRepondue);
+  const slices = [0, 1, 2, 3].map(i => ({
+    label: CONFIG.LETTRES[i] + (i === q.bonneReponseIndex ? ' ✓' : ''),
+    value: q.repartition[i] || 0,
+    color: i === q.bonneReponseIndex ? theme.success : [theme.danger, '#fb923c', '#fbbf24', '#a78bfa'][i],
+  }));
+  if (q.repartition.nonRepondue > 0) {
+    slices.push({ label: 'Non rép.', value: q.repartition.nonRepondue, color: theme.textMuted });
+  }
+
+  const diff = DIFFICULTE_META[q.difficulte] || {};
+  return (
+    <div style={{
+      background: theme.bgAlt, border: `1px solid ${theme.border}`,
+      borderRadius: '8px', padding: '14px',
+    }}>
+      <div style={{
+        display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start',
+        marginBottom: '8px', gap: '8px',
+      }}>
+        <div>
+          <div style={{
+            fontFamily: "'DM Sans', sans-serif", fontSize: '0.75rem',
+            color: theme.textMuted, fontWeight: 600,
+          }}>
+            #{rank} · {q.id} · {diff.emoji} {diff.label} · J{q.jour}
+          </div>
+          <div style={{
+            fontFamily: "'DM Sans', sans-serif", fontSize: '1.1rem',
+            fontWeight: 700, color: theme.danger,
+          }}>
+            {q.pctCorrect.toFixed(0)}% de réussite
+          </div>
+        </div>
+      </div>
+      <div style={{
+        fontFamily: "'Source Serif 4', serif", fontSize: '0.85rem',
+        color: theme.textSecondary, marginBottom: '12px',
+        maxHeight: '3.4em', overflow: 'hidden', lineHeight: 1.4,
+      }}>
+        <RichText text={q.enonce} />
+      </div>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+        <MiniPieChart slices={slices} size={100} />
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '4px' }}>
+          {slices.map((s, i) => (
+            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.78rem', fontFamily: "'DM Sans', sans-serif" }}>
+              <span style={{ width: '10px', height: '10px', background: s.color, borderRadius: '2px', flexShrink: 0 }}></span>
+              <span style={{ color: theme.text }}>{s.label}</span>
+              <span style={{ color: theme.textMuted, marginLeft: 'auto' }}>
+                {s.value} ({total > 0 ? ((s.value / total) * 100).toFixed(0) : 0}%)
+              </span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Modal détail d'une question (cliquée depuis la grille)
+function QuestionStatModal({ questionStat, onClose }) {
+  const { theme } = useTheme();
+  useEffect(() => {
+    const onEsc = (e) => { if (e.key === 'Escape') onClose(); };
+    window.addEventListener('keydown', onEsc);
+    return () => window.removeEventListener('keydown', onEsc);
+  }, [onClose]);
+
+  const q = questionStat;
+  const total = (q.repartition[0] + q.repartition[1] + q.repartition[2] + q.repartition[3] + q.repartition.nonRepondue);
+  const diff = DIFFICULTE_META[q.difficulte] || {};
+
+  return (
+    <div style={{
+      position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.55)',
+      display: 'flex', alignItems: 'flex-start', justifyContent: 'center',
+      zIndex: 1000, padding: '24px', overflowY: 'auto',
+    }} onClick={onClose}>
+      <div style={{
+        background: theme.bg, border: `1px solid ${theme.border}`,
+        borderRadius: '12px', maxWidth: '760px', width: '100%',
+        boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
+        animation: 'slideDown 0.2s',
+      }} onClick={e => e.stopPropagation()}>
+        <div style={{
+          padding: '16px 22px', borderBottom: `1px solid ${theme.border}`,
+          display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+        }}>
+          <div>
+            <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: '0.82rem', color: theme.textMuted }}>
+              {q.id} · {diff.emoji} {diff.label} · J{q.jour} · Type : {q.type}
+            </div>
+            <div style={{
+              fontFamily: "'DM Sans', sans-serif", fontSize: '1.25rem',
+              fontWeight: 700, color: q.pctCorrect >= 60 ? theme.success : theme.danger,
+              marginTop: '2px',
+            }}>
+              {q.pctCorrect.toFixed(1)}% de réussite
+            </div>
+          </div>
+          <button onClick={onClose} style={{
+            background: 'none', border: 'none', cursor: 'pointer',
+            fontSize: '1.5rem', color: theme.text, padding: '4px 12px',
+          }}>✕</button>
+        </div>
+        <div style={{ padding: '20px 22px' }}>
+          <div style={{
+            fontFamily: "'Source Serif 4', serif", fontSize: '0.95rem',
+            color: theme.text, lineHeight: 1.6, marginBottom: '16px',
+          }}>
+            <RichText text={q.enonce} />
+          </div>
+
+          <h3 style={{
+            fontFamily: "'DM Sans', sans-serif", fontSize: '0.95rem',
+            margin: '0 0 10px 0', color: theme.textSecondary,
+          }}>
+            Répartition des réponses données par la classe
+          </h3>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+            {[0, 1, 2, 3].map(i => {
+              const isCorrect = i === q.bonneReponseIndex;
+              const count = q.repartition[i] || 0;
+              const pct = total > 0 ? (count / total) * 100 : 0;
+              return (
+                <div key={i} style={{
+                  display: 'grid', gridTemplateColumns: '30px 1fr 120px', gap: '12px',
+                  alignItems: 'center',
+                  background: isCorrect ? `${theme.success}22` : theme.bgAlt,
+                  border: `1px solid ${isCorrect ? theme.success : theme.border}`,
+                  borderRadius: '6px', padding: '8px 12px',
+                }}>
+                  <span style={{
+                    fontFamily: "'DM Sans', sans-serif", fontWeight: 700,
+                    color: isCorrect ? theme.success : theme.text,
+                  }}>
+                    {CONFIG.LETTRES[i]} {isCorrect ? '✓' : ''}
+                  </span>
+                  <span style={{ fontFamily: "'Source Serif 4', serif", fontSize: '0.88rem', color: theme.text }}>
+                    <RichText text={q.propositions[i]} />
+                  </span>
+                  <span style={{
+                    fontFamily: "'DM Sans', sans-serif", fontSize: '0.85rem',
+                    color: theme.textSecondary, textAlign: 'right',
+                  }}>
+                    {count} ({pct.toFixed(0)}%)
+                  </span>
+                </div>
+              );
+            })}
+            {q.repartition.nonRepondue > 0 && (
+              <div style={{
+                display: 'grid', gridTemplateColumns: '30px 1fr 120px', gap: '12px',
+                alignItems: 'center',
+                background: `${theme.warning}22`,
+                border: `1px solid ${theme.warning}`,
+                borderRadius: '6px', padding: '8px 12px',
+              }}>
+                <span style={{ fontFamily: "'DM Sans', sans-serif", fontWeight: 700, color: theme.warning }}>❓</span>
+                <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: '0.88rem', color: theme.text }}>
+                  Non répondu
+                </span>
+                <span style={{
+                  fontFamily: "'DM Sans', sans-serif", fontSize: '0.85rem',
+                  color: theme.textSecondary, textAlign: 'right',
+                }}>
+                  {q.repartition.nonRepondue} ({total > 0 ? ((q.repartition.nonRepondue / total) * 100).toFixed(0) : 0}%)
+                </span>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ============================================================================
+   APPLICATION PRINCIPALE
+   ============================================================================ */
+function DashboardApp() {
+  const { theme } = useTheme();
+  const [appState, setAppState] = useState('loading'); // loading | upload | dashboard | error
+  const [questionsData, setQuestionsData] = useState(null);
+  const [correctionsData, setCorrectionsData] = useState(null);
+  const [reports, setReports] = useState([]);
+  const [loadError, setLoadError] = useState('');
+  const [fileError, setFileError] = useState('');
+  const [uploadLoading, setUploadLoading] = useState(false);
+
+  // Chargement initial des 2 JSON
+  useEffect(() => {
+    Promise.all([
+      fetch(CONFIG.QUESTIONS_URL, { cache: 'no-store' }).then(r => {
+        if (!r.ok) throw new Error(`${CONFIG.QUESTIONS_URL} : HTTP ${r.status}`); return r.json();
+      }),
+      fetch(CONFIG.CORRECTIONS_URL, { cache: 'no-store' }).then(r => {
+        if (!r.ok) throw new Error(`${CONFIG.CORRECTIONS_URL} : HTTP ${r.status}`); return r.json();
+      }),
+    ])
+    .then(([q, c]) => {
+      setQuestionsData(q);
+      setCorrectionsData(c);
+      setAppState('upload');
+    })
+    .catch(err => {
+      setLoadError(err.message);
+      setAppState('error');
+    });
+  }, []);
+
+  // Lookups
+  const questionsById = useMemo(() => {
+    const m = {};
+    if (questionsData) questionsData.questions.forEach(q => { m[q.id] = q; });
+    return m;
+  }, [questionsData]);
+  const correctionsById = useMemo(() => {
+    const m = {};
+    if (correctionsData) correctionsData.corrections.forEach(c => { m[c.id] = c; });
+    return m;
+  }, [correctionsData]);
+
+  const handleFilesLoaded = useCallback(async (files, err) => {
+    if (err) { setFileError(err); return; }
+    if (!files || files.length === 0) return;
+    setUploadLoading(true);
+    setFileError('');
+    try {
+      const newReports = [];
+      const errors = [];
+      for (const f of files) {
+        if (!f.content) { errors.push(`${f.name} : lecture échouée`); continue; }
+        try {
+          const parsed = parseCsv(f.content);
+          if (!parsed.answers.length) { errors.push(`${f.name} : CSV sans réponses`); continue; }
+          if (!parsed.metadata.Nom || !parsed.metadata.Prenom) {
+            errors.push(`${f.name} : identité manquante`); continue;
+          }
+          const rpt = await buildReport({
+            parsed, filename: f.name, questionsById, correctionsById,
+          });
+          newReports.push(rpt);
+        } catch (e) {
+          errors.push(`${f.name} : ${e.message}`);
+        }
+      }
+      // Fusion : on remplace si même email, sinon on ajoute
+      setReports(prev => {
+        const byEmail = new Map();
+        [...prev, ...newReports].forEach(r => {
+          const key = (r.metadata.Email || '').toLowerCase() + '|' + (r.metadata.DateFin || r.filename);
+          byEmail.set(key, r);
+        });
+        return Array.from(byEmail.values());
+      });
+      if (errors.length > 0) setFileError(`Certains fichiers n'ont pas pu être chargés :\n${errors.join('\n')}`);
+      setAppState('dashboard');
+    } finally {
+      setUploadLoading(false);
+    }
+  }, [questionsById, correctionsById]);
+
+  const handleReset = useCallback(() => {
+    if (!confirm('Recharger de nouveaux fichiers ? Les données actuelles seront conservées (ajout).')) return;
+    setAppState('upload');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, []);
+
+  if (appState === 'loading') {
+    return (
+      <div style={{ background: theme.bg, minHeight: '100vh', display: 'flex',
+                    alignItems: 'center', justifyContent: 'center', color: theme.text }}>
+        <div style={{ textAlign: 'center' }}>
+          <div style={{ fontSize: '2rem', animation: 'spin 1.5s linear infinite', display: 'inline-block' }}>⚙️</div>
+          <div style={{ fontFamily: "'DM Sans', sans-serif", marginTop: '12px' }}>Chargement…</div>
+        </div>
+      </div>
+    );
+  }
+
+  if (appState === 'error') {
+    return (
+      <div style={{ background: theme.bg, minHeight: '100vh', padding: '40px',
+                    color: theme.text, maxWidth: '720px', margin: '0 auto' }}>
+        <h1 style={{ fontFamily: "'DM Sans', sans-serif", color: theme.danger }}>
+          ⚠️ Erreur de chargement
+        </h1>
+        <p style={{ lineHeight: 1.7 }}>{loadError}</p>
+        <Box type="attention" title="À vérifier">
+          <p style={{ margin: 0 }}>
+            Cette page nécessite que <code>questions.json</code> et <code>corrections.json</code>{' '}
+            soient présents dans le même répertoire.
+          </p>
+        </Box>
+      </div>
+    );
+  }
+
+  return (
+    <div style={{ background: theme.bg, minHeight: '100vh', color: theme.text, transition: 'background 0.3s' }}>
+      <style>{`
+        ::selection { background: ${theme.accent}33; }
+        a { color: ${theme.link}; }
+        button:focus { outline: 2px solid ${theme.accent}; outline-offset: 2px; }
+      `}</style>
+      {appState === 'upload' && (
+        <UploadScreen
+          onFilesLoaded={handleFilesLoaded}
+          loading={uploadLoading}
+          ready={!!questionsData && !!correctionsData}
+          errorMsg={fileError} />
+      )}
+      {appState === 'dashboard' && (
+        <>
+          <DashboardScreen
+            reports={reports}
+            questionsData={questionsData}
+            correctionsData={correctionsData}
+            questionsById={questionsById}
+            correctionsById={correctionsById}
+            onReset={handleReset} />
+          {fileError && (
+            <div style={{
+              position: 'fixed', bottom: 16, right: 16,
+              background: theme.attentionBg, border: `1px solid ${theme.attentionBorder}`,
+              color: theme.attentionTitle, padding: '12px 18px', borderRadius: '8px',
+              maxWidth: '400px', fontFamily: "'DM Sans', sans-serif", fontSize: '0.85rem',
+              boxShadow: '0 6px 20px rgba(0,0,0,0.15)', whiteSpace: 'pre-wrap', lineHeight: 1.5,
+            }}>
+              ⚠️ {fileError}
+              <button onClick={() => setFileError('')} style={{
+                background: 'none', border: 'none', marginLeft: '10px', cursor: 'pointer',
+                color: 'inherit', float: 'right',
+              }}>✕</button>
+            </div>
+          )}
+        </>
+      )}
+    </div>
+  );
+}
+
+function App() {
+  return <ThemeProvider><DashboardApp /></ThemeProvider>;
+}
+
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(<App />);
+</script>
+</body>
+</html>

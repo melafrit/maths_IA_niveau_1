@@ -1011,11 +1011,18 @@ function App() {
       parsed.answers.forEach(ans => {
         const cor = correctionsById[ans.id];
         if (!cor) return;
+        // Difficulté et jour AUTORITATIFS depuis corrections.json, pas depuis le CSV
+        const authDifficulte = cor.difficulte;
+        const authJour = cor.jour;
         const isCorrect = ans.indexOriginalChoisi !== null && ans.indexOriginalChoisi === cor.bonne_reponse_index;
-        const pts = (DIFFICULTE_META[ans.difficulte] || {}).points || 0;
+        const pts = (DIFFICULTE_META[authDifficulte] || {}).points || 0;
         if (isCorrect) { pointsObtenus += pts; nbCorrect++; }
-        if (ans.jour === 1) { j1Total++; if (isCorrect) j1Correct++; }
-        if (ans.jour === 2) { j2Total++; if (isCorrect) j2Correct++; }
+        if (authJour === 1) { j1Total++; if (isCorrect) j1Correct++; }
+        if (authJour === 2) { j2Total++; if (isCorrect) j2Correct++; }
+        // On remplace difficulte/jour/type du CSV par les valeurs authoritatives
+        ans.difficulte = authDifficulte;
+        ans.jour = authJour;
+        ans.type = cor.type;
       });
 
       const noteSur20 = (pointsObtenus / CONFIG.POINTS_MAX) * CONFIG.NOTE_SUR;
