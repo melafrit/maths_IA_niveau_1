@@ -1,0 +1,1120 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ma correction personnelle — QCM Jours 1 et 2 — IPSSI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,700;1,400&family=JetBrains+Mono:wght@400;500;700&family=Source+Serif+4:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; padding: 0; font-family: 'Source Serif 4', Georgia, serif; }
+  @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+<script type="text/babel">
+// © 2025 Mohamed EL AFRIT — IPSSI
+// Ce contenu est distribué sous licence Creative Commons BY-NC-SA 4.0
+// https://creativecommons.org/licenses/by-nc-sa/4.0/deed.fr
+//
+// Correction personnelle — QCM d'évaluation Jours 1 et 2
+// Public : 2e année Bachelor Informatique — IPSSI — 2025-2026
+// Fonctionnement : l'étudiant charge son CSV exporté par qcm_etudiant.html,
+// la page affiche le corrigé détaillé de SES questions dans SON ordre.
+
+const { useState, useEffect, useRef, useCallback, createContext, useContext } = React;
+
+/* ============================================================================
+   CONFIGURATION
+   ============================================================================ */
+const CONFIG = {
+  QUESTIONS_URL:    'questions.json',
+  CORRECTIONS_URL:  'corrections.json',
+  SALT:             'IPSSI_SALT_2026',
+  EMAIL_CONTACT:    'm.elafrit@ecole-ipssi.net',
+  LETTRES:          ['A', 'B', 'C', 'D'],
+  BAREME:           { vert: 1, jaune: 2, orange: 3, rouge: 4 },
+  POINTS_MAX:       92,
+  NOTE_SUR:         20,
+  STORAGE_PREFIX:   'qcm_corr_j1j2_v1_',
+};
+
+const DIFFICULTE_META = {
+  vert:   { emoji: '🟢', label: 'Facile',    points: 1 },
+  jaune:  { emoji: '🟡', label: 'Moyen',     points: 2 },
+  orange: { emoji: '🟠', label: 'Difficile', points: 3 },
+  rouge:  { emoji: '🔴', label: 'Expert',    points: 4 },
+};
+
+/* ============================================================================
+   SYSTÈME DE THÈME (identique aux pages de cours)
+   ============================================================================ */
+const THEMES = {
+  light: {
+    bg: '#ffffff', bgAlt: '#fafafa', bgCode: '#f3f4f6',
+    text: '#1a1a2e', textSecondary: '#4b5563', textMuted: '#9ca3af',
+    border: '#e5e7eb', borderLight: '#f3f4f6',
+    definitionBg: '#eff6ff', definitionBorder: '#3b82f6', definitionTitle: '#1e40af',
+    retenirBg: '#f0fdf4', retenirBorder: '#22c55e', retenirTitle: '#166534',
+    attentionBg: '#fff7ed', attentionBorder: '#f97316', attentionTitle: '#c2410c',
+    intuitionBg: '#faf5ff', intuitionBorder: '#a855f7', intuitionTitle: '#7e22ce',
+    exempleBg: '#ecfeff', exempleBorder: '#06b6d4', exempleTitle: '#0e7490',
+    codeBg: '#f8f9fa', codeBorder: '#d1d5db', codeTitle: '#1f2937',
+    link: '#3b82f6', accent: '#3b82f6',
+    danger: '#ef4444', success: '#22c55e', warning: '#f59e0b',
+    correctBg: '#dcfce7', correctBorder: '#16a34a', correctText: '#14532d',
+    wrongBg: '#fee2e2', wrongBorder: '#dc2626', wrongText: '#7f1d1d',
+    missedBg: '#fef3c7', missedBorder: '#d97706', missedText: '#78350f',
+    neutralBg: '#f9fafb', neutralBorder: '#e5e7eb', neutralText: '#374151',
+  },
+  dark: {
+    bg: '#0d1117', bgAlt: '#161b22', bgCode: '#1c2128',
+    text: '#c9d1d9', textSecondary: '#8b949e', textMuted: '#6e7681',
+    border: '#30363d', borderLight: '#21262d',
+    definitionBg: '#0d1f3c', definitionBorder: '#3b82f6', definitionTitle: '#93bbfc',
+    retenirBg: '#0a1f0d', retenirBorder: '#22c55e', retenirTitle: '#86efac',
+    attentionBg: '#1f1206', attentionBorder: '#f97316', attentionTitle: '#fdba74',
+    intuitionBg: '#1a0d2e', intuitionBorder: '#a855f7', intuitionTitle: '#d8b4fe',
+    exempleBg: '#0a1a1f', exempleBorder: '#06b6d4', exempleTitle: '#67e8f9',
+    codeBg: '#161b22', codeBorder: '#30363d', codeTitle: '#c9d1d9',
+    link: '#58a6ff', accent: '#58a6ff',
+    danger: '#f87171', success: '#4ade80', warning: '#fbbf24',
+    correctBg: '#0a2815', correctBorder: '#22c55e', correctText: '#86efac',
+    wrongBg: '#2a0f0f', wrongBorder: '#ef4444', wrongText: '#fca5a5',
+    missedBg: '#2a1f05', missedBorder: '#f59e0b', missedText: '#fcd34d',
+    neutralBg: '#161b22', neutralBorder: '#30363d', neutralText: '#c9d1d9',
+  },
+};
+
+const ThemeContext = createContext();
+
+function ThemeProvider({ children }) {
+  const [mode, setMode] = useState(() => {
+    try {
+      return localStorage.getItem(CONFIG.STORAGE_PREFIX + 'theme') === 'dark' ? 'dark' : 'light';
+    } catch { return 'light'; }
+  });
+  const theme = THEMES[mode];
+  const toggle = () => {
+    const next = mode === 'light' ? 'dark' : 'light';
+    setMode(next);
+    try { localStorage.setItem(CONFIG.STORAGE_PREFIX + 'theme', next); } catch {}
+  };
+  return <ThemeContext.Provider value={{ mode, theme, toggle }}>{children}</ThemeContext.Provider>;
+}
+
+const useTheme = () => useContext(ThemeContext);
+
+/* ============================================================================
+   UTILITAIRES — KaTeX, RichText, SHA-256, etc.
+   ============================================================================ */
+function M({ t, d }) {
+  if (!window.katex) return <code style={{ fontSize: '0.9em' }}>{t}</code>;
+  try {
+    const html = window.katex.renderToString(t, { throwOnError: false, displayMode: !!d });
+    if (d) return <div style={{ margin: '16px 0', textAlign: 'center', overflowX: 'auto' }}
+                       dangerouslySetInnerHTML={{ __html: html }} />;
+    return <span dangerouslySetInnerHTML={{ __html: html }} />;
+  } catch { return <code>{t}</code>; }
+}
+
+function RichText({ text }) {
+  if (!text) return null;
+  const parts = text.split(/(\$[^$]+\$)/g);
+  return (
+    <>
+      {parts.map((p, i) => {
+        if (p.startsWith('$') && p.endsWith('$') && p.length >= 2) {
+          return <M key={i} t={p.slice(1, -1)} />;
+        }
+        return <TextWithCode key={i} text={p} />;
+      })}
+    </>
+  );
+}
+
+function TextWithCode({ text }) {
+  const { theme } = useTheme();
+  if (!text) return null;
+  const parts = text.split(/(```[\s\S]*?```)/g);
+  return (
+    <>
+      {parts.map((p, i) => {
+        if (p.startsWith('```') && p.endsWith('```')) {
+          const lines = p.split('\n');
+          const first = lines[0].replace(/^```\w*/, '');
+          const last = lines[lines.length - 1].replace(/```$/, '');
+          const body = [first, ...lines.slice(1, -1), last].join('\n').trim();
+          return (
+            <pre key={i} style={{
+              background: theme.codeBg, border: `1px solid ${theme.codeBorder}`,
+              borderRadius: '6px', padding: '12px 16px', overflow: 'auto',
+              fontFamily: "'JetBrains Mono', monospace", fontSize: '0.9em',
+              color: theme.text, margin: '10px 0', lineHeight: 1.5,
+            }}>{body}</pre>
+          );
+        }
+        const lines = p.split('\n');
+        return (
+          <React.Fragment key={i}>
+            {lines.map((l, j) => (
+              <React.Fragment key={j}>
+                {j > 0 && <br />}
+                {renderInlineCode(l, theme)}
+              </React.Fragment>
+            ))}
+          </React.Fragment>
+        );
+      })}
+    </>
+  );
+}
+
+function renderInlineCode(text, theme) {
+  const parts = text.split(/(`[^`]+`)/g);
+  return parts.map((p, i) => {
+    if (p.startsWith('`') && p.endsWith('`') && p.length >= 2) {
+      return (
+        <code key={i} style={{
+          background: theme.bgCode, padding: '2px 6px', borderRadius: '3px',
+          fontFamily: "'JetBrains Mono', monospace", fontSize: '0.88em', color: theme.text,
+        }}>{p.slice(1, -1)}</code>
+      );
+    }
+    return <React.Fragment key={i}>{p}</React.Fragment>;
+  });
+}
+
+async function sha256Hex(str) {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(str);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+  return Array.from(new Uint8Array(hashBuffer))
+    .map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+function formatDuration(seconds) {
+  const h = Math.floor(seconds / 3600);
+  const m = Math.floor((seconds % 3600) / 60);
+  const s = Math.floor(seconds % 60);
+  if (h > 0) return `${h}h ${m.toString().padStart(2, '0')}m ${s.toString().padStart(2, '0')}s`;
+  return `${m}m ${s.toString().padStart(2, '0')}s`;
+}
+
+// Parse une ligne CSV (respecte les guillemets et les virgules échappées)
+function parseCsvLine(line) {
+  const out = [];
+  let cur = '';
+  let inQuotes = false;
+  for (let i = 0; i < line.length; i++) {
+    const c = line[i];
+    if (inQuotes) {
+      if (c === '"') {
+        if (line[i + 1] === '"') { cur += '"'; i++; }
+        else inQuotes = false;
+      } else cur += c;
+    } else {
+      if (c === '"') inQuotes = true;
+      else if (c === ',') { out.push(cur); cur = ''; }
+      else cur += c;
+    }
+  }
+  out.push(cur);
+  return out;
+}
+
+// Parse le CSV entier en sections METADATA / REPONSES / SIGNATURE
+function parseCsv(text) {
+  // Supprime le BOM UTF-8 éventuel
+  if (text.charCodeAt(0) === 0xFEFF) text = text.slice(1);
+  const lines = text.split(/\r?\n/);
+
+  const metadata = {};
+  const answers = [];
+  let signature = null;
+  let section = null;
+  let headersRead = false;
+
+  for (const raw of lines) {
+    const line = raw;
+    if (!line.trim()) continue;
+    const trimmed = line.trim();
+
+    if (trimmed.startsWith('#')) {
+      if (/SECTION\s*:\s*METADATA/i.test(trimmed))   { section = 'meta';    headersRead = false; }
+      else if (/SECTION\s*:\s*REPONSES/i.test(trimmed)) { section = 'answers'; headersRead = false; }
+      else if (/SECTION\s*:\s*SIGNATURE/i.test(trimmed)){ section = 'sig';     headersRead = false; }
+      continue;
+    }
+    if (!section) continue;
+
+    const row = parseCsvLine(line);
+    if (!headersRead) { headersRead = true; continue; }
+
+    if (section === 'meta') {
+      metadata[row[0]] = row[1];
+    } else if (section === 'answers') {
+      if (row.length < 9) continue;
+      answers.push({
+        ordre:       parseInt(row[0], 10),
+        id:          row[1],
+        difficulte:  row[2],
+        type:        row[3],
+        jour:        parseInt(row[4], 10),
+        enonceTronque: row[5],
+        permutation: row[6].split('|').map(n => parseInt(n, 10)),
+        lettreChoisie: row[7] || '',
+        indexOriginalChoisi: row[8] === '' ? null : parseInt(row[8], 10),
+      });
+    } else if (section === 'sig') {
+      if (row[0] === 'SHA256') signature = row[1];
+    }
+  }
+
+  return { metadata, answers, signature };
+}
+
+// Recalcul de la signature attendue à partir des données parsées
+async function recomputeSignature(parsed) {
+  const m = parsed.metadata;
+  const dataToSign = [
+    m.Nom || '', m.Prenom || '', m.Email || '',
+    m.DateDebut || '', m.DateFin || '', String(m.DureeSec || ''),
+    String(m.NbQuestions || ''), CONFIG.SALT,
+    ...parsed.answers.map(a => `${a.ordre}|${a.id}|${a.permutation.join('|')}|${a.indexOriginalChoisi === null ? '' : a.indexOriginalChoisi}`),
+  ].join('||');
+  return await sha256Hex(dataToSign);
+}
+
+/* ============================================================================
+   COMPOSANTS UI RÉUTILISABLES
+   ============================================================================ */
+function ThemeToggle() {
+  const { mode, toggle } = useTheme();
+  return (
+    <button onClick={toggle} style={{
+      background: 'none', border: 'none', cursor: 'pointer',
+      fontSize: '1.3rem', padding: '6px 10px', borderRadius: '8px',
+    }} title={mode === 'light' ? 'Mode sombre' : 'Mode clair'}>
+      {mode === 'light' ? '🌙' : '☀️'}
+    </button>
+  );
+}
+
+function Box({ type, title, children, style = {} }) {
+  const { theme } = useTheme();
+  const C = {
+    definition: { icon: '📐', label: 'Définition', bg: 'definitionBg', bd: 'definitionBorder', tt: 'definitionTitle' },
+    retenir:    { icon: '⚡', label: 'À retenir',  bg: 'retenirBg',    bd: 'retenirBorder',    tt: 'retenirTitle' },
+    attention:  { icon: '⚠️', label: 'Attention',  bg: 'attentionBg',  bd: 'attentionBorder',  tt: 'attentionTitle' },
+    intuition:  { icon: '💡', label: 'Intuition',  bg: 'intuitionBg',  bd: 'intuitionBorder',  tt: 'intuitionTitle' },
+    exemple:    { icon: '📊', label: 'Exemple',    bg: 'exempleBg',    bd: 'exempleBorder',    tt: 'exempleTitle' },
+    code:       { icon: '🐍', label: 'Code',       bg: 'codeBg',       bd: 'codeBorder',       tt: 'codeTitle' },
+  }[type] || { icon: '', label: '', bg: 'bgAlt', bd: 'border', tt: 'text' };
+  return (
+    <div style={{
+      background: theme[C.bg], borderLeft: `4px solid ${theme[C.bd]}`,
+      borderRadius: '6px', padding: '14px 18px', margin: '16px 0', ...style,
+    }}>
+      {(title || C.label) && (
+        <div style={{
+          fontFamily: "'DM Sans', sans-serif", fontWeight: 700,
+          color: theme[C.tt], marginBottom: '8px', fontSize: '0.9rem',
+        }}>
+          {C.icon} {title || C.label}
+        </div>
+      )}
+      <div style={{ color: theme.text, lineHeight: 1.65, fontSize: '0.95rem' }}>{children}</div>
+    </div>
+  );
+}
+
+function Button({ variant = 'primary', onClick, disabled, children, icon, style = {} }) {
+  const { theme } = useTheme();
+  const variants = {
+    primary:   { bg: theme.accent,  fg: '#ffffff', bdr: theme.accent },
+    secondary: { bg: theme.bgAlt,   fg: theme.text, bdr: theme.border },
+    success:   { bg: theme.success, fg: '#ffffff', bdr: theme.success },
+    danger:    { bg: theme.danger,  fg: '#ffffff', bdr: theme.danger },
+    ghost:     { bg: 'transparent', fg: theme.text, bdr: theme.border },
+  };
+  const v = variants[variant] || variants.primary;
+  return (
+    <button onClick={onClick} disabled={disabled} style={{
+      background: disabled ? theme.textMuted : v.bg,
+      color: v.fg, border: `1px solid ${disabled ? theme.textMuted : v.bdr}`,
+      padding: '10px 20px', borderRadius: '6px',
+      fontFamily: "'DM Sans', sans-serif", fontSize: '0.95rem', fontWeight: 600,
+      cursor: disabled ? 'not-allowed' : 'pointer', opacity: disabled ? 0.6 : 1,
+      transition: 'all 0.15s', ...style,
+    }}>
+      {icon && <span style={{ marginRight: '6px' }}>{icon}</span>}
+      {children}
+    </button>
+  );
+}
+
+/* ============================================================================
+   ÉCRAN 1 — UPLOAD DU CSV
+   ============================================================================ */
+function UploadScreen({ onFileLoaded, loadError, ready, loading }) {
+  const { theme } = useTheme();
+  const [dragOver, setDragOver] = useState(false);
+  const inputRef = useRef(null);
+
+  const handleFile = (file) => {
+    if (!file) return;
+    if (!/\.csv$/i.test(file.name)) {
+      onFileLoaded(null, 'Le fichier doit porter l\'extension .csv');
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = (e) => onFileLoaded(e.target.result, null, file.name);
+    reader.onerror = () => onFileLoaded(null, 'Erreur de lecture du fichier');
+    reader.readAsText(file, 'UTF-8');
+  };
+
+  const onDrop = (e) => {
+    e.preventDefault();
+    setDragOver(false);
+    const file = e.dataTransfer.files && e.dataTransfer.files[0];
+    handleFile(file);
+  };
+
+  return (
+    <div style={{ maxWidth: '780px', margin: '0 auto', padding: '40px 24px 80px' }}>
+      <div style={{
+        fontFamily: "'DM Sans', sans-serif", fontSize: '0.85rem',
+        color: theme.textMuted, fontWeight: 500,
+      }}>
+        IPSSI — Bachelor 2 Informatique — 2025-2026
+      </div>
+      <h1 style={{
+        fontFamily: "'DM Sans', sans-serif", fontSize: '2rem',
+        fontWeight: 700, color: theme.text, margin: '6px 0 4px',
+      }}>
+        ✅ Ma correction personnelle
+      </h1>
+      <div style={{
+        fontFamily: "'DM Sans', sans-serif", fontSize: '1.05rem',
+        color: theme.textSecondary, fontWeight: 500, marginBottom: '12px',
+      }}>
+        QCM d'évaluation — Jours 1 et 2
+      </div>
+      <div style={{
+        height: '3px', background: `linear-gradient(90deg, ${theme.accent}, ${theme.accent}44)`,
+        borderRadius: '2px', marginBottom: '28px',
+      }} />
+
+      <Box type="definition" title="Comment ça marche">
+        <p style={{ margin: '0 0 6px 0' }}>
+          Cette page affiche la correction détaillée de <strong>votre</strong> QCM.
+          Pour y accéder, chargez le <strong>fichier CSV</strong> que vous avez
+          téléchargé à la fin du passage du QCM.
+        </p>
+        <p style={{ margin: 0 }}>
+          Le nom de fichier attendu ressemble à{' '}
+          <code style={{ background: theme.bgCode, padding: '2px 6px', borderRadius: '3px',
+            fontFamily: "'JetBrains Mono', monospace", fontSize: '0.88em' }}>
+            IPSSI_NOM_Prenom_QCM_J1J2_YYYYMMDD.csv
+          </code>.
+        </p>
+      </Box>
+
+      <div
+        onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
+        onDragLeave={() => setDragOver(false)}
+        onDrop={onDrop}
+        onClick={() => inputRef.current?.click()}
+        style={{
+          marginTop: '24px',
+          border: `3px dashed ${dragOver ? theme.accent : theme.border}`,
+          borderRadius: '12px', padding: '48px 24px', textAlign: 'center',
+          background: dragOver ? `${theme.accent}11` : theme.bgAlt,
+          cursor: 'pointer', transition: 'all 0.2s',
+        }}>
+        <div style={{ fontSize: '3rem', marginBottom: '8px' }}>
+          {loading ? '⏳' : '📁'}
+        </div>
+        <div style={{
+          fontFamily: "'DM Sans', sans-serif", fontSize: '1.1rem',
+          fontWeight: 600, color: theme.text, marginBottom: '6px',
+        }}>
+          {loading ? 'Chargement en cours…' : 'Glissez-déposez votre CSV ici'}
+        </div>
+        <div style={{
+          fontFamily: "'DM Sans', sans-serif", fontSize: '0.9rem',
+          color: theme.textSecondary,
+        }}>
+          ou <strong>cliquez pour sélectionner</strong> un fichier
+        </div>
+        <input ref={inputRef} type="file" accept=".csv,text/csv"
+          onChange={(e) => handleFile(e.target.files?.[0])}
+          style={{ display: 'none' }} />
+      </div>
+
+      {!ready && !loadError && (
+        <Box type="intuition" style={{ marginTop: '24px' }}>
+          <p style={{ margin: 0 }}>
+            <strong>Chargement des données de correction…</strong> Merci de patienter quelques secondes
+            avant de déposer votre fichier.
+          </p>
+        </Box>
+      )}
+
+      {loadError && (
+        <Box type="attention" title="Erreur au chargement" style={{ marginTop: '24px' }}>
+          <p style={{ margin: 0 }}>{loadError}</p>
+        </Box>
+      )}
+
+      <Box type="attention" title="Votre fichier reste sur votre appareil" style={{ marginTop: '24px' }}>
+        <p style={{ margin: 0 }}>
+          Le CSV est analysé <strong>entièrement dans votre navigateur</strong> :
+          aucune information n'est envoyée à un serveur. La page vérifie la signature SHA-256
+          de votre fichier pour confirmer son intégrité.
+        </p>
+      </Box>
+
+      <div style={{
+        marginTop: '48px', padding: '20px 0', borderTop: `1px solid ${theme.border}`,
+        textAlign: 'center', fontFamily: "'DM Sans', sans-serif",
+        fontSize: '0.8rem', color: theme.textMuted,
+      }}>
+        <p style={{ margin: '4px 0' }}>© 2025 Mohamed EL AFRIT — IPSSI</p>
+        <p style={{ margin: '4px 0' }}>
+          <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.fr" target="_blank" rel="noopener"
+             style={{ color: theme.link, textDecoration: 'none' }}>
+            Licence CC BY-NC-SA 4.0
+          </a>
+        </p>
+      </div>
+    </div>
+  );
+}
+
+/* ============================================================================
+   ÉCRAN 2 — RAPPORT DE CORRECTION
+   ============================================================================ */
+function ReportScreen({ report, onReset }) {
+  const { theme } = useTheme();
+  const { metadata, answers, stats, signatureOk, questionsById, correctionsById } = report;
+
+  const noteColor =
+    stats.noteSur20 >= 16 ? theme.success :
+    stats.noteSur20 >= 12 ? theme.accent  :
+    stats.noteSur20 >= 10 ? theme.warning : theme.danger;
+
+  const mention =
+    stats.noteSur20 >= 16 ? 'Très Bien'  :
+    stats.noteSur20 >= 14 ? 'Bien'       :
+    stats.noteSur20 >= 12 ? 'Assez Bien' :
+    stats.noteSur20 >= 10 ? 'Passable'   :
+    'Insuffisant';
+
+  return (
+    <div style={{ maxWidth: '920px', margin: '0 auto', padding: '32px 24px 80px' }}>
+      {/* HEADER */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '18px' }}>
+        <div>
+          <div style={{
+            fontFamily: "'DM Sans', sans-serif", fontSize: '0.85rem',
+            color: theme.textMuted, fontWeight: 500,
+          }}>
+            Correction personnelle — QCM Jours 1 et 2
+          </div>
+          <h1 style={{
+            fontFamily: "'DM Sans', sans-serif", fontSize: '1.8rem',
+            fontWeight: 700, color: theme.text, margin: '4px 0 0',
+          }}>
+            Rapport pour {metadata.Prenom} {metadata.Nom}
+          </h1>
+        </div>
+        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+          <Button variant="ghost" onClick={onReset} icon="🔄">Nouveau fichier</Button>
+          <ThemeToggle />
+        </div>
+      </div>
+      <div style={{
+        height: '3px', background: `linear-gradient(90deg, ${noteColor}, ${noteColor}44)`,
+        borderRadius: '2px', marginBottom: '24px',
+      }} />
+
+      {/* CARTE DE RÉSULTATS */}
+      <div style={{
+        background: theme.bgAlt, border: `2px solid ${noteColor}`,
+        borderRadius: '12px', padding: '24px 28px', marginBottom: '20px',
+        display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '24px',
+        alignItems: 'center',
+      }}>
+        {/* Note géante */}
+        <div style={{ textAlign: 'center', borderRight: `1px solid ${theme.border}`, paddingRight: '24px' }}>
+          <div style={{
+            fontFamily: "'DM Sans', sans-serif", fontSize: '0.85rem',
+            color: theme.textMuted, fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.05em',
+          }}>
+            Note finale
+          </div>
+          <div style={{
+            fontFamily: "'DM Sans', sans-serif", fontSize: '4rem',
+            fontWeight: 700, color: noteColor, lineHeight: 1,
+          }}>
+            {stats.noteSur20.toFixed(2).replace('.', ',')}
+          </div>
+          <div style={{
+            fontFamily: "'DM Sans', sans-serif", fontSize: '1.2rem',
+            color: theme.textSecondary, fontWeight: 500,
+          }}>
+            / 20
+          </div>
+          <div style={{
+            marginTop: '8px', fontFamily: "'DM Sans', sans-serif",
+            fontSize: '0.95rem', fontWeight: 600, color: noteColor,
+          }}>
+            {mention}
+          </div>
+        </div>
+
+        {/* Détails */}
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+          <StatCard label="Bonnes réponses" value={`${stats.nbCorrect} / ${stats.nbTotal}`} color={theme.success} />
+          <StatCard label="Points bruts" value={`${stats.pointsObtenus} / ${CONFIG.POINTS_MAX}`} color={theme.accent} />
+          <StatCard label="Réussite Jour 1" value={`${stats.j1PctCorrect}%`} color={theme.accent} />
+          <StatCard label="Réussite Jour 2" value={`${stats.j2PctCorrect}%`} color={theme.accent} />
+          <StatCard label="Durée totale" value={formatDuration(parseInt(metadata.DureeSec || 0, 10))} color={theme.textSecondary} />
+          <StatCard
+            label="Signature CSV"
+            value={signatureOk ? '✅ Valide' : '❌ Invalide'}
+            color={signatureOk ? theme.success : theme.danger} />
+        </div>
+      </div>
+
+      {/* RAPPEL DU BARÈME */}
+      <Box type="definition" title="Rappel du barème appliqué">
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '10px', marginBottom: '8px' }}>
+          {Object.entries(DIFFICULTE_META).map(([k, d]) => (
+            <div key={k} style={{
+              background: theme.bg, border: `1px solid ${theme.border}`,
+              borderRadius: '6px', padding: '8px', textAlign: 'center',
+            }}>
+              <div style={{ fontSize: '1.3rem' }}>{d.emoji}</div>
+              <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: '0.8rem', color: theme.textSecondary }}>{d.label}</div>
+              <div style={{ fontFamily: "'DM Sans', sans-serif", fontWeight: 700, color: theme.accent, fontSize: '0.9rem' }}>{d.points} pt{d.points > 1 ? 's' : ''}</div>
+            </div>
+          ))}
+        </div>
+        <p style={{ margin: 0, fontSize: '0.9rem' }}>
+          Conversion sur 20 : <M t="\text{Note}_{/20} = \frac{P_{\text{obtenus}}}{92} \times 20" />.
+          Aucun malus pour les mauvaises réponses.
+        </p>
+      </Box>
+
+      {/* AVERTISSEMENT SIGNATURE */}
+      {!signatureOk && (
+        <Box type="attention" title="⚠️ Signature du CSV invalide">
+          <p style={{ margin: 0 }}>
+            La signature cryptographique de ce fichier ne correspond pas aux données qu'il contient.
+            Cela signifie que le fichier a été modifié manuellement après export, ou qu'il provient d'une version
+            différente du QCM. La note affichée est calculée à partir des réponses présentes mais ne peut pas
+            être considérée comme authentique. Contactez l'enseignant ({CONFIG.EMAIL_CONTACT}).
+          </p>
+        </Box>
+      )}
+
+      {/* LÉGENDE */}
+      <Box type="intuition" title="Légende des réponses">
+        <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
+          <LegendItem color={theme.correctBg} border={theme.correctBorder} icon="✅">
+            Votre réponse est correcte
+          </LegendItem>
+          <LegendItem color={theme.wrongBg} border={theme.wrongBorder} icon="❌">
+            Votre réponse est erronée
+          </LegendItem>
+          <LegendItem color={theme.missedBg} border={theme.missedBorder} icon="⭕">
+            Bonne réponse (que vous n'avez pas choisie)
+          </LegendItem>
+          <LegendItem color={theme.neutralBg} border={theme.neutralBorder} icon="⚪">
+            Proposition neutre
+          </LegendItem>
+        </div>
+      </Box>
+
+      {/* DÉROULÉ DES 50 QUESTIONS */}
+      <h2 style={{
+        fontFamily: "'DM Sans', sans-serif", fontSize: '1.4rem',
+        color: theme.text, borderBottom: `2px solid ${theme.accent}`,
+        paddingBottom: '8px', marginTop: '40px', marginBottom: '20px',
+      }}>
+        Détail question par question
+      </h2>
+
+      {answers.map((ans, idx) => (
+        <QuestionReport key={ans.id + '_' + idx}
+          index={idx}
+          answer={ans}
+          question={questionsById[ans.id]}
+          correction={correctionsById[ans.id]} />
+      ))}
+
+      <div style={{ textAlign: 'center', marginTop: '40px' }}>
+        <Button variant="ghost" onClick={onReset} icon="🔄">
+          Charger un autre CSV
+        </Button>
+      </div>
+
+      <div style={{
+        marginTop: '40px', padding: '20px 0', borderTop: `1px solid ${theme.border}`,
+        textAlign: 'center', fontFamily: "'DM Sans', sans-serif",
+        fontSize: '0.8rem', color: theme.textMuted,
+      }}>
+        <p style={{ margin: '4px 0' }}>© 2025 Mohamed EL AFRIT — IPSSI</p>
+        <p style={{ margin: '4px 0' }}>
+          <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.fr" target="_blank" rel="noopener"
+             style={{ color: theme.link, textDecoration: 'none' }}>
+            Licence CC BY-NC-SA 4.0
+          </a>
+        </p>
+      </div>
+    </div>
+  );
+}
+
+function StatCard({ label, value, color }) {
+  const { theme } = useTheme();
+  return (
+    <div style={{
+      background: theme.bg, border: `1px solid ${theme.border}`,
+      borderRadius: '8px', padding: '10px 12px',
+    }}>
+      <div style={{
+        fontFamily: "'DM Sans', sans-serif", fontSize: '0.75rem',
+        color: theme.textMuted, textTransform: 'uppercase', letterSpacing: '0.03em',
+      }}>
+        {label}
+      </div>
+      <div style={{
+        fontFamily: "'DM Sans', sans-serif", fontSize: '1.15rem',
+        fontWeight: 700, color: color, marginTop: '2px',
+      }}>
+        {value}
+      </div>
+    </div>
+  );
+}
+
+function LegendItem({ color, border, icon, children }) {
+  const { theme } = useTheme();
+  return (
+    <div style={{
+      display: 'inline-flex', alignItems: 'center', gap: '8px',
+      background: color, border: `2px solid ${border}`,
+      borderRadius: '6px', padding: '4px 10px',
+      fontFamily: "'DM Sans', sans-serif", fontSize: '0.85rem', color: theme.text,
+    }}>
+      <span>{icon}</span>{children}
+    </div>
+  );
+}
+
+/* ============================================================================
+   BLOC DÉTAIL D'UNE QUESTION
+   ============================================================================ */
+function QuestionReport({ index, answer, question, correction }) {
+  const { theme } = useTheme();
+  const [expanded, setExpanded] = useState(true);
+
+  // Cas où on n'a pas trouvé la question dans questions.json
+  if (!question || !correction) {
+    return (
+      <Box type="attention" title={`Question ${index + 1} (${answer.id}) — données manquantes`}>
+        <p style={{ margin: 0 }}>
+          Cette question n'a pas pu être retrouvée dans la base de données.
+          Contactez l'enseignant : <a href={`mailto:${CONFIG.EMAIL_CONTACT}`}>{CONFIG.EMAIL_CONTACT}</a>.
+        </p>
+      </Box>
+    );
+  }
+
+  // Reconstruit les propositions dans l'ordre vu par l'étudiant
+  const propositionsVues = answer.permutation.map(origIdx => question.propositions[origIdx]);
+  const bonneReponseOriginalIdx = correction.bonne_reponse_index;
+  // Trouve l'index DANS l'ordre vu par l'étudiant de la bonne réponse
+  const bonneReponseVueIdx = answer.permutation.indexOf(bonneReponseOriginalIdx);
+
+  // Index (dans l'ordre vu) de la réponse choisie
+  const choixVueIdx = answer.lettreChoisie ? CONFIG.LETTRES.indexOf(answer.lettreChoisie) : -1;
+  const choixOriginalIdx = answer.indexOriginalChoisi;
+
+  const isCorrect = choixOriginalIdx !== null && choixOriginalIdx === bonneReponseOriginalIdx;
+  const isUnanswered = choixVueIdx === -1;
+
+  const diff = DIFFICULTE_META[answer.difficulte] || { emoji: '❔', label: answer.difficulte, points: 0 };
+  const pointsObtenus = isCorrect ? diff.points : 0;
+
+  // Couleur du bandeau
+  const bandColor = isCorrect ? theme.correctBorder
+                  : isUnanswered ? theme.missedBorder
+                  : theme.wrongBorder;
+  const bandBg    = isCorrect ? theme.correctBg
+                  : isUnanswered ? theme.missedBg
+                  : theme.wrongBg;
+  const statusIcon = isCorrect ? '✅' : isUnanswered ? '❓' : '❌';
+  const statusText = isCorrect ? 'Correct' : isUnanswered ? 'Non répondue' : 'Incorrect';
+
+  return (
+    <div style={{
+      background: theme.bgAlt, border: `1px solid ${theme.border}`,
+      borderRadius: '10px', marginBottom: '16px', overflow: 'hidden',
+      animation: 'fadeIn 0.2s',
+    }}>
+      {/* EN-TÊTE avec statut + numéro + difficulté */}
+      <div onClick={() => setExpanded(e => !e)} style={{
+        cursor: 'pointer', padding: '12px 20px',
+        background: bandBg, borderBottom: `1px solid ${theme.border}`,
+        borderLeft: `5px solid ${bandColor}`,
+        display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+        flexWrap: 'wrap', gap: '8px',
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+          <span style={{
+            fontFamily: "'DM Sans', sans-serif", fontWeight: 700,
+            color: theme.text, fontSize: '1rem',
+          }}>
+            Question {index + 1}
+          </span>
+          <span style={{
+            fontFamily: "'JetBrains Mono', monospace", fontSize: '0.8rem',
+            color: theme.textMuted, background: theme.bg,
+            padding: '2px 6px', borderRadius: '3px',
+          }}>
+            {answer.id}
+          </span>
+          <span style={{
+            fontFamily: "'DM Sans', sans-serif", fontSize: '0.85rem',
+            color: theme.textSecondary,
+          }}>
+            {diff.emoji} {diff.label} · {answer.type} · Jour {answer.jour}
+          </span>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <span style={{
+            fontFamily: "'DM Sans', sans-serif", fontSize: '0.9rem',
+            fontWeight: 700, color: bandColor,
+          }}>
+            {statusIcon} {statusText} · {pointsObtenus}/{diff.points} pt{diff.points > 1 ? 's' : ''}
+          </span>
+          <span style={{ color: theme.textMuted, fontSize: '0.8rem' }}>
+            {expanded ? '▼' : '▶'}
+          </span>
+        </div>
+      </div>
+
+      {expanded && (
+        <div style={{ padding: '20px 24px' }}>
+          {/* ÉNONCÉ */}
+          <div style={{
+            fontFamily: "'Source Serif 4', serif", fontSize: '1rem',
+            color: theme.text, lineHeight: 1.65, marginBottom: '16px',
+          }}>
+            <RichText text={question.enonce} />
+          </div>
+
+          {/* 4 PROPOSITIONS DANS L'ORDRE VU PAR L'ÉTUDIANT */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '16px' }}>
+            {propositionsVues.map((prop, i) => {
+              const isChoisi = i === choixVueIdx;
+              const isBonne = i === bonneReponseVueIdx;
+              let bg, border, label, labelColor;
+              if (isChoisi && isBonne) {
+                bg = theme.correctBg; border = theme.correctBorder;
+                label = '✅ Votre réponse — correcte'; labelColor = theme.correctText;
+              } else if (isChoisi && !isBonne) {
+                bg = theme.wrongBg; border = theme.wrongBorder;
+                label = '❌ Votre réponse — incorrecte'; labelColor = theme.wrongText;
+              } else if (!isChoisi && isBonne) {
+                bg = theme.missedBg; border = theme.missedBorder;
+                label = '⭕ Bonne réponse'; labelColor = theme.missedText;
+              } else {
+                bg = theme.neutralBg; border = theme.neutralBorder;
+                label = null; labelColor = theme.textMuted;
+              }
+              return (
+                <div key={i} style={{
+                  background: bg, border: `2px solid ${border}`,
+                  borderRadius: '8px', padding: '12px 16px',
+                  display: 'flex', flexDirection: 'column', gap: '6px',
+                }}>
+                  <div style={{ display: 'flex', gap: '10px', alignItems: 'flex-start' }}>
+                    <span style={{
+                      fontFamily: "'DM Sans', sans-serif", fontWeight: 700,
+                      color: labelColor || theme.accent, minWidth: '22px', flexShrink: 0,
+                    }}>
+                      {CONFIG.LETTRES[i]}.
+                    </span>
+                    <span style={{ flex: 1, color: theme.text, fontSize: '0.95rem', lineHeight: 1.55 }}>
+                      <RichText text={prop} />
+                    </span>
+                  </div>
+                  {label && (
+                    <div style={{
+                      fontFamily: "'DM Sans', sans-serif", fontSize: '0.8rem',
+                      fontWeight: 600, color: labelColor, marginLeft: '32px',
+                    }}>
+                      {label}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+
+          {/* EXPLICATIONS */}
+          <Box type="retenir" title={`Pourquoi la bonne réponse est « ${CONFIG.LETTRES[bonneReponseVueIdx]} »`}>
+            <RichText text={correction.explication_bonne} />
+          </Box>
+
+          {/* Explications des mauvaises réponses */}
+          {correction.explications_mauvaises && (
+            <div style={{ marginTop: '12px' }}>
+              <div style={{
+                fontFamily: "'DM Sans', sans-serif", fontWeight: 600,
+                color: theme.textSecondary, fontSize: '0.9rem', marginBottom: '8px',
+              }}>
+                Pourquoi les autres propositions sont incorrectes :
+              </div>
+              <ul style={{ margin: 0, paddingLeft: '22px', color: theme.text, lineHeight: 1.6 }}>
+                {propositionsVues.map((_, i) => {
+                  if (i === bonneReponseVueIdx) return null;
+                  const origIdx = answer.permutation[i];
+                  const expl = correction.explications_mauvaises[origIdx];
+                  if (!expl) return null;
+                  return (
+                    <li key={i} style={{ marginBottom: '6px', fontSize: '0.92rem' }}>
+                      <strong style={{ color: theme.danger }}>
+                        Option {CONFIG.LETTRES[i]}
+                      </strong>
+                      {' — '}
+                      <RichText text={expl} />
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+          )}
+
+          {/* PIÈGE À ÉVITER */}
+          {correction.piege_a_eviter && (
+            <Box type="attention" title="Piège à éviter">
+              <RichText text={correction.piege_a_eviter} />
+            </Box>
+          )}
+
+          {/* RÉFÉRENCE COURS */}
+          {correction.reference_cours && (
+            <div style={{
+              marginTop: '12px', fontFamily: "'DM Sans', sans-serif",
+              fontSize: '0.85rem', color: theme.textMuted, fontStyle: 'italic',
+            }}>
+              📚 Pour approfondir : {correction.reference_cours}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ============================================================================
+   APPLICATION PRINCIPALE
+   ============================================================================ */
+function App() {
+  const { theme } = useTheme();
+  const [appState, setAppState] = useState('loading'); // loading | upload | report | error
+  const [questionsData, setQuestionsData] = useState(null);
+  const [correctionsData, setCorrectionsData] = useState(null);
+  const [loadError, setLoadError] = useState('');
+  const [report, setReport] = useState(null);
+  const [fileError, setFileError] = useState(null);
+  const [loading, setLoading] = useState(false);
+
+  // Chargement parallèle des 2 JSON
+  useEffect(() => {
+    Promise.all([
+      fetch(CONFIG.QUESTIONS_URL, { cache: 'no-store' }).then(r => {
+        if (!r.ok) throw new Error(`${CONFIG.QUESTIONS_URL} : HTTP ${r.status}`);
+        return r.json();
+      }),
+      fetch(CONFIG.CORRECTIONS_URL, { cache: 'no-store' }).then(r => {
+        if (!r.ok) throw new Error(`${CONFIG.CORRECTIONS_URL} : HTTP ${r.status}`);
+        return r.json();
+      }),
+    ])
+    .then(([qData, cData]) => {
+      if (!qData.questions || !cData.corrections) {
+        throw new Error('Un des fichiers JSON est mal formé.');
+      }
+      setQuestionsData(qData);
+      setCorrectionsData(cData);
+      setAppState('upload');
+    })
+    .catch(err => {
+      setLoadError(err.message);
+      setAppState('error');
+    });
+  }, []);
+
+  const handleFileLoaded = useCallback(async (content, error, filename) => {
+    if (error) { setFileError(error); return; }
+    if (!content) return;
+
+    setLoading(true);
+    setFileError(null);
+
+    try {
+      const parsed = parseCsv(content);
+
+      if (!parsed.answers.length) {
+        throw new Error('Le fichier CSV ne contient aucune réponse. Vérifiez qu\'il s\'agit bien du fichier téléchargé à la fin du QCM.');
+      }
+      if (!parsed.metadata.Nom || !parsed.metadata.Prenom) {
+        throw new Error('Le fichier CSV ne contient pas les informations d\'identité. Format invalide.');
+      }
+
+      // Vérification de la signature
+      let signatureOk = false;
+      if (parsed.signature) {
+        const expected = await recomputeSignature(parsed);
+        signatureOk = (expected.toLowerCase() === parsed.signature.toLowerCase());
+      }
+
+      // Construction des lookups
+      const questionsById = {};
+      questionsData.questions.forEach(q => { questionsById[q.id] = q; });
+      const correctionsById = {};
+      correctionsData.corrections.forEach(c => { correctionsById[c.id] = c; });
+
+      // Calcul des stats
+      let pointsObtenus = 0;
+      let nbCorrect = 0;
+      let j1Correct = 0, j1Total = 0, j2Correct = 0, j2Total = 0;
+
+      parsed.answers.forEach(ans => {
+        const cor = correctionsById[ans.id];
+        if (!cor) return;
+        const isCorrect = ans.indexOriginalChoisi !== null && ans.indexOriginalChoisi === cor.bonne_reponse_index;
+        const pts = (DIFFICULTE_META[ans.difficulte] || {}).points || 0;
+        if (isCorrect) { pointsObtenus += pts; nbCorrect++; }
+        if (ans.jour === 1) { j1Total++; if (isCorrect) j1Correct++; }
+        if (ans.jour === 2) { j2Total++; if (isCorrect) j2Correct++; }
+      });
+
+      const noteSur20 = (pointsObtenus / CONFIG.POINTS_MAX) * CONFIG.NOTE_SUR;
+      const stats = {
+        pointsObtenus,
+        nbCorrect,
+        nbTotal: parsed.answers.length,
+        noteSur20,
+        j1PctCorrect: j1Total > 0 ? Math.round((j1Correct / j1Total) * 100) : 0,
+        j2PctCorrect: j2Total > 0 ? Math.round((j2Correct / j2Total) * 100) : 0,
+      };
+
+      setReport({
+        metadata: parsed.metadata,
+        answers: parsed.answers,
+        signature: parsed.signature,
+        signatureOk,
+        stats,
+        questionsById,
+        correctionsById,
+        filename,
+      });
+      setAppState('report');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } catch (err) {
+      setFileError(err.message || 'Erreur de parsing du CSV.');
+    } finally {
+      setLoading(false);
+    }
+  }, [questionsData, correctionsData]);
+
+  const handleReset = useCallback(() => {
+    setReport(null);
+    setFileError(null);
+    setAppState('upload');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, []);
+
+  if (appState === 'loading') {
+    return (
+      <div style={{ background: theme.bg, minHeight: '100vh', display: 'flex',
+                    alignItems: 'center', justifyContent: 'center', color: theme.text }}>
+        <div style={{ textAlign: 'center' }}>
+          <div style={{ fontSize: '2rem', animation: 'spin 1.5s linear infinite', display: 'inline-block' }}>⚙️</div>
+          <div style={{ fontFamily: "'DM Sans', sans-serif", marginTop: '12px' }}>
+            Chargement des données…
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (appState === 'error') {
+    return (
+      <div style={{ background: theme.bg, minHeight: '100vh', padding: '40px',
+                    color: theme.text, maxWidth: '720px', margin: '0 auto' }}>
+        <h1 style={{ fontFamily: "'DM Sans', sans-serif", color: theme.danger }}>
+          ⚠️ Erreur de chargement
+        </h1>
+        <p style={{ lineHeight: 1.7 }}>{loadError}</p>
+        <Box type="attention" title="Que faire ?">
+          <p style={{ margin: 0 }}>
+            Les fichiers <code>questions.json</code> et <code>corrections.json</code> doivent être présents
+            dans le même répertoire que cette page. Contactez l'enseignant :{' '}
+            <a href={`mailto:${CONFIG.EMAIL_CONTACT}`} style={{ color: theme.link }}>{CONFIG.EMAIL_CONTACT}</a>.
+          </p>
+        </Box>
+      </div>
+    );
+  }
+
+  return (
+    <div style={{ background: theme.bg, minHeight: '100vh', color: theme.text, transition: 'background 0.3s' }}>
+      <style>{`
+        ::selection { background: ${theme.accent}33; }
+        a { color: ${theme.link}; }
+        button:focus { outline: 2px solid ${theme.accent}; outline-offset: 2px; }
+      `}</style>
+      {appState === 'upload' && (
+        <>
+          <div style={{ position: 'absolute', top: 16, right: 20 }}>
+            <ThemeToggle />
+          </div>
+          <UploadScreen
+            onFileLoaded={handleFileLoaded}
+            loadError={fileError}
+            ready={!!questionsData && !!correctionsData}
+            loading={loading} />
+        </>
+      )}
+      {appState === 'report' && report && (
+        <ReportScreen report={report} onReset={handleReset} />
+      )}
+    </div>
+  );
+}
+
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(<ThemeProvider><App /></ThemeProvider>);
+</script>
+</body>
+</html>
