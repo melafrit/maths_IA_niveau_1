@@ -1,0 +1,1318 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QCM d'évaluation — Jours 1 et 2 — Maths appliquées à l'IA — IPSSI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,700;1,400&family=JetBrains+Mono:wght@400;500;700&family=Source+Serif+4:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; padding: 0; font-family: 'Source Serif 4', Georgia, serif; }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.6; }
+  }
+  @keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+<script type="text/babel">
+// © 2025 Mohamed EL AFRIT — IPSSI
+// Ce contenu est distribué sous licence Creative Commons BY-NC-SA 4.0
+// https://creativecommons.org/licenses/by-nc-sa/4.0/deed.fr
+//
+// QCM d'évaluation — Jours 1 et 2
+// Mathématiques appliquées à l'Intelligence Artificielle
+// Public : 2e année Bachelor Informatique — IPSSI — 2025-2026
+
+const { useState, useEffect, useRef, useCallback, useMemo, createContext, useContext } = React;
+
+/* ============================================================================
+   CONSTANTES DE L'ÉVALUATION
+   ============================================================================ */
+const CONFIG = {
+  QUESTIONS_URL: 'questions.json',
+  STORAGE_PREFIX: 'qcm_j1j2_v1_',
+  SALT: 'IPSSI_SALT_2026',
+  EMAIL_DEST: 'm.elafrit@ecole-ipssi.net',
+  LETTRES: ['A', 'B', 'C', 'D'],
+  BAREME: { vert: 1, jaune: 2, orange: 3, rouge: 4 },
+};
+
+/* ============================================================================
+   SYSTÈME DE THÈME (identique aux pages de cours)
+   ============================================================================ */
+const THEMES = {
+  light: {
+    bg: '#ffffff', bgAlt: '#fafafa', bgCode: '#f3f4f6',
+    text: '#1a1a2e', textSecondary: '#4b5563', textMuted: '#9ca3af',
+    border: '#e5e7eb', borderLight: '#f3f4f6',
+    definitionBg: '#eff6ff', definitionBorder: '#3b82f6', definitionTitle: '#1e40af',
+    retenirBg: '#f0fdf4', retenirBorder: '#22c55e', retenirTitle: '#166534',
+    attentionBg: '#fff7ed', attentionBorder: '#f97316', attentionTitle: '#c2410c',
+    intuitionBg: '#faf5ff', intuitionBorder: '#a855f7', intuitionTitle: '#7e22ce',
+    exempleBg: '#ecfeff', exempleBorder: '#06b6d4', exempleTitle: '#0e7490',
+    codeBg: '#f8f9fa', codeBorder: '#d1d5db', codeTitle: '#1f2937',
+    sidebarBg: '#f8f9fa', sidebarText: '#374151', sidebarActive: '#3b82f6',
+    sidebarActiveBg: '#eff6ff', sidebarHover: '#f3f4f6',
+    link: '#3b82f6', accent: '#3b82f6',
+    danger: '#ef4444', success: '#22c55e', warning: '#f59e0b',
+    optionBg: '#ffffff', optionBgHover: '#eff6ff', optionBgSelected: '#3b82f6',
+    optionTextSelected: '#ffffff',
+  },
+  dark: {
+    bg: '#0d1117', bgAlt: '#161b22', bgCode: '#1c2128',
+    text: '#c9d1d9', textSecondary: '#8b949e', textMuted: '#6e7681',
+    border: '#30363d', borderLight: '#21262d',
+    definitionBg: '#0d1f3c', definitionBorder: '#3b82f6', definitionTitle: '#93bbfc',
+    retenirBg: '#0a1f0d', retenirBorder: '#22c55e', retenirTitle: '#86efac',
+    attentionBg: '#1f1206', attentionBorder: '#f97316', attentionTitle: '#fdba74',
+    intuitionBg: '#1a0d2e', intuitionBorder: '#a855f7', intuitionTitle: '#d8b4fe',
+    exempleBg: '#0a1a1f', exempleBorder: '#06b6d4', exempleTitle: '#67e8f9',
+    codeBg: '#161b22', codeBorder: '#30363d', codeTitle: '#c9d1d9',
+    sidebarBg: '#161b22', sidebarText: '#8b949e', sidebarActive: '#58a6ff',
+    sidebarActiveBg: '#1c2541', sidebarHover: '#1c2128',
+    link: '#58a6ff', accent: '#58a6ff',
+    danger: '#f87171', success: '#4ade80', warning: '#fbbf24',
+    optionBg: '#161b22', optionBgHover: '#1c2541', optionBgSelected: '#58a6ff',
+    optionTextSelected: '#0d1117',
+  },
+};
+
+const ThemeContext = createContext();
+
+function ThemeProvider({ children }) {
+  const [mode, setMode] = useState(() => {
+    try {
+      const saved = localStorage.getItem(CONFIG.STORAGE_PREFIX + 'theme');
+      return saved === 'dark' ? 'dark' : 'light';
+    } catch { return 'light'; }
+  });
+  const theme = THEMES[mode];
+  const toggle = () => {
+    const next = mode === 'light' ? 'dark' : 'light';
+    setMode(next);
+    try { localStorage.setItem(CONFIG.STORAGE_PREFIX + 'theme', next); } catch {}
+  };
+  return (
+    <ThemeContext.Provider value={{ mode, theme, toggle }}>
+      {children}
+    </ThemeContext.Provider>
+  );
+}
+
+function useTheme() { return useContext(ThemeContext); }
+
+/* ============================================================================
+   UTILITAIRES
+   ============================================================================ */
+
+// Rendu KaTeX pour formules inline
+function M({ t, d }) {
+  if (!window.katex) return <code style={{ fontSize: '0.9em' }}>{t}</code>;
+  try {
+    const html = window.katex.renderToString(t, { throwOnError: false, displayMode: !!d });
+    if (d) return <div style={{ margin: '20px 0', textAlign: 'center', overflowX: 'auto' }}
+                       dangerouslySetInnerHTML={{ __html: html }} />;
+    return <span dangerouslySetInnerHTML={{ __html: html }} />;
+  } catch { return <code>{t}</code>; }
+}
+
+// Rendu d'un texte contenant des portions LaTeX délimitées par $...$
+function RichText({ text }) {
+  if (!text) return null;
+  // Sépare par $...$ (inline) — les $$...$$ ne sont pas utilisés dans notre QCM
+  const parts = text.split(/(\$[^$]+\$)/g);
+  return (
+    <>
+      {parts.map((p, i) => {
+        if (p.startsWith('$') && p.endsWith('$') && p.length >= 2) {
+          return <M key={i} t={p.slice(1, -1)} />;
+        }
+        // Gérer les retours à la ligne + les blocs de code ```python ... ```
+        return <TextWithCode key={i} text={p} />;
+      })}
+    </>
+  );
+}
+
+// Gère les blocs de code ```python ... ``` et les retours à la ligne
+function TextWithCode({ text }) {
+  const { theme } = useTheme();
+  if (!text) return null;
+  // Détecte les blocs de code ```...```
+  const parts = text.split(/(```[\s\S]*?```)/g);
+  return (
+    <>
+      {parts.map((p, i) => {
+        if (p.startsWith('```') && p.endsWith('```')) {
+          // Retire ```python et ```
+          const lines = p.split('\n');
+          const first = lines[0].replace(/^```\w*/, '');
+          const last = lines[lines.length - 1].replace(/```$/, '');
+          const body = [first, ...lines.slice(1, -1), last].join('\n').trim();
+          return (
+            <pre key={i} style={{
+              background: theme.codeBg, border: `1px solid ${theme.codeBorder}`,
+              borderRadius: '6px', padding: '12px 16px', overflow: 'auto',
+              fontFamily: "'JetBrains Mono', monospace", fontSize: '0.9em',
+              color: theme.text, margin: '10px 0', lineHeight: 1.5,
+            }}>{body}</pre>
+          );
+        }
+        // Rendre les retours à la ligne comme <br/>
+        const lines = p.split('\n');
+        return (
+          <React.Fragment key={i}>
+            {lines.map((l, j) => (
+              <React.Fragment key={j}>
+                {j > 0 && <br />}
+                {renderInlineCode(l, theme)}
+              </React.Fragment>
+            ))}
+          </React.Fragment>
+        );
+      })}
+    </>
+  );
+}
+
+// Gère le code inline `...`
+function renderInlineCode(text, theme) {
+  const parts = text.split(/(`[^`]+`)/g);
+  return parts.map((p, i) => {
+    if (p.startsWith('`') && p.endsWith('`') && p.length >= 2) {
+      return (
+        <code key={i} style={{
+          background: theme.bgCode, padding: '2px 6px', borderRadius: '3px',
+          fontFamily: "'JetBrains Mono', monospace", fontSize: '0.88em',
+          color: theme.text,
+        }}>{p.slice(1, -1)}</code>
+      );
+    }
+    return <React.Fragment key={i}>{p}</React.Fragment>;
+  });
+}
+
+// Fisher-Yates shuffle (avec seed pour reproductibilité si besoin)
+function shuffle(array) {
+  const a = [...array];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+// Retourne la permutation : nouvelleListe[i] = ancienneListe[permutation[i]]
+function shuffleWithPermutation(array) {
+  const indices = array.map((_, i) => i);
+  const permutation = shuffle(indices);
+  const shuffled = permutation.map(i => array[i]);
+  return { shuffled, permutation };
+}
+
+// SHA-256 via Web Crypto API
+async function sha256Hex(str) {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(str);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+  const bytes = Array.from(new Uint8Array(hashBuffer));
+  return bytes.map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+// Échappe une cellule pour CSV (guillemets si contient , " ou \n)
+function csvCell(val) {
+  if (val === null || val === undefined) return '';
+  const s = String(val);
+  if (/[",\n\r]/.test(s)) {
+    return '"' + s.replace(/"/g, '""') + '"';
+  }
+  return s;
+}
+
+// Formate secondes → "mm:ss" ou "hh:mm:ss"
+function formatDuration(seconds) {
+  const h = Math.floor(seconds / 3600);
+  const m = Math.floor((seconds % 3600) / 60);
+  const s = Math.floor(seconds % 60);
+  if (h > 0) {
+    return `${h}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+  }
+  return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+}
+
+// Validation email
+function isEmailValid(email) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
+
+// Normalise un NOM en MAJUSCULES sans accents pour le nom de fichier
+function normalizeForFilename(s) {
+  return (s || '')
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^A-Za-z0-9]/g, '')
+    .toUpperCase();
+}
+
+function normalizePrenomForFilename(s) {
+  const up = normalizeForFilename(s);
+  if (!up) return '';
+  return up.charAt(0).toUpperCase() + up.slice(1).toLowerCase();
+}
+
+// Date YYYYMMDD
+function dateStampYMD() {
+  const d = new Date();
+  return d.getFullYear() + String(d.getMonth() + 1).padStart(2, '0') + String(d.getDate()).padStart(2, '0');
+}
+
+// Tronque un énoncé pour le CSV (retire les balises LaTeX et code)
+function troncateEnonce(enonce, maxLen = 180) {
+  let s = (enonce || '')
+    .replace(/\$[^$]*\$/g, '[formule]')
+    .replace(/```[\s\S]*?```/g, '[code]')
+    .replace(/`[^`]+`/g, '[code]')
+    .replace(/\s+/g, ' ')
+    .trim();
+  if (s.length > maxLen) s = s.slice(0, maxLen - 1) + '…';
+  return s;
+}
+
+/* ============================================================================
+   STOCKAGE LOCAL (résistance au refresh)
+   ============================================================================ */
+const Storage = {
+  get(key) {
+    try { return JSON.parse(localStorage.getItem(CONFIG.STORAGE_PREFIX + key) || 'null'); }
+    catch { return null; }
+  },
+  set(key, value) {
+    try { localStorage.setItem(CONFIG.STORAGE_PREFIX + key, JSON.stringify(value)); } catch {}
+  },
+  remove(key) {
+    try { localStorage.removeItem(CONFIG.STORAGE_PREFIX + key); } catch {}
+  },
+  clearAllQuizData() {
+    try {
+      const keys = ['quiz_state', 'quiz_questions', 'quiz_answers', 'quiz_start', 'quiz_current'];
+      keys.forEach(k => localStorage.removeItem(CONFIG.STORAGE_PREFIX + k));
+    } catch {}
+  },
+};
+
+/* ============================================================================
+   COMPOSANTS RÉUTILISABLES
+   ============================================================================ */
+function ThemeToggle() {
+  const { mode, toggle } = useTheme();
+  return (
+    <button onClick={toggle} style={{
+      background: 'none', border: 'none', cursor: 'pointer',
+      fontSize: '1.3rem', padding: '6px 10px', borderRadius: '8px',
+    }}
+      title={mode === 'light' ? 'Mode sombre' : 'Mode clair'}
+      aria-label="Basculer le thème">
+      {mode === 'light' ? '🌙' : '☀️'}
+    </button>
+  );
+}
+
+function Box({ type, title, children, style = {} }) {
+  const { theme } = useTheme();
+  const C = {
+    definition: { icon: '📐', label: 'Définition', bg: 'definitionBg', bd: 'definitionBorder', tt: 'definitionTitle' },
+    retenir:    { icon: '⚡', label: 'À retenir',  bg: 'retenirBg',    bd: 'retenirBorder',    tt: 'retenirTitle' },
+    attention:  { icon: '⚠️', label: 'Attention',  bg: 'attentionBg',  bd: 'attentionBorder',  tt: 'attentionTitle' },
+    intuition:  { icon: '💡', label: 'Intuition',  bg: 'intuitionBg',  bd: 'intuitionBorder',  tt: 'intuitionTitle' },
+    exemple:    { icon: '📊', label: 'Exemple',    bg: 'exempleBg',    bd: 'exempleBorder',    tt: 'exempleTitle' },
+    code:       { icon: '🐍', label: 'Code',       bg: 'codeBg',       bd: 'codeBorder',       tt: 'codeTitle' },
+  }[type] || { icon: '', label: '', bg: 'bgAlt', bd: 'border', tt: 'text' };
+  return (
+    <div style={{
+      background: theme[C.bg], borderLeft: `4px solid ${theme[C.bd]}`,
+      borderRadius: '6px', padding: '16px 20px', margin: '20px 0', ...style,
+    }}>
+      {(title || C.label) && (
+        <div style={{
+          fontFamily: "'DM Sans', sans-serif", fontWeight: 700,
+          color: theme[C.tt], marginBottom: '10px', fontSize: '0.95rem',
+        }}>
+          {C.icon} {title || C.label}
+        </div>
+      )}
+      <div style={{ color: theme.text, lineHeight: 1.7 }}>{children}</div>
+    </div>
+  );
+}
+
+function Button({ variant = 'primary', onClick, disabled, children, style = {}, icon }) {
+  const { theme } = useTheme();
+  const variants = {
+    primary:   { bg: theme.accent,  fg: '#ffffff', bdr: theme.accent },
+    secondary: { bg: theme.bgAlt,   fg: theme.text, bdr: theme.border },
+    success:   { bg: theme.success, fg: '#ffffff', bdr: theme.success },
+    danger:    { bg: theme.danger,  fg: '#ffffff', bdr: theme.danger },
+    ghost:     { bg: 'transparent', fg: theme.text, bdr: theme.border },
+  };
+  const v = variants[variant] || variants.primary;
+  return (
+    <button onClick={onClick} disabled={disabled} style={{
+      background: disabled ? theme.textMuted : v.bg,
+      color: v.fg, border: `1px solid ${disabled ? theme.textMuted : v.bdr}`,
+      padding: '10px 20px', borderRadius: '6px',
+      fontFamily: "'DM Sans', sans-serif", fontSize: '0.95rem', fontWeight: 600,
+      cursor: disabled ? 'not-allowed' : 'pointer', opacity: disabled ? 0.6 : 1,
+      transition: 'all 0.15s', ...style,
+    }}>
+      {icon && <span style={{ marginRight: '6px' }}>{icon}</span>}
+      {children}
+    </button>
+  );
+}
+
+function Input({ value, onChange, placeholder, type = 'text', error, style = {} }) {
+  const { theme } = useTheme();
+  return (
+    <input type={type} value={value} onChange={onChange} placeholder={placeholder}
+      style={{
+        width: '100%', padding: '10px 14px',
+        background: theme.bgAlt, color: theme.text,
+        border: `1px solid ${error ? theme.danger : theme.border}`,
+        borderRadius: '6px', fontFamily: "'Source Serif 4', serif",
+        fontSize: '1rem', outline: 'none',
+        ...style,
+      }} />
+  );
+}
+
+function ProgressBar({ value, total, color }) {
+  const { theme } = useTheme();
+  const pct = total > 0 ? Math.round((value / total) * 100) : 0;
+  return (
+    <div style={{
+      background: theme.bgAlt, height: '10px', borderRadius: '6px',
+      overflow: 'hidden', border: `1px solid ${theme.border}`,
+    }}>
+      <div style={{
+        width: `${pct}%`, height: '100%',
+        background: color || theme.accent, transition: 'width 0.3s',
+      }} />
+    </div>
+  );
+}
+
+/* ============================================================================
+   ÉCRAN 1 — ACCUEIL / EXPLICATION DU BARÈME
+   ============================================================================ */
+function HomeScreen({ onStart, hasInProgress, onResume, onReset }) {
+  const { theme } = useTheme();
+  return (
+    <div style={{ maxWidth: '820px', margin: '0 auto', padding: '40px 24px 80px' }}>
+      <div style={{
+        fontFamily: "'DM Sans', sans-serif", fontSize: '0.85rem',
+        color: theme.textMuted, fontWeight: 500, letterSpacing: '0.02em',
+      }}>
+        IPSSI — Bachelor 2 Informatique — 2025-2026
+      </div>
+      <h1 style={{
+        fontFamily: "'DM Sans', sans-serif", fontSize: '2.2rem',
+        fontWeight: 700, color: theme.text, margin: '6px 0 4px', lineHeight: 1.2,
+      }}>
+        QCM d'évaluation
+      </h1>
+      <div style={{
+        fontFamily: "'DM Sans', sans-serif", fontSize: '1.1rem',
+        color: theme.textSecondary, fontWeight: 500, marginBottom: '12px',
+      }}>
+        Mathématiques appliquées à l'IA — Jours 1 et 2
+      </div>
+      <div style={{
+        height: '3px',
+        background: `linear-gradient(90deg, ${theme.accent}, ${theme.accent}44)`,
+        borderRadius: '2px', marginBottom: '32px',
+      }} />
+
+      <Box type="retenir" title="Objectif de cette évaluation">
+        <p style={{ margin: 0 }}>
+          Cette évaluation couvre les deux premiers jours du module :
+          <strong> données et représentation mathématique</strong> (vecteurs, matrices, régression linéaire, MSE)
+          et <strong>optimisation</strong> (fonction de coût, descente de gradient, taux d'apprentissage).
+          Le QCM comporte <strong>50 questions à choix unique</strong>.
+        </p>
+      </Box>
+
+      <Box type="definition" title="Déroulement">
+        <ul style={{ margin: 0, paddingLeft: '22px', lineHeight: 1.8 }}>
+          <li><strong>50 questions</strong> à choix unique (4 propositions, 1 seule bonne réponse par question).</li>
+          <li>L'ordre des questions et des propositions est <strong>mélangé aléatoirement</strong> pour chaque étudiant.</li>
+          <li>Vous pouvez <strong>naviguer librement</strong> et modifier vos réponses avant la soumission.</li>
+          <li>Un <strong>chronomètre indicatif</strong> s'affiche : il n'y a <em>pas de blocage automatique</em>.</li>
+          <li>À la fin, vous exporterez un <strong>fichier CSV</strong> à envoyer par email.</li>
+        </ul>
+      </Box>
+
+      <Box type="intuition" title="Barème (pondéré par difficulté, sans malus)">
+        <p style={{ margin: '0 0 10px 0' }}>
+          Chaque question a une difficulté interne (non affichée pendant le QCM). Les points sont attribués ainsi :
+        </p>
+        <div style={{
+          display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '10px',
+          marginBottom: '12px',
+        }}>
+          {[
+            { emoji: '🟢', label: 'Facile', pts: '1 pt' },
+            { emoji: '🟡', label: 'Moyen', pts: '2 pts' },
+            { emoji: '🟠', label: 'Difficile', pts: '3 pts' },
+            { emoji: '🔴', label: 'Expert', pts: '4 pts' },
+          ].map((d, i) => (
+            <div key={i} style={{
+              background: theme.bgAlt, border: `1px solid ${theme.border}`,
+              borderRadius: '6px', padding: '10px', textAlign: 'center',
+            }}>
+              <div style={{ fontSize: '1.5rem' }}>{d.emoji}</div>
+              <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: '0.85rem', color: theme.textSecondary }}>
+                {d.label}
+              </div>
+              <div style={{ fontFamily: "'DM Sans', sans-serif", fontWeight: 700, color: theme.accent }}>
+                {d.pts}
+              </div>
+            </div>
+          ))}
+        </div>
+        <ul style={{ margin: '0', paddingLeft: '22px', lineHeight: 1.8, fontSize: '0.95rem' }}>
+          <li>Chaque jour totalise <strong>46 points bruts</strong> (10×1 + 10×2 + 4×3 + 1×4).</li>
+          <li>Sur les 2 jours : <strong>92 points bruts maximum</strong>, convertis sur <strong>/20</strong>.</li>
+          <li>Formule : <M t="\text{Note}_{/20} = \frac{P_{\text{obtenus}}}{92} \times 20" />.</li>
+          <li><strong>Aucun malus</strong> : une mauvaise réponse = 0 point (pas de pénalité).
+            → <em>Il est toujours préférable de tenter une réponse, même par élimination.</em></li>
+        </ul>
+      </Box>
+
+      <Box type="attention" title="Conseils avant de commencer">
+        <ul style={{ margin: 0, paddingLeft: '22px', lineHeight: 1.8 }}>
+          <li>Installez-vous dans un environnement calme : prévoyez environ <strong>60 à 90 minutes</strong>.</li>
+          <li>Une <strong>feuille de brouillon</strong> et un <strong>stylo</strong> sont fortement recommandés pour les calculs.</li>
+          <li>Une <strong>calculatrice simple</strong> (ou celle de votre téléphone) est autorisée.</li>
+          <li>À la fin, vous devrez saisir vos <strong>nom, prénom et email</strong> pour générer le CSV.</li>
+          <li>Envoyez ensuite le CSV par email à <code style={{ background: theme.bgCode, padding: '2px 6px', borderRadius: '3px' }}>{CONFIG.EMAIL_DEST}</code>.</li>
+          <li>⚠️ <strong>Ne fermez pas la page</strong> pendant le QCM : vos réponses sont sauvegardées localement,
+            mais seule la soumission génère le fichier officiel.</li>
+        </ul>
+      </Box>
+
+      <div style={{
+        display: 'flex', gap: '12px', flexWrap: 'wrap',
+        justifyContent: 'center', marginTop: '40px',
+      }}>
+        {hasInProgress ? (
+          <>
+            <Button variant="primary" onClick={onResume} icon="▶️" style={{ fontSize: '1.1rem', padding: '14px 32px' }}>
+              Reprendre mon QCM
+            </Button>
+            <Button variant="ghost" onClick={onReset} icon="🔄">
+              Recommencer à zéro
+            </Button>
+          </>
+        ) : (
+          <Button variant="primary" onClick={onStart} icon="🚀" style={{ fontSize: '1.1rem', padding: '14px 32px' }}>
+            Démarrer l'évaluation
+          </Button>
+        )}
+      </div>
+
+      <div style={{
+        marginTop: '60px', padding: '20px 0', borderTop: `1px solid ${theme.border}`,
+        textAlign: 'center', fontFamily: "'DM Sans', sans-serif",
+        fontSize: '0.8rem', color: theme.textMuted,
+      }}>
+        <p style={{ margin: '4px 0' }}>© 2025 Mohamed EL AFRIT — IPSSI</p>
+        <p style={{ margin: '4px 0' }}>
+          <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.fr"
+             target="_blank" rel="noopener"
+             style={{ color: theme.link, textDecoration: 'none' }}>
+            Licence CC BY-NC-SA 4.0
+          </a>
+        </p>
+      </div>
+    </div>
+  );
+}
+
+/* ============================================================================
+   ÉCRAN 2 — QCM EN COURS
+   ============================================================================ */
+function QuizScreen({
+  questions, answers, currentIndex, elapsedSec,
+  onAnswer, onNavigate, onSubmitRequest,
+}) {
+  const { theme } = useTheme();
+  const q = questions[currentIndex];
+  const total = questions.length;
+  const answered = Object.keys(answers).length;
+  const currentAnswer = answers[q.id]; // index de la proposition choisie (dans l'ordre randomisé)
+
+  const jumpToFirstUnanswered = () => {
+    const idx = questions.findIndex(qq => answers[qq.id] === undefined);
+    if (idx >= 0) onNavigate(idx);
+  };
+
+  return (
+    <div style={{ maxWidth: '860px', margin: '0 auto', padding: '24px 24px 80px' }}>
+      {/* HEADER : progression + chrono */}
+      <div style={{
+        display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+        flexWrap: 'wrap', gap: '12px', marginBottom: '16px',
+      }}>
+        <div style={{
+          fontFamily: "'DM Sans', sans-serif", fontSize: '0.9rem',
+          color: theme.textSecondary, fontWeight: 500,
+        }}>
+          Question <strong style={{ color: theme.text }}>{currentIndex + 1}</strong> / {total}
+          <span style={{ margin: '0 12px', color: theme.textMuted }}>|</span>
+          Répondues : <strong style={{ color: answered === total ? theme.success : theme.text }}>{answered}</strong> / {total}
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <div style={{
+            fontFamily: "'JetBrains Mono', monospace", fontSize: '1rem',
+            background: theme.bgAlt, padding: '6px 12px', borderRadius: '6px',
+            border: `1px solid ${theme.border}`, color: theme.text, fontWeight: 500,
+          }}>
+            ⏱️ {formatDuration(elapsedSec)}
+          </div>
+          <ThemeToggle />
+        </div>
+      </div>
+
+      <ProgressBar value={answered} total={total} color={answered === total ? theme.success : theme.accent} />
+
+      {/* CARTE DE LA QUESTION */}
+      <div style={{
+        background: theme.bgAlt, border: `1px solid ${theme.border}`,
+        borderRadius: '10px', padding: '28px 32px', margin: '24px 0',
+      }}>
+        <div style={{
+          fontFamily: "'DM Sans', sans-serif", fontSize: '0.85rem',
+          color: theme.textMuted, marginBottom: '12px',
+        }}>
+          Question {currentIndex + 1}
+        </div>
+        <div style={{
+          fontFamily: "'Source Serif 4', serif", fontSize: '1.1rem',
+          color: theme.text, lineHeight: 1.7, marginBottom: '24px',
+        }}>
+          <RichText text={q.enonce} />
+        </div>
+
+        {/* PROPOSITIONS */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+          {q.propositionsShuffled.map((prop, i) => {
+            const isSelected = currentAnswer === i;
+            return (
+              <button key={i} onClick={() => onAnswer(q.id, i)}
+                style={{
+                  display: 'flex', alignItems: 'flex-start', gap: '12px',
+                  background: isSelected ? theme.optionBgSelected : theme.optionBg,
+                  color: isSelected ? theme.optionTextSelected : theme.text,
+                  border: `2px solid ${isSelected ? theme.optionBgSelected : theme.border}`,
+                  borderRadius: '8px', padding: '14px 18px',
+                  textAlign: 'left', cursor: 'pointer',
+                  fontFamily: "'Source Serif 4', serif", fontSize: '1rem',
+                  transition: 'all 0.15s', width: '100%', lineHeight: 1.6,
+                }}
+                onMouseEnter={e => { if (!isSelected) e.currentTarget.style.background = theme.optionBgHover; }}
+                onMouseLeave={e => { if (!isSelected) e.currentTarget.style.background = theme.optionBg; }}>
+                <span style={{
+                  fontFamily: "'DM Sans', sans-serif", fontWeight: 700,
+                  minWidth: '28px', flexShrink: 0,
+                  color: isSelected ? theme.optionTextSelected : theme.accent,
+                }}>
+                  {CONFIG.LETTRES[i]}.
+                </span>
+                <span style={{ flex: 1 }}>
+                  <RichText text={prop} />
+                </span>
+              </button>
+            );
+          })}
+        </div>
+
+        {currentAnswer !== undefined && (
+          <div style={{ marginTop: '16px', textAlign: 'right' }}>
+            <button onClick={() => onAnswer(q.id, undefined)}
+              style={{
+                background: 'none', border: `1px solid ${theme.border}`,
+                color: theme.textSecondary, padding: '6px 14px',
+                borderRadius: '6px', cursor: 'pointer',
+                fontFamily: "'DM Sans', sans-serif", fontSize: '0.85rem',
+              }}>
+              ✖ Effacer ma réponse
+            </button>
+          </div>
+        )}
+      </div>
+
+      {/* NAVIGATION PREV/NEXT */}
+      <div style={{
+        display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+        gap: '12px', flexWrap: 'wrap', marginBottom: '32px',
+      }}>
+        <Button variant="secondary"
+          disabled={currentIndex === 0}
+          onClick={() => onNavigate(currentIndex - 1)}
+          icon="←">
+          Précédent
+        </Button>
+        <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+          {answered < total && (
+            <Button variant="ghost" onClick={jumpToFirstUnanswered}>
+              🔍 Aller à la 1<sup>re</sup> non répondue
+            </Button>
+          )}
+          <Button variant="success" onClick={onSubmitRequest} icon="📤">
+            Soumettre mes réponses
+          </Button>
+        </div>
+        <Button variant="secondary"
+          disabled={currentIndex === total - 1}
+          onClick={() => onNavigate(currentIndex + 1)}>
+          Suivant →
+        </Button>
+      </div>
+
+      {/* GRILLE DE NAVIGATION — vue d'ensemble */}
+      <div style={{
+        background: theme.bgAlt, border: `1px solid ${theme.border}`,
+        borderRadius: '8px', padding: '16px',
+      }}>
+        <div style={{
+          fontFamily: "'DM Sans', sans-serif", fontSize: '0.85rem',
+          color: theme.textSecondary, marginBottom: '10px', fontWeight: 500,
+        }}>
+          Navigation rapide — <span style={{ color: theme.success }}>■ répondue</span>
+          <span style={{ margin: '0 8px' }}>·</span>
+          <span style={{ color: theme.textMuted }}>■ non répondue</span>
+          <span style={{ margin: '0 8px' }}>·</span>
+          <span style={{ color: theme.accent }}>■ question actuelle</span>
+        </div>
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fill, minmax(38px, 1fr))',
+          gap: '6px',
+        }}>
+          {questions.map((qq, i) => {
+            const isAnswered = answers[qq.id] !== undefined;
+            const isCurrent = i === currentIndex;
+            const bg = isCurrent ? theme.accent
+                      : isAnswered ? theme.success
+                      : theme.bg;
+            const fg = (isCurrent || isAnswered) ? '#ffffff' : theme.text;
+            return (
+              <button key={i} onClick={() => onNavigate(i)}
+                style={{
+                  background: bg, color: fg,
+                  border: `1px solid ${isCurrent ? theme.accent : theme.border}`,
+                  borderRadius: '5px', padding: '6px 0',
+                  cursor: 'pointer', fontFamily: "'DM Sans', sans-serif",
+                  fontSize: '0.8rem', fontWeight: 600, transition: 'all 0.15s',
+                }}>
+                {i + 1}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ============================================================================
+   ÉCRAN 3 — RÉCAPITULATIF + IDENTITÉ + EXPORT
+   ============================================================================ */
+function ReviewScreen({ questions, answers, startIso, elapsedSec, onBack, onExport }) {
+  const { theme } = useTheme();
+  const [nom, setNom]       = useState(() => Storage.get('identite')?.nom || '');
+  const [prenom, setPrenom] = useState(() => Storage.get('identite')?.prenom || '');
+  const [email, setEmail]   = useState(() => Storage.get('identite')?.email || '');
+  const [errors, setErrors] = useState({});
+  const [exporting, setExporting] = useState(false);
+
+  const answered = Object.keys(answers).length;
+  const total = questions.length;
+  const nonAnswered = total - answered;
+
+  const validate = () => {
+    const e = {};
+    if (!nom.trim()) e.nom = 'Le nom est obligatoire.';
+    if (!prenom.trim()) e.prenom = 'Le prénom est obligatoire.';
+    if (!email.trim()) e.email = 'L\'email est obligatoire.';
+    else if (!isEmailValid(email)) e.email = 'Adresse email invalide (exemple : prenom.nom@ecole.fr).';
+    setErrors(e);
+    return Object.keys(e).length === 0;
+  };
+
+  const handleExport = async () => {
+    if (!validate()) return;
+    setExporting(true);
+    try {
+      Storage.set('identite', { nom: nom.trim(), prenom: prenom.trim(), email: email.trim() });
+      await onExport({ nom: nom.trim(), prenom: prenom.trim(), email: email.trim() });
+    } finally {
+      setExporting(false);
+    }
+  };
+
+  return (
+    <div style={{ maxWidth: '820px', margin: '0 auto', padding: '40px 24px 80px' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+        <h1 style={{
+          fontFamily: "'DM Sans', sans-serif", fontSize: '1.8rem',
+          fontWeight: 700, color: theme.text, margin: 0,
+        }}>
+          📤 Soumettre mon évaluation
+        </h1>
+        <ThemeToggle />
+      </div>
+
+      <div style={{
+        display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
+        gap: '12px', marginBottom: '24px',
+      }}>
+        {[
+          { label: 'Questions répondues', value: `${answered} / ${total}`,
+            color: answered === total ? theme.success : theme.warning },
+          { label: 'Sans réponse', value: nonAnswered,
+            color: nonAnswered === 0 ? theme.success : theme.danger },
+          { label: 'Durée totale', value: formatDuration(elapsedSec),
+            color: theme.accent },
+        ].map((s, i) => (
+          <div key={i} style={{
+            background: theme.bgAlt, border: `1px solid ${theme.border}`,
+            borderRadius: '8px', padding: '16px', textAlign: 'center',
+          }}>
+            <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: '0.8rem', color: theme.textMuted, marginBottom: '4px' }}>
+              {s.label}
+            </div>
+            <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: '1.5rem', fontWeight: 700, color: s.color }}>
+              {s.value}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {nonAnswered > 0 && (
+        <Box type="attention" title="Attention : questions sans réponse">
+          <p style={{ margin: '0 0 10px 0' }}>
+            Il vous reste <strong>{nonAnswered}</strong> question{nonAnswered > 1 ? 's' : ''} sans réponse.
+            Chaque question sans réponse compte <strong>0 point</strong> (aucun malus, mais aucun gain).
+            Il est généralement préférable de tenter une réponse, même par élimination.
+          </p>
+          <Button variant="ghost" onClick={onBack} icon="↩️">
+            Retourner au QCM pour compléter
+          </Button>
+        </Box>
+      )}
+
+      <Box type="definition" title="Vos informations d'identification">
+        <p style={{ margin: '0 0 16px 0' }}>
+          Ces informations figureront dans le fichier CSV envoyé à l'enseignant. Elles sont <strong>obligatoires</strong>.
+        </p>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '12px' }}>
+          <div>
+            <label style={{ display: 'block', fontFamily: "'DM Sans', sans-serif", fontSize: '0.85rem', color: theme.textSecondary, marginBottom: '4px' }}>
+              NOM *
+            </label>
+            <Input value={nom} onChange={e => setNom(e.target.value.toUpperCase())}
+                   placeholder="DUPONT" error={!!errors.nom} />
+            {errors.nom && <div style={{ color: theme.danger, fontSize: '0.8rem', marginTop: '4px' }}>{errors.nom}</div>}
+          </div>
+          <div>
+            <label style={{ display: 'block', fontFamily: "'DM Sans', sans-serif", fontSize: '0.85rem', color: theme.textSecondary, marginBottom: '4px' }}>
+              Prénom *
+            </label>
+            <Input value={prenom} onChange={e => setPrenom(e.target.value)}
+                   placeholder="Marie" error={!!errors.prenom} />
+            {errors.prenom && <div style={{ color: theme.danger, fontSize: '0.8rem', marginTop: '4px' }}>{errors.prenom}</div>}
+          </div>
+        </div>
+        <div>
+          <label style={{ display: 'block', fontFamily: "'DM Sans', sans-serif", fontSize: '0.85rem', color: theme.textSecondary, marginBottom: '4px' }}>
+            Email *
+          </label>
+          <Input type="email" value={email} onChange={e => setEmail(e.target.value.trim())}
+                 placeholder="prenom.nom@ecole-ipssi.fr" error={!!errors.email} />
+          {errors.email && <div style={{ color: theme.danger, fontSize: '0.8rem', marginTop: '4px' }}>{errors.email}</div>}
+        </div>
+      </Box>
+
+      <div style={{
+        display: 'flex', gap: '12px', flexWrap: 'wrap',
+        justifyContent: 'space-between', marginTop: '32px',
+      }}>
+        <Button variant="ghost" onClick={onBack} icon="←" disabled={exporting}>
+          Retourner au QCM
+        </Button>
+        <Button variant="success" onClick={handleExport} disabled={exporting}
+                icon={exporting ? '⏳' : '📤'}
+                style={{ fontSize: '1.05rem', padding: '12px 28px' }}>
+          {exporting ? 'Génération du CSV…' : 'Soumettre et télécharger le CSV'}
+        </Button>
+      </div>
+    </div>
+  );
+}
+
+/* ============================================================================
+   ÉCRAN 4 — FINAL (instructions d'envoi email)
+   ============================================================================ */
+function DoneScreen({ filename, identite, onRedownload, onReset }) {
+  const { theme } = useTheme();
+  const mailSubject = encodeURIComponent(`[QCM J1-J2] Soumission — ${identite.nom} ${identite.prenom}`);
+  const mailBody = encodeURIComponent(
+    `Bonjour M. EL AFRIT,\n\n` +
+    `Je vous transmets en pièce jointe le CSV de mon évaluation QCM Jours 1-2.\n\n` +
+    `Nom : ${identite.nom}\n` +
+    `Prénom : ${identite.prenom}\n` +
+    `Email : ${identite.email}\n` +
+    `Fichier : ${filename}\n\n` +
+    `Cordialement,\n${identite.prenom} ${identite.nom}`
+  );
+  const mailto = `mailto:${CONFIG.EMAIL_DEST}?subject=${mailSubject}&body=${mailBody}`;
+
+  return (
+    <div style={{ maxWidth: '780px', margin: '0 auto', padding: '40px 24px 80px' }}>
+      <div style={{ textAlign: 'right', marginBottom: '16px' }}>
+        <ThemeToggle />
+      </div>
+
+      <div style={{ textAlign: 'center', marginBottom: '32px' }}>
+        <div style={{ fontSize: '4rem' }}>✅</div>
+        <h1 style={{
+          fontFamily: "'DM Sans', sans-serif", fontSize: '2rem',
+          fontWeight: 700, color: theme.text, margin: '8px 0 4px',
+        }}>
+          CSV généré avec succès
+        </h1>
+        <p style={{
+          fontFamily: "'DM Sans', sans-serif", fontSize: '1rem',
+          color: theme.textSecondary, margin: 0,
+        }}>
+          Il reste une étape essentielle : <strong>envoyer le fichier par email</strong>.
+        </p>
+      </div>
+
+      <Box type="retenir" title="1. Votre fichier a été téléchargé">
+        <p style={{ margin: '0 0 6px 0' }}>Le fichier suivant se trouve dans votre dossier <em>Téléchargements</em> :</p>
+        <div style={{
+          background: theme.bgCode, border: `1px solid ${theme.border}`,
+          padding: '10px 14px', borderRadius: '6px',
+          fontFamily: "'JetBrains Mono', monospace", fontSize: '0.9rem',
+          color: theme.text, wordBreak: 'break-all',
+        }}>
+          📄 {filename}
+        </div>
+        <div style={{ marginTop: '10px' }}>
+          <Button variant="ghost" onClick={onRedownload} icon="⬇️">
+            Re-télécharger le fichier
+          </Button>
+        </div>
+      </Box>
+
+      <Box type="attention" title="2. Envoyez ce fichier par email — obligatoire">
+        <p style={{ margin: '0 0 12px 0' }}>
+          Composez un nouvel email depuis votre messagerie (Gmail, Outlook, webmail IPSSI, etc.) avec les informations suivantes :
+        </p>
+        <div style={{
+          background: theme.bgAlt, border: `1px solid ${theme.border}`,
+          borderRadius: '6px', padding: '14px 18px', marginBottom: '12px',
+        }}>
+          <div style={{ marginBottom: '8px' }}>
+            <strong>Destinataire :</strong>{' '}
+            <code style={{
+              background: theme.bgCode, padding: '2px 6px', borderRadius: '3px',
+              fontFamily: "'JetBrains Mono', monospace", color: theme.text,
+            }}>{CONFIG.EMAIL_DEST}</code>
+          </div>
+          <div style={{ marginBottom: '8px' }}>
+            <strong>Objet :</strong>{' '}
+            <code style={{
+              background: theme.bgCode, padding: '2px 6px', borderRadius: '3px',
+              fontFamily: "'JetBrains Mono', monospace", color: theme.text, fontSize: '0.88em',
+            }}>[QCM J1-J2] Soumission — {identite.nom} {identite.prenom}</code>
+          </div>
+          <div>
+            <strong>Pièce jointe :</strong> le fichier{' '}
+            <code style={{
+              background: theme.bgCode, padding: '2px 6px', borderRadius: '3px',
+              fontFamily: "'JetBrains Mono', monospace", color: theme.text, fontSize: '0.88em',
+            }}>{filename}</code>
+            {' '}(depuis votre dossier <em>Téléchargements</em>)
+          </div>
+        </div>
+        <p style={{ margin: '0 0 12px 0' }}>
+          Raccourci : le bouton ci-dessous ouvre votre client email avec l'objet pré-rempli.
+          <br /><strong>N'oubliez pas d'attacher manuellement le fichier CSV</strong> avant d'envoyer.
+        </p>
+        <Button variant="primary" onClick={() => { window.location.href = mailto; }} icon="✉️">
+          Ouvrir mon client email (objet pré-rempli)
+        </Button>
+      </Box>
+
+      <Box type="intuition" title="3. Une fois l'email envoyé">
+        <p style={{ margin: '0 0 8px 0' }}>
+          L'enseignant recevra votre CSV et le corrigera via son dashboard. Vous recevrez ensuite un lien vers
+          la page de <strong>correction personnelle</strong> pour analyser vos réponses question par question.
+        </p>
+        <p style={{ margin: 0 }}>
+          Merci de votre sérieux, et bonne suite de formation !
+        </p>
+      </Box>
+
+      <div style={{ textAlign: 'center', marginTop: '32px' }}>
+        <Button variant="ghost" onClick={onReset}>
+          🏠 Retour à l'accueil
+        </Button>
+      </div>
+    </div>
+  );
+}
+
+/* ============================================================================
+   MACHINE À ÉTATS PRINCIPALE
+   ============================================================================ */
+function QuizApp() {
+  const { theme } = useTheme();
+  const [appState, setAppState] = useState('loading'); // loading | home | quiz | review | done | error
+  const [questionsData, setQuestionsData] = useState(null); // le JSON brut
+  const [quizQuestions, setQuizQuestions] = useState(null); // questions mélangées (persistées)
+  const [answers, setAnswers] = useState({}); // { Q01: 0, Q02: 2, ... }
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [startIso, setStartIso] = useState(null);
+  const [elapsedSec, setElapsedSec] = useState(0);
+  const [lastCsv, setLastCsv] = useState(null); // { content, filename, identite }
+  const [errorMsg, setErrorMsg] = useState('');
+
+  // -------- Chargement initial du JSON --------
+  useEffect(() => {
+    fetch(CONFIG.QUESTIONS_URL, { cache: 'no-store' })
+      .then(r => {
+        if (!r.ok) throw new Error(`Impossible de charger ${CONFIG.QUESTIONS_URL} (HTTP ${r.status})`);
+        return r.json();
+      })
+      .then(data => {
+        if (!data.questions || !Array.isArray(data.questions)) {
+          throw new Error('Format invalide : la clé "questions" est absente ou mal formée.');
+        }
+        setQuestionsData(data);
+
+        // Restauration éventuelle d'un QCM en cours
+        const savedQuiz = Storage.get('quiz_questions');
+        const savedAnswers = Storage.get('quiz_answers');
+        const savedStart = Storage.get('quiz_start');
+        const savedCurrent = Storage.get('quiz_current');
+        if (savedQuiz && Array.isArray(savedQuiz) && savedQuiz.length === data.questions.length) {
+          setQuizQuestions(savedQuiz);
+          setAnswers(savedAnswers || {});
+          setStartIso(savedStart || new Date().toISOString());
+          setCurrentIndex(typeof savedCurrent === 'number' ? savedCurrent : 0);
+        }
+        setAppState('home');
+      })
+      .catch(err => {
+        setErrorMsg(err.message);
+        setAppState('error');
+      });
+  }, []);
+
+  // -------- Chronomètre --------
+  useEffect(() => {
+    if (appState !== 'quiz' && appState !== 'review') return;
+    if (!startIso) return;
+    const tick = () => {
+      const elapsed = (new Date() - new Date(startIso)) / 1000;
+      setElapsedSec(Math.max(0, elapsed));
+    };
+    tick();
+    const id = setInterval(tick, 1000);
+    return () => clearInterval(id);
+  }, [appState, startIso]);
+
+  // -------- Persistance dans localStorage --------
+  useEffect(() => {
+    if (quizQuestions) Storage.set('quiz_questions', quizQuestions);
+  }, [quizQuestions]);
+  useEffect(() => { Storage.set('quiz_answers', answers); }, [answers]);
+  useEffect(() => { if (startIso) Storage.set('quiz_start', startIso); }, [startIso]);
+  useEffect(() => { Storage.set('quiz_current', currentIndex); }, [currentIndex]);
+
+  // -------- Démarrage (nouveau) --------
+  const startQuiz = useCallback(() => {
+    if (!questionsData) return;
+    // Mélange des questions
+    const { shuffled: qShuffled, permutation: qPerm } = shuffleWithPermutation(questionsData.questions);
+    // Pour chaque question, on mélange aussi les propositions et on stocke la permutation
+    const prepared = qShuffled.map((q, idxInQuiz) => {
+      const { shuffled: pShuffled, permutation: pPerm } = shuffleWithPermutation(q.propositions);
+      return {
+        ...q,
+        propositionsShuffled: pShuffled,
+        permutationPropositions: pPerm, // permutation[i] = index original de la proposition placée en i
+        ordreOriginal: qPerm[idxInQuiz], // utile pour reconstruire
+      };
+    });
+    setQuizQuestions(prepared);
+    setAnswers({});
+    setCurrentIndex(0);
+    setStartIso(new Date().toISOString());
+    setAppState('quiz');
+  }, [questionsData]);
+
+  const resumeQuiz = useCallback(() => {
+    setAppState('quiz');
+  }, []);
+
+  const resetQuiz = useCallback(() => {
+    if (!confirm('Cette action supprime vos réponses en cours et réinitialise le QCM. Continuer ?')) return;
+    Storage.clearAllQuizData();
+    setQuizQuestions(null);
+    setAnswers({});
+    setCurrentIndex(0);
+    setStartIso(null);
+    setElapsedSec(0);
+    setAppState('home');
+  }, []);
+
+  const handleAnswer = useCallback((questionId, shuffledIndex) => {
+    setAnswers(prev => {
+      const next = { ...prev };
+      if (shuffledIndex === undefined) delete next[questionId];
+      else next[questionId] = shuffledIndex;
+      return next;
+    });
+  }, []);
+
+  const handleNavigate = useCallback((idx) => {
+    if (!quizQuestions) return;
+    if (idx < 0) idx = 0;
+    if (idx >= quizQuestions.length) idx = quizQuestions.length - 1;
+    setCurrentIndex(idx);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [quizQuestions]);
+
+  const handleSubmitRequest = useCallback(() => {
+    setAppState('review');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, []);
+
+  // -------- Export CSV --------
+  const handleExport = useCallback(async ({ nom, prenom, email }) => {
+    if (!quizQuestions) return;
+    const endIso = new Date().toISOString();
+    const dureeSec = Math.round((new Date(endIso) - new Date(startIso)) / 1000);
+
+    // Construction des lignes réponses
+    const answerRows = quizQuestions.map((q, i) => {
+      const chosenShuffledIdx = answers[q.id]; // index dans propositionsShuffled
+      const chosenOriginalIdx = chosenShuffledIdx !== undefined
+        ? q.permutationPropositions[chosenShuffledIdx]
+        : undefined;
+      const chosenLetter = chosenShuffledIdx !== undefined ? CONFIG.LETTRES[chosenShuffledIdx] : '';
+      return {
+        ordre: i + 1,
+        id: q.id,
+        difficulte: q.difficulte,
+        type: q.type,
+        jour: q.jour,
+        enonceTronque: troncateEnonce(q.enonce),
+        permutation: q.permutationPropositions.join('|'),
+        lettreChoisie: chosenLetter,
+        indexOriginalChoisi: chosenOriginalIdx === undefined ? '' : chosenOriginalIdx,
+      };
+    });
+
+    // Construction du corps des données à signer
+    const dataToSign = [
+      nom, prenom, email, startIso, endIso, String(dureeSec),
+      String(quizQuestions.length), CONFIG.SALT,
+      ...answerRows.map(r => `${r.ordre}|${r.id}|${r.permutation}|${r.indexOriginalChoisi}`),
+    ].join('||');
+    const signature = await sha256Hex(dataToSign);
+
+    // Construction du CSV
+    const lines = [];
+    lines.push('# CSV d\'evaluation QCM Jours 1-2 - IPSSI Bachelor 2 Info');
+    lines.push('# Ne pas modifier ce fichier (signe par hash SHA-256)');
+    lines.push('# Auteur du module : Mohamed EL AFRIT (m.elafrit@ecole-ipssi.net)');
+    lines.push('#');
+    lines.push('# SECTION: METADATA');
+    lines.push('cle,valeur');
+    const meta = [
+      ['Nom', nom], ['Prenom', prenom], ['Email', email],
+      ['DateDebut', startIso], ['DateFin', endIso], ['DureeSec', dureeSec],
+      ['NbQuestions', quizQuestions.length], ['Version', '1.0'],
+      ['SaltVersion', CONFIG.SALT],
+    ];
+    meta.forEach(([k, v]) => lines.push(`${csvCell(k)},${csvCell(v)}`));
+    lines.push('#');
+    lines.push('# SECTION: REPONSES');
+    lines.push('Ordre,IDQuestion,Difficulte,Type,Jour,EnonceTronque,PermutationPropositions,LettreChoisie,IndexOriginalChoisi');
+    answerRows.forEach(r => {
+      lines.push([
+        r.ordre, r.id, r.difficulte, r.type, r.jour,
+        csvCell(r.enonceTronque), csvCell(r.permutation),
+        r.lettreChoisie, r.indexOriginalChoisi,
+      ].join(','));
+    });
+    lines.push('#');
+    lines.push('# SECTION: SIGNATURE');
+    lines.push('champ,valeur');
+    lines.push(`SHA256,${signature}`);
+    const csvContent = lines.join('\n') + '\n';
+
+    // Nom de fichier : IPSSI_NOM_Prenom_QCM_J1J2_YYYYMMDD.csv
+    const nomFile = normalizeForFilename(nom);
+    const prenomFile = normalizePrenomForFilename(prenom);
+    const filename = `IPSSI_${nomFile}_${prenomFile}_QCM_J1J2_${dateStampYMD()}.csv`;
+
+    // Téléchargement
+    downloadCsv(csvContent, filename);
+
+    // Nettoyage et bascule vers l'écran final
+    setLastCsv({ content: csvContent, filename, identite: { nom, prenom, email } });
+    Storage.clearAllQuizData();
+    setAppState('done');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [quizQuestions, answers, startIso]);
+
+  const redownload = useCallback(() => {
+    if (lastCsv) downloadCsv(lastCsv.content, lastCsv.filename);
+  }, [lastCsv]);
+
+  const resetToHome = useCallback(() => {
+    Storage.clearAllQuizData();
+    setQuizQuestions(null);
+    setAnswers({});
+    setCurrentIndex(0);
+    setStartIso(null);
+    setElapsedSec(0);
+    setLastCsv(null);
+    setAppState('home');
+  }, []);
+
+  // -------- RENDU --------
+  if (appState === 'loading') {
+    return (
+      <div style={{ background: theme.bg, minHeight: '100vh', display: 'flex',
+                    alignItems: 'center', justifyContent: 'center', color: theme.text }}>
+        <div style={{ textAlign: 'center' }}>
+          <div style={{ fontSize: '2rem', animation: 'spin 1.5s linear infinite', display: 'inline-block' }}>⚙️</div>
+          <div style={{ fontFamily: "'DM Sans', sans-serif", marginTop: '12px' }}>Chargement du QCM…</div>
+        </div>
+      </div>
+    );
+  }
+
+  if (appState === 'error') {
+    return (
+      <div style={{ background: theme.bg, minHeight: '100vh', padding: '40px',
+                    color: theme.text, maxWidth: '720px', margin: '0 auto' }}>
+        <h1 style={{ fontFamily: "'DM Sans', sans-serif", color: theme.danger }}>
+          ⚠️ Erreur de chargement
+        </h1>
+        <p>{errorMsg}</p>
+        <Box type="attention" title="Que faire ?">
+          <p>Vérifiez que le fichier <code>questions.json</code> est bien présent dans le même répertoire
+          que cette page HTML. Si le problème persiste, contactez l'enseignant :{' '}
+          <a href={`mailto:${CONFIG.EMAIL_DEST}`} style={{ color: theme.link }}>{CONFIG.EMAIL_DEST}</a>.</p>
+        </Box>
+      </div>
+    );
+  }
+
+  const hasInProgress = !!quizQuestions && Object.keys(answers).length > 0 && appState === 'home';
+
+  return (
+    <div style={{ background: theme.bg, minHeight: '100vh', color: theme.text, transition: 'background 0.3s' }}>
+      <style>{`
+        ::selection { background: ${theme.accent}33; }
+        a { color: ${theme.link}; }
+        button:focus { outline: 2px solid ${theme.accent}; outline-offset: 2px; }
+      `}</style>
+      {appState === 'home' && (
+        <HomeScreen
+          onStart={startQuiz}
+          hasInProgress={hasInProgress}
+          onResume={resumeQuiz}
+          onReset={resetQuiz}
+        />
+      )}
+      {appState === 'quiz' && quizQuestions && (
+        <QuizScreen
+          questions={quizQuestions}
+          answers={answers}
+          currentIndex={currentIndex}
+          elapsedSec={elapsedSec}
+          onAnswer={handleAnswer}
+          onNavigate={handleNavigate}
+          onSubmitRequest={handleSubmitRequest}
+        />
+      )}
+      {appState === 'review' && quizQuestions && (
+        <ReviewScreen
+          questions={quizQuestions}
+          answers={answers}
+          startIso={startIso}
+          elapsedSec={elapsedSec}
+          onBack={() => setAppState('quiz')}
+          onExport={handleExport}
+        />
+      )}
+      {appState === 'done' && lastCsv && (
+        <DoneScreen
+          filename={lastCsv.filename}
+          identite={lastCsv.identite}
+          onRedownload={redownload}
+          onReset={resetToHome}
+        />
+      )}
+    </div>
+  );
+}
+
+function downloadCsv(content, filename) {
+  // BOM UTF-8 pour Excel
+  const blob = new Blob(['\ufeff' + content], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = filename;
+  document.body.appendChild(a); a.click();
+  document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+// Point d'entrée
+function App() {
+  return (
+    <ThemeProvider>
+      <QuizApp />
+    </ThemeProvider>
+  );
+}
+
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(<App />);
+</script>
+</body>
+</html>
