@@ -1,0 +1,679 @@
+{
+  "metadata": {
+    "titre": "QCM d'evaluation - Jours 1 et 2",
+    "module": "Mathematiques appliquees a l'Intelligence Artificielle",
+    "formation": "Bachelor 2 Informatique - IPSSI",
+    "annee_academique": "2025-2026",
+    "auteur": "Mohamed EL AFRIT",
+    "email_contact": "m.elafrit@ecole-ipssi.net",
+    "licence": "CC BY-NC-SA 4.0",
+    "version": "1.0",
+    "date_creation": "2026-04-20",
+    "bareme": {
+      "vert": 1,
+      "jaune": 2,
+      "orange": 3,
+      "rouge": 4
+    },
+    "points_max_bruts": 92,
+    "note_sur": 20,
+    "nombre_questions": 50,
+    "randomisation": "questions_et_propositions_par_etudiant",
+    "chronometre": "indicatif_sans_blocage",
+    "navigation": "libre_avec_retour_arriere",
+    "anti_fraude": "signature_SHA256",
+    "salt_signature": "IPSSI_SALT_2026"
+  },
+  "questions": [
+    {
+      "id": "Q01",
+      "jour": 1,
+      "difficulte": "vert",
+      "type": "conceptuel",
+      "enonce": "Dans le contexte du machine learning, qu'est-ce qu'un vecteur de features d'un developpeur ?",
+      "propositions": [
+        "Une liste ordonnee de caracteristiques numeriques decrivant un developpeur (ex : experience, nb langages, salaire)",
+        "Un tableau de tous les developpeurs de l'entreprise",
+        "Une seule valeur numerique representant la competence globale",
+        "Un graphique a points representant un developpeur"
+      ]
+    },
+    {
+      "id": "Q02",
+      "jour": 1,
+      "difficulte": "vert",
+      "type": "conceptuel",
+      "enonce": "Le dataset fil rouge contient 30 developpeurs avec 5 features. Quelle est la dimension de la matrice $\\mathbf{X}$ representant ce dataset ?",
+      "propositions": [
+        "$30 \\times 5$ (30 lignes, 5 colonnes)",
+        "$5 \\times 30$ (5 lignes, 30 colonnes)",
+        "$30 \\times 30$",
+        "$5 \\times 5$"
+      ]
+    },
+    {
+      "id": "Q03",
+      "jour": 1,
+      "difficulte": "jaune",
+      "type": "conceptuel",
+      "enonce": "Dans l'equation de regression lineaire simple $\\hat{y} = w \\cdot x + b$ appliquee a la prediction de salaire, que represente le parametre $w$ ?",
+      "propositions": [
+        "L'augmentation de salaire predite par annee d'experience supplementaire",
+        "Le salaire de base d'un developpeur avec 0 an d'experience",
+        "Le nombre moyen d'annees d'experience dans le dataset",
+        "L'erreur moyenne de prediction du modele"
+      ]
+    },
+    {
+      "id": "Q04",
+      "jour": 1,
+      "difficulte": "jaune",
+      "type": "conceptuel",
+      "enonce": "Pourquoi utilise-t-on le MSE (Mean Squared Error) plutot que la simple somme des erreurs $\\sum(y_i - \\hat{y}_i)$ comme mesure de qualite d'un modele ?",
+      "propositions": [
+        "Pour eviter que les erreurs positives et negatives se compensent et pour penaliser davantage les grosses erreurs",
+        "Parce que le MSE est plus rapide a calculer",
+        "Parce que le MSE donne toujours une valeur entiere",
+        "Parce que le MSE est la seule mesure compatible avec NumPy"
+      ]
+    },
+    {
+      "id": "Q05",
+      "jour": 1,
+      "difficulte": "orange",
+      "type": "conceptuel",
+      "enonce": "On ajuste un modele de regression lineaire sur le dataset fil rouge et on obtient $w = 2{,}07$, $b = 31{,}27$, $MSE = 20{,}46$. Que peut-on conclure de la valeur du MSE ?",
+      "propositions": [
+        "L'erreur quadratique moyenne est de 20,46 (k€)², ce qui correspond a une erreur typique de prediction d'environ 4,5 k€",
+        "Le modele predit toujours le salaire avec une erreur de 20,46 k€",
+        "Le modele a 20,46 % de precision",
+        "Le salaire moyen est de 20,46 k€"
+      ]
+    },
+    {
+      "id": "Q06",
+      "jour": 1,
+      "difficulte": "vert",
+      "type": "conceptuel",
+      "enonce": "Dans le dataset fil rouge, on considere la regression simple : salaire = $w$ × experience + $b$. Laquelle de ces affirmations est correcte ?",
+      "propositions": [
+        "L'experience est la variable explicative ($x$), le salaire est la cible a predire ($y$)",
+        "Le salaire est la variable explicative ($x$), l'experience est la cible ($y$)",
+        "Les deux variables sont des variables cibles",
+        "Les deux variables sont des features explicatives"
+      ]
+    },
+    {
+      "id": "Q07",
+      "jour": 1,
+      "difficulte": "vert",
+      "type": "calcul",
+      "enonce": "Soit le vecteur $\\mathbf{x} = (3, 4)$. Quelle est sa norme euclidienne $\\|\\mathbf{x}\\|$ ?",
+      "propositions": [
+        "$5$",
+        "$7$",
+        "$12$",
+        "$\\sqrt{7}$"
+      ]
+    },
+    {
+      "id": "Q08",
+      "jour": 1,
+      "difficulte": "vert",
+      "type": "calcul",
+      "enonce": "Avec le modele $\\hat{y} = 2{,}07 \\cdot x + 31{,}27$ (k€), quelle est la prediction de salaire pour un developpeur avec $x = 5$ ans d'experience ?",
+      "propositions": [
+        "$41{,}62$ k€",
+        "$33{,}34$ k€",
+        "$10{,}35$ k€",
+        "$2{,}07$ k€"
+      ]
+    },
+    {
+      "id": "Q09",
+      "jour": 1,
+      "difficulte": "vert",
+      "type": "calcul",
+      "enonce": "Soient $\\mathbf{u} = (1, 2, 3)$ et $\\mathbf{v} = (4, 5, 6)$. Que vaut $\\mathbf{u} + \\mathbf{v}$ ?",
+      "propositions": [
+        "$(5, 7, 9)$",
+        "$(4, 10, 18)$",
+        "$(5, 5, 5)$",
+        "$32$"
+      ]
+    },
+    {
+      "id": "Q10",
+      "jour": 1,
+      "difficulte": "jaune",
+      "type": "calcul",
+      "enonce": "Soient $\\mathbf{x} = (2, -1, 3)$ et $\\mathbf{w} = (1, 4, -2)$. Que vaut le produit scalaire $\\mathbf{x}^T \\mathbf{w}$ ?",
+      "propositions": [
+        "$-8$",
+        "$8$",
+        "$-2$",
+        "$6$"
+      ]
+    },
+    {
+      "id": "Q11",
+      "jour": 1,
+      "difficulte": "vert",
+      "type": "calcul",
+      "enonce": "On a 3 observations : $y = (40, 50, 60)$ et les predictions $\\hat{y} = (42, 48, 58)$. Que vaut le MSE ?",
+      "propositions": [
+        "$4$",
+        "$12$",
+        "$2$",
+        "$8$"
+      ]
+    },
+    {
+      "id": "Q12",
+      "jour": 1,
+      "difficulte": "jaune",
+      "type": "calcul",
+      "enonce": "Avec $\\hat{y} = 2{,}07 \\cdot x + 31{,}27$, quelle est la difference de salaire predit entre un developpeur avec 8 ans d'experience et un developpeur avec 3 ans d'experience ?",
+      "propositions": [
+        "$10{,}35$ k€",
+        "$16{,}56$ k€",
+        "$5{,}00$ k€",
+        "$2{,}07$ k€"
+      ]
+    },
+    {
+      "id": "Q13",
+      "jour": 1,
+      "difficulte": "jaune",
+      "type": "calcul",
+      "enonce": "Un developpeur a 6 ans d'experience et un salaire reel de $45$ k€. Avec $\\hat{y} = 2{,}07 x + 31{,}27$, quelle est l'erreur de prediction $(y - \\hat{y})$ ?",
+      "propositions": [
+        "$+1{,}31$ k€",
+        "$-1{,}31$ k€",
+        "$+12{,}42$ k€",
+        "$0$ k€"
+      ]
+    },
+    {
+      "id": "Q14",
+      "jour": 1,
+      "difficulte": "orange",
+      "type": "calcul",
+      "enonce": "Sur 4 observations, on a les erreurs residuelles $e_i = y_i - \\hat{y}_i$ : $e = (-3, +2, -1, +4)$. Que vaut le MSE ?",
+      "propositions": [
+        "$7{,}5$",
+        "$2$",
+        "$0{,}5$",
+        "$30$"
+      ]
+    },
+    {
+      "id": "Q15",
+      "jour": 1,
+      "difficulte": "jaune",
+      "type": "calcul",
+      "enonce": "Soit la matrice $\\mathbf{X} = \\begin{pmatrix} 1 & 2 \\\\ 3 & 4 \\\\ 5 & 6 \\end{pmatrix}$ et le vecteur $\\mathbf{w} = \\begin{pmatrix} 2 \\\\ -1 \\end{pmatrix}$. Que vaut $\\mathbf{X} \\mathbf{w}$ ?",
+      "propositions": [
+        "$(0, 2, 4)$",
+        "$(2, 6, 10)$",
+        "$(-1, -2, -1)$",
+        "$(3, 7, 11)$"
+      ]
+    },
+    {
+      "id": "Q16",
+      "jour": 1,
+      "difficulte": "rouge",
+      "type": "calcul",
+      "enonce": "On compare deux modeles sur les memes 3 donnees $y = (40, 50, 60)$. Modele A predit $\\hat{y}_A = (41, 52, 57)$ et modele B predit $\\hat{y}_B = (45, 45, 55)$. Lequel est meilleur selon le MSE, et quel est son MSE ?",
+      "propositions": [
+        "Modele A, $MSE = 4{,}67$",
+        "Modele B, $MSE = 25{,}00$",
+        "Modele A, $MSE = 14{,}00$",
+        "Les deux sont equivalents"
+      ]
+    },
+    {
+      "id": "Q17",
+      "jour": 1,
+      "difficulte": "vert",
+      "type": "code",
+      "enonce": "Quelle instruction Python cree correctement un vecteur NumPy $\\mathbf{x} = (2{,}5, 3{,}1, 4{,}8)$ ?",
+      "propositions": [
+        "`x = np.array([2.5, 3.1, 4.8])`",
+        "`x = np.vector(2.5, 3.1, 4.8)`",
+        "`x = [2.5, 3.1, 4.8].numpy()`",
+        "`x = np.tuple([2.5, 3.1, 4.8])`"
+      ]
+    },
+    {
+      "id": "Q18",
+      "jour": 1,
+      "difficulte": "vert",
+      "type": "code",
+      "enonce": "Quelle est la valeur de `result` apres execution du code suivant ?\n```python\nimport numpy as np\nu = np.array([2, 3])\nv = np.array([4, 5])\nresult = np.dot(u, v)\n```",
+      "propositions": [
+        "`23`",
+        "`(8, 15)`",
+        "`7`",
+        "`[2, 3, 4, 5]`"
+      ]
+    },
+    {
+      "id": "Q19",
+      "jour": 1,
+      "difficulte": "jaune",
+      "type": "code",
+      "enonce": "Quelle est la prediction affichee par le code ?\n```python\nimport numpy as np\nx = np.array([3, 5, 7])\nw, b = 2.07, 31.27\ny_hat = w * x + b\nprint(y_hat[1])\n```",
+      "propositions": [
+        "`41.62`",
+        "`37.48`",
+        "`45.76`",
+        "`10.35`"
+      ]
+    },
+    {
+      "id": "Q20",
+      "jour": 1,
+      "difficulte": "jaune",
+      "type": "code",
+      "enonce": "Que fait precisement ce code ?\n```python\nimport numpy as np\ny = np.array([40, 50, 60])\ny_hat = np.array([42, 48, 58])\nmse = np.mean((y - y_hat) ** 2)\nprint(mse)\n```",
+      "propositions": [
+        "Calcule et affiche le MSE entre `y` et `y_hat`, soit 4.0",
+        "Calcule et affiche l'erreur moyenne signee, soit 0.0",
+        "Calcule et affiche la somme des erreurs au carre, soit 12",
+        "Genere une erreur car les tableaux doivent etre de type float"
+      ]
+    },
+    {
+      "id": "Q21",
+      "jour": 1,
+      "difficulte": "orange",
+      "type": "code",
+      "enonce": "Considerons ce code :\n```python\nX = np.array([[1, 2], [3, 4], [5, 6]])\nw = np.array([0.5, 1.0])\npredictions = X @ w\n```\nQuelle est la valeur de `predictions` ?",
+      "propositions": [
+        "`array([2.5, 5.5, 8.5])`",
+        "`array([0.5, 2.0, 3.0])`",
+        "`array([[0.5, 2.], [1.5, 4.], [2.5, 6.]])`",
+        "`array([4., 9., 14.])`"
+      ]
+    },
+    {
+      "id": "Q22",
+      "jour": 1,
+      "difficulte": "jaune",
+      "type": "code",
+      "enonce": "Pour le tableau `X = np.array([[1, 2, 3], [4, 5, 6]])`, quelle est la sortie de `print(X.shape)` ?",
+      "propositions": [
+        "`(2, 3)`",
+        "`(3, 2)`",
+        "`(6,)`",
+        "`6`"
+      ]
+    },
+    {
+      "id": "Q23",
+      "jour": 1,
+      "difficulte": "vert",
+      "type": "formule",
+      "enonce": "Quelle est la formule correcte de la regression lineaire simple (une seule feature) ?",
+      "propositions": [
+        "$\\hat{y} = w \\cdot x + b$",
+        "$\\hat{y} = w^x + b$",
+        "$\\hat{y} = \\frac{w \\cdot x}{b}$",
+        "$\\hat{y} = w - x + b$"
+      ]
+    },
+    {
+      "id": "Q24",
+      "jour": 1,
+      "difficulte": "jaune",
+      "type": "formule",
+      "enonce": "Quelle est la formule correcte du MSE (Mean Squared Error) ?",
+      "propositions": [
+        "$MSE = \\frac{1}{n} \\sum_{i=1}^{n} (y_i - \\hat{y}_i)^2$",
+        "$MSE = \\sum_{i=1}^{n} |y_i - \\hat{y}_i|$",
+        "$MSE = \\frac{1}{n} \\sum_{i=1}^{n} (y_i - \\hat{y}_i)$",
+        "$MSE = \\sum_{i=1}^{n} (y_i - \\hat{y}_i)^2$"
+      ]
+    },
+    {
+      "id": "Q25",
+      "jour": 1,
+      "difficulte": "orange",
+      "type": "formule",
+      "enonce": "Parmi les formules suivantes, laquelle est une ecriture correcte du produit scalaire entre deux vecteurs $\\mathbf{u}$ et $\\mathbf{v}$ de $\\mathbb{R}^n$ ?",
+      "propositions": [
+        "$\\mathbf{u}^T \\mathbf{v} = \\sum_{i=1}^{n} u_i v_i$",
+        "$\\mathbf{u}^T \\mathbf{v} = \\sum_{i=1}^{n} (u_i + v_i)$",
+        "$\\mathbf{u}^T \\mathbf{v} = \\prod_{i=1}^{n} u_i v_i$",
+        "$\\mathbf{u}^T \\mathbf{v} = |u_1 v_1|$"
+      ]
+    },
+    {
+      "id": "Q26",
+      "jour": 2,
+      "difficulte": "vert",
+      "type": "conceptuel",
+      "enonce": "A quoi sert une fonction de cout $J(w, b)$ en machine learning ?",
+      "propositions": [
+        "A mesurer a quel point le modele fait de mauvaises predictions, afin de pouvoir l'ameliorer",
+        "A predire la cible $y$ a partir des features",
+        "A initialiser les parametres du modele",
+        "A generer de nouvelles donnees d'entrainement"
+      ]
+    },
+    {
+      "id": "Q27",
+      "jour": 2,
+      "difficulte": "vert",
+      "type": "conceptuel",
+      "enonce": "Quel est l'objectif principal de la descente de gradient ?",
+      "propositions": [
+        "Trouver les parametres qui minimisent la fonction de cout",
+        "Generer les predictions $\\hat{y}$ pour une donnee $x$",
+        "Augmenter la fonction de cout autant que possible",
+        "Diviser le dataset en train et test"
+      ]
+    },
+    {
+      "id": "Q28",
+      "jour": 2,
+      "difficulte": "jaune",
+      "type": "conceptuel",
+      "enonce": "Quelle analogie illustre le mieux le principe de la descente de gradient ?",
+      "propositions": [
+        "Descendre une montagne dans le brouillard : a chaque pas, on regarde la pente locale et on avance vers le bas",
+        "Jeter un pion sur un plateau et accepter la case ou il tombe",
+        "Grimper un escalier en sautant plusieurs marches",
+        "Dessiner toutes les positions possibles et choisir la meilleure"
+      ]
+    },
+    {
+      "id": "Q29",
+      "jour": 2,
+      "difficulte": "jaune",
+      "type": "conceptuel",
+      "enonce": "Que represente geometriquement le gradient $\\nabla J(\\mathbf{w})$ d'une fonction de cout ?",
+      "propositions": [
+        "Un vecteur qui pointe dans la direction de la plus forte AUGMENTATION de $J$",
+        "Un vecteur qui pointe toujours vers le minimum global",
+        "La valeur numerique du cout en un point",
+        "La moyenne des derivees partielles"
+      ]
+    },
+    {
+      "id": "Q30",
+      "jour": 2,
+      "difficulte": "orange",
+      "type": "conceptuel",
+      "enonce": "On entraine un modele avec un taux d'apprentissage $\\alpha$ tres grand. Que risque-t-il de se passer ?",
+      "propositions": [
+        "L'algorithme diverge : les parametres oscillent ou explosent au lieu de converger vers le minimum",
+        "L'algorithme converge plus vite vers un meilleur minimum",
+        "L'algorithme s'arrete immediatement apres une iteration",
+        "Le gradient devient nul"
+      ]
+    },
+    {
+      "id": "Q31",
+      "jour": 2,
+      "difficulte": "vert",
+      "type": "conceptuel",
+      "enonce": "Dans une iteration de descente de gradient $w \\leftarrow w - \\alpha \\cdot \\frac{\\partial J}{\\partial w}$, quelle affirmation est exacte ?",
+      "propositions": [
+        "$w$ est une valeur (le parametre) et $\\frac{\\partial J}{\\partial w}$ est une autre valeur (la derivee partielle au point courant)",
+        "$w$ et $\\frac{\\partial J}{\\partial w}$ designent la meme quantite",
+        "$\\frac{\\partial J}{\\partial w}$ est le salaire moyen predit",
+        "$\\frac{\\partial J}{\\partial w}$ est egal a $w$"
+      ]
+    },
+    {
+      "id": "Q32",
+      "jour": 2,
+      "difficulte": "vert",
+      "type": "calcul",
+      "enonce": "On a $w = 5$, $\\frac{\\partial J}{\\partial w} = 2$ et $\\alpha = 0{,}01$. Quelle est la nouvelle valeur de $w$ apres une iteration de descente de gradient ?",
+      "propositions": [
+        "$4{,}98$",
+        "$5{,}02$",
+        "$4{,}00$",
+        "$3{,}00$"
+      ]
+    },
+    {
+      "id": "Q33",
+      "jour": 2,
+      "difficulte": "vert",
+      "type": "calcul",
+      "enonce": "Avec $w = 10$, $\\alpha = 0{,}1$, gradient $= -4$, que vaut $w$ apres une iteration ?",
+      "propositions": [
+        "$10{,}4$",
+        "$9{,}6$",
+        "$14$",
+        "$6$"
+      ]
+    },
+    {
+      "id": "Q34",
+      "jour": 2,
+      "difficulte": "jaune",
+      "type": "calcul",
+      "enonce": "Pour une regression simple $\\hat{y}_i = w x_i + b$ avec une seule observation $(x_1, y_1) = (4, 20)$ et les parametres initiaux $w = 2$, $b = 5$, que vaut la derivee partielle $\\frac{\\partial J}{\\partial w}$ ? (Utiliser $J = (y_1 - \\hat{y}_1)^2$ pour cet exemple simple.)",
+      "propositions": [
+        "$-56$",
+        "$-7$",
+        "$+56$",
+        "$+28$"
+      ]
+    },
+    {
+      "id": "Q35",
+      "jour": 2,
+      "difficulte": "jaune",
+      "type": "calcul",
+      "enonce": "On effectue une mise a jour simultanee de $w$ et $b$ avec $\\alpha = 0{,}01$. Etat courant : $w = 3$, $b = 10$, $\\frac{\\partial J}{\\partial w} = 20$, $\\frac{\\partial J}{\\partial b} = -5$. Quelles sont les nouvelles valeurs ?",
+      "propositions": [
+        "$w = 2{,}8$ et $b = 10{,}05$",
+        "$w = 3{,}2$ et $b = 9{,}95$",
+        "$w = 2{,}8$ et $b = 9{,}95$",
+        "$w = 2$ et $b = 15$"
+      ]
+    },
+    {
+      "id": "Q36",
+      "jour": 2,
+      "difficulte": "vert",
+      "type": "calcul",
+      "enonce": "Avec $w_0 = 0$, $\\alpha = 0{,}1$, et supposons que le gradient soit constant egal a $-2$ a chaque iteration. Que vaut $w_3$ (apres 3 iterations) ?",
+      "propositions": [
+        "$0{,}6$",
+        "$-0{,}6$",
+        "$6$",
+        "$0{,}2$"
+      ]
+    },
+    {
+      "id": "Q37",
+      "jour": 2,
+      "difficulte": "jaune",
+      "type": "calcul",
+      "enonce": "Un etudiant observe : $w_0 = 1$, $w_1 = 5$, $w_2 = 25$, $w_3 = 125$. Que peut-on conclure ?",
+      "propositions": [
+        "L'algorithme diverge : $w$ explose, le taux d'apprentissage est trop grand",
+        "L'algorithme converge tres rapidement vers le minimum",
+        "Le gradient est nul, donc on a trouve le minimum",
+        "C'est une suite arithmetique : tout va bien"
+      ]
+    },
+    {
+      "id": "Q38",
+      "jour": 2,
+      "difficulte": "orange",
+      "type": "calcul",
+      "enonce": "On double le taux d'apprentissage $\\alpha$ (de $0{,}01$ a $0{,}02$) pour une descente de gradient. Pour une meme iteration avec un gradient donne, comment change la taille du pas sur $w$ ?",
+      "propositions": [
+        "Le pas est exactement deux fois plus grand",
+        "Le pas est inchange : $\\alpha$ et le gradient ne sont pas lies",
+        "Le pas est divise par 2",
+        "Le pas augmente de facon exponentielle"
+      ]
+    },
+    {
+      "id": "Q39",
+      "jour": 2,
+      "difficulte": "jaune",
+      "type": "calcul",
+      "enonce": "Pour le dataset fil rouge avec $n = 30$ developpeurs, la formule du gradient MSE par rapport a $w$ est $\\frac{\\partial J}{\\partial w} = -\\frac{2}{n} \\sum_{i=1}^{n} (y_i - \\hat{y}_i) x_i$. Si a une iteration on a $\\sum (y_i - \\hat{y}_i) x_i = -90$, que vaut le gradient ?",
+      "propositions": [
+        "$+6$",
+        "$-6$",
+        "$+3$",
+        "$-3$"
+      ]
+    },
+    {
+      "id": "Q40",
+      "jour": 2,
+      "difficulte": "orange",
+      "type": "calcul",
+      "enonce": "On compare 3 taux d'apprentissage pour la meme initialisation et le meme gradient initial non nul. Apres 100 iterations : $\\alpha_1 = 0{,}0001$ donne $J = 45{,}2$ ; $\\alpha_2 = 0{,}01$ donne $J = 20{,}5$ ; $\\alpha_3 = 1{,}0$ donne $J = 10^{12}$. Quel diagnostic poser ?",
+      "propositions": [
+        "$\\alpha_1$ est trop petit (convergence lente), $\\alpha_2$ est bien calibre, $\\alpha_3$ est trop grand (divergence)",
+        "$\\alpha_3$ est ideal : il donne la valeur la plus grande",
+        "Seul $\\alpha_1$ fonctionne, les autres sont invalides",
+        "Tous les $\\alpha$ donnent des resultats equivalents apres suffisamment d'iterations"
+      ]
+    },
+    {
+      "id": "Q41",
+      "jour": 2,
+      "difficulte": "rouge",
+      "type": "calcul",
+      "enonce": "Dataset fil rouge simplifie a 3 dev. $(x, y)$ = $(1, 35), (3, 40), (5, 45)$. Initialisation $w = 1$, $b = 30$, $\\alpha = 0{,}01$. Apres UNE iteration sur le batch complet avec les gradients analytiques $\\frac{\\partial J}{\\partial w} = -\\frac{2}{3}\\sum (y-\\hat{y}) x$ et $\\frac{\\partial J}{\\partial b} = -\\frac{2}{3}\\sum (y-\\hat{y})$, que valent les nouveaux $(w, b)$ ?",
+      "propositions": [
+        "$w \\approx 1{,}173$ ; $b \\approx 30{,}053$",
+        "$w \\approx 0{,}827$ ; $b \\approx 29{,}947$",
+        "$w \\approx 1{,}01$ ; $b \\approx 30{,}01$",
+        "$w \\approx 2{,}000$ ; $b \\approx 35{,}000$"
+      ]
+    },
+    {
+      "id": "Q42",
+      "jour": 2,
+      "difficulte": "vert",
+      "type": "code",
+      "enonce": "Quelle boucle Python implemente correctement une descente de gradient avec 100 iterations ?",
+      "propositions": [
+        "```python\nfor i in range(100):\n    grad = compute_gradient(w, b, X, y)\n    w = w - alpha * grad\n```",
+        "```python\nwhile True:\n    w = w - alpha * grad\n```",
+        "```python\nfor i in range(100):\n    w = w + alpha * grad\n```",
+        "```python\nif grad > 0:\n    w = w - alpha * grad\n```"
+      ]
+    },
+    {
+      "id": "Q43",
+      "jour": 2,
+      "difficulte": "vert",
+      "type": "code",
+      "enonce": "Que fait la ligne `w = w - alpha * dJ_dw` dans une boucle de descente de gradient ?",
+      "propositions": [
+        "Elle applique la regle de mise a jour des parametres",
+        "Elle calcule la prediction $\\hat{y}$",
+        "Elle calcule le cout $J$",
+        "Elle genere aleatoirement une nouvelle valeur de $w$"
+      ]
+    },
+    {
+      "id": "Q44",
+      "jour": 2,
+      "difficulte": "jaune",
+      "type": "code",
+      "enonce": "Quelle expression NumPy calcule correctement le gradient MSE par rapport a $w$ : $\\frac{\\partial J}{\\partial w} = -\\frac{2}{n}\\sum (y_i - \\hat{y}_i) x_i$ ?",
+      "propositions": [
+        "`dJ_dw = -(2/n) * np.sum((y - y_hat) * x)`",
+        "`dJ_dw = (2/n) * np.sum((y - y_hat) * x)`",
+        "`dJ_dw = -(2/n) * np.sum(y - y_hat)`",
+        "`dJ_dw = -(2/n) * np.mean(y_hat)`"
+      ]
+    },
+    {
+      "id": "Q45",
+      "jour": 2,
+      "difficulte": "jaune",
+      "type": "code",
+      "enonce": "Quelle condition d'arret premature ajouter dans une boucle de descente de gradient pour eviter des iterations inutiles si on a converge ?",
+      "propositions": [
+        "```python\nif abs(J_old - J_new) < 1e-6:\n    break\n```",
+        "```python\nif J_new > J_old:\n    break\n```",
+        "```python\nif w == 0:\n    break\n```",
+        "```python\nif alpha > 1:\n    break\n```"
+      ]
+    },
+    {
+      "id": "Q46",
+      "jour": 2,
+      "difficulte": "jaune",
+      "type": "code",
+      "enonce": "On compare deux implementations du gradient MSE :\n\n**Version A** :\n```python\ngrad = 0\nfor i in range(n):\n    grad += -2 * (y[i] - y_hat[i]) * x[i]\ngrad /= n\n```\n\n**Version B** :\n```python\ngrad = -(2/n) * np.sum((y - y_hat) * x)\n```\n\nQuelle affirmation est correcte ?",
+      "propositions": [
+        "Les deux versions calculent la meme chose, mais B est plus rapide (vectorisation NumPy)",
+        "A est plus precise que B",
+        "A et B donnent des resultats differents",
+        "B ne fonctionne que pour $n < 10$"
+      ]
+    },
+    {
+      "id": "Q47",
+      "jour": 2,
+      "difficulte": "vert",
+      "type": "code",
+      "enonce": "Quelle strategie d'initialisation de $w$ et $b$ est la plus couramment utilisee pour un probleme de regression lineaire simple ?",
+      "propositions": [
+        "`w = 0.0 ; b = 0.0` (initialisation a zero)",
+        "`w = 999 ; b = -1000` (initialisation extremement grande en valeur absolue)",
+        "`w = np.nan ; b = np.nan` (valeur indefinie)",
+        "`w = 'auto' ; b = 'auto'` (chaine de caracteres)"
+      ]
+    },
+    {
+      "id": "Q48",
+      "jour": 2,
+      "difficulte": "vert",
+      "type": "formule",
+      "enonce": "Quelle est la regle correcte de mise a jour des parametres en descente de gradient ?",
+      "propositions": [
+        "$\\boldsymbol{\\theta} \\leftarrow \\boldsymbol{\\theta} - \\alpha \\, \\nabla J(\\boldsymbol{\\theta})$",
+        "$\\boldsymbol{\\theta} \\leftarrow \\boldsymbol{\\theta} + \\alpha \\, \\nabla J(\\boldsymbol{\\theta})$",
+        "$\\boldsymbol{\\theta} \\leftarrow \\alpha \\, \\nabla J(\\boldsymbol{\\theta})$",
+        "$\\boldsymbol{\\theta} \\leftarrow \\boldsymbol{\\theta} \\cdot \\alpha$"
+      ]
+    },
+    {
+      "id": "Q49",
+      "jour": 2,
+      "difficulte": "jaune",
+      "type": "formule",
+      "enonce": "Pour une regression lineaire simple $\\hat{y}_i = w x_i + b$ avec $J = \\frac{1}{n}\\sum (y_i - \\hat{y}_i)^2$, quelle est la derivee $\\frac{\\partial J}{\\partial w}$ ?",
+      "propositions": [
+        "$-\\frac{2}{n} \\sum_{i=1}^{n} (y_i - \\hat{y}_i) x_i$",
+        "$-\\frac{2}{n} \\sum_{i=1}^{n} (y_i - \\hat{y}_i)$",
+        "$\\frac{1}{n} \\sum_{i=1}^{n} (y_i - \\hat{y}_i)^2$",
+        "$\\frac{2}{n} \\sum_{i=1}^{n} (\\hat{y}_i - y_i)$"
+      ]
+    },
+    {
+      "id": "Q50",
+      "jour": 2,
+      "difficulte": "orange",
+      "type": "formule",
+      "enonce": "Pour le meme probleme, quelle est la derivee $\\frac{\\partial J}{\\partial b}$ ?",
+      "propositions": [
+        "$-\\frac{2}{n} \\sum_{i=1}^{n} (y_i - \\hat{y}_i)$",
+        "$-\\frac{2}{n} \\sum_{i=1}^{n} (y_i - \\hat{y}_i) x_i$",
+        "$\\frac{2}{n} \\sum_{i=1}^{n} (y_i - \\hat{y}_i)^2$",
+        "$+\\frac{1}{n} \\sum (y_i - \\hat{y}_i)$"
+      ]
+    }
+  ]
+}
