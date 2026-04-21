@@ -77,6 +77,26 @@ if (preg_match('#^/api/([a-z0-9_-]+)(?:/.*)?$#i', $requestPath, $matches)) {
 }
 
 // ============================================================================
+// Servir les pages frontend HTML (login.html, dashboard_temp.html, 404.html, 500.html)
+// ============================================================================
+
+$frontendDir = realpath(EXAMENS_ROOT . '/../frontend/commun');
+if ($frontendDir !== false && preg_match('#^/([a-z0-9_-]+\.html)$#i', $requestPath, $m)) {
+    $candidate = realpath($frontendDir . '/' . $m[1]);
+    if ($candidate !== false && str_starts_with($candidate, $frontendDir . DIRECTORY_SEPARATOR)) {
+        header('Content-Type: text/html; charset=utf-8');
+        readfile($candidate);
+        exit;
+    }
+}
+
+// Redirection : / → /login.html (si pas connecté) ou page d'accueil placeholder
+if ($requestPath === '/' && file_exists(EXAMENS_ROOT . '/../frontend/commun/login.html')) {
+    header('Location: /login.html', true, 302);
+    exit;
+}
+
+// ============================================================================
 // Page d'accueil (placeholder en P1 — enrichie en P2)
 // ============================================================================
 

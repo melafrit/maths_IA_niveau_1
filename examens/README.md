@@ -4,8 +4,8 @@
 > génération IA, anti-triche avancé, analytics approfondies et design professionnel.
 
 [![License: CC BY-NC-SA 4.0](https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-lightgrey.svg)](https://creativecommons.org/licenses/by-nc-sa/4.0/)
-[![Status](https://img.shields.io/badge/status-Phase%20P0%20%E2%80%94%20Cadrage-blue)]()
-[![Version](https://img.shields.io/badge/version-0.0.1-orange)]()
+[![Status](https://img.shields.io/badge/status-Phase%20P1%20%E2%9C%85%20%E2%80%94%20Fondations%20backend%20livr%C3%A9es-success)]()
+[![Version](https://img.shields.io/badge/version-0.1.0-blue)]()
 
 ---
 
@@ -202,13 +202,13 @@ php scripts/init_comptes.php
 
 ## 📅 Statut du projet
 
-**Phase actuelle : P0 — Cadrage** ✅
+**Phase actuelle : P1 — Fondations backend** ✅ **Terminée**
 
 | Phase | Description | Statut |
 |:-:|---|:-:|
-| P0 | Cadrage + structure repo | ✅ **En cours** |
-| P1 | Fondations backend (auth, comptes, API) | ⏳ À venir |
-| P2 | Design system + frontend commun | ⏳ |
+| P0 | Cadrage + structure repo | ✅ Livrée |
+| P1 | Fondations backend (auth, comptes, API) | ✅ **Livrée** |
+| P2 | Design system + frontend commun | 🟡 À venir |
 | P3 | Banque de questions (CRUD + Import/Export) | ⏳ |
 | P4 | Génération IA + Migration J1-J2 | ⏳ |
 | P5 | Création examen + Passage étudiant + Focus-lock | ⏳ |

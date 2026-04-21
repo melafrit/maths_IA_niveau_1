@@ -10,7 +10,88 @@ et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 ## [Non publié]
 
 ### À venir
-- Phase P1 : Fondations backend (auth, comptes, API base)
+- Phase P2 : Design system + frontend commun (composants React, tokens, i18n, layouts)
+
+---
+
+## [0.1.0] — 2026-04-21
+
+### ✨ Ajouté (Phase P1 — Fondations backend)
+
+**Architecture backend (P1.1)**
+- `backend/config.sample.php` — Template de configuration exhaustif (app, paths, security, logging, email, IA, backup, RGPD, dev)
+- `backend/bootstrap.php` — Chargement initial : autoloader PSR-4, config, timezone, error handling, configuration session sécurisée
+- `backend/lib/FileStorage.php` — Lecture/écriture JSON atomique avec `flock()` (LOCK_SH lecture, LOCK_EX écriture, écriture via fichier temp + rename atomique)
+- `backend/lib/Logger.php` — Logs JSONL avec rotation par jour, 4 niveaux (debug/info/warning/error), channels multiples
+- `backend/lib/Response.php` — Helpers JSON API standardisés (`{ok:true, data}` / `{ok:false, error:{code,message,details}}`), 8 méthodes de raccourci HTTP
+- `backend/lib/Validator.php` — Validation fluent (required, email, minLength, maxLength, in, matches, boolean, sanitize)
+- `backend/lib/Utils.php` — Helpers : codes examen (alphabet sans I/O/0/1), tokens, normalisation noms/emails, formatage durée, **chiffrement AES-256-GCM** (clés API IA), signatures SHA-256
+- `backend/public/index.php` — Front controller avec routing : `/api/{endpoint}` → délégation, `/health`, pages HTML frontend, page d'accueil placeholder
+- `backend/public/.htaccess` — Apache mod_rewrite, headers sécurité (X-Frame-Options, X-Content-Type-Options, Referrer-Policy, Permissions-Policy), blocage fichiers sensibles, cache assets statiques, gzip
+- `backend/.htaccess` — Protection totale du dossier (Require all denied, seul `public/` exposé)
+
+**Authentification & sécurité (P1.2)**
+- `backend/lib/Session.php` — Sessions PHP sécurisées : démarrage paresseux, régénération périodique de l'ID (anti-fixation, défaut 5 min), fingerprint (UA + 2 octets IP) anti-hijacking, helpers get/set/has/delete, flash one-shot
+- `backend/lib/Csrf.php` — Tokens CSRF : génération + vérification timing-safe (`hash_equals`), TTL configurable (défaut 2h), récupération auto depuis header `X-CSRF-Token` / body JSON `_csrf` / POST `_csrf`
+- `backend/lib/RateLimiter.php` — Rate limiting fichier (sliding window, sans Redis ni DB, compatible OVH mutualisé), bucket configurable (login, api_ia, submit), méthodes attempt/record/remaining/retryAfter/isBlocked/reset, cleanup automatique
+- `backend/lib/Auth.php` — Authentification + CRUD comptes enseignants : login (bcrypt + re-hash auto si cost change), logout, 2 rôles (admin/enseignant), middleware `requireAuth()` (401) et `requireAdmin()` (403), CRUD complet avec garde-fous (anti-doublon, anti-suppression dernier admin)
+
+**API REST (P1.3)**
+- `backend/api/health.php` — `GET /api/health` : monitoring (PHP version, écriture data/, extensions OpenSSL/JSON/mbstring), HTTP 200 ou 503
+- `backend/api/auth.php` — Endpoints d'authentification :
+  - `GET /api/auth/csrf-token` — Récupère le token CSRF courant
+  - `GET /api/auth/me` — Compte courant ou `{authenticated: false}`
+  - `POST /api/auth/login` — Login + rate limiting par IP (5 tentatives / 15 min)
+  - `POST /api/auth/logout` — Déconnexion + destruction session
+  - `POST /api/auth/change-password` — Changement de mot de passe (CSRF + ancien mdp requis)
+- `backend/api/comptes.php` — CRUD comptes (admin only sauf consultation soi-même) :
+  - `GET /api/comptes` — Liste tous les comptes (admin)
+  - `POST /api/comptes` — Créer un compte (admin + CSRF + Validator)
+  - `GET /api/comptes/{id}` — Détail (admin OU soi-même)
+  - `PUT /api/comptes/{id}` — Update (admin OU soi-même limité, garde-fous anti-suicide)
+  - `DELETE /api/comptes/{id}` — Désactiver (soft delete, admin)
+  - `POST /api/comptes/{id}/enable` — Réactiver (admin)
+  - `POST /api/comptes/{id}/destroy` — Suppression définitive (admin)
+
+**Frontend & Scripts CLI (P1.4)**
+- `scripts/init_comptes.php` — Script CLI interactif pour créer le 1er admin (vérification doublon, prompts colorisés ANSI, mot de passe sans écho terminal, confirmation explicite)
+- `scripts/reset_password.php` — Reset password en CLI (par email, vérification existence, prompt nouveau mdp avec confirmation)
+- `frontend/commun/login.html` — Page de connexion stylée (vanilla JS, fetch API, pas de dépendance externe, dark mode auto)
+- `frontend/commun/dashboard_temp.html` — Dashboard temporaire P1 (cards "à venir", logout, vérification auth)
+- `frontend/commun/404.html` — Page d'erreur 404
+- `frontend/commun/500.html` — Page d'erreur 500
+- Routing dans `index.php` étendu pour servir les pages HTML frontend depuis `/`
+
+### 🧪 Tests effectués
+
+**Tests unitaires PHP (CLI)**
+- P1.1 : 8/8 tests passés (config, helpers, autoloader, Utils, FileStorage, Validator, chiffrement AES-256-GCM round-trip)
+- P1.2 : 11/11 tests passés (création admin, refus doublon, refus mdp court, password_verify, création enseignant, disable/enable, change password, listComptes, RateLimiter, deleteCompte)
+
+**Tests fonctionnels HTTP (curl)**
+- P1.3 : 13/13 tests passés (health, csrf-token, me, login mauvais/bon mdp, comptes CRUD avec/sans CSRF, logout, parcours complet)
+- P1.4 : Tests parcours complet (login → dashboard → logout) + sécurité path traversal OK
+
+### 🔒 Sécurité implémentée
+
+- Bcrypt cost 12 (configurable) + re-hash auto à la connexion si le cost change
+- Sessions HttpOnly + SameSite=Strict + régénération périodique d'ID
+- Fingerprint session (UA + 2 octets IP) — anti session hijacking
+- CSRF tokens avec `hash_equals` (timing-safe)
+- Rate limiting login (5 tentatives / 15 min par IP, sliding window fichier)
+- Path traversal bloqué (realpath + str_starts_with check)
+- Headers sécurité Apache (.htaccess) : X-Frame-Options, X-Content-Type-Options, Referrer-Policy, Permissions-Policy
+- Chiffrement AES-256-GCM pour les futures clés API IA (Phase P4)
+- Garde-fous anti-suicide : impossible de désactiver/supprimer son propre compte ou le dernier admin actif
+
+### 📊 Statistiques Phase P1
+
+- **Fichiers PHP créés** : 14 (4 lib P1.1 + 1 Utils + 4 lib P1.2 + 3 api + 2 scripts CLI)
+- **Fichiers HTML créés** : 4 (login, dashboard_temp, 404, 500)
+- **Lignes de code total** : ~3 200 lignes
+- **Commits Phase P1** : 5 (P1.1×2, P1.2, P1.3, P1.4 à venir)
+- **Tests passés** : 32/32 (8 + 11 + 13 + parcours P1.4)
+- **Durée** : ~6h de travail effectif
 
 ---
 
@@ -107,16 +188,16 @@ Chaque version suit cette structure :
 
 | Version | Phase | Statut | Date prévue |
 |:-:|---|:-:|:-:|
-| 0.0.1 | P0 — Cadrage | ✅ **Actuelle** | 2026-04-21 |
-| 0.1.0 | P1 — Fondations backend | 🔴 À venir | +1-2 sem |
-| 0.2.0 | P2 — Design system | 🔴 | +3-4 sem |
-| 0.3.0 | P3 — Banque de questions | 🔴 | +5 sem |
-| 0.4.0 | P4 — IA + Migration J1-J2 | 🔴 | +6 sem |
-| 0.5.0 | P5 — Création examen + Passage + Focus-lock | 🔴 | +8-9 sem |
-| 0.6.0 | P6 — Correction + Emails | 🔴 | +10 sem |
-| 0.7.0 | P7 — Historique + Analytics | 🔴 | +12 sem |
-| 0.8.0 | P8 — Tests + CI/CD + Backups | 🔴 | +14 sem |
-| 0.9.0 | P9 — Documentation + Soft launch prep | 🔴 | +15 sem |
+| 0.0.1 | P0 — Cadrage | ✅ Livré | 2026-04-21 |
+| 0.1.0 | P1 — Fondations backend | ✅ **Livré** | 2026-04-21 |
+| 0.2.0 | P2 — Design system | 🔴 À venir | +1-2 sem |
+| 0.3.0 | P3 — Banque de questions | 🔴 | +3 sem |
+| 0.4.0 | P4 — IA + Migration J1-J2 | 🔴 | +4 sem |
+| 0.5.0 | P5 — Création examen + Passage + Focus-lock | 🔴 | +6-7 sem |
+| 0.6.0 | P6 — Correction + Emails | 🔴 | +8 sem |
+| 0.7.0 | P7 — Historique + Analytics | 🔴 | +10 sem |
+| 0.8.0 | P8 — Tests + CI/CD + Backups | 🔴 | +12 sem |
+| 0.9.0 | P9 — Documentation + Soft launch prep | 🔴 | +13 sem |
 | 1.0.0 | Production stable (post soft launch) | 🔴 | ~Juillet 2026 |
 
 ---

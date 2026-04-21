@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Connexion à la plateforme d'examens IPSSI">
+  <title>Connexion — Plateforme d'examens IPSSI</title>
+
+  <style>
+    /* ====================================================================
+       Page login provisoire — Phase P1
+       Sera remplacée par un composant React en Phase P2
+       © 2026 Mohamed EL AFRIT — IPSSI — CC BY-NC-SA 4.0
+    ==================================================================== */
+
+    *, *::before, *::after { box-sizing: border-box; }
+
+    :root {
+      --color-primary: #3b82f6;
+      --color-primary-hover: #2563eb;
+      --color-bg: #f8fafc;
+      --color-card: #ffffff;
+      --color-text: #1a1a2e;
+      --color-text-muted: #64748b;
+      --color-border: #e2e8f0;
+      --color-error: #dc2626;
+      --color-success: #16a34a;
+      --color-input-bg: #ffffff;
+      --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+      --radius: 12px;
+      --radius-sm: 6px;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --color-bg: #0d1117;
+        --color-card: #161b22;
+        --color-text: #c9d1d9;
+        --color-text-muted: #8b949e;
+        --color-border: #30363d;
+        --color-input-bg: #0d1117;
+      }
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif;
+      background: var(--color-bg);
+      color: var(--color-text);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      line-height: 1.5;
+    }
+
+    .container { width: 100%; max-width: 420px; }
+
+    .logo {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+    .logo-emoji {
+      font-size: 48px;
+      display: block;
+      margin-bottom: 8px;
+    }
+    .logo-title {
+      margin: 0;
+      font-size: 1.5rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+    .logo-subtitle {
+      margin: 4px 0 0 0;
+      color: var(--color-text-muted);
+      font-size: 0.875rem;
+    }
+
+    .card {
+      background: var(--color-card);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-lg);
+      padding: 32px 28px;
+    }
+
+    .card-title {
+      margin: 0 0 4px 0;
+      font-size: 1.25rem;
+      font-weight: 600;
+    }
+    .card-subtitle {
+      margin: 0 0 24px 0;
+      color: var(--color-text-muted);
+      font-size: 0.875rem;
+    }
+
+    .form-group { margin-bottom: 16px; }
+    .form-group:last-of-type { margin-bottom: 0; }
+
+    .form-label {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 0.875rem;
+      font-weight: 500;
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 10px 12px;
+      font-size: 0.9375rem;
+      font-family: inherit;
+      color: var(--color-text);
+      background: var(--color-input-bg);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-sm);
+      outline: none;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    .form-input:focus {
+      border-color: var(--color-primary);
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+    .form-input:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .form-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin: 16px 0 24px 0;
+      font-size: 0.875rem;
+    }
+    .form-checkbox-label {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      color: var(--color-text-muted);
+    }
+    .form-checkbox {
+      cursor: pointer;
+      accent-color: var(--color-primary);
+    }
+    .form-link {
+      color: var(--color-primary);
+      text-decoration: none;
+    }
+    .form-link:hover { text-decoration: underline; }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 11px 20px;
+      font-size: 0.9375rem;
+      font-weight: 500;
+      font-family: inherit;
+      color: #ffffff;
+      background: var(--color-primary);
+      border: none;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      width: 100%;
+      transition: background 0.15s, transform 0.05s;
+    }
+    .btn:hover:not(:disabled) { background: var(--color-primary-hover); }
+    .btn:active:not(:disabled) { transform: translateY(1px); }
+    .btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+    .spinner {
+      display: inline-block;
+      width: 14px;
+      height: 14px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-top-color: #ffffff;
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .alert {
+      padding: 12px 16px;
+      border-radius: var(--radius-sm);
+      font-size: 0.875rem;
+      margin-bottom: 16px;
+      display: none;
+    }
+    .alert.show { display: block; }
+    .alert-error {
+      background: rgba(220, 38, 38, 0.1);
+      color: var(--color-error);
+      border: 1px solid rgba(220, 38, 38, 0.2);
+    }
+    .alert-success {
+      background: rgba(22, 163, 74, 0.1);
+      color: var(--color-success);
+      border: 1px solid rgba(22, 163, 74, 0.2);
+    }
+
+    .footer {
+      text-align: center;
+      margin-top: 24px;
+      font-size: 0.8125rem;
+      color: var(--color-text-muted);
+    }
+    .footer a {
+      color: var(--color-text-muted);
+      text-decoration: none;
+    }
+    .footer a:hover { text-decoration: underline; }
+
+    .badge {
+      display: inline-block;
+      padding: 2px 10px;
+      border-radius: 999px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      background: rgba(251, 191, 36, 0.15);
+      color: #b45309;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+
+    <div class="logo">
+      <span class="logo-emoji">🎓</span>
+      <h1 class="logo-title">Plateforme d'examens IPSSI</h1>
+      <p class="logo-subtitle">Espace enseignant <span class="badge">Phase P1</span></p>
+    </div>
+
+    <div class="card">
+      <h2 class="card-title">Connexion</h2>
+      <p class="card-subtitle">Connectez-vous avec votre compte enseignant.</p>
+
+      <div id="alert" class="alert" role="alert" aria-live="polite"></div>
+
+      <form id="loginForm" novalidate>
+        <div class="form-group">
+          <label for="email" class="form-label">Adresse email</label>
+          <input
+            type="email"
+            id="email"
+            name="email"
+            class="form-input"
+            autocomplete="username"
+            required
+            placeholder="vous@ipssi.fr"
+            autofocus
+          >
+        </div>
+
+        <div class="form-group">
+          <label for="password" class="form-label">Mot de passe</label>
+          <input
+            type="password"
+            id="password"
+            name="password"
+            class="form-input"
+            autocomplete="current-password"
+            required
+            minlength="8"
+            placeholder="••••••••"
+          >
+        </div>
+
+        <div class="form-row">
+          <label class="form-checkbox-label">
+            <input type="checkbox" id="remember" class="form-checkbox" disabled>
+            Se souvenir de moi
+          </label>
+          <a href="#" class="form-link" onclick="alert('Reset par CLI : php scripts/reset_password.php\\n(disponible en self-service en P9)'); return false;">
+            Mot de passe oublié ?
+          </a>
+        </div>
+
+        <button type="submit" id="submitBtn" class="btn">
+          <span id="btnText">Se connecter</span>
+          <span id="btnSpinner" class="spinner" style="display:none;"></span>
+        </button>
+      </form>
+    </div>
+
+    <div class="footer">
+      © 2026 <a href="https://github.com/melafrit/maths_IA_niveau_1" target="_blank" rel="noopener">Mohamed EL AFRIT — IPSSI</a><br>
+      Sous licence
+      <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.fr" target="_blank" rel="noopener">CC BY-NC-SA 4.0</a>
+    </div>
+
+  </div>
+
+  <script>
+    /* ==================================================================
+       login.js (inline) — Logique de connexion
+       Consomme l'API /api/auth/login
+       ================================================================== */
+
+    const form = document.getElementById('loginForm');
+    const emailInput = document.getElementById('email');
+    const passwordInput = document.getElementById('password');
+    const submitBtn = document.getElementById('submitBtn');
+    const btnText = document.getElementById('btnText');
+    const btnSpinner = document.getElementById('btnSpinner');
+    const alertBox = document.getElementById('alert');
+
+    const API_BASE = window.location.origin;
+
+    function showAlert(message, type = 'error') {
+      alertBox.textContent = message;
+      alertBox.className = 'alert show alert-' + type;
+    }
+    function hideAlert() {
+      alertBox.className = 'alert';
+    }
+    function setLoading(loading) {
+      submitBtn.disabled = loading;
+      emailInput.disabled = loading;
+      passwordInput.disabled = loading;
+      btnText.style.display = loading ? 'none' : 'inline';
+      btnSpinner.style.display = loading ? 'inline-block' : 'none';
+    }
+
+    async function checkAlreadyAuthenticated() {
+      try {
+        const res = await fetch(API_BASE + '/api/auth/me', { credentials: 'same-origin' });
+        const data = await res.json();
+        if (data.ok && data.data.authenticated) {
+          // Déjà connecté → redirection
+          window.location.href = '/dashboard_temp.html';
+        }
+      } catch (e) {
+        // Pas grave, l'utilisateur peut se connecter manuellement
+        console.warn('Check auth failed:', e);
+      }
+    }
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      hideAlert();
+
+      const email = emailInput.value.trim();
+      const password = passwordInput.value;
+
+      if (!email || !password) {
+        showAlert('Veuillez remplir tous les champs.');
+        return;
+      }
+      if (password.length < 8) {
+        showAlert('Le mot de passe doit contenir au moins 8 caractères.');
+        return;
+      }
+
+      setLoading(true);
+      try {
+        const res = await fetch(API_BASE + '/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'same-origin',
+          body: JSON.stringify({ email, password })
+        });
+        const data = await res.json();
+
+        if (data.ok) {
+          showAlert('Connexion réussie. Redirection…', 'success');
+          setTimeout(() => {
+            window.location.href = '/dashboard_temp.html';
+          }, 600);
+        } else {
+          const msg = data.error?.message || 'Erreur de connexion.';
+          showAlert(msg);
+          setLoading(false);
+          passwordInput.value = '';
+          passwordInput.focus();
+        }
+      } catch (err) {
+        showAlert('Erreur réseau. Vérifiez votre connexion et réessayez.');
+        setLoading(false);
+      }
+    });
+
+    // Au chargement : vérifier si déjà connecté
+    checkAlreadyAuthenticated();
+  </script>
+</body>
+</html>
