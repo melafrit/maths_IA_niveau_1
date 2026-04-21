@@ -1,0 +1,81 @@
+# ============================================================================
+# GitHub Actions CI Workflow — Plateforme d'examens IPSSI
+# ============================================================================
+#
+# ⚠️ PLACEHOLDER — Sera complété en Phase P8 (Tests + CI/CD)
+#
+# Ce workflow actuel ne fait rien de concret car aucun test n'existe encore.
+# Il est là pour montrer la structure prévue.
+
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - 'examens/**'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'examens/**'
+
+jobs:
+  # --------------------------------------------------------------------------
+  # Job 1 — Vérifier la syntaxe (placeholder pour P8)
+  # --------------------------------------------------------------------------
+  lint:
+    name: Lint et vérifications
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout du repo
+        uses: actions/checkout@v4
+
+      - name: Placeholder — à compléter en Phase P8
+        run: |
+          echo "⚠️ CI placeholder"
+          echo "Ce workflow sera complété en Phase P8 avec :"
+          echo "  - PHPUnit (tests unitaires backend)"
+          echo "  - Playwright (tests E2E frontend)"
+          echo "  - PHPStan (analyse statique PHP)"
+          echo "  - ESLint (analyse statique JS)"
+          echo ""
+          echo "Actuellement en Phase P0 (cadrage) — aucun test à exécuter."
+
+  # --------------------------------------------------------------------------
+  # Job 2 — Tests PHPUnit (à activer en P8)
+  # --------------------------------------------------------------------------
+  # phpunit:
+  #   name: Tests unitaires PHP
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - uses: shivammathur/setup-php@v2
+  #       with:
+  #         php-version: '8.1'
+  #         extensions: mbstring, openssl, json
+  #     - run: cd examens/backend && composer install --no-progress
+  #     - run: cd examens && vendor/bin/phpunit tests/backend --colors=always
+
+  # --------------------------------------------------------------------------
+  # Job 3 — Tests E2E Playwright (à activer en P8)
+  # --------------------------------------------------------------------------
+  # e2e:
+  #   name: Tests E2E Playwright
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - uses: actions/setup-node@v4
+  #       with:
+  #         node-version: '20'
+  #     - uses: shivammathur/setup-php@v2
+  #       with:
+  #         php-version: '8.1'
+  #     - run: cd examens/tests/e2e && npm install
+  #     - run: cd examens/tests/e2e && npx playwright install --with-deps
+  #     - run: cd examens && php -S 127.0.0.1:8000 -t backend/public &
+  #     - run: cd examens/tests/e2e && npx playwright test --reporter=html
+  #     - uses: actions/upload-artifact@v4
+  #       if: always()
+  #       with:
+  #         name: playwright-report
+  #         path: examens/tests/e2e/playwright-report/

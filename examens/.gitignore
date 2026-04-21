@@ -1,0 +1,198 @@
+# ============================================================================
+# .gitignore — Plateforme d'examens IPSSI
+# ============================================================================
+
+# ------ Secrets et configurations ------
+# JAMAIS commiter ces fichiers : ils contiennent des secrets ou données perso
+backend/config.php
+backend/.env
+backend/.env.local
+data/comptes/enseignants.json
+data/comptes/sessions/
+data/config/secrets.json
+
+# ------ Données utilisateur (réelles) ------
+# Les passages des étudiants et banques en production ne doivent pas être commités
+data/examens/*/
+!data/examens/.gitkeep
+!data/examens/.example/
+data/banque/*/
+!data/banque/.gitkeep
+!data/banque/_template/
+
+# ------ Backups ------
+data/_backups/
+data/*.zip
+*.backup
+*.bak
+
+# ------ Logs ------
+*.log
+logs/
+data/logs/
+backend/logs/
+
+# ------ Sessions PHP ------
+sessions/
+*.sess
+
+# ------ Caches ------
+cache/
+*.cache
+.cache/
+
+# ============================================================================
+# PHP
+# ============================================================================
+
+# Composer
+vendor/
+composer.phar
+composer.lock.bak
+
+# PHPUnit
+.phpunit.result.cache
+phpunit.xml
+coverage/
+coverage.xml
+clover.xml
+
+# PHPStan
+.phpstan.cache
+phpstan.neon
+
+# PHP CS Fixer
+.php-cs-fixer.cache
+
+# ============================================================================
+# Node.js / NPM
+# ============================================================================
+
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.npm
+.pnp
+.pnp.js
+*.tgz
+
+# Parcel / Webpack / Vite outputs
+dist/
+build/
+.parcel-cache/
+
+# Playwright
+test-results/
+playwright-report/
+playwright/.cache/
+.playwright/
+
+# ============================================================================
+# Python (scripts utilitaires)
+# ============================================================================
+
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.venv/
+ENV/
+env.bak/
+venv.bak/
+pip-log.txt
+pip-delete-this-directory.txt
+.pytest_cache/
+.coverage
+htmlcov/
+
+# ============================================================================
+# IDEs et éditeurs
+# ============================================================================
+
+# VSCode
+.vscode/
+!.vscode/settings.json.example
+*.code-workspace
+
+# PHPStorm / WebStorm / JetBrains
+.idea/
+*.iml
+*.iws
+.idea_modules/
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# Vim
+*.swp
+*.swo
+.netrwhist
+tags
+
+# Emacs
+*~
+\#*\#
+
+# ============================================================================
+# OS
+# ============================================================================
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+.Spotlight-V100
+.Trashes
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+*.stackdump
+
+# Linux
+*~
+.fuse_hidden*
+
+# ============================================================================
+# Fichiers temporaires divers
+# ============================================================================
+
+*.tmp
+*.temp
+*.swp
+*.swo
+*.orig
+*.rej
+
+# ============================================================================
+# Exports et fichiers générés (selon contexte)
+# ============================================================================
+
+# PDFs générés (sauf templates)
+data/exports/*.pdf
+data/exports/*.xlsx
+data/exports/*.csv
+
+# Fichiers d'échantillons volumineux
+*.big
+*.huge
+
+# ============================================================================
+# Tokens et credentials sensibles
+# ============================================================================
+
+# Jamais commit en clair : tokens GitHub, API keys, etc.
+.github-token
+*_token.txt
+*_secret.txt
+*.pem
+*.key
+*.crt
+*.pfx
