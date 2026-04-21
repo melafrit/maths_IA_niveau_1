@@ -457,9 +457,7 @@ function HomeScreen({ onStart, hasInProgress, onResume, onReset }) {
       <Box type="definition" title="Déroulement">
         <ul style={{ margin: 0, paddingLeft: '22px', lineHeight: 1.8 }}>
           <li><strong>50 questions</strong> à choix unique (4 propositions, 1 seule bonne réponse par question).</li>
-          <li>L'ordre des questions et des propositions est <strong>mélangé aléatoirement</strong> pour chaque étudiant.</li>
           <li>Vous pouvez <strong>naviguer librement</strong> et modifier vos réponses avant la soumission.</li>
-          <li>Un <strong>chronomètre indicatif</strong> s'affiche : il n'y a <em>pas de blocage automatique</em>.</li>
           <li>À la fin, vous exporterez un <strong>fichier CSV</strong> à envoyer par email.</li>
         </ul>
       </Box>
@@ -503,13 +501,12 @@ function HomeScreen({ onStart, hasInProgress, onResume, onReset }) {
 
       <Box type="attention" title="Conseils avant de commencer">
         <ul style={{ margin: 0, paddingLeft: '22px', lineHeight: 1.8 }}>
-          <li>Installez-vous dans un environnement calme : prévoyez environ <strong>60 à 90 minutes</strong>.</li>
+          <li>Installez-vous dans un environnement calme : prévoyez environ <strong>50 minutes</strong>.</li>
           <li>Une <strong>feuille de brouillon</strong> et un <strong>stylo</strong> sont fortement recommandés pour les calculs.</li>
           <li>Une <strong>calculatrice simple</strong> (ou celle de votre téléphone) est autorisée.</li>
           <li>À la fin, vous devrez saisir vos <strong>nom, prénom et email</strong> pour générer le CSV.</li>
           <li>Envoyez ensuite le CSV par email à <code style={{ background: theme.bgCode, padding: '2px 6px', borderRadius: '3px' }}>{CONFIG.EMAIL_DEST}</code>.</li>
-          <li>⚠️ <strong>Ne fermez pas la page</strong> pendant le QCM : vos réponses sont sauvegardées localement,
-            mais seule la soumission génère le fichier officiel.</li>
+          <li>⚠️ <strong>Ne fermez pas la page pour ne pas perdre vos réponses.</strong></li>
         </ul>
       </Box>
 
