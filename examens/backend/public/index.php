@@ -77,7 +77,45 @@ if (preg_match('#^/api/([a-z0-9_-]+)(?:/.*)?$#i', $requestPath, $matches)) {
 }
 
 // ============================================================================
-// Servir les pages frontend HTML (login.html, dashboard_temp.html, 404.html, 500.html)
+// Servir les assets statiques frontend (CSS, JS, images, fonts)
+// /assets/main.css → frontend/assets/main.css
+// ============================================================================
+
+$assetsDir = realpath(EXAMENS_ROOT . '/../frontend/assets');
+if ($assetsDir !== false && preg_match('#^/assets/(.+)$#', $requestPath, $m)) {
+    $relPath = $m[1];
+    // Sécurité : pas de .., pas de chemins absolus
+    if (str_contains($relPath, '..') || str_starts_with($relPath, '/')) {
+        Response::notFound('Asset introuvable');
+    }
+    $candidate = realpath($assetsDir . '/' . $relPath);
+    if ($candidate !== false && str_starts_with($candidate, $assetsDir . DIRECTORY_SEPARATOR)) {
+        // Détection MIME type basique
+        $ext = strtolower(pathinfo($candidate, PATHINFO_EXTENSION));
+        $mimes = [
+            'css'  => 'text/css; charset=utf-8',
+            'js'   => 'application/javascript; charset=utf-8',
+            'json' => 'application/json',
+            'png'  => 'image/png',
+            'jpg'  => 'image/jpeg', 'jpeg' => 'image/jpeg',
+            'gif'  => 'image/gif',
+            'svg'  => 'image/svg+xml',
+            'webp' => 'image/webp',
+            'woff' => 'font/woff', 'woff2' => 'font/woff2',
+            'ttf'  => 'font/ttf', 'otf' => 'font/otf',
+            'ico'  => 'image/x-icon',
+        ];
+        $mime = $mimes[$ext] ?? 'application/octet-stream';
+        header('Content-Type: ' . $mime);
+        // Cache 1h en dev, à augmenter en prod via .htaccess
+        header('Cache-Control: public, max-age=3600');
+        readfile($candidate);
+        exit;
+    }
+}
+
+// ============================================================================
+// Servir les pages frontend HTML (login.html, dashboard_temp.html, etc.)
 // ============================================================================
 
 $frontendDir = realpath(EXAMENS_ROOT . '/../frontend/commun');

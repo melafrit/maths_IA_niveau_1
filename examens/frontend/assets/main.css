@@ -1,0 +1,94 @@
+/* ============================================================================
+   main.css — Point d'entrée du design system
+   Plateforme d'examens IPSSI
+
+   À inclure en premier dans toute page HTML :
+   <link rel="stylesheet" href="/assets/main.css">
+
+   © 2026 Mohamed EL AFRIT — IPSSI — CC BY-NC-SA 4.0
+============================================================================ */
+
+@import url('./fonts.css');
+@import url('./tokens.css');
+@import url('./theme.css');
+@import url('./reset.css');
+@import url('./animations.css');
+
+/* ============================================================================
+   Helpers d'accessibilité visibles globalement
+============================================================================ */
+
+/* Skip link pour utilisateurs au clavier */
+.skip-link {
+  position: absolute;
+  top: -100px;
+  left: 0;
+  background: var(--color-primary);
+  color: var(--color-text-on-primary);
+  padding: var(--space-3) var(--space-4);
+  z-index: var(--z-max);
+  transition: top var(--transition-fast);
+  text-decoration: none;
+  font-weight: var(--font-medium);
+}
+.skip-link:focus {
+  top: 0;
+}
+
+/* ============================================================================
+   Utilités communes
+============================================================================ */
+
+.container {
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: var(--space-4);
+  padding-right: var(--space-4);
+}
+
+@media (min-width: 640px)  { .container { max-width: var(--container-sm); } }
+@media (min-width: 768px)  { .container { max-width: var(--container-md); } }
+@media (min-width: 1024px) { .container { max-width: var(--container-lg); } }
+@media (min-width: 1280px) { .container { max-width: var(--container-xl); } }
+@media (min-width: 1536px) { .container { max-width: var(--container-2xl); } }
+
+.flex          { display: flex; }
+.flex-col      { flex-direction: column; }
+.items-center  { align-items: center; }
+.justify-center { justify-content: center; }
+.justify-between { justify-content: space-between; }
+.gap-2 { gap: var(--space-2); }
+.gap-3 { gap: var(--space-3); }
+.gap-4 { gap: var(--space-4); }
+.gap-6 { gap: var(--space-6); }
+
+.text-center  { text-align: center; }
+.text-muted   { color: var(--color-text-muted); }
+.text-strong  { color: var(--color-text-strong); }
+.text-primary { color: var(--color-primary); }
+.text-success { color: var(--color-success); }
+.text-warning { color: var(--color-warning); }
+.text-danger  { color: var(--color-danger); }
+
+.font-medium   { font-weight: var(--font-medium); }
+.font-semibold { font-weight: var(--font-semibold); }
+.font-bold     { font-weight: var(--font-bold); }
+
+.mt-0 { margin-top: 0; }
+.mt-2 { margin-top: var(--space-2); }
+.mt-4 { margin-top: var(--space-4); }
+.mt-6 { margin-top: var(--space-6); }
+.mt-8 { margin-top: var(--space-8); }
+
+.mb-0 { margin-bottom: 0; }
+.mb-2 { margin-bottom: var(--space-2); }
+.mb-4 { margin-bottom: var(--space-4); }
+.mb-6 { margin-bottom: var(--space-6); }
+.mb-8 { margin-bottom: var(--space-8); }
+
+.p-2 { padding: var(--space-2); }
+.p-4 { padding: var(--space-4); }
+.p-6 { padding: var(--space-6); }
+
+.hidden { display: none !important; }

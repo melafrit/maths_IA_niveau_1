@@ -1,0 +1,303 @@
+/* ============================================================================
+   tokens.css — Design Tokens
+   Plateforme d'examens IPSSI — Phase P2
+
+   Variables CSS centralisées : couleurs, spacing, typographie, ombres, etc.
+   Cohérent avec les recommandations modernes (8-pt grid, ratios harmoniques).
+
+   Couleur primaire : BLEU (validé en Phase P2)
+
+   © 2026 Mohamed EL AFRIT — IPSSI — CC BY-NC-SA 4.0
+============================================================================ */
+
+:root {
+  /* ==========================================================================
+     1. PALETTE DE COULEURS
+     ========================================================================== */
+
+  /* Primaires (bleu) — gamme complète */
+  --c-primary-50:  #eff6ff;
+  --c-primary-100: #dbeafe;
+  --c-primary-200: #bfdbfe;
+  --c-primary-300: #93c5fd;
+  --c-primary-400: #60a5fa;
+  --c-primary-500: #3b82f6;  /* ← couleur primaire principale */
+  --c-primary-600: #2563eb;
+  --c-primary-700: #1d4ed8;
+  --c-primary-800: #1e40af;
+  --c-primary-900: #1e3a8a;
+  --c-primary-950: #172554;
+
+  /* Neutres (gris) — gamme complète */
+  --c-neutral-0:   #ffffff;
+  --c-neutral-50:  #f8fafc;
+  --c-neutral-100: #f1f5f9;
+  --c-neutral-200: #e2e8f0;
+  --c-neutral-300: #cbd5e1;
+  --c-neutral-400: #94a3b8;
+  --c-neutral-500: #64748b;
+  --c-neutral-600: #475569;
+  --c-neutral-700: #334155;
+  --c-neutral-800: #1e293b;
+  --c-neutral-900: #0f172a;
+  --c-neutral-950: #020617;
+
+  /* Sémantiques — feedback */
+  --c-success-50:  #f0fdf4;
+  --c-success-100: #dcfce7;
+  --c-success-500: #22c55e;
+  --c-success-600: #16a34a;
+  --c-success-700: #15803d;
+
+  --c-warning-50:  #fffbeb;
+  --c-warning-100: #fef3c7;
+  --c-warning-500: #f59e0b;
+  --c-warning-600: #d97706;
+  --c-warning-700: #b45309;
+
+  --c-danger-50:   #fef2f2;
+  --c-danger-100:  #fee2e2;
+  --c-danger-500:  #ef4444;
+  --c-danger-600:  #dc2626;
+  --c-danger-700:  #b91c1c;
+
+  --c-info-50:     #eff6ff;
+  --c-info-100:    #dbeafe;
+  --c-info-500:    #3b82f6;
+  --c-info-600:    #2563eb;
+
+  /* Couleurs spécifiques aux Box pédagogiques (cf. spécifications projet) */
+  --c-box-definition: #3b82f6;  /* bleu */
+  --c-box-retenir:    #22c55e;  /* vert */
+  --c-box-attention:  #f97316;  /* orange */
+  --c-box-intuition:  #a855f7;  /* violet */
+  --c-box-exemple:    #06b6d4;  /* cyan */
+  --c-box-python:     #1e293b;  /* terminal sombre */
+
+  /* Difficultés pédagogiques (cohérent avec qcm_eval_J1_J2) */
+  --c-difficulte-vert:   #22c55e;
+  --c-difficulte-jaune:  #eab308;
+  --c-difficulte-orange: #f97316;
+  --c-difficulte-rouge:  #ef4444;
+
+  /* ==========================================================================
+     2. APPLICATION DES COULEURS (clair par défaut)
+     ========================================================================== */
+
+  --color-bg:           var(--c-neutral-50);
+  --color-bg-subtle:    var(--c-neutral-100);
+  --color-bg-card:      var(--c-neutral-0);
+  --color-bg-input:     var(--c-neutral-0);
+  --color-bg-overlay:   rgba(15, 23, 42, 0.5);
+
+  --color-text:         var(--c-neutral-900);
+  --color-text-strong:  var(--c-neutral-950);
+  --color-text-muted:   var(--c-neutral-500);
+  --color-text-subtle:  var(--c-neutral-400);
+  --color-text-on-primary: var(--c-neutral-0);
+
+  --color-border:       var(--c-neutral-200);
+  --color-border-hover: var(--c-neutral-300);
+  --color-border-focus: var(--c-primary-500);
+
+  --color-link:         var(--c-primary-600);
+  --color-link-hover:   var(--c-primary-700);
+
+  /* États interactifs */
+  --color-primary:        var(--c-primary-500);
+  --color-primary-hover:  var(--c-primary-600);
+  --color-primary-active: var(--c-primary-700);
+  --color-primary-soft:   var(--c-primary-50);
+
+  --color-success:        var(--c-success-500);
+  --color-success-soft:   var(--c-success-50);
+  --color-warning:        var(--c-warning-500);
+  --color-warning-soft:   var(--c-warning-50);
+  --color-danger:         var(--c-danger-500);
+  --color-danger-hover:   var(--c-danger-600);
+  --color-danger-soft:    var(--c-danger-50);
+
+  /* ==========================================================================
+     3. TYPOGRAPHIE
+     ========================================================================== */
+
+  /* Familles */
+  --font-sans:    'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-heading: 'Manrope', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono:    'JetBrains Mono', 'SF Mono', Monaco, Consolas, 'Courier New', monospace;
+
+  /* Tailles (échelle modulaire ratio ~1.2) */
+  --text-xs:   0.75rem;      /* 12px */
+  --text-sm:   0.875rem;     /* 14px */
+  --text-base: 1rem;         /* 16px */
+  --text-lg:   1.125rem;     /* 18px */
+  --text-xl:   1.25rem;      /* 20px */
+  --text-2xl:  1.5rem;       /* 24px */
+  --text-3xl:  1.875rem;     /* 30px */
+  --text-4xl:  2.25rem;      /* 36px */
+  --text-5xl:  3rem;         /* 48px */
+  --text-6xl:  3.75rem;      /* 60px */
+
+  /* Poids */
+  --font-light:    300;
+  --font-normal:   400;
+  --font-medium:   500;
+  --font-semibold: 600;
+  --font-bold:     700;
+  --font-extrabold: 800;
+
+  /* Hauteurs de ligne */
+  --leading-none:    1;
+  --leading-tight:   1.25;
+  --leading-snug:    1.375;
+  --leading-normal:  1.5;
+  --leading-relaxed: 1.625;
+  --leading-loose:   2;
+
+  /* Espacement de lettres */
+  --tracking-tighter: -0.04em;
+  --tracking-tight:   -0.02em;
+  --tracking-normal:  0;
+  --tracking-wide:    0.02em;
+  --tracking-wider:   0.04em;
+
+  /* ==========================================================================
+     4. ESPACEMENTS (base 4px - 8pt grid)
+     ========================================================================== */
+
+  --space-0:   0;
+  --space-px:  1px;
+  --space-0_5: 0.125rem;  /* 2px */
+  --space-1:   0.25rem;   /* 4px */
+  --space-2:   0.5rem;    /* 8px */
+  --space-3:   0.75rem;   /* 12px */
+  --space-4:   1rem;      /* 16px */
+  --space-5:   1.25rem;   /* 20px */
+  --space-6:   1.5rem;    /* 24px */
+  --space-7:   1.75rem;   /* 28px */
+  --space-8:   2rem;      /* 32px */
+  --space-10:  2.5rem;    /* 40px */
+  --space-12:  3rem;      /* 48px */
+  --space-14:  3.5rem;    /* 56px */
+  --space-16:  4rem;      /* 64px */
+  --space-20:  5rem;      /* 80px */
+  --space-24:  6rem;      /* 96px */
+  --space-32:  8rem;      /* 128px */
+
+  /* ==========================================================================
+     5. RAYONS
+     ========================================================================== */
+
+  --radius-none: 0;
+  --radius-sm:   0.25rem;   /* 4px */
+  --radius-md:   0.375rem;  /* 6px */
+  --radius-lg:   0.5rem;    /* 8px */
+  --radius-xl:   0.75rem;   /* 12px */
+  --radius-2xl:  1rem;      /* 16px */
+  --radius-3xl:  1.5rem;    /* 24px */
+  --radius-full: 9999px;
+
+  /* ==========================================================================
+     6. OMBRES
+     ========================================================================== */
+
+  --shadow-xs: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+  --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  --shadow-inner: inset 0 2px 4px 0 rgba(0, 0, 0, 0.05);
+
+  --shadow-focus: 0 0 0 3px rgba(59, 130, 246, 0.25);
+  --shadow-focus-danger: 0 0 0 3px rgba(239, 68, 68, 0.25);
+
+  /* ==========================================================================
+     7. TRANSITIONS & ANIMATIONS
+     ========================================================================== */
+
+  --transition-fast:   150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-normal: 250ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow:   350ms cubic-bezier(0.4, 0, 0.2, 1);
+
+  --ease-in:     cubic-bezier(0.4, 0, 1, 1);
+  --ease-out:    cubic-bezier(0, 0, 0.2, 1);
+  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-bounce: cubic-bezier(0.68, -0.55, 0.27, 1.55);
+
+  /* ==========================================================================
+     8. BREAKPOINTS (utilisés via @media en CSS classique)
+     ========================================================================== */
+  /*
+     Mobile-first :
+     sm  : 640px  (smartphone landscape, petite tablette)
+     md  : 768px  (tablette portrait)
+     lg  : 1024px (tablette landscape, petit desktop)
+     xl  : 1280px (desktop)
+     2xl : 1536px (grand desktop)
+  */
+
+  /* ==========================================================================
+     9. Z-INDEX (échelle ordonnée pour éviter les conflits)
+     ========================================================================== */
+
+  --z-base:     1;
+  --z-dropdown: 100;
+  --z-sticky:   200;
+  --z-fixed:    300;
+  --z-overlay:  400;
+  --z-modal:    500;
+  --z-popover:  600;
+  --z-tooltip:  700;
+  --z-toast:    800;
+  --z-max:      9999;
+
+  /* ==========================================================================
+     10. CONTAINERS
+     ========================================================================== */
+
+  --container-sm:  640px;
+  --container-md:  768px;
+  --container-lg:  1024px;
+  --container-xl:  1280px;
+  --container-2xl: 1536px;
+}
+
+/* ============================================================================
+   THÈME SOMBRE — appliqué via [data-theme="dark"] sur <html>
+   Aussi auto si preference système et data-theme="auto" (cf. theme.css)
+============================================================================ */
+
+[data-theme="dark"] {
+  --color-bg:           var(--c-neutral-950);
+  --color-bg-subtle:    var(--c-neutral-900);
+  --color-bg-card:      var(--c-neutral-900);
+  --color-bg-input:     var(--c-neutral-800);
+  --color-bg-overlay:   rgba(0, 0, 0, 0.7);
+
+  --color-text:         var(--c-neutral-100);
+  --color-text-strong:  var(--c-neutral-0);
+  --color-text-muted:   var(--c-neutral-400);
+  --color-text-subtle:  var(--c-neutral-500);
+
+  --color-border:       var(--c-neutral-700);
+  --color-border-hover: var(--c-neutral-600);
+
+  --color-link:         var(--c-primary-400);
+  --color-link-hover:   var(--c-primary-300);
+
+  --color-primary:        var(--c-primary-500);
+  --color-primary-hover:  var(--c-primary-400);
+  --color-primary-active: var(--c-primary-300);
+  --color-primary-soft:   rgba(59, 130, 246, 0.15);
+
+  --color-success-soft:   rgba(34, 197, 94, 0.12);
+  --color-warning-soft:   rgba(245, 158, 11, 0.12);
+  --color-danger-soft:    rgba(239, 68, 68, 0.12);
+
+  /* Ombres atténuées en mode sombre */
+  --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.6);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.7);
+}

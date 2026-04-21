@@ -1,0 +1,21 @@
+/* ============================================================================
+   fonts.css — Polices Google Fonts
+   Plateforme d'examens IPSSI
+
+   Polices chargées :
+   - Inter (UI principale, 100-900)
+   - Manrope (titres, 200-800)
+   - JetBrains Mono (code, 400-700)
+
+   font-display: swap utilisé pour éviter le FOIT (Flash of Invisible Text).
+
+   © 2026 Mohamed EL AFRIT — IPSSI — CC BY-NC-SA 4.0
+============================================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Manrope:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap');
+
+/* Préfetch pour améliorer le LCP */
+/* À ajouter dans le <head> HTML :
+   <link rel="preconnect" href="https://fonts.googleapis.com">
+   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+*/
