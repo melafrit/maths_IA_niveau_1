@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Démo composants React (P2.2) — IPSSI Examens</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="/assets/main.css">
+
+  <style>
+    body { padding: var(--space-8) 0; }
+    .demo-section {
+      background: var(--color-bg-card);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-xl);
+      padding: var(--space-6);
+      margin-bottom: var(--space-6);
+      box-shadow: var(--shadow-sm);
+    }
+    .demo-section h2 {
+      margin-top: 0;
+      font-size: var(--text-xl);
+      padding-bottom: var(--space-3);
+      border-bottom: 1px solid var(--color-border);
+      margin-bottom: var(--space-4);
+    }
+    .demo-row {
+      display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: center;
+      margin-bottom: var(--space-3);
+    }
+    .demo-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: var(--space-4);
+    }
+    .theme-toggle {
+      position: fixed; top: var(--space-4); right: var(--space-4);
+      padding: var(--space-2) var(--space-4);
+      background: var(--color-primary); color: #fff;
+      border: none; border-radius: var(--radius-md);
+      cursor: pointer; font-weight: var(--font-medium);
+      box-shadow: var(--shadow-md); z-index: var(--z-fixed);
+    }
+  </style>
+</head>
+<body>
+
+  <button class="theme-toggle" id="themeToggle">🌙 Sombre</button>
+
+  <div class="container" style="max-width: 1100px;">
+    <h1 style="text-align:center; font-size:var(--text-4xl); margin-bottom:var(--space-2);">
+      Composants React
+    </h1>
+    <p style="text-align:center; color:var(--color-text-muted); margin-bottom:var(--space-8);">
+      Phase P2.2 — 15 composants fondamentaux
+    </p>
+    <div id="root"></div>
+  </div>
+
+  <!-- React + Babel -->
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <!-- Composants de base -->
+  <script src="/assets/components-base.js" type="text/babel"></script>
+
+  <!-- Démo -->
+  <script type="text/babel">
+    const { useState } = React;
+    const {
+      Button, Input, Textarea, Select, Checkbox, Radio,
+      Card, Box, Badge, Avatar,
+      Modal, Tooltip,
+      ToastProvider, useToast,
+      Spinner, Skeleton, ProgressBar,
+    } = window.UI;
+
+    function Demo() {
+      const [text, setText] = useState('');
+      const [textareaVal, setTextareaVal] = useState('');
+      const [selectVal, setSelectVal] = useState('');
+      const [checked, setChecked] = useState(false);
+      const [radioVal, setRadioVal] = useState('option1');
+      const [modalOpen, setModalOpen] = useState(false);
+      const [progress, setProgress] = useState(35);
+      const [emailErr, setEmailErr] = useState('');
+      const { toast } = useToast();
+
+      const validateEmail = (val) => {
+        setText(val);
+        if (val && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)) {
+          setEmailErr('Email invalide');
+        } else {
+          setEmailErr('');
+        }
+      };
+
+      return (
+        <div>
+          {/* ========== BUTTONS ========== */}
+          <section className="demo-section">
+            <h2>1. Buttons</h2>
+            <div className="demo-row">
+              <Button variant="primary" onClick={() => toast.info('Primary cliqué !')}>Primary</Button>
+              <Button variant="secondary">Secondary</Button>
+              <Button variant="success" onClick={() => toast.success('Bravo !')}>Success</Button>
+              <Button variant="danger" onClick={() => toast.error('Erreur !')}>Danger</Button>
+              <Button variant="outline">Outline</Button>
+              <Button variant="ghost">Ghost</Button>
+            </div>
+            <div className="demo-row">
+              <Button size="sm">Small</Button>
+              <Button size="md">Medium</Button>
+              <Button size="lg">Large</Button>
+              <Button disabled>Disabled</Button>
+              <Button loading>Loading…</Button>
+              <Button icon={<span>📥</span>}>Avec icône</Button>
+            </div>
+          </section>
+
+          {/* ========== INPUTS ========== */}
+          <section className="demo-section">
+            <h2>2. Inputs / Form fields</h2>
+            <div className="demo-grid">
+              <Input
+                label="Email"
+                type="email"
+                placeholder="vous@ipssi.fr"
+                value={text}
+                onChange={validateEmail}
+                error={emailErr}
+                required
+              />
+              <Input
+                label="Nom complet"
+                placeholder="Votre nom"
+                hint="Tel qu'il apparaîtra sur les certificats"
+              />
+              <Input
+                label="Mot de passe"
+                type="password"
+                placeholder="••••••••"
+                hint="Minimum 8 caractères"
+              />
+              <Select
+                label="Promotion"
+                options={[
+                  { value: 'b2-2026', label: 'Bachelor 2 — 2025-2026' },
+                  { value: 'b3-2026', label: 'Bachelor 3 — 2025-2026' },
+                  { value: 'm1-2026', label: 'Master 1 — 2025-2026' },
+                ]}
+                value={selectVal}
+                onChange={setSelectVal}
+                hint="Sélectionnez la promotion concernée"
+              />
+            </div>
+            <Textarea
+              label="Description"
+              placeholder="Décrivez le contexte de l'examen…"
+              value={textareaVal}
+              onChange={setTextareaVal}
+              hint="Cette description sera visible par les étudiants"
+              rows={3}
+            />
+          </section>
+
+          {/* ========== CHECKBOX & RADIO ========== */}
+          <section className="demo-section">
+            <h2>3. Checkbox & Radio</h2>
+            <div className="demo-grid">
+              <div>
+                <Checkbox
+                  label="J'accepte les conditions générales d'utilisation"
+                  checked={checked}
+                  onChange={setChecked}
+                />
+                <Checkbox
+                  label="Activer le focus-lock anti-triche"
+                  hint="Plein écran obligatoire + détection sortie de page"
+                />
+                <Checkbox label="Désactivé" disabled checked />
+              </div>
+              <Radio
+                name="duree"
+                label="Durée de l'examen"
+                value={radioVal}
+                onChange={setRadioVal}
+                options={[
+                  { value: 'option1', label: '30 minutes', hint: 'Pour les QCM courts' },
+                  { value: 'option2', label: '1 heure', hint: 'Recommandé pour 25-30 questions' },
+                  { value: 'option3', label: '2 heures', hint: 'Examen final complet' },
+                ]}
+              />
+            </div>
+          </section>
+
+          {/* ========== CARDS & BOXES ========== */}
+          <section className="demo-section">
+            <h2>4. Cards & Boxes</h2>
+            <div className="demo-grid">
+              <Card title="Examen Maths J1" subtitle="Bachelor 2 — 27 étudiants">
+                <p style={{ margin: 0, fontSize: 'var(--text-sm)', color: 'var(--color-text-muted)' }}>
+                  Représentation et vecteurs. Note moyenne : 14.2/20
+                </p>
+              </Card>
+              <Card title="Carte cliquable" hoverable onClick={() => toast.info('Carte cliquée')}>
+                <p style={{ margin: 0 }}>Survolez et cliquez sur cette carte.</p>
+              </Card>
+              <Card
+                title="Avec footer"
+                footer={<>
+                  <Button variant="ghost" size="sm">Annuler</Button>
+                  <Button size="sm">Valider</Button>
+                </>}
+              >
+                <p style={{ margin: 0 }}>Card avec une zone footer pour actions.</p>
+              </Card>
+            </div>
+
+            <h3 style={{ marginTop: 'var(--space-6)', fontSize: 'var(--text-lg)' }}>Box pédagogiques (6 types)</h3>
+            <Box type="definition">
+              <strong>Régression linéaire</strong> : modèle prédisant une variable continue
+              à partir d'une combinaison linéaire de features.
+            </Box>
+            <Box type="retenir">
+              Le gradient est le vecteur des dérivées partielles. Il pointe dans la direction
+              de la <em>plus forte croissance</em>.
+            </Box>
+            <Box type="attention">
+              Un taux d'apprentissage trop grand fait <strong>diverger</strong> la descente de gradient.
+            </Box>
+            <Box type="intuition">
+              Imaginez descendre une montagne les yeux bandés : à chaque pas, vous sentez la pente
+              et avancez dans la direction qui descend le plus.
+            </Box>
+            <Box type="exemple">
+              Avec n=30 développeurs et w=2.07, b=31.27, on obtient une MSE de 20.46 (k€)².
+            </Box>
+            <Box type="python">
+{`import numpy as np
+def mse(y, y_pred):
+    return np.mean((y - y_pred) ** 2)`}
+            </Box>
+          </section>
+
+          {/* ========== BADGES & AVATARS ========== */}
+          <section className="demo-section">
+            <h2>5. Badges & Avatars</h2>
+            <div className="demo-row">
+              <Badge variant="primary">Nouveau</Badge>
+              <Badge variant="success">Validé</Badge>
+              <Badge variant="warning">En attente</Badge>
+              <Badge variant="danger">Rejeté</Badge>
+              <Badge variant="neutral">Brouillon</Badge>
+              <Badge variant="primary" size="lg">Phase P2.2</Badge>
+            </div>
+            <div className="demo-row" style={{ marginTop: 'var(--space-4)' }}>
+              <Avatar name="Mohamed EL AFRIT" size={32} />
+              <Avatar name="Sophie Martin" size={40} />
+              <Avatar name="Jean Dupont" size={48} />
+              <Avatar name="Marie Bernard" size={60} />
+              <Avatar name="Lucas Petit" />
+            </div>
+          </section>
+
+          {/* ========== FEEDBACK ========== */}
+          <section className="demo-section">
+            <h2>6. Feedback (Spinner, Skeleton, ProgressBar)</h2>
+
+            <h3 style={{ fontSize: 'var(--text-base)' }}>Spinners</h3>
+            <div className="demo-row">
+              <Spinner size={12} />
+              <Spinner size={20} />
+              <Spinner size={32} />
+              <Spinner size={48} thickness={4} />
+            </div>
+
+            <h3 style={{ fontSize: 'var(--text-base)', marginTop: 'var(--space-4)' }}>Skeletons</h3>
+            <div style={{ display: 'flex', gap: 'var(--space-3)', alignItems: 'center', marginBottom: 'var(--space-3)' }}>
+              <Skeleton width={48} height={48} circle />
+              <div style={{ flex: 1 }}>
+                <Skeleton width="60%" height={14} />
+                <div style={{ marginTop: 8 }}><Skeleton width="40%" height={12} /></div>
+              </div>
+            </div>
+            <Skeleton height={120} />
+
+            <h3 style={{ fontSize: 'var(--text-base)', marginTop: 'var(--space-4)' }}>ProgressBar</h3>
+            <div style={{ marginBottom: 'var(--space-3)' }}>
+              <ProgressBar value={progress} label={`Progression : ${progress}%`} showValue />
+            </div>
+            <div style={{ marginBottom: 'var(--space-3)' }}>
+              <ProgressBar value={75} label="Score moyen" color="var(--color-success)" />
+            </div>
+            <div className="demo-row">
+              <Button size="sm" onClick={() => setProgress(Math.max(0, progress - 10))}>−10 %</Button>
+              <Button size="sm" onClick={() => setProgress(Math.min(100, progress + 10))}>+10 %</Button>
+            </div>
+          </section>
+
+          {/* ========== MODAL & TOOLTIP ========== */}
+          <section className="demo-section">
+            <h2>7. Modal & Tooltip</h2>
+            <div className="demo-row">
+              <Button onClick={() => setModalOpen(true)}>Ouvrir la modale</Button>
+              <Tooltip content="Survolez pour voir l'aide" position="top">
+                <Button variant="outline">Tooltip top</Button>
+              </Tooltip>
+              <Tooltip content="Aide à droite" position="right">
+                <Button variant="outline">Tooltip right</Button>
+              </Tooltip>
+              <Tooltip content="Aide en bas" position="bottom">
+                <Button variant="outline">Tooltip bottom</Button>
+              </Tooltip>
+            </div>
+
+            <Modal
+              open={modalOpen}
+              onClose={() => setModalOpen(false)}
+              title="Confirmer la création"
+              size="md"
+              footer={<>
+                <Button variant="ghost" onClick={() => setModalOpen(false)}>Annuler</Button>
+                <Button onClick={() => { toast.success('Examen créé !'); setModalOpen(false); }}>
+                  Confirmer
+                </Button>
+              </>}
+            >
+              <p style={{ marginTop: 0 }}>
+                Vous êtes sur le point de créer un examen avec les paramètres suivants :
+              </p>
+              <ul>
+                <li>Promotion : <strong>Bachelor 2 — 2025-2026</strong></li>
+                <li>Durée : <strong>1 heure</strong></li>
+                <li>Questions : <strong>25</strong></li>
+                <li>Focus-lock : <strong>Activé</strong></li>
+              </ul>
+              <p style={{ color: 'var(--color-text-muted)', fontSize: 'var(--text-sm)' }}>
+                Une fois créé, l'examen sera accessible aux étudiants via le code généré.
+              </p>
+            </Modal>
+          </section>
+
+          {/* ========== TOASTS ========== */}
+          <section className="demo-section">
+            <h2>8. Toasts</h2>
+            <div className="demo-row">
+              <Button variant="primary" onClick={() => toast.info('Information : examen démarré.')}>Info</Button>
+              <Button variant="success" onClick={() => toast.success('Examen enregistré avec succès !')}>Success</Button>
+              <Button variant="danger" onClick={() => toast.error('Échec de la sauvegarde.')}>Error</Button>
+              <Button onClick={() => toast.warning('Attention, cette action est irréversible.')} style={{ background: 'var(--color-warning)', borderColor: 'var(--color-warning)' }}>Warning</Button>
+            </div>
+          </section>
+
+        </div>
+      );
+    }
+
+    function App() {
+      return (
+        <ToastProvider>
+          <Demo />
+        </ToastProvider>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+  </script>
+
+  <script>
+    const html = document.documentElement;
+    const btn = document.getElementById('themeToggle');
+    function setTheme(t) {
+      html.setAttribute('data-theme', t);
+      btn.textContent = t === 'dark' ? '☀️ Clair' : '🌙 Sombre';
+      try { localStorage.setItem('theme', t); } catch(e) {}
+    }
+    btn.addEventListener('click', () => setTheme(html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark'));
+    try {
+      const saved = localStorage.getItem('theme');
+      if (saved) setTheme(saved);
+    } catch(e) {}
+  </script>
+</body>
+</html>
