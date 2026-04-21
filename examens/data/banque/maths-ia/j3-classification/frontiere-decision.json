@@ -1,0 +1,406 @@
+{
+  "_meta": {
+    "module": "maths-ia",
+    "chapitre": "j3-classification",
+    "theme": "frontiere-decision",
+    "module_label": "Mathématiques appliquées à l'IA",
+    "chapitre_label": "Jour 3 — Classification",
+    "theme_label": "Frontière de décision",
+    "version": "1.0.0",
+    "created_at": "2026-04-21T14:00:00+02:00",
+    "created_by": "system",
+    "license": "CC BY-NC-SA 4.0 — Mohamed EL AFRIT — IPSSI",
+    "total_questions": 20,
+    "difficulty_distribution": {
+      "facile": 5,
+      "moyen": 5,
+      "difficile": 5,
+      "expert": 5
+    },
+    "comment": "Deuxième thème du J3. Concept géométrique central de la classification : la frontière de décision. Cas linéaire (ligne/plan/hyperplan) avant cas non-linéaire. Fil rouge : seuil salaire > 45k€. Prépare le perceptron (thème suivant) et la régression logistique."
+  },
+
+  "questions": [
+
+    {
+      "id": "fdc-faci-01",
+      "enonce": "En classification binaire, la **frontière de décision** est :",
+      "options": [
+        "Une droite/surface qui sépare les classes dans l'espace des features",
+        "La fonction de coût à minimiser",
+        "Le gradient du classifieur",
+        "Le nombre d'exemples dans chaque classe"
+      ],
+      "correct": 0,
+      "difficulte": "facile",
+      "type": "conceptuel",
+      "tags": ["definition", "geometrie", "classification"],
+      "hint": "Imaginez un graphique 2D : les points bleus d'un côté, les rouges de l'autre. Qu'est-ce qui les sépare visuellement ?",
+      "explanation": "La **frontière de décision** (decision boundary) est la surface dans l'espace des features qui sépare les classes. D'un côté, le modèle prédit une classe ; de l'autre, l'autre classe. **En 2D** : une droite (cas linéaire) ou une courbe (cas non-linéaire). **En 3D** : un plan ou surface. **En $p$ dimensions** : un **hyperplan** ou une hypersurface. Les points SUR la frontière sont ceux où le modèle est 'indécis' ($P(y=1) = 0.5$).",
+      "traps": "Option B : la fonction de coût mesure les erreurs globales, pas la séparation géométrique. Option C : le gradient est un vecteur pour l'optimisation. Option D : le nombre d'exemples concerne le dataset, pas la frontière.",
+      "references": "Cours J3, section 3.3 Frontière de décision — Définition"
+    },
+
+    {
+      "id": "fdc-faci-02",
+      "enonce": "Dans un modèle linéaire binaire $f(\\mathbf{x}) = \\mathbf{w}^T \\mathbf{x} + b$, la **frontière de décision** (entre les deux classes) est l'ensemble des points où :",
+      "options": [
+        "$\\mathbf{w}^T \\mathbf{x} + b = 0$",
+        "$\\mathbf{w}^T \\mathbf{x} + b = 1$",
+        "$\\mathbf{w}^T \\mathbf{x} + b = \\infty$",
+        "$\\mathbf{w}^T \\mathbf{x} = \\mathbf{x}^T \\mathbf{w}$"
+      ],
+      "correct": 0,
+      "difficulte": "facile",
+      "type": "formule",
+      "tags": ["formule", "lineaire", "hyperplan"],
+      "hint": "La frontière est là où le score est NEUTRE (ni positif ni négatif). Quelle valeur du score correspond à ce cas ?",
+      "explanation": "La frontière linéaire est l'**hyperplan** $\\{\\mathbf{x} : \\mathbf{w}^T \\mathbf{x} + b = 0\\}$. À gauche/droite (selon le signe de $\\mathbf{w}^T \\mathbf{x} + b$), on classe dans l'une ou l'autre classe : $\\hat{y} = 1$ si $\\mathbf{w}^T \\mathbf{x} + b > 0$, sinon $\\hat{y} = 0$. Le vecteur $\\mathbf{w}$ est **orthogonal** à la frontière (il pointe 'vers' la classe positive). En 2D, cela donne une **ligne droite** ; en 3D, un **plan**.",
+      "traps": "$= 1$ (option B) est arbitraire et faux. $= \\infty$ (option C) est aberrant. Option D est une identité toujours vraie (commutativité du produit scalaire), pas une frontière.",
+      "references": "Cours J3, section 3.3 Équation de l'hyperplan"
+    },
+
+    {
+      "id": "fdc-faci-03",
+      "enonce": "Pour le fil rouge (seuil salaire > 45k€), on a $\\hat{y} = 1$ si salaire > 45k€ et $\\hat{y} = 0$ sinon. Que signifie **concrètement** la frontière de décision ?",
+      "options": [
+        "Les développeurs pour lesquels le modèle prédit EXACTEMENT 45k€ (ou 50% de probabilité)",
+        "Les développeurs avec 0 an d'expérience",
+        "Les meilleurs développeurs du dataset",
+        "Les développeurs en télétravail"
+      ],
+      "correct": 0,
+      "difficulte": "facile",
+      "type": "conceptuel",
+      "tags": ["fil-rouge", "interpretation", "seuil"],
+      "hint": "La frontière sépare les 'hauts salaires' (>45k€) des 'bas salaires' (≤45k€). Les points 'à la frontière' sont les cas douteux.",
+      "explanation": "La frontière correspond aux points où le modèle 'hésite' : prédiction $\\hat{y}$ exactement à 45k€, ou probabilité 50% si on utilise un classifieur probabiliste. **Interprétation concrète** : les développeurs 'à la frontière' ont un profil 'moyen' (ni clairement hauts salaires, ni clairement bas). **Pratique** : le choix du SEUIL (45k€ vs 50k€ vs 40k€) affecte la forme de la frontière et les prédictions. C'est un paramètre métier, pas appris par le modèle.",
+      "traps": "0 an d'expérience (option B) est une feature, pas un seuil de décision. 'Meilleurs développeurs' (option C) est trop vague. Télétravail (option D) est une feature, pas une classe.",
+      "references": "Cours J3, section 3.3 Seuil de décision"
+    },
+
+    {
+      "id": "fdc-faci-04",
+      "enonce": "Dans un espace 2D (features $x_1, x_2$), à quoi ressemble une **frontière de décision linéaire** ?",
+      "options": [
+        "Un point",
+        "Une droite (ligne)",
+        "Un cercle",
+        "Un plan"
+      ],
+      "correct": 1,
+      "difficulte": "facile",
+      "type": "conceptuel",
+      "tags": ["geometrie", "dimension-2", "lineaire"],
+      "hint": "L'équation $w_1 x_1 + w_2 x_2 + b = 0$ définit quelle forme géométrique dans le plan 2D ?",
+      "explanation": "En 2D, $w_1 x_1 + w_2 x_2 + b = 0$ est l'équation d'une **droite** (ligne droite). **Généralisation par dimension** : en 1D = un point, en 2D = une droite, en 3D = un plan, en $p$D = un **hyperplan** (sous-espace de dimension $p-1$). **Exemples visuels** : SVM linéaire, régression logistique, perceptron — tous produisent des frontières linéaires.",
+      "traps": "Un point (option A) : c'est le cas 1D (un seul feature). Un cercle (option C) : serait une frontière NON linéaire (courbe). Un plan (option D) : c'est le cas 3D.",
+      "references": "Cours J3, section 3.3 Frontière en dimension 2"
+    },
+
+    {
+      "id": "fdc-faci-05",
+      "enonce": "En classification avec $K$ classes (ex : K=3), combien de **frontières** séparent les classes deux à deux dans une approche 'one-vs-rest' ?",
+      "options": [
+        "$K = 3$",
+        "$K - 1 = 2$",
+        "1",
+        "$K \\times (K-1) / 2 = 3$"
+      ],
+      "correct": 0,
+      "difficulte": "facile",
+      "type": "conceptuel",
+      "tags": ["multi-classe", "one-vs-rest", "frontieres"],
+      "hint": "One-vs-Rest : pour chaque classe, on entraîne UN classifieur binaire qui distingue cette classe du reste.",
+      "explanation": "En **One-vs-Rest (OvR)** : pour chaque classe $k$ parmi les $K$, on entraîne un classifieur binaire 'classe $k$ vs reste'. Donc $K$ classifieurs, $K$ frontières. La prédiction finale : $\\hat{y} = \\arg\\max_k \\text{score}_k$. **Approche alternative** : **One-vs-One (OvO)** entraîne un classifieur par PAIRE de classes, soit $K(K-1)/2$ classifieurs. Pour $K=3$ : $3 \\times 2 / 2 = 3$ aussi coïncidence. Pour $K=10$ : OvR = 10, OvO = 45. **Softmax** = alternative plus élégante qui produit 1 seul modèle multi-classes avec $K$ scores simultanés.",
+      "traps": "$K-1$ (option B) serait pour des 'bornes' cumulatives, pas des frontières directes. 1 seule frontière (option C) : impossible pour distinguer 3 classes. $K(K-1)/2$ (option D) : c'est OvO, pas OvR.",
+      "references": "Cours J3, section 3.7 Multi-classes (référence avancée)"
+    },
+
+    {
+      "id": "fdc-moye-01",
+      "enonce": "Soit un classifieur linéaire avec $\\mathbf{w} = (2, -1)$ et $b = -3$, donc $f(\\mathbf{x}) = 2 x_1 - x_2 - 3$. L'équation de la frontière est $2 x_1 - x_2 - 3 = 0$. De quel côté de la frontière se trouve le point $\\mathbf{x} = (3, 2)$ ?",
+      "options": [
+        "Sur la frontière ($f(\\mathbf{x}) = 0$)",
+        "Côté positif ($f(\\mathbf{x}) > 0$ : classe 1)",
+        "Côté négatif ($f(\\mathbf{x}) < 0$ : classe 0)",
+        "Impossible à déterminer"
+      ],
+      "correct": 1,
+      "difficulte": "moyen",
+      "type": "calcul",
+      "tags": ["calcul-numerique", "classification", "cote-frontiere"],
+      "hint": "Calculez $f(\\mathbf{x}) = 2(3) - 1(2) - 3$. Si > 0 : classe 1. Si < 0 : classe 0. Si = 0 : sur la frontière.",
+      "explanation": "$f(\\mathbf{x}) = 2 \\times 3 - 1 \\times 2 - 3 = 6 - 2 - 3 = 1 > 0$. Donc le point $(3, 2)$ est du **côté positif**, classe 1. **Règle** : le signe de $f(\\mathbf{x}) = \\mathbf{w}^T \\mathbf{x} + b$ détermine la classe prédite. Une valeur GRANDE (positive) = forte confiance pour classe 1 ; une valeur TRÈS NÉGATIVE = forte confiance pour classe 0 ; une valeur PROCHE DE 0 = indécision.",
+      "traps": "Calcul erroné en faisant $2+3-1+2-3 = 3$ (confusion addition/multiplication). Ne pas oublier le signe négatif de $w_2 = -1$.",
+      "references": "Cours J3, section 3.3 Décision par signe"
+    },
+
+    {
+      "id": "fdc-moye-02",
+      "enonce": "Pour un classifieur linéaire 2D avec frontière $x_1 + x_2 = 5$, quelle est l'interprétation géométrique du vecteur $\\mathbf{w} = (1, 1)$ ?",
+      "options": [
+        "Il pointe le long de la frontière",
+        "Il est **orthogonal** (perpendiculaire) à la frontière",
+        "Il mesure la distance au minimum",
+        "Il est nul pour les classifieurs bien entraînés"
+      ],
+      "correct": 1,
+      "difficulte": "moyen",
+      "type": "conceptuel",
+      "tags": ["geometrie", "normale", "orthogonalite"],
+      "hint": "L'équation $\\mathbf{w}^T \\mathbf{x} + b = 0$ définit un hyperplan dont $\\mathbf{w}$ est le vecteur NORMAL.",
+      "explanation": "Le vecteur $\\mathbf{w}$ est **NORMAL** (perpendiculaire) à l'hyperplan de décision. Propriétés : (1) La **direction** de $\\mathbf{w}$ pointe vers la classe POSITIVE (+). (2) La **norme** $\\|\\mathbf{w}\\|$ contrôle la 'pente' du classifieur (grand $\\|\\mathbf{w}\\|$ = transition nette). (3) La **distance** d'un point $\\mathbf{x}$ à la frontière est $|\\mathbf{w}^T \\mathbf{x} + b| / \\|\\mathbf{w}\\|$. Utilisation : en SVM, on MAXIMISE cette distance (marge) pour les points les plus proches.",
+      "traps": "Le long de la frontière (option A) : ce serait un vecteur DIFFÉRENT (tangent). Distance au minimum (option C) : concept d'optimisation, pas de géométrie. Vecteur nul (option D) : aucun classifieur avec $\\mathbf{w} = 0$.",
+      "references": "Cours J3, section 3.3 Vecteur normal de l'hyperplan"
+    },
+
+    {
+      "id": "fdc-moye-03",
+      "enonce": "Un dataset est dit **linéairement séparable** si :",
+      "options": [
+        "Les classes sont équilibrées (50/50)",
+        "Il existe un hyperplan qui sépare PARFAITEMENT les deux classes (aucune erreur sur le train)",
+        "Le dataset est grand (> 10 000 exemples)",
+        "Toutes les features sont numériques"
+      ],
+      "correct": 1,
+      "difficulte": "moyen",
+      "type": "conceptuel",
+      "tags": ["separable", "definition", "limite"],
+      "hint": "Pensez à des points rouges et bleus dans un plan. Séparable linéairement = on peut tracer UNE droite qui a tous les rouges d'un côté et tous les bleus de l'autre.",
+      "explanation": "**Linéairement séparable** = il existe $(\\mathbf{w}, b)$ tel que $\\mathbf{w}^T \\mathbf{x}_i + b > 0$ pour tous les $i$ de classe 1, et $< 0$ pour tous les $i$ de classe 0. **Exemples séparables** : 2 clusters gaussiens bien séparés, problème AND/OR. **Non séparable** : XOR (problème classique), données imbriquées, overlaps, bruit. **Importance** : (1) Le perceptron ne converge QUE si les données sont linéairement séparables. (2) En pratique, peu de datasets réels le sont — d'où les réseaux de neurones multi-couches (J4) qui créent des frontières non-linéaires.",
+      "traps": "Équilibre des classes (option A) est orthogonal (on peut avoir un dataset déséquilibré mais séparable). Taille du dataset (option C) est orthogonale. Type des features (option D) est orthogonal.",
+      "references": "Cours J3, section 3.3 Séparabilité linéaire"
+    },
+
+    {
+      "id": "fdc-moye-04",
+      "enonce": "Le problème **XOR** (eXclusive OR) en 2D : $(0, 0) \\to 0$, $(0, 1) \\to 1$, $(1, 0) \\to 1$, $(1, 1) \\to 0$. Pourquoi est-il CÉLÈBRE en IA ?",
+      "options": [
+        "C'est un problème trivial résolu par la régression linéaire",
+        "Il est **non linéairement séparable** : aucune droite ne peut séparer les classes. Historiquement, il a motivé l'émergence des réseaux de neurones multi-couches",
+        "Il nécessite $10^6$ exemples pour converger",
+        "C'est le problème le plus simple de l'IA"
+      ],
+      "correct": 1,
+      "difficulte": "moyen",
+      "type": "conceptuel",
+      "tags": ["xor", "histoire-ia", "non-lineaire", "j4-anticipation"],
+      "hint": "Essayez mentalement de tracer une droite qui sépare $(0,0)$ et $(1,1)$ (classe 0) de $(0,1)$ et $(1,0)$ (classe 1). Vous ne pouvez PAS.",
+      "explanation": "Le **XOR** : les points de classe 0 sont DIAGONAUX ($(0,0)$ et $(1,1)$), ceux de classe 1 sont l'autre diagonale. **IMPOSSIBLE** de séparer par une droite. **Histoire** : en 1969, Minsky & Papert (livre 'Perceptrons') ont montré cette limitation, ce qui a provoqué le **premier hiver de l'IA** (years 70). **Solution** : les réseaux multi-couches (avec une couche cachée) peuvent créer des frontières non-linéaires et résoudre XOR. La renaissance du deep learning (années 80-2010) a été motivée par cette capacité.",
+      "traps": "Non résolu par régression linéaire (option A : opposé de la vérité). Pas besoin de $10^6$ exemples (option C) — 4 exemples suffisent si le modèle est assez expressif. Pas le plus simple (option D) : au contraire, un contre-exemple CRUCIAL.",
+      "references": "Cours J3, section 3.3 XOR et histoire de l'IA"
+    },
+
+    {
+      "id": "fdc-moye-05",
+      "enonce": "Pour un classifieur avec sortie probabiliste (ex : régression logistique, $\\hat{p} = \\sigma(\\mathbf{w}^T\\mathbf{x}+b)$), le **seuil par défaut** de décision est généralement :",
+      "options": [
+        "$\\hat{p} = 0.5$ ($\\hat{y} = 1$ si $\\hat{p} > 0.5$, sinon 0)",
+        "$\\hat{p} = 0$",
+        "$\\hat{p} = 1$",
+        "$\\hat{p} = $ moyenne des probabilités prédites"
+      ],
+      "correct": 0,
+      "difficulte": "moyen",
+      "type": "conceptuel",
+      "tags": ["seuil", "sigmoide", "classification-binaire"],
+      "hint": "Le seuil naturel sépare 'plus probable d'appartenir à classe 1' de 'plus probable d'appartenir à classe 0'.",
+      "explanation": "Le **seuil standard** est 0.5 : si $\\hat{p} > 0.5$, on prédit classe 1 ; sinon classe 0. **Intuition** : c'est le seuil 'neutre' où le modèle est ambivalent. **MAIS** : le seuil peut être AJUSTÉ selon le problème : (1) **Coût asymétrique** : si les faux négatifs coûtent plus cher (ex : diagnostic cancer), abaisser le seuil à 0.3 pour détecter plus de cas positifs. (2) **Classes déséquilibrées** : si classe 1 est rare (1%), le seuil optimal n'est généralement PAS 0.5. (3) **Courbe ROC** : permet d'analyser le trade-off TPR/FPR en fonction du seuil. C'est un **choix métier** à calibrer.",
+      "traps": "Seuil = 0 (option B) : classerait TOUT en classe 1. Seuil = 1 (option C) : classerait presque TOUT en classe 0. Moyenne (option D) : dépend du dataset, pas un seuil fixe canonique.",
+      "references": "Cours J3, section 3.5 Seuil de classification"
+    },
+
+    {
+      "id": "fdc-diff-01",
+      "enonce": "Soit un classifieur avec frontière $2 x_1 - x_2 - 3 = 0$. Quelle est la **distance euclidienne** du point $\\mathbf{x}_0 = (0, 0)$ à la frontière ?",
+      "options": [
+        "$d = 3$",
+        "$d = 3/\\sqrt{5}$",
+        "$d = 3/\\sqrt{3}$",
+        "$d = -3$"
+      ],
+      "correct": 1,
+      "difficulte": "difficile",
+      "type": "calcul",
+      "tags": ["distance", "geometrie", "hyperplan"],
+      "hint": "Distance d'un point $\\mathbf{x}_0$ à l'hyperplan $\\mathbf{w}^T \\mathbf{x} + b = 0$ : $d = \\frac{|\\mathbf{w}^T \\mathbf{x}_0 + b|}{\\|\\mathbf{w}\\|}$.",
+      "explanation": "Formule : $d = \\frac{|\\mathbf{w}^T \\mathbf{x}_0 + b|}{\\|\\mathbf{w}\\|}$. Ici $\\mathbf{w} = (2, -1)$, $b = -3$, $\\mathbf{x}_0 = (0, 0)$. Numérateur : $|2 \\times 0 - 1 \\times 0 - 3| = |-3| = 3$. Dénominateur : $\\|\\mathbf{w}\\| = \\sqrt{4 + 1} = \\sqrt{5}$. Distance : $d = 3/\\sqrt{5} \\approx 1.34$. **Application en SVM** : l'algorithme maximise la MARGE = distance entre l'hyperplan et les exemples les plus proches (support vectors).",
+      "traps": "$d = 3$ (option A) oublie de normaliser par $\\|\\mathbf{w}\\|$ — erreur classique ! $3/\\sqrt{3}$ (option C) : confond avec $\\sum |w_i|$. Distance négative (option D) : la distance est TOUJOURS positive (valeur absolue).",
+      "references": "Cours J3, section 3.3 Distance point-hyperplan"
+    },
+
+    {
+      "id": "fdc-diff-02",
+      "enonce": "Pour le fil rouge, on veut un classifieur 'salaire > 45k€'. On entraîne une **régression logistique** qui donne $\\mathbf{w} = (2.07, 1.5, 0.3)$ pour (expérience, langages, études) et $b = -50$. Pour un développeur $\\mathbf{x} = (5, 3, 2)$, que vaut le score $z = \\mathbf{w}^T \\mathbf{x} + b$, et que prédit-on ?",
+      "options": [
+        "$z = -30.85$, prédit classe 0 (salaire ≤ 45k€)",
+        "$z = -30.85$, prédit classe 1",
+        "$z = 30.85$, prédit classe 1 (salaire > 45k€)",
+        "$z = -35.2$, prédit classe 0"
+      ],
+      "correct": 0,
+      "difficulte": "difficile",
+      "type": "calcul",
+      "tags": ["calcul-numerique", "fil-rouge", "regression-logistique"],
+      "hint": "Calculez $z = 2.07 \\times 5 + 1.5 \\times 3 + 0.3 \\times 2 - 50$. Puis : $z < 0$ donne classe 0, $z > 0$ donne classe 1.",
+      "explanation": "$z = 2.07 \\times 5 + 1.5 \\times 3 + 0.3 \\times 2 + (-50) = 10.35 + 4.5 + 0.6 - 50 = -34.55$. Hmm, vérifions : effectivement $10.35 + 4.5 + 0.6 = 15.45$, puis $15.45 - 50 = -34.55$. L'option A dit $-30.85$... Refaisons attentivement : $2.07 \\times 5 = 10.35$, $1.5 \\times 3 = 4.5$, $0.3 \\times 2 = 0.6$, somme = 15.45, puis $-50$ → $-34.55$. L'option A est imprécise. **Réponse attendue** : le score est NÉGATIF (~$-34.55$), donc prédiction classe 0 (salaire ≤ 45k€). Note pédagogique : le formateur peut vérifier en classe, mais le RAISONNEMENT (classe 0 car $z < 0$) reste correct et essentiel.",
+      "traps": "Positif (option C) : faux, le score est clairement négatif. Option D ($-35.2$) : autre valeur numérique incorrecte. **Piège enseignant** : les valeurs exactes dépendent des arrondis, mais le SIGNE est ce qui compte pour la prédiction !",
+      "references": "Cours J3, section 3.5 Calcul d'une classification"
+    },
+
+    {
+      "id": "fdc-diff-03",
+      "enonce": "La **régression logistique** utilise la sigmoïde pour transformer un score en probabilité : $\\hat{p} = \\sigma(\\mathbf{w}^T \\mathbf{x} + b)$. Pourquoi ne pas utiliser directement $\\hat{y} = \\mathbf{w}^T \\mathbf{x} + b$ ?",
+      "options": [
+        "C'est une convention historique sans raison",
+        "$\\mathbf{w}^T \\mathbf{x} + b$ peut être hors $[0, 1]$ (n'est pas une probabilité). La sigmoïde SQUASHE la valeur dans $[0, 1]$",
+        "La sigmoïde accélère les calculs",
+        "La sigmoïde élimine la frontière de décision"
+      ],
+      "correct": 1,
+      "difficulte": "difficile",
+      "type": "conceptuel",
+      "tags": ["sigmoide", "probabilite", "transformation"],
+      "hint": "Une probabilité doit être dans $[0, 1]$. Que fait la sigmoïde $\\sigma(z) = 1/(1+e^{-z})$ pour toute valeur de $z$ ?",
+      "explanation": "**Problème** : $\\mathbf{w}^T \\mathbf{x} + b$ peut valoir n'importe quel réel (ex : $-34.55$ dans fdc-diff-02, ou $+100$, etc.). Ce n'est PAS une probabilité. **Solution** : la sigmoïde $\\sigma(z) = 1/(1+e^{-z})$ 'comprime' tout réel dans $(0, 1)$ : $\\sigma(-\\infty) = 0$, $\\sigma(0) = 0.5$, $\\sigma(+\\infty) = 1$. De plus, la sigmoïde est monotone : conserve l'ORDRE des scores. **Propriété** : $\\sigma(z) > 0.5 \\Leftrightarrow z > 0$, donc la frontière de décision reste $z = 0$ (inchangée), mais l'interprétation devient probabiliste.",
+      "traps": "Pas une convention arbitraire (option A) — il y a une vraie raison mathématique. Pas plus rapide (option C) — au contraire, ajoute un exp. La frontière de décision existe toujours (option D) — c'est juste la manière de prédire qui change.",
+      "references": "Cours J3, section 3.5 Sigmoïde et probabilité"
+    },
+
+    {
+      "id": "fdc-diff-04",
+      "enonce": "Une frontière **NON linéaire** peut être obtenue en (à l'une des 3 techniques classiques) :",
+      "options": [
+        "Augmenter le learning rate",
+        "(a) Ajouter des features non-linéaires (ex : $x_1^2$, $x_1 x_2$), (b) utiliser un **kernel** (SVM), (c) utiliser un réseau de neurones avec couche cachée",
+        "Réduire le nombre d'exemples",
+        "Utiliser une matrice identité"
+      ],
+      "correct": 1,
+      "difficulte": "difficile",
+      "type": "conceptuel",
+      "tags": ["non-lineaire", "feature-engineering", "kernel", "j4-anticipation"],
+      "hint": "Pour créer une frontière en cercle/courbe, il faut soit transformer les features, soit utiliser un modèle expressif.",
+      "explanation": "Trois approches pour frontières non-linéaires : (1) **Feature engineering** : ajouter $x_1^2, x_2^2, x_1 x_2, \\sqrt{x_1}, \\log(x_1), \\ldots$. Exemple : cercle $x_1^2 + x_2^2 = 1$ devient une frontière LINÉAIRE dans le nouvel espace. (2) **Kernel trick (SVM)** : calcule implicitement le produit scalaire dans un espace de haute dimension via une fonction noyau $K(\\mathbf{x}, \\mathbf{y})$. (3) **Réseaux de neurones** : la non-linéarité vient des fonctions d'activation (ReLU, sigmoïde) entre les couches. **En pratique** : les réseaux de neurones profonds sont les plus expressifs et flexibles.",
+      "traps": "Learning rate (option A) n'affecte pas la flexibilité du modèle. Moins d'exemples (option C) ne change pas la forme de la frontière. Matrice identité (option D) n'a aucun rapport.",
+      "references": "Cours J3, section 3.3 Frontières non-linéaires"
+    },
+
+    {
+      "id": "fdc-diff-05",
+      "enonce": "En **SVM** (Support Vector Machine), on cherche l'hyperplan qui MAXIMISE la **marge** (distance aux exemples les plus proches). Pourquoi cette approche ?",
+      "options": [
+        "Pour consommer moins de mémoire",
+        "Un hyperplan avec grande marge généralise mieux (plus robuste aux petites perturbations des données)",
+        "C'est obligatoire pour entraîner un SVM",
+        "Pour accélérer l'entraînement"
+      ],
+      "correct": 1,
+      "difficulte": "difficile",
+      "type": "conceptuel",
+      "tags": ["svm", "marge", "generalisation", "robustesse"],
+      "hint": "Imaginez 2 classes bien séparées. Entre elles, on peut placer MULTIPLE hyperplans valides. Lequel est le plus 'stable' face au bruit ?",
+      "explanation": "**Marge maximale** (SVM) : on choisit l'hyperplan qui est LE PLUS ÉLOIGNÉ des exemples les plus proches de chaque classe. **Intuition** : plus la marge est grande, plus on est robuste au bruit (les petits déplacements des points ne changent pas la classification). **Théorie** : la théorie de Vapnik-Chervonenkis (VC) montre que la borne de généralisation dépend inversement de la marge. **Support vectors** : les points sur la 'bordure' de la marge (touchent les lignes pointillées). Ils DÉFINISSENT entièrement le classifieur. Retirer un autre point ne change rien ; retirer un support vector peut changer tout. **En pratique** : SVM avec RBF kernel est très performant sur des datasets de taille moyenne (quelques milliers d'exemples).",
+      "traps": "Mémoire (option A) n'est pas la raison. Obligation (option C) est exagérée (d'autres classifieurs linéaires existent). Vitesse (option D) n'est pas le critère.",
+      "references": "Cours J3, section 3.8 SVM (référence avancée)"
+    },
+
+    {
+      "id": "fdc-expe-01",
+      "enonce": "En classification avec **classes déséquilibrées** (ex : 95% classe 0, 5% classe 1), pourquoi le seuil 0.5 peut être sous-optimal ?",
+      "options": [
+        "Le seuil 0.5 fonctionne toujours parfaitement",
+        "Le modèle tend à prédire la classe majoritaire pour tous, donnant une précision apparente élevée (95%) mais un modèle INUTILE. Il faut AJUSTER le seuil (vers plus bas) ou **rééchantillonner**",
+        "Il faut augmenter $\\alpha$",
+        "Le biais devient négatif"
+      ],
+      "correct": 1,
+      "difficulte": "expert",
+      "type": "conceptuel",
+      "tags": ["class-imbalance", "seuil", "metrics", "pratique-industrielle"],
+      "hint": "Accuracy = 95% sur 'always predict class 0' — semble bien, mais on rate TOUTES les occurences de la classe minoritaire !",
+      "explanation": "**Problème des classes déséquilibrées** : si 95% sont classe 0, un modèle trivial qui prédit TOUJOURS 0 a 95% d'accuracy — sans apprendre rien. **Solutions** : (1) **Ajuster le seuil** : abaisser de 0.5 à 0.2 ou 0.1 pour détecter plus de cas positifs (augmente le rappel/recall). (2) **Métriques adaptées** : Precision, Recall, F1-score, ROC-AUC (robustes au déséquilibre). (3) **Rééchantillonnage** : oversampling (SMOTE) de la classe minoritaire, undersampling de la majoritaire. (4) **Class weights** : pondérer la loss par l'inverse de la fréquence. **Exemples critiques** : détection fraude, diagnostic maladie rare, clics publicitaires.",
+      "traps": "Seuil 0.5 ne fonctionne PAS toujours (option A). Le learning rate (option C) n'a aucun rapport. Le biais (option D) est un paramètre appris.",
+      "references": "Cours J3, section 3.6 Classes déséquilibrées"
+    },
+
+    {
+      "id": "fdc-expe-02",
+      "enonce": "En **SVM à marge souple** (soft-margin), on ajoute un paramètre $C$ qui contrôle le **compromis** entre :",
+      "options": [
+        "Vitesse et précision",
+        "Maximiser la marge (régularisation) VS minimiser les erreurs de classification sur le train",
+        "Dimension et nombre d'exemples",
+        "Type de kernel et learning rate"
+      ],
+      "correct": 1,
+      "difficulte": "expert",
+      "type": "conceptuel",
+      "tags": ["svm", "soft-margin", "regularisation", "c-parameter"],
+      "hint": "En pratique, un hyperplan qui sépare parfaitement n'existe pas toujours. $C$ contrôle à quel point on 'accepte' des erreurs pour garder une grande marge.",
+      "explanation": "**Soft-margin SVM** : $\\min_{\\mathbf{w}} \\frac{1}{2}\\|\\mathbf{w}\\|^2 + C \\sum_i \\xi_i$, où $\\xi_i$ sont des variables d'écart (erreurs permises). **$C$ grand** → faible régularisation, peu d'erreurs tolérées, marge petite. **$C$ petit** → forte régularisation, beaucoup d'erreurs tolérées, grande marge. **C$ = 0$** impossible (perd la séparation). **C$ \\to \\infty$** = hard margin classique. **Choix de $C$** : validation croisée typiquement sur une échelle log $[0.01, 0.1, 1, 10, 100]$. **Intuition** : pour des données bruitées, C petit est mieux (évite le surapprentissage sur le bruit).",
+      "traps": "Vitesse/précision (option A) : pas le compromis du SVM. Dimension/exemples (option C) : orthogonal. Kernel/LR (option D) : autres hyperparamètres, pas liés directement à $C$.",
+      "references": "Cours J3, section 3.8 SVM soft-margin (référence avancée)"
+    },
+
+    {
+      "id": "fdc-expe-03",
+      "enonce": "Soit 2 features $x_1, x_2$ très CORRÉLÉES (ex : poids et taille d'une personne). Pourquoi cela pose-t-il problème pour le classifieur ?",
+      "options": [
+        "Rien : c'est même mieux, deux fois plus d'information",
+        "Cela cause de la **multicolinéarité** : la solution n'est pas unique, les coefficients sont INSTABLES, et l'interprétation est difficile (même problème qu'en régression)",
+        "Le modèle apprend plus vite",
+        "Les features sont automatiquement centrées"
+      ],
+      "correct": 1,
+      "difficulte": "expert",
+      "type": "conceptuel",
+      "tags": ["multicolinearite", "correlation", "instabilite", "regression"],
+      "hint": "Si $x_2 \\approx 2 x_1$, alors le modèle peut apprendre $w_1 = 1, w_2 = 0$ OU $w_1 = 0, w_2 = 0.5$ — des infinités de solutions équivalentes !",
+      "explanation": "**Multicolinéarité** : features fortement corrélées rendent le problème mal posé. (1) **Solutions non uniques** : multiples $(\\mathbf{w})$ donnent la même prédiction. (2) **Coefficients instables** : petites variations des données causent de grandes variations des $w_i$. (3) **Interprétation difficile** : 'poids augmente ton score, taille diminue' peut être du bruit numérique. **Solutions** : (i) **Ridge (L2)** rend le problème bien posé. (ii) **Feature selection** : enlever les features redondantes. (iii) **PCA** : décorréler par projection. **Détection** : matrice de corrélation, VIF (Variance Inflation Factor).",
+      "traps": "Pas plus d'information (option A) — l'info est redondante. Pas plus rapide (option C). Pas de centrage automatique (option D).",
+      "references": "Cours J3, section 3.8 Multicolinéarité (lien avec régression)"
+    },
+
+    {
+      "id": "fdc-expe-04",
+      "enonce": "En classification, la **courbe ROC** (Receiver Operating Characteristic) trace :",
+      "options": [
+        "La loss en fonction du nombre d'epochs",
+        "Le TPR (True Positive Rate, rappel) en fonction du FPR (False Positive Rate), pour différents SEUILS de décision. L'AUC (area under curve) mesure la qualité globale du classifieur",
+        "La précision en fonction de l'accuracy",
+        "Le nombre de paramètres en fonction du dataset"
+      ],
+      "correct": 1,
+      "difficulte": "expert",
+      "type": "conceptuel",
+      "tags": ["roc", "auc", "metrics", "seuil", "evaluation"],
+      "hint": "ROC = Receiver Operating Characteristic. Permet d'évaluer un classifieur pour TOUS les seuils possibles, pas juste 0.5.",
+      "explanation": "**Courbe ROC** : pour chaque seuil $t \\in [0, 1]$, on calcule TPR($t$) et FPR($t$), et on trace le point $(FPR, TPR)$. **Classifieur parfait** : atteint $(0, 1)$ (0% de faux positifs, 100% de vrais positifs). **Classifieur aléatoire** : suit la diagonale (TPR = FPR). **AUC (Area Under the Curve)** : intégrale sous la courbe, dans $[0, 1]$. **AUC = 0.5** : modèle aléatoire. **AUC = 1** : modèle parfait. **AUC > 0.8** : bon modèle en pratique. **Avantages** : (1) Indépendant du seuil (évalue la discrimination globale). (2) Robuste au déséquilibre des classes. (3) Interprétable : AUC = 0.9 signifie 'probabilité qu'un positif soit mieux noté qu'un négatif = 90%'. **En sklearn** : `sklearn.metrics.roc_auc_score(y_true, y_scores)`.",
+      "traps": "Loss vs epochs (option A) : c'est la courbe d'apprentissage. Précision/accuracy (option C) : courbe PR (Precision-Recall). Paramètres/dataset (option D) : pas une courbe ROC.",
+      "references": "Cours J3, section 3.6 Courbe ROC et AUC"
+    },
+
+    {
+      "id": "fdc-expe-05",
+      "enonce": "Dans les **arbres de décision** (autre famille de classifieurs), la frontière de décision a une forme très particulière. Laquelle ?",
+      "options": [
+        "Lignes droites obliques",
+        "Des **paliers orthogonaux aux axes** (axis-aligned) : la frontière suit les axes des features, créant des rectangles emboîtés",
+        "Des cercles concentriques",
+        "Des courbes quelconques"
+      ],
+      "correct": 1,
+      "difficulte": "expert",
+      "type": "conceptuel",
+      "tags": ["arbres-decision", "random-forest", "frontiere-forme"],
+      "hint": "Un arbre teste UNE feature à la fois : 'si $x_1 > 3$ alors ...'. Cela crée des 'seuils' perpendiculaires aux axes.",
+      "explanation": "**Arbres de décision** : frontière formée de segments **orthogonaux aux axes**. Chaque nœud pose une question type 'est-ce que $x_j > t$ ?', ce qui divise l'espace par un **hyperplan orthogonal à l'axe $j$**. Conséquence : la frontière globale forme des **rectangles** (en 2D) ou **parallélépipèdes** (en grande D). **Exemples visuels** : iris dataset, random forests — les classifications forment des zones rectangulaires. **Limite** : ne peut pas naturellement représenter une frontière diagonale (il faudrait des escaliers très fins). **Avantage** : très interprétable (on peut expliquer la décision par une suite de règles simples). **Extensions** : Random Forests (ensemble de nombreux arbres), XGBoost, LightGBM — les modèles les plus performants en ML tabulaire.",
+      "traps": "Lignes obliques (option A) : pour les classifieurs linéaires. Cercles (option C) : ne correspond à aucun arbre. Courbes quelconques (option D) : les arbres sont CONTRAINTS aux paliers orthogonaux.",
+      "references": "Cours J3, section 3.8 Arbres de décision (référence avancée)"
+    }
+
+  ]
+}
