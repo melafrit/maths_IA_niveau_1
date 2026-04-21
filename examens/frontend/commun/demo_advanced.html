@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Démo composants avancés (P2.3) — IPSSI Examens</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="/assets/main.css">
+
+  <style>
+    body { padding: var(--space-8) 0; }
+    .demo-section {
+      background: var(--color-bg-card);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-xl);
+      padding: var(--space-6);
+      margin-bottom: var(--space-6);
+      box-shadow: var(--shadow-sm);
+    }
+    .demo-section h2 {
+      margin-top: 0;
+      font-size: var(--text-xl);
+      padding-bottom: var(--space-3);
+      border-bottom: 1px solid var(--color-border);
+      margin-bottom: var(--space-4);
+    }
+    .demo-row {
+      display: flex; flex-wrap: wrap; gap: var(--space-4); align-items: center;
+      margin-bottom: var(--space-3);
+    }
+    .demo-grid-3 {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: var(--space-4);
+    }
+    .theme-toggle-fixed {
+      position: fixed; top: var(--space-4); right: var(--space-4);
+      z-index: var(--z-fixed);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="theme-toggle-fixed" id="themeToggleMount"></div>
+
+  <div class="container" style="max-width: 1100px;">
+    <h1 style="text-align:center; font-size:var(--text-4xl); margin-bottom:var(--space-2);">
+      Composants avancés
+    </h1>
+    <p style="text-align:center; color:var(--color-text-muted); margin-bottom:var(--space-8);">
+      Phase P2.3 — KaTeX, Chronomètre, DataTable, Wizard, Tabs, Accordion, Stat, etc.
+    </p>
+    <div id="root"></div>
+  </div>
+
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="/assets/components-base.js" type="text/babel"></script>
+  <script src="/assets/components-advanced.js" type="text/babel"></script>
+
+  <script type="text/babel">
+    const { useState } = React;
+    const {
+      Button, Input, Select, Card, Box, Badge, Avatar,
+      ToastProvider, useToast,
+      KatexMath, CodeBlock, ChronoDisplay, ThemeToggle,
+      DataTable, Pagination, Tabs, Accordion,
+      EmptyState, Stat, Wizard,
+    } = window.UI;
+
+    // Mount du theme toggle séparément pour qu'il soit visible
+    const themeToggleRoot = ReactDOM.createRoot(document.getElementById('themeToggleMount'));
+    themeToggleRoot.render(<ThemeToggle />);
+
+    // Données fictives pour DataTable
+    const studentsData = Array.from({ length: 47 }, (_, i) => ({
+      id: i + 1,
+      nom: `${['DUPONT','MARTIN','BERNARD','PETIT','ROBERT','RICHARD','THOMAS','MOREAU','LAURENT','SIMON'][i % 10]}`,
+      prenom: ['Marie','Jean','Sophie','Lucas','Emma','Hugo','Chloé','Léo','Inès','Adam'][i % 10],
+      email: `student${i+1}@ipssi.fr`,
+      note: Math.round(Math.random() * 200) / 10,
+      duree: Math.floor(Math.random() * 1800) + 600,
+      statut: ['valide','en_cours','annule'][i % 3],
+    }));
+
+    function Demo() {
+      const { toast } = useToast();
+      const [pagDemo, setPagDemo] = useState(1);
+      const [wizardData, setWizardData] = useState({ titre: '', duree: '60' });
+      const [chronoEnd] = useState(() => new Date(Date.now() + 65 * 1000)); // 65s à partir de maintenant
+
+      const studentColumns = [
+        { key: 'id', label: '#', width: '60px' },
+        { key: 'nom', label: 'Nom' },
+        { key: 'prenom', label: 'Prénom' },
+        { key: 'email', label: 'Email', render: (r) => (
+          <a href={`mailto:${r.email}`} style={{ color: 'var(--color-primary)' }}>{r.email}</a>
+        )},
+        { key: 'note', label: 'Note /20', render: (r) => (
+          <span style={{
+            fontWeight: 'var(--font-semibold)',
+            color: r.note >= 14 ? 'var(--color-success)' :
+                   r.note >= 10 ? 'var(--color-text)' : 'var(--color-danger)',
+          }}>{r.note.toFixed(1)}</span>
+        )},
+        { key: 'duree', label: 'Durée', render: (r) => {
+          const m = Math.floor(r.duree / 60); const s = r.duree % 60;
+          return <span style={{ fontFamily: 'var(--font-mono)' }}>{m}m{String(s).padStart(2,'0')}s</span>;
+        }},
+        { key: 'statut', label: 'Statut', render: (r) => (
+          <Badge variant={r.statut === 'valide' ? 'success' : r.statut === 'en_cours' ? 'warning' : 'danger'}>
+            {r.statut === 'valide' ? 'Validé' : r.statut === 'en_cours' ? 'En cours' : 'Annulé'}
+          </Badge>
+        )},
+      ];
+
+      return (
+        <div>
+          {/* ========== KATEXMATH ========== */}
+          <section className="demo-section">
+            <h2>1. KatexMath — Rendu LaTeX</h2>
+
+            <h3 style={{ fontSize: 'var(--text-base)' }}>Inline</h3>
+            <p style={{ marginBottom: 'var(--space-3)' }}>
+              La fonction de coût MSE est définie par <KatexMath inline math="J(\mathbf{w}) = \frac{1}{n}\sum_{i=1}^{n}(y_i - \hat{y}_i)^2" />,
+              avec <KatexMath inline math="\hat{y}_i = \mathbf{w}^T \mathbf{x}_i + b" />.
+            </p>
+
+            <h3 style={{ fontSize: 'var(--text-base)' }}>Display (centré, multi-lignes)</h3>
+            <KatexMath math="\nabla J(\boldsymbol{\theta}) = \begin{bmatrix} \frac{\partial J}{\partial \theta_1} \\ \frac{\partial J}{\partial \theta_2} \\ \vdots \\ \frac{\partial J}{\partial \theta_p} \end{bmatrix}" />
+
+            <KatexMath math="\boldsymbol{\theta}^{(t+1)} = \boldsymbol{\theta}^{(t)} - \alpha \, \nabla J(\boldsymbol{\theta}^{(t)})" />
+
+            <KatexMath math="\sigma(z) = \frac{1}{1 + e^{-z}} \quad \text{(sigmoïde)}" />
+          </section>
+
+          {/* ========== CODEBLOCK ========== */}
+          <section className="demo-section">
+            <h2>2. CodeBlock — Bloc de code</h2>
+
+            <CodeBlock
+              language="python"
+              code={`import numpy as np
+import matplotlib.pyplot as plt
+
+# Dataset fil rouge : 30 développeurs
+n = 30
+experience = np.random.uniform(0, 10, n)
+salaire = 2.07 * experience + 31.27 + np.random.normal(0, 4, n)
+
+# Régression linéaire from scratch
+def gradient_descent(X, y, lr=0.01, n_iter=1000):
+    w, b = 0, 0
+    for _ in range(n_iter):
+        y_pred = w * X + b
+        dw = -2 * np.mean((y - y_pred) * X)
+        db = -2 * np.mean(y - y_pred)
+        w -= lr * dw
+        b -= lr * db
+    return w, b
+
+w, b = gradient_descent(experience, salaire)
+print(f"w={w:.2f}, b={b:.2f}")  # ≈ w=2.07, b=31.27`}
+              showLineNumbers
+            />
+
+            <CodeBlock language="bash" code={`cd /var/www/examens
+php scripts/init_comptes.php`} />
+          </section>
+
+          {/* ========== CHRONODISPLAY ========== */}
+          <section className="demo-section">
+            <h2>3. ChronoDisplay — Chronomètre</h2>
+
+            <h3 style={{ fontSize: 'var(--text-base)' }}>Countdown avec alertes (65 secondes)</h3>
+            <p style={{ color: 'var(--color-text-muted)', fontSize: 'var(--text-sm)' }}>
+              Alertes : 60s (orange), 30s (rouge), 10s (rouge + pulse)
+            </p>
+            <div className="demo-row">
+              <ChronoDisplay
+                endAt={chronoEnd.toISOString()}
+                alerts={[
+                  { atSeconds: 60, color: 'var(--color-warning)', label: '< 1 min' },
+                  { atSeconds: 30, color: 'var(--color-danger)',  label: 'Bientôt fini !' },
+                  { atSeconds: 10, color: 'var(--color-danger)',  label: 'Dernières secondes' },
+                ]}
+                onExpire={() => toast.warning('Le chronomètre a expiré !')}
+              />
+              <span>Format compact : <ChronoDisplay endAt={chronoEnd.toISOString()} compact alerts={[{ atSeconds: 60, color: 'var(--color-warning)' }]} /></span>
+            </div>
+
+            <h3 style={{ fontSize: 'var(--text-base)', marginTop: 'var(--space-4)' }}>Countup (sans endAt)</h3>
+            <ChronoDisplay startAt={new Date().toISOString()} countDown={false} />
+          </section>
+
+          {/* ========== STATS ========== */}
+          <section className="demo-section">
+            <h2>4. Stat — Indicateurs clés</h2>
+            <div className="demo-grid-3">
+              <Stat label="Examens créés" value="47" trend={12} trendLabel="vs mois dernier" icon="📝" color="var(--color-primary)" />
+              <Stat label="Étudiants évalués" value="1 234" trend={8} trendLabel="vs mois dernier" icon="👥" color="var(--c-success-500)" />
+              <Stat label="Note moyenne" value="14.2/20" trend={-2} trendLabel="vs mois dernier" icon="📊" color="var(--c-warning-500)" />
+              <Stat label="Taux de réussite" value="78 %" trend={5} icon="🎯" color="var(--c-info-500)" />
+              <Stat label="Triche détectée" value="3" trend={-50} trendLabel="vs mois dernier" icon="🛡️" color="var(--color-danger)" />
+              <Stat label="Génération IA" value="245" icon="🤖" color="var(--c-box-intuition)" />
+            </div>
+          </section>
+
+          {/* ========== TABS ========== */}
+          <section className="demo-section">
+            <h2>5. Tabs — Onglets</h2>
+            <Tabs
+              tabs={[
+                { key: 'examens', label: 'Examens', icon: '📝', badge: 12, content: (
+                  <div>
+                    <h3 style={{ marginTop: 0 }}>Examens en cours</h3>
+                    <p>12 examens actifs, dont 3 en cours de passage par les étudiants.</p>
+                  </div>
+                )},
+                { key: 'questions', label: 'Banque', icon: '📚', badge: 247, content: (
+                  <div>
+                    <h3 style={{ marginTop: 0 }}>Banque de questions</h3>
+                    <p>247 questions disponibles dans la banque, dont 50 importées du QCM J1-J2.</p>
+                  </div>
+                )},
+                { key: 'analytics', label: 'Analytics', icon: '📊', content: (
+                  <div>
+                    <h3 style={{ marginTop: 0 }}>Statistiques globales</h3>
+                    <p>Tableau de bord des performances par promotion et par module.</p>
+                  </div>
+                )},
+                { key: 'parametres', label: 'Paramètres', icon: '⚙️', content: (
+                  <div>
+                    <h3 style={{ marginTop: 0 }}>Paramètres du compte</h3>
+                    <p>Configurez vos clés API IA, votre email, vos préférences.</p>
+                  </div>
+                )},
+              ]}
+            />
+          </section>
+
+          {/* ========== ACCORDION ========== */}
+          <section className="demo-section">
+            <h2>6. Accordion — Sections pliables</h2>
+            <Accordion
+              allowMultiple
+              items={[
+                { key: 'q1', title: 'Comment créer un examen ?', defaultOpen: true, content: (
+                  <p>Cliquez sur "Nouvel examen" depuis le dashboard, puis suivez le wizard en 4 étapes : métadonnées, contenu, paramètres, validation.</p>
+                )},
+                { key: 'q2', title: 'Comment activer le focus-lock anti-triche ?', content: (
+                  <p>À l'étape 3 (Paramètres) du wizard, activez l'option "Focus-lock" et choisissez la politique : strict, standard, tolérant ou log seul.</p>
+                )},
+                { key: 'q3', title: 'Comment utiliser la génération IA ?', content: (
+                  <>
+                    <p>1. Configurez votre clé API (Anthropic ou OpenAI) dans <strong>Profil → Clés API</strong>.</p>
+                    <p>2. Allez dans <strong>Banque → Générer avec l'IA</strong>.</p>
+                    <p>3. Décrivez ce que vous voulez (module, chapitre, difficulté, nombre).</p>
+                    <p>4. Validez chaque question avant de l'enregistrer.</p>
+                  </>
+                )},
+                { key: 'q4', title: 'Comment exporter les résultats ?', content: (
+                  <p>Sur la page de détail d'un examen, cliquez sur "Exporter" → choisissez CSV (Yparéo), XLSX ou PDF.</p>
+                )},
+              ]}
+            />
+          </section>
+
+          {/* ========== DATATABLE ========== */}
+          <section className="demo-section">
+            <h2>7. DataTable — Tableau riche</h2>
+            <p style={{ color: 'var(--color-text-muted)', fontSize: 'var(--text-sm)', marginBottom: 'var(--space-3)' }}>
+              47 étudiants fictifs. Tri par colonne (clic), recherche, pagination 10/page.
+            </p>
+            <DataTable
+              columns={studentColumns}
+              data={studentsData}
+              pageSize={10}
+              searchPlaceholder="Rechercher par nom, email..."
+              onRowClick={(row) => toast.info(`Étudiant sélectionné : ${row.prenom} ${row.nom}`)}
+            />
+          </section>
+
+          {/* ========== PAGINATION ========== */}
+          <section className="demo-section">
+            <h2>8. Pagination — Navigation pages</h2>
+            <p style={{ color: 'var(--color-text-muted)' }}>Page actuelle : <strong>{pagDemo}</strong></p>
+            <Pagination currentPage={pagDemo} totalPages={20} onPageChange={setPagDemo} />
+          </section>
+
+          {/* ========== EMPTYSTATE ========== */}
+          <section className="demo-section">
+            <h2>9. EmptyState — État vide</h2>
+            <Card>
+              <EmptyState
+                icon="📭"
+                title="Aucun examen pour le moment"
+                message="Vous n'avez pas encore créé d'examen. Commencez par cliquer sur le bouton ci-dessous."
+                action={<Button onClick={() => toast.info('Direction le wizard !')}>+ Créer mon premier examen</Button>}
+              />
+            </Card>
+          </section>
+
+          {/* ========== WIZARD ========== */}
+          <section className="demo-section">
+            <h2>10. Wizard — Formulaire multi-étapes</h2>
+            <Wizard
+              onComplete={() => toast.success('Examen créé avec succès !')}
+              steps={[
+                { key: 'meta', label: 'Métadonnées', validate: () => wizardData.titre ? true : 'Le titre est requis', content: (
+                  <Card title="Étape 1 — Informations générales">
+                    <Input label="Titre de l'examen" required value={wizardData.titre} onChange={(v) => setWizardData({...wizardData, titre: v})} placeholder="Ex: Examen final Mathématiques IA" />
+                    <Select label="Promotion" options={[
+                      {value: 'b2-2026', label: 'Bachelor 2 — 2025-2026'},
+                      {value: 'b3-2026', label: 'Bachelor 3 — 2025-2026'},
+                    ]} />
+                  </Card>
+                )},
+                { key: 'content', label: 'Contenu', content: (
+                  <Card title="Étape 2 — Sélection des questions">
+                    <p>Sélection hybride : filtres automatiques + affinage manuel.</p>
+                    <Box type="intuition">
+                      Le système tirera automatiquement N questions selon vos critères (module, difficulté, type),
+                      puis vous pourrez en exclure ou en ajouter manuellement.
+                    </Box>
+                  </Card>
+                )},
+                { key: 'params', label: 'Paramètres', content: (
+                  <Card title="Étape 3 — Durée et sécurité">
+                    <Select label="Durée totale" value={wizardData.duree} onChange={(v) => setWizardData({...wizardData, duree: v})} options={[
+                      {value: '30', label: '30 minutes'},
+                      {value: '60', label: '1 heure'},
+                      {value: '120', label: '2 heures'},
+                    ]} />
+                    <Box type="attention">
+                      Si focus-lock activé : l'étudiant doit rester sur la page (plein écran obligatoire).
+                    </Box>
+                  </Card>
+                )},
+                { key: 'validate', label: 'Validation', content: (
+                  <Card title="Étape 4 — Récapitulatif">
+                    <p><strong>Titre :</strong> {wizardData.titre || '(non défini)'}</p>
+                    <p><strong>Durée :</strong> {wizardData.duree} minutes</p>
+                    <p style={{ color: 'var(--color-text-muted)', fontSize: 'var(--text-sm)' }}>
+                      Cliquez sur <strong>Terminer</strong> pour créer l'examen.
+                    </p>
+                  </Card>
+                )},
+              ]}
+            />
+          </section>
+
+        </div>
+      );
+    }
+
+    function App() {
+      return (
+        <ToastProvider>
+          <Demo />
+        </ToastProvider>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+  </script>
+</body>
+</html>
