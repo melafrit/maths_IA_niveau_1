@@ -1,0 +1,406 @@
+{
+  "_meta": {
+    "module": "maths-ia",
+    "chapitre": "j4-reseaux",
+    "theme": "fonctions-activation",
+    "module_label": "Mathématiques appliquées à l'IA",
+    "chapitre_label": "Jour 4 — Réseaux de neurones",
+    "theme_label": "Fonctions d'activation",
+    "version": "1.0.0",
+    "created_at": "2026-04-21T14:00:00+02:00",
+    "created_by": "system",
+    "license": "CC BY-NC-SA 4.0 — Mohamed EL AFRIT — IPSSI",
+    "total_questions": 20,
+    "difficulty_distribution": {
+      "facile": 5,
+      "moyen": 5,
+      "difficile": 5,
+      "expert": 5
+    },
+    "comment": "Deuxième thème du J4. Panorama complet des fonctions d'activation : sigmoïde, tanh, ReLU, Leaky ReLU, softmax, GELU, Swish. Sans activation non-linéaire, un réseau = régression linéaire. Couvre l'évolution historique (1980s → 2020s), les problèmes pratiques (vanishing, dying ReLU), et le choix adapté par contexte."
+  },
+
+  "questions": [
+
+    {
+      "id": "act-faci-01",
+      "enonce": "Dans un réseau de neurones, **pourquoi utilise-t-on des fonctions d'activation NON-LINÉAIRES** entre les couches ?",
+      "options": [
+        "Pour rendre les calculs plus rapides",
+        "Sans non-linéarité, **empiler plusieurs couches linéaires = 1 seule couche linéaire** (composition de fonctions linéaires = fonction linéaire). Les activations non-linéaires sont ce qui donne leur pouvoir aux réseaux profonds",
+        "Pour économiser de la mémoire",
+        "C'est une convention arbitraire"
+      ],
+      "correct": 1,
+      "difficulte": "facile",
+      "type": "conceptuel",
+      "tags": ["non-linearite", "composition", "raison-etre"],
+      "hint": "Composez 2 fonctions linéaires : $g(f(x)) = A \\cdot (B x + c) + d = AB \\cdot x + (Ac+d)$ — c'est encore linéaire ! Pour changer cela, il faut une NON-linéarité entre les deux.",
+      "explanation": "**Principe fondamental** : la composition de fonctions linéaires reste linéaire. Si $L_1(\\mathbf{x}) = \\mathbf{W}_1 \\mathbf{x} + \\mathbf{b}_1$ et $L_2(\\mathbf{h}) = \\mathbf{W}_2 \\mathbf{h} + \\mathbf{b}_2$, alors $L_2(L_1(\\mathbf{x})) = \\mathbf{W}_2 \\mathbf{W}_1 \\mathbf{x} + (\\mathbf{W}_2 \\mathbf{b}_1 + \\mathbf{b}_2)$ — toujours linéaire. **Conséquence** : sans activation non-linéaire, un réseau à 100 couches = 1 couche linéaire. **Solution** : injecter une non-linéarité $f$ entre les couches : $\\mathbf{h} = f(\\mathbf{W}_1 \\mathbf{x} + \\mathbf{b}_1)$, puis $\\hat{y} = \\mathbf{W}_2 \\mathbf{h} + \\mathbf{b}_2$. Cela débloque la puissance expressive (cf. théorème d'approximation universelle, neu-expe-01).",
+      "traps": "Option A (rapidité) : les activations non-linéaires ajoutent du calcul, pas l'inverse. Option C (mémoire) : non lié. Option D (arbitraire) : il y a une vraie raison mathématique.",
+      "references": "Cours J4, section 4.2 Nécessité de la non-linéarité"
+    },
+
+    {
+      "id": "act-faci-02",
+      "enonce": "La fonction **ReLU** (Rectified Linear Unit), très utilisée en deep learning moderne, est définie par :",
+      "options": [
+        "$\\text{ReLU}(z) = \\max(0, z)$",
+        "$\\text{ReLU}(z) = \\min(0, z)$",
+        "$\\text{ReLU}(z) = z^2$",
+        "$\\text{ReLU}(z) = e^z$"
+      ],
+      "correct": 0,
+      "difficulte": "facile",
+      "type": "formule",
+      "tags": ["relu", "definition", "formule"],
+      "hint": "ReLU = 'rectified linear' = on 'redresse' les valeurs négatives à 0, et on garde la partie positive identique.",
+      "explanation": "**ReLU** : $\\text{ReLU}(z) = \\max(0, z)$. Comportement : (1) Si $z \\geq 0$ : sortie = $z$ (identité). (2) Si $z < 0$ : sortie = $0$ (coupée). **Graphe** : en 'L' inversée (horizontal à gauche, linéaire à 45° à droite). **Dérivée** : $\\text{ReLU}'(z) = 1$ si $z > 0$, $0$ si $z < 0$, indéfinie en $0$ (convention = 0). **Avantages** : (1) Simple et rapide (1 comparaison). (2) Pas de saturation positive (pas de vanishing gradient dans le côté positif). (3) Sparsité : beaucoup de neurones à 0, favorable à la généralisation. **Pourquoi si populaire** : Krizhevsky et al. (2012, AlexNet) ont prouvé son efficacité sur ImageNet — révolution du deep learning.",
+      "traps": "Option B (min) : inversion. Option C ($z^2$) : c'est une parabole, pas une activation standard. Option D ($e^z$) : c'est l'exponentielle.",
+      "references": "Cours J4, section 4.2 ReLU"
+    },
+
+    {
+      "id": "act-faci-03",
+      "enonce": "La **sigmoïde** est-elle encore utilisée en deep learning moderne ?",
+      "options": [
+        "Oui, partout",
+        "**Rarement dans les couches cachées** (vanishing gradient), mais **souvent dans la couche de sortie** pour la classification binaire (produit une probabilité $\\in (0, 1)$)",
+        "Non, jamais",
+        "Uniquement dans les réseaux convolutifs"
+      ],
+      "correct": 1,
+      "difficulte": "facile",
+      "type": "conceptuel",
+      "tags": ["sigmoide", "usage-moderne", "choix"],
+      "hint": "La sigmoïde a 2 problèmes en couche cachée (vanishing gradient, saturation) mais reste parfaite pour produire une probabilité en sortie.",
+      "explanation": "**Usage moderne de la sigmoïde** : (1) **Couches cachées** : rarement (ReLU et variantes la surpassent — vanishing gradient, voir slo-expe-03). (2) **Couche de sortie** : OUI pour la classification binaire (produit $\\hat{p} \\in (0, 1)$ = probabilité). (3) **Gates** dans LSTM/GRU : utilisée pour les 'portes' (forget gate, input gate, etc.) car elle produit des valeurs dans $[0, 1]$. **Alternatives modernes en couches cachées** : ReLU, Leaky ReLU, ELU, GELU, Swish. **Alternatives en sortie** : softmax pour multi-classes, identité pour régression.",
+      "traps": "Option A (partout) : faux, remplacée dans les couches cachées. Option C (jamais) : fausse, toujours en sortie binaire. Option D (CNN uniquement) : pas spécifique au CNN.",
+      "references": "Cours J4, section 4.2 Usage moderne de la sigmoïde"
+    },
+
+    {
+      "id": "act-faci-04",
+      "enonce": "Pour une **classification multi-classes** (ex : 10 classes dans MNIST), quelle fonction d'activation utilise-t-on dans la couche de sortie ?",
+      "options": [
+        "ReLU",
+        "Sigmoïde",
+        "**Softmax**",
+        "Aucune (identité)"
+      ],
+      "correct": 2,
+      "difficulte": "facile",
+      "type": "conceptuel",
+      "tags": ["softmax", "multi-classe", "sortie"],
+      "hint": "Softmax transforme un vecteur de scores en probabilités qui somment à 1 (distribution sur les classes).",
+      "explanation": "**Softmax** : $\\text{softmax}(z_k) = \\frac{e^{z_k}}{\\sum_j e^{z_j}}$, pour $k = 1, \\ldots, K$ (cf. prb-expe-04 et slo-expe-01). **Propriétés** : (1) Somme à 1 : $\\sum_k \\text{softmax}(z_k) = 1$. (2) Chaque sortie dans $(0, 1)$. (3) Monotone : plus grand $z_k$ → plus grande probabilité. **Généralisation de la sigmoïde** : pour $K = 2$, softmax devient sigmoïde. **Combinée avec cross-entropy** : gradient très simple $(\\hat{\\mathbf{p}} - \\mathbf{y})$ pour mise à jour efficace. **Usage** : dernière couche des CNN pour classification images (ResNet, VGG), BERT pour prédire le mot suivant, etc.",
+      "traps": "ReLU (option A) ne produit pas de distribution. Sigmoïde (option B) ne somme pas à 1 pour K > 2. Aucune (option D) : les scores bruts ne sont pas des probabilités.",
+      "references": "Cours J4, section 4.2 Softmax"
+    },
+
+    {
+      "id": "act-faci-05",
+      "enonce": "Pour un problème de **régression** (prédire un nombre continu, ex : prix d'une maison), quelle activation utilise-t-on dans la couche de **sortie** ?",
+      "options": [
+        "Sigmoïde (borne dans $(0, 1)$)",
+        "**Identité** (pas d'activation) : $\\hat{y} = z$, pour permettre n'importe quelle valeur réelle",
+        "ReLU (borne $\\geq 0$)",
+        "Softmax"
+      ],
+      "correct": 1,
+      "difficulte": "facile",
+      "type": "conceptuel",
+      "tags": ["regression", "identite", "sortie"],
+      "hint": "En régression, la sortie doit pouvoir prendre n'importe quelle valeur (positive, négative, grande, petite). Quelle activation ne contraint PAS la sortie ?",
+      "explanation": "**Régression = identité (ou pas d'activation)** : $\\hat{y} = \\mathbf{w}^T\\mathbf{x} + b$. La sortie peut prendre n'importe quelle valeur réelle, ce qui est souhaité pour une régression (prix en €, température, âge, etc.). **Exception** : si la cible est toujours positive (prix, population), on peut utiliser **ReLU** ou **Softplus** pour garantir $\\hat{y} \\geq 0$. Si la cible est dans un intervalle borné, on peut utiliser **sigmoïde scaled** ou **tanh**. **Règle générale** : choisir l'activation de sortie selon la plage de valeurs de la cible.",
+      "traps": "Sigmoïde (option A) : bornerait la sortie à $(0, 1)$, trop restrictif. ReLU (option C) : force positif seulement (sauf contexte spécifique). Softmax (option D) : pour classification, pas régression.",
+      "references": "Cours J4, section 4.2 Activation de sortie en régression"
+    },
+
+    {
+      "id": "act-moye-01",
+      "enonce": "Calculez $\\text{ReLU}(-3)$, $\\text{ReLU}(0)$, et $\\text{ReLU}(5)$.",
+      "options": [
+        "$\\text{ReLU}(-3) = 0$, $\\text{ReLU}(0) = 0$, $\\text{ReLU}(5) = 5$",
+        "$\\text{ReLU}(-3) = -3$, $\\text{ReLU}(0) = 0$, $\\text{ReLU}(5) = 5$",
+        "$\\text{ReLU}(-3) = 3$, $\\text{ReLU}(0) = 0$, $\\text{ReLU}(5) = 5$",
+        "$\\text{ReLU}(-3) = 0$, $\\text{ReLU}(0) = 1$, $\\text{ReLU}(5) = 25$"
+      ],
+      "correct": 0,
+      "difficulte": "moyen",
+      "type": "calcul",
+      "tags": ["relu", "calcul-numerique"],
+      "hint": "ReLU($z$) = max(0, z). Pour chaque cas : si $z < 0$ → 0 ; si $z \\geq 0$ → $z$.",
+      "explanation": "**Calculs** : (1) $\\text{ReLU}(-3) = \\max(0, -3) = 0$ (valeur négative → coupée). (2) $\\text{ReLU}(0) = \\max(0, 0) = 0$. (3) $\\text{ReLU}(5) = \\max(0, 5) = 5$ (valeur positive → conservée). **Observation** : ReLU crée une zone 'morte' pour $z \\leq 0$ (d'où le 'dying ReLU problem', voir neu-expe-05). Avantage : sparsité et simplicité.",
+      "traps": "Option B : traite ReLU comme identité (faux). Option C : ReLU($-3$) $\\neq 3$ (c'est pas valeur absolue). Option D : ReLU($5$) $\\neq 25$ (pas élévation au carré).",
+      "references": "Cours J4, section 4.2 Calculs ReLU"
+    },
+
+    {
+      "id": "act-moye-02",
+      "enonce": "La **Leaky ReLU** est une variante de ReLU qui résout le problème du 'dying ReLU'. Sa définition :",
+      "options": [
+        "$\\text{LReLU}(z) = \\max(0, z)$ (identique à ReLU)",
+        "$\\text{LReLU}(z) = \\max(\\alpha z, z)$ où $\\alpha$ est petit (typiquement $0.01$) : comportement linéaire avec pente $\\alpha$ pour $z < 0$, et pente 1 pour $z > 0$",
+        "$\\text{LReLU}(z) = \\min(0, z)$",
+        "$\\text{LReLU}(z) = z^3$"
+      ],
+      "correct": 1,
+      "difficulte": "moyen",
+      "type": "formule",
+      "tags": ["leaky-relu", "variante", "dying-relu"],
+      "hint": "'Leaky' = 'qui fuit'. Au lieu de couper complètement les négatifs (ReLU → 0), on les laisse passer avec une petite pente.",
+      "explanation": "**Leaky ReLU** : $\\text{LReLU}(z) = z$ si $z \\geq 0$, et $\\alpha z$ si $z < 0$ (avec $\\alpha = 0.01$ par défaut). Équivalent : $\\max(\\alpha z, z)$. **Dérivée** : $\\text{LReLU}'(z) = 1$ si $z > 0$, $\\alpha$ si $z < 0$. **Solution au dying ReLU** : le gradient n'est jamais strictement nul, donc les neurones ne 'meurent' jamais. **Performance** : souvent comparable à ReLU, parfois meilleure. **Variante apprise** : **PReLU** (Parametric ReLU), où $\\alpha$ est un paramètre appris par le réseau.",
+      "traps": "Option A (identique à ReLU) : pas d'amélioration. Option C (min) : aberrant. Option D ($z^3$) : pas une Leaky ReLU.",
+      "references": "Cours J4, section 4.2 Leaky ReLU"
+    },
+
+    {
+      "id": "act-moye-03",
+      "enonce": "Quel est le **problème majeur** de la sigmoïde en couches cachées d'un réseau profond ?",
+      "options": [
+        "Elle est trop rapide à calculer",
+        "**Vanishing gradient** : $\\sigma'(z) \\leq 0.25$, et le gradient backprop devient un PRODUIT de petites valeurs → tend vers 0 exponentiellement avec la profondeur",
+        "Elle est bornée entre 0 et 1",
+        "Elle ne peut pas être implémentée"
+      ],
+      "correct": 1,
+      "difficulte": "moyen",
+      "type": "conceptuel",
+      "tags": ["vanishing-gradient", "sigmoide", "deep-learning"],
+      "hint": "Déjà vu en slo-expe-03 : la dérivée de sigmoïde est max 0.25. Avec 10 couches : $0.25^{10} = 10^{-6}$ ≈ zéro.",
+      "explanation": "**Vanishing gradient avec sigmoïde** : lors du backward pass, le gradient par rapport aux couches profondes est un **produit** des dérivées successives : $\\frac{\\partial L}{\\partial \\mathbf{w}_1} \\propto \\prod_i \\sigma'(z_i)$. Comme $\\sigma'(z) \\leq 0.25$ toujours, avec $n$ couches : $(0.25)^n \\to 0$ exponentiellement. Avec 10 couches : $\\approx 10^{-6}$. **Conséquence** : les premières couches n'apprennent plus → le réseau est en fait 'superficiel' même s'il est profond. **Solutions** : (1) **ReLU** (dérivée = 0 ou 1, pas de shrinkage). (2) **Skip connections** (ResNet). (3) **Batch normalization**. (4) **Initialisations adaptées** (He init pour ReLU).",
+      "traps": "Option A : pas un problème de vitesse. Option C : borne n'est pas le problème (c'est même un avantage pour probabilités). Option D : absurde.",
+      "references": "Cours J4, section 4.2 Vanishing gradient"
+    },
+
+    {
+      "id": "act-moye-04",
+      "enonce": "En PyTorch, comment applique-t-on la fonction **ReLU** à un tensor `z` ?",
+      "options": [
+        "`torch.relu(z)` ou `F.relu(z)` (fonctionnel) ou `nn.ReLU()(z)` (module)",
+        "`z.activate()`",
+        "`relu(z)` (sans import)",
+        "`z^2`"
+      ],
+      "correct": 0,
+      "difficulte": "moyen",
+      "type": "code",
+      "tags": ["pytorch", "code", "api", "relu"],
+      "hint": "PyTorch offre 3 styles : fonction (torch.relu), fonctionnel (F.relu) ou module (nn.ReLU()).",
+      "explanation": "**3 façons d'appliquer ReLU en PyTorch** : (1) **Fonction** : `torch.relu(z)`. (2) **Fonctionnel** : `import torch.nn.functional as F; F.relu(z)`. (3) **Module** : `relu = nn.ReLU(); relu(z)` ou dans un `nn.Sequential`. **Choix** : (a) **nn.Module** (3e style) : préféré dans une architecture `nn.Module` car PyTorch tracke automatiquement. (b) **Fonctionnel** (2e) : plus flexible pour les architectures complexes custom. (c) **Fonction directe** (1er) : utile pour des tests rapides. **Autres activations** : `torch.sigmoid`, `torch.tanh`, `F.softmax(z, dim=1)`, `F.gelu(z)`, etc.",
+      "traps": "Option B (`z.activate()`) : pas d'API PyTorch. Option C : il FAUT importer torch. Option D ($z^2$) : aucun rapport.",
+      "references": "Cours J4, section 4.2 API PyTorch activations"
+    },
+
+    {
+      "id": "act-moye-05",
+      "enonce": "Voici plusieurs fonctions d'activation. Laquelle est la plus **rapide** à calculer et dériver ?",
+      "options": [
+        "Sigmoïde (nécessite $e^{-z}$)",
+        "Tanh (nécessite $e^z$ et $e^{-z}$)",
+        "**ReLU** : juste une comparaison `max(0, z)` et dérivée binaire (0 ou 1)",
+        "GELU (nécessite une intégrale approximée)"
+      ],
+      "correct": 2,
+      "difficulte": "moyen",
+      "type": "conceptuel",
+      "tags": ["performance", "vitesse", "relu"],
+      "hint": "ReLU = simple comparaison. Les autres nécessitent des exponentielles ou plus.",
+      "explanation": "**ReLU est la PLUS RAPIDE** : (1) **Forward** : `max(0, z)` = 1 comparaison CPU/GPU = ~1 cycle. (2) **Backward** : gradient = 0 ou 1 = 1 comparaison. **Autres activations** : (1) **Sigmoïde** : $\\sigma(z) = 1/(1+e^{-z})$, nécessite une exponentielle (~10-100 cycles). (2) **Tanh** : similaire. (3) **GELU** : $\\text{GELU}(z) = z \\cdot \\Phi(z)$ où $\\Phi$ est la CDF gaussienne, encore plus complexe. **Impact pratique** : pour un réseau avec millions de neurones, ReLU est plusieurs fois plus rapide que sigmoïde sur GPU. C'est une RAISON MAJEURE (avec vanishing gradient) pour laquelle ReLU domine depuis 2012.",
+      "traps": "Sigmoïde et tanh (options A, B) : nécessitent exp. GELU (option D) : encore plus complexe. Toutes plus lentes que ReLU.",
+      "references": "Cours J4, section 4.2 Efficacité des activations"
+    },
+
+    {
+      "id": "act-diff-01",
+      "enonce": "La fonction **tanh** est-elle équivalente à une sigmoïde 'scaled and shifted' ? Si oui, quelle est la relation ?",
+      "options": [
+        "$\\tanh(z) = \\sigma(z) - 1$",
+        "$\\tanh(z) = 2\\sigma(2z) - 1$ (déjà vue en slo-expe-04)",
+        "$\\tanh(z) = \\sigma(z) + 1$",
+        "Aucune relation simple"
+      ],
+      "correct": 1,
+      "difficulte": "difficile",
+      "type": "formule",
+      "tags": ["tanh", "sigmoide", "relation"],
+      "hint": "Preuve : substituer et utiliser l'identité $e^{2z} - 1 = (e^z-1)(e^z+1)$.",
+      "explanation": "**Relation** : $\\tanh(z) = 2\\sigma(2z) - 1$. **Preuve** : $2\\sigma(2z) - 1 = \\frac{2}{1+e^{-2z}} - 1 = \\frac{2 - (1 + e^{-2z})}{1+e^{-2z}} = \\frac{1 - e^{-2z}}{1+e^{-2z}} = \\frac{e^z - e^{-z}}{e^z + e^{-z}} = \\tanh(z)$ ✓. **Conséquences** : (1) Tanh est monotone, plage $(-1, 1)$. (2) $\\tanh(0) = 0$ (vs $\\sigma(0) = 0.5$). (3) Tanh est **anti-symétrique** : $\\tanh(-z) = -\\tanh(z)$. (4) **Avantage en couches cachées** : centrée en 0, ce qui stabilise l'apprentissage par rapport à sigmoïde.",
+      "traps": "Les options A et C sont des relations incorrectes. Option D : il y a UNE relation simple.",
+      "references": "Cours J4, section 4.2 Tanh et sigmoïde"
+    },
+
+    {
+      "id": "act-diff-02",
+      "enonce": "La fonction **ELU** (Exponential Linear Unit, Clevert 2015) est définie par $\\text{ELU}(z) = z$ si $z \\geq 0$, et $\\alpha (e^z - 1)$ si $z < 0$ (avec $\\alpha > 0$). Quel est son **avantage** sur ReLU ?",
+      "options": [
+        "Elle est plus rapide à calculer",
+        "Elle évite le dying ReLU (gradient non-nul côté négatif) ET converge vers $-\\alpha$ asymptotiquement (moins de bruit sur la moyenne des activations)",
+        "Elle a des sorties dans $[0, 1]$",
+        "Elle utilise la logique booléenne"
+      ],
+      "correct": 1,
+      "difficulte": "difficile",
+      "type": "conceptuel",
+      "tags": ["elu", "variante-relu", "dying-relu"],
+      "hint": "ELU a 2 propriétés clés : (1) gradient non-nul en $z < 0$, (2) asymptote horizontale vers $-\\alpha$.",
+      "explanation": "**ELU** : $\\text{ELU}(z) = z$ si $z \\geq 0$, $\\alpha(e^z - 1)$ si $z < 0$. **Avantages** : (1) **Pas de dying neurons** : $\\text{ELU}'(z) = \\alpha e^z$ (jamais strictement 0 pour $z$ fini). (2) **Moyenne d'activation proche de 0** : pour $z < 0$, la sortie est bornée par $-\\alpha$ (plutôt que $0$ strict comme ReLU), ce qui 'centre' les activations. Réduit le biais global. (3) **Lisse** : dérivable partout (alors que ReLU ne l'est pas en 0). **Inconvénients** : (i) Plus coûteuse à calculer que ReLU (exponentielle). (ii) Performance souvent SIMILAIRE à Leaky ReLU en pratique. **Choix** : ReLU est plus simple et souvent suffisant ; ELU pour des tâches sensibles.",
+      "traps": "Option A (plus rapide) : faux, ELU est plus lente. Option C : borne $[0, 1]$ est pour sigmoïde. Option D : aucun rapport.",
+      "references": "Cours J4, section 4.2 ELU"
+    },
+
+    {
+      "id": "act-diff-03",
+      "enonce": "Voici les fonctions d'activation les plus courantes et leurs **domaines de sortie**. Laquelle a une sortie **non bornée** (peut tendre vers $+\\infty$) ?",
+      "options": [
+        "Sigmoïde : $(0, 1)$",
+        "Tanh : $(-1, 1)$",
+        "**ReLU** : $[0, +\\infty)$",
+        "Softmax : $(0, 1)$ avec somme à 1"
+      ],
+      "correct": 2,
+      "difficulte": "difficile",
+      "type": "conceptuel",
+      "tags": ["comparaison", "domaines", "bornes"],
+      "hint": "ReLU = identité pour $z > 0$, donc sortie peut être aussi grande que $z$.",
+      "explanation": "**Domaines de sortie** : (1) **Sigmoïde** : $(0, 1)$ — bornée. (2) **Tanh** : $(-1, 1)$ — bornée. (3) **ReLU** : $[0, +\\infty)$ — **non bornée supérieurement**. (4) **Softmax** : $(0, 1)$ avec somme à 1. **Conséquence pratique pour ReLU** : risque d'**exploding activations** si les poids sont mal réglés. Solutions : **batch normalization** pour contrôler les activations, ou **clipping** par un max (ex : ReLU6 = min(max(0,z), 6)). **Leaky ReLU** : aussi non bornée. **ELU, Swish** : non bornées côté positif.",
+      "traps": "Les 3 autres options sont bornées dans leur intervalle.",
+      "references": "Cours J4, section 4.2 Domaines des activations"
+    },
+
+    {
+      "id": "act-diff-04",
+      "enonce": "Le **gradient** de ReLU est simple : $\\text{ReLU}'(z) = 1$ si $z > 0$, $0$ si $z < 0$. **En $z = 0$**, la fonction est NON dérivable (saut de pente). Que fait PyTorch en pratique ?",
+      "options": [
+        "Il lève une erreur",
+        "Il utilise une **convention** (souvent $\\text{ReLU}'(0) = 0$) — c'est un **sous-gradient** valide. En pratique, $z = 0$ exact est extrêmement rare en arithmétique flottante",
+        "Il interpole entre 0 et 1",
+        "Il calcule par différences finies"
+      ],
+      "correct": 1,
+      "difficulte": "difficile",
+      "type": "conceptuel",
+      "tags": ["sous-gradient", "relu", "pytorch", "convention"],
+      "hint": "Déjà vu en der-expe-05 : en pratique, $z = 0$ exactement n'arrive (presque) jamais avec des floats.",
+      "explanation": "**Sous-gradient en $z = 0$** : tout valeur dans $[0, 1]$ est un sous-gradient valide de ReLU. **Convention PyTorch/TF** : $\\text{ReLU}'(0) = 0$. **Justifications pratiques** : (1) **Arithmétique flottante** : $z = 0$ exactement est extrêmement rare (probabilité $\\to 0$ avec des poids aléatoires + features continues). (2) **Stochasticité** : le SGD avec mini-batches injecte du bruit qui 'efface' ces problèmes. (3) **Simplicité computationnelle** : 0 est simple à retourner. **Alternative** : choisir $\\text{ReLU}'(0) = 1$ (côté positif) — marche aussi, généralement pas de différence pratique. **Moralité** : la non-dérivabilité ponctuelle n'est pas un problème en deep learning.",
+      "traps": "Option A (erreur) : PyTorch ne lève pas d'erreur. Option C (interpolation) : pas d'interpolation, convention stricte. Option D (différences finies) : trop coûteux, non utilisé.",
+      "references": "Cours J4, section 4.2 Sous-gradients"
+    },
+
+    {
+      "id": "act-diff-05",
+      "enonce": "Dans un réseau pour **image classification** (ex : MNIST, 10 classes), l'architecture typique des **activations** est :",
+      "options": [
+        "**ReLU** dans toutes les couches cachées, **Softmax** en sortie",
+        "Sigmoïde partout",
+        "Pas d'activation",
+        "Softmax partout"
+      ],
+      "correct": 0,
+      "difficulte": "difficile",
+      "type": "conceptuel",
+      "tags": ["architecture", "cnn", "pratique"],
+      "hint": "ReLU = couches cachées (rapide, pas de vanishing). Softmax = sortie multi-classes (distribution de probabilité).",
+      "explanation": "**Architecture typique classification multi-classes** : (1) **Couches cachées** : ReLU (ou Leaky ReLU, GELU). (2) **Couche de sortie** : Softmax (pour produire une distribution de probabilité sur les K classes). **Exemples concrets** : (a) **LeNet (1998)** : originally used sigmoïde, aujourd'hui réécrit avec ReLU. (b) **AlexNet (2012)** : premier grand succès de ReLU, 5 couches convolutives + ReLU + 3 FC + Softmax. (c) **ResNet, VGG, EfficientNet** : ReLU partout + Softmax en sortie. **Pour classification binaire** : ReLU caché + Sigmoïde sortie. **Pour régression** : ReLU caché + Identité sortie.",
+      "traps": "Option B (sigmoïde partout) : vanishing gradient catastrophique. Option C (pas d'activation) : réseau = régression linéaire. Option D (softmax partout) : softmax dans les couches cachées détruirait l'apprentissage.",
+      "references": "Cours J4, section 4.2 Architecture typique"
+    },
+
+    {
+      "id": "act-expe-01",
+      "enonce": "La fonction **GELU** (Gaussian Error Linear Unit, Hendrycks 2016) est définie par $\\text{GELU}(z) = z \\cdot \\Phi(z)$ où $\\Phi$ est la CDF (fonction de répartition) de la loi normale standard. Pourquoi est-elle populaire dans les **Transformers** ?",
+      "options": [
+        "Elle est plus simple que ReLU",
+        "GELU est **lisse** (C∞) et **non-monotone** (légère 'courbure' négative pour petits $z$), ce qui donne une meilleure performance empirique dans les grands modèles. BERT, GPT, etc. l'utilisent",
+        "Elle est plus rapide que ReLU",
+        "Elle remplace toutes les autres activations"
+      ],
+      "correct": 1,
+      "difficulte": "expert",
+      "type": "conceptuel",
+      "tags": ["gelu", "transformers", "bert", "gpt", "activations-modernes"],
+      "hint": "GELU est une alternative douce à ReLU, très utilisée dans les architectures Transformer modernes.",
+      "explanation": "**GELU** : $\\text{GELU}(z) = z \\cdot \\Phi(z)$, où $\\Phi(z) = \\frac{1}{2}(1 + \\text{erf}(z/\\sqrt{2}))$. **Comportement** : similaire à ReLU pour grandes valeurs, mais **lisse et non-monotone** — il y a une 'creuse' légère pour $z \\in (-2, 0)$. **Avantages** : (1) **Dérivable partout** (C∞). (2) **Stochasticité implicite** : interprétable comme ReLU avec dropout probabiliste par position. (3) **Meilleures performances empiriques** dans les Transformers. **Usage** : **BERT** (Google 2018), **GPT-2/3/4** (OpenAI), **Vision Transformers (ViT)**. **Approximation rapide** : $\\text{GELU}(z) \\approx 0.5 z (1 + \\tanh(\\sqrt{2/\\pi}(z + 0.044715 z^3)))$. **Autre variante populaire** : **Swish/SiLU** $= z \\cdot \\sigma(z)$ (similaire).",
+      "traps": "Option A (plus simple que ReLU) : faux, GELU est plus complexe. Option C (plus rapide) : faux, plus coûteux. Option D (remplace tout) : exagéré, ReLU reste dominant en CNN.",
+      "references": "Cours J4, section 4.2 GELU (référence avancée)"
+    },
+
+    {
+      "id": "act-expe-02",
+      "enonce": "Comparez la **complexité** des opérations entre sigmoïde et ReLU. Quel est le gain de performance typique sur GPU ?",
+      "options": [
+        "Sigmoïde est 10× plus rapide",
+        "ReLU est typiquement **3× à 10× plus rapide** que sigmoïde/tanh sur GPU, selon l'architecture. Pour un grand réseau, cela peut réduire le temps d'entraînement de 50%+",
+        "Elles sont strictement équivalentes",
+        "ReLU est plus lente"
+      ],
+      "correct": 1,
+      "difficulte": "expert",
+      "type": "conceptuel",
+      "tags": ["performance", "gpu", "optimisation"],
+      "hint": "ReLU = 1 comparaison, sigmoïde = 1 exponentielle + 1 division. Sur GPU, les opérations spéciales (exp) sont plus lentes.",
+      "explanation": "**Comparaison concrète** : (1) **ReLU** : 1 comparaison par élément. Instructions simples, fusionnées avec d'autres opérations. (2) **Sigmoïde** : nécessite $e^{-z}$ (fonction spéciale). Sur GPU moderne : ~5-10 cycles (vs 1 pour ReLU). (3) **Gain pratique** : sur un grand modèle (ResNet-50, 25M paramètres), remplacer sigmoïde par ReLU peut accélérer l'entraînement de 30-50%. **Bibliothèques optimisées** : cuDNN, TensorCore ont des kernels ultra-optimisés pour ReLU (fusion avec conv, gain encore plus). **C'est** l'une des raisons (avec vanishing gradient) de la domination de ReLU depuis 2012. **Énergie** : ReLU consomme moins de watts → important pour edge AI, smartphones, voitures.",
+      "traps": "Option A (sigmoïde plus rapide) : inverse. Option C (équivalentes) : faux. Option D (ReLU plus lente) : inverse.",
+      "references": "Cours J4, section 4.2 Performance activations (référence avancée)"
+    },
+
+    {
+      "id": "act-expe-03",
+      "enonce": "L'évolution historique des fonctions d'activation en deep learning est riche. Quelle est la **chronologie** simplifiée ?",
+      "options": [
+        "Pas d'évolution, toujours les mêmes",
+        "Sigmoïde/tanh (1980s-2000s) → ReLU (2012, AlexNet révolution) → variantes (Leaky ReLU, ELU, 2013-2015) → GELU/Swish (2016+, dans Transformers)",
+        "ReLU a toujours été la seule utilisée",
+        "GELU est la plus ancienne"
+      ],
+      "correct": 1,
+      "difficulte": "expert",
+      "type": "conceptuel",
+      "tags": ["histoire", "evolution", "chronologie"],
+      "hint": "Chaque époque a apporté des améliorations : lutte contre vanishing gradient, amélioration des gradients, meilleure performance empirique.",
+      "explanation": "**Chronologie des activations en DL** : (1) **1943-1960** : fonction de Heaviside (perceptron). (2) **1980s-2000s** : Sigmoïde/tanh dominent (backpropagation, Hinton, LeCun). (3) **2010-2012** : **Révolution ReLU** : Krizhevsky, Hinton dans AlexNet démontrent sur ImageNet. (4) **2013-2015** : **Variantes** : Leaky ReLU (Maas 2013), ELU (Clevert 2015), Swish/SiLU (Ramachandran 2017). (5) **2016+** : **GELU** (Hendrycks 2016), adoptée par BERT (2018), GPT-2/3/4 (2019+). (6) **Recherche actuelle** : activations apprises (PAU), activations adaptatives par couche, Mish, etc. **Morale** : chaque génération améliore légèrement sur la précédente, mais la simplicité de ReLU reste une référence.",
+      "traps": "Options A, C, D : caricatures de l'histoire.",
+      "references": "Cours J4, section 4.2 Histoire des activations"
+    },
+
+    {
+      "id": "act-expe-04",
+      "enonce": "Le **gradient exploding problem** peut se produire dans certaines architectures. Comment se manifeste-t-il avec certaines activations ?",
+      "options": [
+        "Les gradients deviennent systématiquement nuls",
+        "Les gradients explosent vers l'infini (ou NaN) lors du backward pass. Activations SANS saturation (comme ReLU linéaire pour $z > 0$) peuvent amplifier ce phénomène, surtout avec de grandes poids",
+        "Les activations deviennent toutes égales",
+        "Le modèle prédit toujours 0"
+      ],
+      "correct": 1,
+      "difficulte": "expert",
+      "type": "conceptuel",
+      "tags": ["exploding-gradient", "instabilite", "clipping"],
+      "hint": "Sigmoïde/tanh sont BORNÉES (saturation), donc limitent la taille des gradients. ReLU n'est pas bornée côté positif.",
+      "explanation": "**Exploding gradient** : pendant le backward pass, les gradients s'amplifient multiplicativement à travers les couches : $\\frac{\\partial L}{\\partial \\mathbf{w}_1} \\propto \\prod_i \\frac{\\partial \\mathbf{h}_{i+1}}{\\partial \\mathbf{h}_i}$. Si ces facteurs sont $> 1$ systématiquement → explosion. **Causes** : (1) **Poids trop grands** (mauvaise initialisation). (2) **Activations non-bornées** (ReLU sans régularisation). (3) **RNN** longs (gradients multipliés par la même matrice). **Symptômes** : loss NaN, poids `inf`, entraînement qui diverge. **Solutions** : (1) **Gradient clipping** : limiter $\\|\\nabla\\| \\leq c$. (2) **Batch normalization**. (3) **Learning rate plus petit**. (4) **Bonnes initialisations** (He pour ReLU). (5) **Skip connections** (ResNet). **Contraste** : sigmoïde/tanh ont une saturation qui limite l'amplification (gradient $\\leq 0.25$ pour sigmoïde).",
+      "traps": "Option A (nuls) : c'est le vanishing, opposé. Option C (toutes égales) : pas un symptôme du exploding. Option D : pas directement lié.",
+      "references": "Cours J4, section 4.3 Exploding gradient (référence avancée)"
+    },
+
+    {
+      "id": "act-expe-05",
+      "enonce": "En pratique, pour un **débutant** qui construit son premier réseau de neurones, quel **conseil** sur les fonctions d'activation ?",
+      "options": [
+        "Commencer avec sigmoïde, c'est intuitif",
+        "**Utiliser ReLU** par défaut dans les couches cachées, et choisir l'activation de sortie selon le problème (softmax multi-classe, sigmoïde binaire, identité régression). Raffiner plus tard si problème",
+        "Tester toutes les activations possibles systématiquement",
+        "Ne pas utiliser d'activation pour simplifier"
+      ],
+      "correct": 1,
+      "difficulte": "expert",
+      "type": "conceptuel",
+      "tags": ["pratique", "conseil", "debutant", "defaut"],
+      "hint": "80% des cas en pratique : ReLU + activation de sortie adaptée. Ne pas sur-ingénierer.",
+      "explanation": "**Règles pratiques** : (1) **Couches cachées** : ReLU par défaut. Si dying neurons problem, passer à Leaky ReLU ou ELU. Pour Transformers, GELU. (2) **Sortie régression** : Identité (pas d'activation). (3) **Sortie classification binaire** : Sigmoïde. (4) **Sortie classification multi-classe** : Softmax. (5) **Gates (LSTM/GRU)** : Sigmoïde + Tanh. **Règle d'or** : commencer simple (ReLU + activation de sortie standard), optimiser PLUS TARD si nécessaire. **Erreur typique du débutant** : passer des heures à tester 10 activations alors qu'une architecture plus large ou un meilleur LR schedule aurait plus d'impact. Les activations ne sont PAS l'hyperparamètre le plus important.",
+      "traps": "Option A (sigmoïde) : dépassée, vanishing gradient. Option C (tout tester) : gaspillage de temps. Option D (pas d'activation) : réseau inutile.",
+      "references": "Cours J4, section 4.2 Règles pratiques"
+    }
+
+  ]
+}
