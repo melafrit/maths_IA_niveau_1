@@ -19,6 +19,8 @@ data/examens/*/
 data/banque/*/
 !data/banque/.gitkeep
 !data/banque/_template/
+!data/banque/maths-ia/
+!data/banque/maths-ia/**
 
 # ------ Backups ------
 data/_backups/
