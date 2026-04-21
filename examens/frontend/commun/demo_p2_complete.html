@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Démo P2 complète — IPSSI Examens</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="/assets/main.css">
+</head>
+<body>
+  <div id="root"></div>
+
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="/assets/components-base.js" type="text/babel"></script>
+  <script src="/assets/components-advanced.js" type="text/babel"></script>
+  <script src="/assets/hooks.js" type="text/babel"></script>
+  <script src="/assets/layouts.js" type="text/babel"></script>
+
+  <script type="text/babel">
+    const { useState } = React;
+    const {
+      Button, Input, Card, Box, Badge, Select,
+      Stat, ChronoDisplay,
+      ToastProvider, useToast,
+    } = window.UI;
+    const {
+      useTheme, useTranslation, useDebounce, useLocalStorage,
+      useKeyboardShortcut, useModal,
+    } = window.UIHooks;
+    const { PublicLayout, ProfLayout, StudentLayout } = window.UILayouts;
+
+    function LayoutDemo() {
+      const [selectedLayout, setSelectedLayout] = useState('prof');
+      const { t, lang, setLang } = useTranslation();
+      const { theme, toggle } = useTheme();
+      const { toast } = useToast();
+      const modal = useModal();
+
+      // useDebounce demo
+      const [search, setSearch] = useState('');
+      const debouncedSearch = useDebounce(search, 500);
+
+      // useLocalStorage demo
+      const [preference, setPreference, removePreference] = useLocalStorage('demo_pref', 'défaut');
+
+      // useKeyboardShortcut demo
+      useKeyboardShortcut('cmd+k', () => toast.info('Raccourci Cmd+K / Ctrl+K déclenché !'));
+      useKeyboardShortcut('cmd+/', () => toast.info('Ouverture aide (Cmd+/)'));
+
+      const renderContent = () => (
+        <div>
+          <h1 style={{ fontFamily: 'var(--font-heading)', marginBottom: 'var(--space-2)' }}>
+            Démo P2 complète
+          </h1>
+          <p style={{ color: 'var(--color-text-muted)', marginBottom: 'var(--space-6)' }}>
+            Démonstration des hooks, layouts, i18n et composants.
+          </p>
+
+          <Card title="Choisir un layout" style={{ marginBottom: 'var(--space-4)' }}>
+            <p style={{ marginBottom: 'var(--space-3)', fontSize: 'var(--text-sm)' }}>
+              Layout actuel : <strong>{selectedLayout}</strong>
+            </p>
+            <div style={{ display: 'flex', gap: 'var(--space-2)', flexWrap: 'wrap' }}>
+              <Button variant={selectedLayout === 'public' ? 'primary' : 'outline'} size="sm" onClick={() => setSelectedLayout('public')}>PublicLayout</Button>
+              <Button variant={selectedLayout === 'prof' ? 'primary' : 'outline'} size="sm" onClick={() => setSelectedLayout('prof')}>ProfLayout</Button>
+              <Button variant={selectedLayout === 'student' ? 'primary' : 'outline'} size="sm" onClick={() => setSelectedLayout('student')}>StudentLayout</Button>
+            </div>
+          </Card>
+
+          <Card title="useTranslation — i18n" style={{ marginBottom: 'var(--space-4)' }}>
+            <p>Langue actuelle : <Badge variant="primary">{lang}</Badge></p>
+            <ul style={{ fontSize: 'var(--text-sm)' }}>
+              <li><code>t('app.name')</code> → <strong>{t('app.name')}</strong></li>
+              <li><code>t('auth.login')</code> → <strong>{t('auth.login')}</strong></li>
+              <li><code>t('exam.remaining', {'{time: "12:34"}'})</code> → <strong>{t('exam.remaining', { time: '12:34' })}</strong></li>
+              <li><code>t('clé.inexistante')</code> → <strong>{t('clé.inexistante')}</strong> <em>(retourne la clé)</em></li>
+            </ul>
+          </Card>
+
+          <Card title="useTheme — clair/sombre" style={{ marginBottom: 'var(--space-4)' }}>
+            <p>Thème actuel : <Badge variant="primary">{theme}</Badge></p>
+            <Button onClick={toggle}>Basculer le thème</Button>
+          </Card>
+
+          <Card title="useDebounce — recherche optimisée" style={{ marginBottom: 'var(--space-4)' }}>
+            <Input
+              label="Tapez pour voir le debounce en action (500ms)"
+              value={search}
+              onChange={setSearch}
+              placeholder="Tapez quelque chose..."
+            />
+            <div style={{ marginTop: 'var(--space-2)', fontSize: 'var(--text-sm)' }}>
+              <div>Valeur immédiate : <code>{search || '(vide)'}</code></div>
+              <div>Valeur debouncée : <code style={{ color: 'var(--color-success)' }}>{debouncedSearch || '(vide)'}</code></div>
+            </div>
+          </Card>
+
+          <Card title="useLocalStorage — persistance" style={{ marginBottom: 'var(--space-4)' }}>
+            <p>Valeur stockée (rechargez la page, elle persiste) : <strong>{preference}</strong></p>
+            <div style={{ display: 'flex', gap: 'var(--space-2)', flexWrap: 'wrap' }}>
+              <Button size="sm" onClick={() => setPreference('A')}>Valeur A</Button>
+              <Button size="sm" onClick={() => setPreference('B')}>Valeur B</Button>
+              <Button size="sm" onClick={() => setPreference(new Date().toLocaleTimeString('fr'))}>Timestamp</Button>
+              <Button size="sm" variant="danger" onClick={removePreference}>Reset</Button>
+            </div>
+          </Card>
+
+          <Card title="useKeyboardShortcut — raccourcis globaux" style={{ marginBottom: 'var(--space-4)' }}>
+            <p>Essayez <kbd>Cmd+K</kbd> ou <kbd>Ctrl+K</kbd> (ou <kbd>Cmd+/</kbd>)</p>
+          </Card>
+
+          <Card title="useModal — gestion modale" style={{ marginBottom: 'var(--space-4)' }}>
+            <Button onClick={modal.open}>Ouvrir modale (useModal)</Button>
+            {modal.isOpen && (
+              <div onClick={modal.close} style={{
+                position: 'fixed', inset: 0, background: 'var(--color-bg-overlay)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                zIndex: 999,
+              }}>
+                <Card style={{ maxWidth: 400 }} onClick={(e) => e.stopPropagation()}>
+                  <h3 style={{ marginTop: 0 }}>Modale ouverte !</h3>
+                  <p>L'état est géré par <code>useModal()</code>.</p>
+                  <Button onClick={modal.close}>Fermer</Button>
+                </Card>
+              </div>
+            )}
+          </Card>
+
+          <Box type="retenir">
+            Phase P2 complète : design tokens + 28 composants + 8 hooks + i18n FR + 4 layouts.
+          </Box>
+        </div>
+      );
+
+      // Layouts
+      if (selectedLayout === 'public') {
+        return <PublicLayout maxWidth={800}>{renderContent()}</PublicLayout>;
+      }
+
+      if (selectedLayout === 'student') {
+        return (
+          <StudentLayout
+            examTitle="Démonstration examen"
+            isFullscreen={true}
+            chronoComponent={<ChronoDisplay endAt={new Date(Date.now() + 10 * 60 * 1000).toISOString()} compact alerts={[{ atSeconds: 60, color: 'var(--color-warning)' }]} />}
+            progressComponent={<Badge variant="primary">Question 3 / 25</Badge>}
+            footerLeft="🛡️ Mode sécurisé activé"
+            footerRight="Sauvegardé il y a 3 secondes"
+          >
+            {renderContent()}
+          </StudentLayout>
+        );
+      }
+
+      // prof par défaut
+      return (
+        <ProfLayout
+          title="Démonstration P2 complète"
+          subtitle="Hooks, layouts, i18n — tous intégrés"
+          breadcrumbs={[{ label: 'Accueil', href: '/dashboard_temp.html' }, { label: 'Démos' }, { label: 'P2 complet' }]}
+          actions={<Button variant="outline" onClick={() => window.location.href = '/dashboard_temp.html'}>Retour dashboard</Button>}
+        >
+          {renderContent()}
+        </ProfLayout>
+      );
+    }
+
+    function App() {
+      return (
+        <ToastProvider>
+          <LayoutDemo />
+        </ToastProvider>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+  </script>
+</body>
+</html>

@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Espace enseignant — Plateforme d'examens IPSSI</title>
+  <style>
+    /* Page placeholder P1 — sera enrichie en P2/P7
+       © 2026 Mohamed EL AFRIT — IPSSI — CC BY-NC-SA 4.0 */
+
+    *, *::before, *::after { box-sizing: border-box; }
+
+    :root {
+      --color-primary: #3b82f6;
+      --color-primary-hover: #2563eb;
+      --color-bg: #f8fafc;
+      --color-card: #ffffff;
+      --color-text: #1a1a2e;
+      --color-text-muted: #64748b;
+      --color-border: #e2e8f0;
+      --color-danger: #dc2626;
+      --color-danger-hover: #b91c1c;
+      --shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+      --radius: 12px;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --color-bg: #0d1117;
+        --color-card: #161b22;
+        --color-text: #c9d1d9;
+        --color-text-muted: #8b949e;
+        --color-border: #30363d;
+      }
+    }
+
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif;
+      background: var(--color-bg);
+      color: var(--color-text);
+      line-height: 1.5;
+    }
+
+    .navbar {
+      background: var(--color-card);
+      border-bottom: 1px solid var(--color-border);
+      padding: 12px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    .navbar-brand {
+      font-weight: 700;
+      font-size: 1.1rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .user-info {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 0.875rem;
+    }
+    .user-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: var(--color-primary);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      font-size: 0.8125rem;
+    }
+    .btn-logout {
+      padding: 6px 14px;
+      font-size: 0.8125rem;
+      font-family: inherit;
+      background: transparent;
+      color: var(--color-danger);
+      border: 1px solid var(--color-danger);
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+    }
+    .btn-logout:hover {
+      background: var(--color-danger);
+      color: #fff;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 32px auto;
+      padding: 0 24px;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 2px 10px;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      background: rgba(251, 191, 36, 0.15);
+      color: #b45309;
+      margin-bottom: 8px;
+    }
+
+    h1 { font-size: 1.75rem; margin: 0 0 8px 0; }
+    .subtitle { color: var(--color-text-muted); margin-bottom: 32px; }
+
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    .card {
+      background: var(--color-card);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius);
+      padding: 20px;
+      box-shadow: var(--shadow);
+    }
+    .card h3 { margin: 0 0 8px 0; font-size: 1rem; }
+    .card p { margin: 0; color: var(--color-text-muted); font-size: 0.875rem; }
+    .card .icon { font-size: 1.75rem; margin-bottom: 12px; }
+    .card.disabled { opacity: 0.5; }
+    .card.disabled .badge-soon {
+      display: inline-block;
+      margin-left: 6px;
+      padding: 1px 6px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      background: var(--color-text-muted);
+      color: #fff;
+      border-radius: 3px;
+    }
+
+    .info-card {
+      background: rgba(59, 130, 246, 0.08);
+      border: 1px solid rgba(59, 130, 246, 0.2);
+      border-radius: var(--radius);
+      padding: 20px;
+      margin-bottom: 24px;
+    }
+    .info-card h3 { margin: 0 0 8px 0; color: var(--color-primary); }
+    .info-card ul { margin: 8px 0 0 0; padding-left: 20px; }
+    .info-card li { margin-bottom: 4px; font-size: 0.9rem; }
+
+    code {
+      background: var(--color-bg);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: 'JetBrains Mono', Consolas, monospace;
+      font-size: 0.85em;
+    }
+
+    .footer {
+      text-align: center;
+      margin-top: 40px;
+      padding: 16px;
+      font-size: 0.8125rem;
+      color: var(--color-text-muted);
+    }
+    .footer a { color: var(--color-text-muted); }
+  </style>
+</head>
+<body>
+
+  <nav class="navbar">
+    <div class="navbar-brand">🎓 Plateforme examens IPSSI</div>
+    <div class="user-info">
+      <div class="user-avatar" id="userAvatar">--</div>
+      <div>
+        <div id="userName" style="font-weight:600;">Chargement…</div>
+        <div id="userRole" style="font-size:0.75rem; color:var(--color-text-muted);"></div>
+      </div>
+      <button class="btn-logout" id="logoutBtn">Déconnexion</button>
+    </div>
+  </nav>
+
+  <div class="container">
+
+    <span class="badge">Phase P1 — Espace temporaire</span>
+    <h1>Bienvenue 👋</h1>
+    <p class="subtitle">
+      Vous êtes connecté à la plateforme d'examens IPSSI.
+      Cette page est un placeholder qui sera remplacée par le vrai dashboard
+      en <strong>Phase P2 (design system)</strong> puis enrichie en
+      <strong>Phase P7 (analytics)</strong>.
+    </p>
+
+    <div class="info-card">
+      <h3>✅ Phase P1 terminée — Fondations backend opérationnelles</h3>
+      <p style="margin-top:8px;">
+        Toutes les briques essentielles sont en place :
+      </p>
+      <ul>
+        <li>✅ Authentification sécurisée (bcrypt, sessions, CSRF, rate limit)</li>
+        <li>✅ Gestion multi-comptes (admin / enseignant)</li>
+        <li>✅ API REST (endpoints <code>/api/auth/*</code> et <code>/api/comptes/*</code>)</li>
+        <li>✅ Stockage atomique des fichiers JSON (flock + rename)</li>
+        <li>✅ Page de connexion fonctionnelle</li>
+      </ul>
+    </div>
+
+    <h2 style="margin-top:32px;">🚀 À venir dans les prochaines phases</h2>
+
+    <div class="card-grid">
+      <div class="card disabled">
+        <div class="icon">📚</div>
+        <h3>Banque de questions <span class="badge-soon">P3</span></h3>
+        <p>Créer, éditer, organiser vos questions par module et chapitre.</p>
+      </div>
+      <div class="card disabled">
+        <div class="icon">🤖</div>
+        <h3>Génération IA <span class="badge-soon">P4</span></h3>
+        <p>Générer des questions par IA avec Claude ou OpenAI.</p>
+      </div>
+      <div class="card disabled">
+        <div class="icon">📝</div>
+        <h3>Créer un examen <span class="badge-soon">P5</span></h3>
+        <p>Wizard en 4 étapes pour configurer un examen complet.</p>
+      </div>
+      <div class="card disabled">
+        <div class="icon">🛡️</div>
+        <h3>Anti-triche focus-lock <span class="badge-soon">P5</span></h3>
+        <p>Plein écran obligatoire, détection sortie de page.</p>
+      </div>
+      <div class="card disabled">
+        <div class="icon">📊</div>
+        <h3>Analytics approfondies <span class="badge-soon">P7</span></h3>
+        <p>Dashboard temps réel + analyses transversales multi-promos.</p>
+      </div>
+      <div class="card disabled">
+        <div class="icon">📧</div>
+        <h3>Notifications email <span class="badge-soon">P6</span></h3>
+        <p>Confirmations automatiques et corrections par email.</p>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="footer">
+    © 2026 <a href="https://github.com/melafrit/maths_IA_niveau_1" target="_blank" rel="noopener">Mohamed EL AFRIT — IPSSI</a> —
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.fr" target="_blank" rel="noopener">CC BY-NC-SA 4.0</a>
+  </div>
+
+  <script>
+    /* ==================================================================
+       dashboard_temp.js — Récupère le user + logout
+       ================================================================== */
+    const API_BASE = window.location.origin;
+
+    async function loadUser() {
+      try {
+        const res = await fetch(API_BASE + '/api/auth/me', { credentials: 'same-origin' });
+        const data = await res.json();
+        if (!data.ok || !data.data.authenticated) {
+          window.location.href = '/login.html';
+          return;
+        }
+        const user = data.data.user;
+        document.getElementById('userName').textContent = (user.prenom || '') + ' ' + (user.nom || '');
+        document.getElementById('userRole').textContent = user.role === 'admin' ? '🔑 Administrateur' : '👨‍🏫 Enseignant';
+        const initials = ((user.prenom || '?')[0] + (user.nom || '?')[0]).toUpperCase();
+        document.getElementById('userAvatar').textContent = initials;
+
+        // Stocker le CSRF token pour le logout
+        window._csrfToken = data.data.csrf_token;
+      } catch (err) {
+        console.error('Erreur chargement user', err);
+        window.location.href = '/login.html';
+      }
+    }
+
+    document.getElementById('logoutBtn').addEventListener('click', async () => {
+      try {
+        await fetch(API_BASE + '/api/auth/logout', {
+          method: 'POST',
+          credentials: 'same-origin',
+          headers: window._csrfToken ? { 'X-CSRF-Token': window._csrfToken } : {}
+        });
+      } catch (e) { /* ignore */ }
+      window.location.href = '/login.html';
+    });
+
+    loadUser();
+  </script>
+</body>
+</html>

@@ -10,7 +10,93 @@ et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 ## [Non publié]
 
 ### À venir
-- Phase P2 : Design system + frontend commun (composants React, tokens, i18n, layouts)
+- Phase P3 : Banque de questions (CRUD + Import/Export)
+
+---
+
+## [0.2.0] — 2026-04-21
+
+### ✨ Ajouté (Phase P2 — Design system + Frontend commun)
+
+**P2.1 — Tokens & CSS fondations**
+- `frontend/assets/tokens.css` — Variables CSS (palette bleu 50-950, 11 nuances neutres, sémantiques, 6 Box pédagogiques, 4 difficultés, typo Inter+Manrope+JetBrains Mono, espacements 4px base, rayons, ombres, z-index, containers)
+- `frontend/assets/fonts.css` — Import Google Fonts (Inter 300-800, Manrope 200-800, JetBrains Mono 400-700, font-display: swap)
+- `frontend/assets/reset.css` — Normalize moderne + focus-visible + scrollbars stylées + `.sr-only`
+- `frontend/assets/theme.css` — Mode auto, accessibilité (PPAS : dyslexic/contrast/size/motion)
+- `frontend/assets/animations.css` — 14 keyframes + 12 classes utilitaires (fadeIn, scaleIn, pulse, shake, spin, bounce, etc.)
+- `frontend/assets/main.css` — Point d'entrée avec imports + helpers utilitaires + skip-link a11y
+- `frontend/commun/demo_tokens.html` — Page de démo interactive (couleurs, typo, espacements, ombres, animations)
+
+**P2.2 — Composants React de base (17 composants sur `window.UI`)**
+- `frontend/assets/components-base.js`
+- **Form (6)** : Button (6 variants × 3 sizes, loading, disabled, icons), Input (focus ring, error, hint, icon), Textarea, Select (chevron SVG), Checkbox, Radio
+- **Layout (4)** : Card (title/subtitle/footer/hoverable), Box (6 types pédagogiques : définition/retenir/attention/intuition/exemple/python), Badge (5 variants × 3 sizes), Avatar (initiales auto, couleur hash)
+- **Feedback (5)** : Modal (4 sizes, closeOnOverlay/Esc, focus trap body overflow), Tooltip (4 positions), Toast/ToastProvider/useToast (4 types, auto-dismiss, Context React), Spinner, Skeleton
+- **Misc (1)** : ProgressBar (label, color, showValue %)
+- `frontend/commun/demo_components.html` — Démo interactive des 17 composants
+
+**P2.3 — Composants React avancés (11 composants, window.UI étendu)**
+- `frontend/assets/components-advanced.js`
+- **Math/Code (2)** : KatexMath (lazy load KaTeX CDN, inline/display), CodeBlock (header langue, copie clipboard + fallback execCommand, line numbers)
+- **Time (1)** : ChronoDisplay (countdown/countup, alertes seuillées, onExpire, mode compact)
+- **Theme (1)** : ThemeToggle (sync localStorage + data-theme, 3 sizes)
+- **Data (4)** : DataTable (tri, recherche full-text, pagination, onRowClick, columns custom avec render), Pagination (algorithme 1…[6]…20), Tabs (ARIA + navigation clavier + badges), Accordion (single/multi-open)
+- **Feedback (2)** : EmptyState (icon + title + message + action), Stat (KPI avec tendance, icon coloré)
+- **Forms (1)** : Wizard (stepper visuel, validation par étape, navigation)
+- `frontend/commun/demo_advanced.html` — Démo des 11 composants avancés
+
+**P2.4 — Hooks + i18n + Layouts + Refontes**
+- `frontend/assets/hooks.js` — **8 hooks custom sur `window.UIHooks`** :
+  - `useTheme` (theme + accessibility PPAS + sync localStorage)
+  - `useTranslation` (i18n avec cache singleton, fallback FR, substitution `{var}`)
+  - `useApi` (wrapper fetch standardisé, CSRF auto sur méthodes mutantes)
+  - `useAuth` (singleton _authState + listeners, login/logout/user/isAdmin)
+  - `useDebounce` (valeur debouncée configurable)
+  - `useLocalStorage` (state synchronisé, remove helper)
+  - `useKeyboardShortcut` (parseShortcut, cmd+k compatible Mac/Win/Linux)
+  - `useModal` (isOpen/open/close/toggle)
+- `frontend/assets/i18n/fr.json` — **231 clés françaises** organisées en namespaces (app, common, auth, user, nav, exam, exam.create, rules, anticheat, correction, banque, ia, stats, rgpd, settings, errors, footer, phase)
+- `frontend/assets/layouts.js` — **4 layouts sur `window.UILayouts`** :
+  - `PublicLayout` (centré, maxWidth configurable, ThemeToggle fixe, footer)
+  - `ProfLayout` (sidebar 260px/72px collapsable, mobile drawer avec overlay, header sticky avec titre+breadcrumbs+actions+user menu dropdown, items adaptés au rôle, détection route active)
+  - `StudentLayout` (immersif examen : pas de sidebar, header minimal titre+chrono+progression, footer état)
+  - `AdminLayout` (alias ProfLayout avec menus étendus : audit logs, sauvegardes, config)
+- `frontend/commun/login.html` — **Refonte React complète** utilisant PublicLayout + useAuth + useTranslation + useToast, validation client (email regex + mdp ≥ 8), redirect auto si déjà connecté, branding + badge version, legacy sauvegardée
+- `frontend/commun/dashboard_temp.html` — **Refonte React** avec ProfLayout + Stat cards "à venir" + cartes 6 phases + liens démos, legacy sauvegardée
+- `frontend/commun/demo_p2_complete.html` — Démo combinée de tous les hooks + 3 layouts (public/prof/student)
+
+### 🏗️ Architecture frontend (sans bundler)
+
+- React 18 via CDN unpkg (production build)
+- Babel standalone pour transpilation in-browser (JSX + modern JS)
+- Pattern UMD-like : tous les modules exposent via `window.UI`, `window.UIHooks`, `window.UILayouts`
+- Aucune dépendance npm, aucun build step
+- Compatible OVH mutualisé (serveur static files + PHP)
+
+### 🧪 Tests HTTP effectués
+
+- **13/13 fichiers P2 servis correctement** (HTTP 200) : 6 CSS, 4 JS + 1 JSON i18n + 2 HTML (login + dashboard)
+- MIME types corrects (text/css, application/javascript, application/json, text/html)
+- Cache-Control: public, max-age=3600
+- Path traversal bloqué sur `/assets/*`
+
+### 📊 Statistiques Phase P2
+
+- **Fichiers créés** : 13 nouveaux fichiers (6 CSS + 4 JS + 1 JSON + 5 HTML dont 2 refontes)
+- **Lignes de code** : ~5 700 lignes
+- **Composants React totaux** : **28** (17 base + 11 avancés)
+- **Hooks custom** : **8**
+- **Layouts** : **4**
+- **Traductions FR** : **231 clés**
+- **Commits Phase P2** : 4 (P2.1 → P2.4)
+
+### 🎨 Design tokens utilisés
+
+- Couleur primaire : **bleu** `#3b82f6` (validée en début de P2)
+- Typographie : Inter (UI), Manrope (titres), JetBrains Mono (code)
+- 8-pt grid pour espacements
+- Ratios d'échelle modulaire 1.2 pour typographie
+- Mode clair par défaut + sombre via `data-theme="dark"` sur `<html>`
 
 ---
 
@@ -189,15 +275,15 @@ Chaque version suit cette structure :
 | Version | Phase | Statut | Date prévue |
 |:-:|---|:-:|:-:|
 | 0.0.1 | P0 — Cadrage | ✅ Livré | 2026-04-21 |
-| 0.1.0 | P1 — Fondations backend | ✅ **Livré** | 2026-04-21 |
-| 0.2.0 | P2 — Design system | 🔴 À venir | +1-2 sem |
-| 0.3.0 | P3 — Banque de questions | 🔴 | +3 sem |
-| 0.4.0 | P4 — IA + Migration J1-J2 | 🔴 | +4 sem |
-| 0.5.0 | P5 — Création examen + Passage + Focus-lock | 🔴 | +6-7 sem |
-| 0.6.0 | P6 — Correction + Emails | 🔴 | +8 sem |
-| 0.7.0 | P7 — Historique + Analytics | 🔴 | +10 sem |
-| 0.8.0 | P8 — Tests + CI/CD + Backups | 🔴 | +12 sem |
-| 0.9.0 | P9 — Documentation + Soft launch prep | 🔴 | +13 sem |
+| 0.1.0 | P1 — Fondations backend | ✅ Livré | 2026-04-21 |
+| 0.2.0 | P2 — Design system | ✅ **Livré** | 2026-04-21 |
+| 0.3.0 | P3 — Banque de questions | 🔴 À venir | +2 sem |
+| 0.4.0 | P4 — IA + Migration J1-J2 | 🔴 | +3 sem |
+| 0.5.0 | P5 — Création examen + Passage + Focus-lock | 🔴 | +5-6 sem |
+| 0.6.0 | P6 — Correction + Emails | 🔴 | +7 sem |
+| 0.7.0 | P7 — Historique + Analytics | 🔴 | +9 sem |
+| 0.8.0 | P8 — Tests + CI/CD + Backups | 🔴 | +11 sem |
+| 0.9.0 | P9 — Documentation + Soft launch prep | 🔴 | +12 sem |
 | 1.0.0 | Production stable (post soft launch) | 🔴 | ~Juillet 2026 |
 
 ---
