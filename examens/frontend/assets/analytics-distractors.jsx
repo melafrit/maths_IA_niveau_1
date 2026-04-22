@@ -374,6 +374,48 @@
 
     return (
       <div>
+        {/* Export button flottant en haut */}
+        <div style={{
+          display: 'flex',
+          justifyContent: 'flex-end',
+          marginBottom: 'var(--space-3)',
+        }}>
+          {window.ExportMenu && (
+            <window.ExportMenu
+              label="Exporter distracteurs"
+              getData={() => {
+                const build = window.analyticsExports.buildQuestionsRows;
+                const slug = window.analyticsExports.slugify;
+                const questionsData = build(data.questions || []);
+
+                return {
+                  filenameBase: 'distracteurs_' + slug(examenId),
+                  title: 'Analyse des distracteurs',
+                  csv: questionsData,
+                  excelSheets: [
+                    {
+                      name: 'Distracteurs',
+                      headers: questionsData.headers,
+                      rows: questionsData.rows,
+                    },
+                  ],
+                };
+              }}
+            />
+          )}
+        </div>
+
+        {/* Print header */}
+        <div className="print-only print-header">
+          <h1>🎯 Analyse des distracteurs</h1>
+          <div className="subtitle">
+            {data.nb_questions} questions · {data.nb_passages} passages · Exporté le {new Date().toLocaleString('fr-FR')}
+          </div>
+          <div className="subtitle">
+            IPSSI — Plateforme d'examens · Mohamed EL AFRIT
+          </div>
+        </div>
+
         {/* Overview stats */}
         {stats && (
           <div className="kpi-grid" style={{ marginBottom: 'var(--space-3)' }}>

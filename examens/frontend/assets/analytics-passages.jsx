@@ -264,14 +264,71 @@
           <Button variant="ghost" onClick={onBack}>
             ← Retour au dashboard
           </Button>
-          <h2 style={{
-            margin: 'var(--space-2) 0 0 0',
-            fontSize: 'var(--text-2xl)',
+          <div style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'flex-start',
+            gap: 16,
+            marginTop: 'var(--space-2)',
           }}>
-            📊 {examenTitre || 'Examen'}
-          </h2>
-          <div style={{ fontSize: 12, color: 'var(--color-text-muted)' }}>
-            <code>{examenId}</code>
+            <div>
+              <h2 style={{ margin: 0, fontSize: 'var(--text-2xl)' }}>
+                📊 {examenTitre || 'Examen'}
+              </h2>
+              <div style={{ fontSize: 12, color: 'var(--color-text-muted)' }}>
+                <code>{examenId}</code>
+              </div>
+            </div>
+
+            {/* Export menu */}
+            {window.ExportMenu && (
+              <window.ExportMenu
+                label="Exporter"
+                getData={async () => {
+                  // Recuperer toutes les donnees (sans pagination)
+                  const allRes = await api.request('GET',
+                    `/api/analytics/examen/${examenId}/passages?limit=500`);
+                  const questionsRes = await api.request('GET',
+                    `/api/analytics/examen/${examenId}/questions?with_details=true`);
+
+                  const buildP = window.analyticsExports.buildPassagesRows;
+                  const buildQ = window.analyticsExports.buildQuestionsRows;
+                  const slug = window.analyticsExports.slugify;
+
+                  const passagesData = allRes.ok ? buildP(allRes.data.passages) : { headers: [], rows: [] };
+                  const questionsData = questionsRes.ok ? buildQ(questionsRes.data.questions) : { headers: [], rows: [] };
+
+                  return {
+                    filenameBase: 'examen_' + slug(examenTitre || examenId),
+                    title: examenTitre,
+                    csv: passagesData,
+                    excelSheets: [
+                      {
+                        name: 'Passages',
+                        headers: passagesData.headers,
+                        rows: passagesData.rows,
+                      },
+                      {
+                        name: 'Questions',
+                        headers: questionsData.headers,
+                        rows: questionsData.rows,
+                      },
+                    ],
+                  };
+                }}
+              />
+            )}
+          </div>
+
+          {/* Print header (visible uniquement en impression) */}
+          <div className="print-only print-header">
+            <h1>📊 {examenTitre || 'Examen'}</h1>
+            <div className="subtitle">
+              {examenId} · Exporté le {new Date().toLocaleString('fr-FR')}
+            </div>
+            <div className="subtitle">
+              IPSSI — Plateforme d'examens · Mohamed EL AFRIT
+            </div>
           </div>
         </div>
 

@@ -269,6 +269,56 @@
               📧 {data.email}
             </p>
           </div>
+
+          {/* Export menu */}
+          {window.ExportMenu && (
+            <window.ExportMenu
+              label="Exporter"
+              getData={() => {
+                const build = window.analyticsExports.buildStudentRows;
+                const slug = window.analyticsExports.slugify;
+                const passagesData = build(data.passages || []);
+
+                return {
+                  filenameBase: 'etudiant_' + slug(data.email || 'unknown'),
+                  title: `${data.student_info.prenom} ${data.student_info.nom}`,
+                  csv: passagesData,
+                  excelSheets: [
+                    {
+                      name: 'Passages',
+                      headers: passagesData.headers,
+                      rows: passagesData.rows,
+                    },
+                    {
+                      name: 'Resume',
+                      headers: ['Métrique', 'Valeur'],
+                      rows: [
+                        ['Prénom', data.student_info.prenom || ''],
+                        ['Nom', data.student_info.nom || ''],
+                        ['Email', data.email],
+                        ['Nb passages', data.nb_passages],
+                        ['Moyenne (%)', data.avg_score_pct],
+                        ['Meilleur score (%)', data.best_score_pct],
+                        ['Pire score (%)', data.worst_score_pct],
+                        ['Temps total (s)', data.total_time_sec],
+                      ],
+                    },
+                  ],
+                };
+              }}
+            />
+          )}
+        </div>
+
+        {/* Print header */}
+        <div className="print-only print-header">
+          <h1>👤 {data.student_info.prenom} {data.student_info.nom}</h1>
+          <div className="subtitle">
+            {data.email} · Exporté le {new Date().toLocaleString('fr-FR')}
+          </div>
+          <div className="subtitle">
+            IPSSI — Plateforme d'examens · Mohamed EL AFRIT
+          </div>
         </div>
 
         {/* Banner si vue prof filtrée */}

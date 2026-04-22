@@ -224,6 +224,11 @@
         }}>
           © 2026 Mohamed EL AFRIT — IPSSI · CC BY-NC-SA 4.0
         </div>
+
+        {/* Print footer (visible uniquement en impression) */}
+        <div className="print-footer print-only">
+          © 2026 Mohamed EL AFRIT — IPSSI · CC BY-NC-SA 4.0 · {new Date().toLocaleString('fr-FR')}
+        </div>
       </div>
     );
   }
