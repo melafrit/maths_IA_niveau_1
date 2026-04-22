@@ -44,7 +44,9 @@ $requestPath = '/' . trim($requestPath, '/');
 
 // Health check (monitoring)
 if ($requestPath === '/health' || $requestPath === '/api/health') {
-    Response::json([
+    $detailed = isset($_GET['detailed']) || isset($_GET['full']);
+
+    $baseResponse = [
         'status'     => 'ok',
         'version'    => $GLOBALS['CONFIG']['app']['version']
                        ?? $GLOBALS['CONFIG']['version']
@@ -52,7 +54,31 @@ if ($requestPath === '/health' || $requestPath === '/api/health') {
         'timestamp'  => date('c'),
         'php'        => PHP_VERSION,
         'uptime_sec' => round(microtime(true) - EXAMENS_START_TIME, 4),
-    ]);
+    ];
+
+    // Mode detaille : lance tous les checks
+    if ($detailed) {
+        try {
+            $hc = new \Examens\Lib\HealthChecker();
+            $report = $hc->checkAll();
+            $baseResponse['status'] = $report['status'];
+            $baseResponse['checks'] = $report['checks'];
+            $baseResponse['check_duration_ms'] = $report['duration_ms'];
+
+            // Code HTTP selon status
+            if ($report['status'] === 'error') {
+                http_response_code(503); // Service Unavailable
+            } elseif ($report['status'] === 'warning') {
+                http_response_code(200); // OK mais warnings
+            }
+        } catch (\Throwable $e) {
+            $baseResponse['status'] = 'error';
+            $baseResponse['error'] = $e->getMessage();
+            http_response_code(500);
+        }
+    }
+
+    Response::json($baseResponse);
 }
 
 // ============================================================================

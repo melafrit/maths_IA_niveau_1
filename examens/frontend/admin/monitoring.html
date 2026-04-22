@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Monitoring — IPSSI Examens</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="/assets/main.css">
+
+  <style>
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: var(--color-bg);
+    }
+
+    .monitoring-container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: var(--space-4);
+    }
+
+    /* Status banner */
+    .status-banner {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: var(--space-4);
+      border-radius: var(--radius-md);
+      margin-bottom: var(--space-4);
+      border: 2px solid;
+    }
+    .status-banner.ok {
+      background: #dcfce7;
+      border-color: #16a34a;
+      color: #14532d;
+    }
+    .status-banner.warning {
+      background: #fef3c7;
+      border-color: #d97706;
+      color: #78350f;
+    }
+    .status-banner.error {
+      background: #fee2e2;
+      border-color: #dc2626;
+      color: #7f1d1d;
+    }
+    .status-banner-icon {
+      font-size: 48px;
+      line-height: 1;
+    }
+    .status-banner-text {
+      flex: 1;
+    }
+    .status-banner-title {
+      margin: 0;
+      font-size: 20px;
+      font-weight: 700;
+    }
+    .status-banner-meta {
+      margin: 4px 0 0 0;
+      font-size: 13px;
+      opacity: 0.85;
+    }
+
+    /* Checks grid */
+    .checks-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 16px;
+    }
+
+    .check-card {
+      background: var(--color-bg-elevated);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      padding: var(--space-4);
+      border-left: 4px solid var(--color-border);
+      transition: all 0.15s;
+    }
+    .check-card.ok { border-left-color: #16a34a; }
+    .check-card.warning { border-left-color: #d97706; }
+    .check-card.error { border-left-color: #dc2626; }
+
+    .check-card-head {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: var(--space-3);
+    }
+
+    .check-icon {
+      font-size: 24px;
+      line-height: 1;
+    }
+
+    .check-title {
+      font-size: 14px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      flex: 1;
+    }
+
+    .status-pill {
+      padding: 3px 10px;
+      border-radius: 999px;
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .status-pill.ok { background: #dcfce7; color: #14532d; }
+    .status-pill.warning { background: #fef3c7; color: #78350f; }
+    .status-pill.error { background: #fee2e2; color: #7f1d1d; }
+
+    .check-message {
+      font-size: 13px;
+      color: var(--color-text);
+      margin: 0 0 var(--space-3) 0;
+    }
+
+    .check-details {
+      background: var(--color-bg-subtle);
+      border-radius: 6px;
+      padding: var(--space-2) var(--space-3);
+      font-family: var(--font-mono, monospace);
+      font-size: 11px;
+      color: var(--color-text-muted);
+      max-height: 200px;
+      overflow-y: auto;
+    }
+
+    .detail-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 2px 0;
+      border-bottom: 1px dashed transparent;
+    }
+    .detail-row:hover {
+      border-bottom-color: var(--color-border);
+    }
+
+    .detail-key {
+      font-weight: 600;
+      color: var(--color-text);
+    }
+
+    .detail-value {
+      text-align: right;
+    }
+
+    /* Progress bars pour usage */
+    .usage-bar {
+      height: 8px;
+      background: var(--color-bg-subtle);
+      border-radius: 4px;
+      overflow: hidden;
+      margin: 6px 0;
+    }
+    .usage-fill {
+      height: 100%;
+      transition: width 0.3s ease;
+    }
+    .usage-fill.low { background: #16a34a; }
+    .usage-fill.medium { background: #d97706; }
+    .usage-fill.high { background: #dc2626; }
+
+    /* Top controls */
+    .monitoring-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: var(--space-3);
+    }
+
+    .refresh-btn {
+      padding: 8px 16px;
+      background: var(--color-primary);
+      color: white;
+      border: none;
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: transform 0.1s;
+    }
+    .refresh-btn:hover { transform: translateY(-1px); }
+    .refresh-btn:active { transform: translateY(0); }
+    .refresh-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .auto-refresh {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+      color: var(--color-text-muted);
+    }
+
+    /* Loading/Error states */
+    .loading-wrap, .error-wrap {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 400px;
+      flex-direction: column;
+      gap: 16px;
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <script src="/assets/components-base.js" type="text/babel"></script>
+  <script src="/assets/components-advanced.js" type="text/babel"></script>
+  <script src="/assets/hooks.js" type="text/babel"></script>
+
+  <script src="/assets/monitoring.jsx" type="text/babel"></script>
+</body>
+</html>

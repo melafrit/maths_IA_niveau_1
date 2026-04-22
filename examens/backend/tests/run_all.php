@@ -37,6 +37,7 @@ $ALL_SUITES = [
     'analytics_manager'    => ['file' => 'test_analytics_manager.php', 'category' => 'unit'],
     'mailer'               => ['file' => 'test_mailer.php', 'category' => 'unit'],
     'backup_manager'       => ['file' => 'test_backup_manager.php', 'category' => 'unit'],
+    'health_checker'       => ['file' => 'test_health_checker.php', 'category' => 'unit'],
 
     // APIs
     'api_examens'          => ['file' => 'test_api_examens.php', 'category' => 'integration'],
