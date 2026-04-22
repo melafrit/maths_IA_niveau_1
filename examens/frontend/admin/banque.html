@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Banque de questions — Plateforme d'examens IPSSI</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+  <!-- Design system P2 -->
+  <link rel="stylesheet" href="/assets/main.css">
+
+  <!-- KaTeX pour le rendu des formules mathématiques -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+
+  <!-- Prism pour la coloration syntaxique du code -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css">
+
+  <style>
+    /* Styles spécifiques à la page banque */
+    .banque-container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: var(--space-4);
+    }
+
+    .banque-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: var(--space-5);
+      padding-bottom: var(--space-4);
+      border-bottom: 1px solid var(--color-border);
+    }
+
+    .banque-breadcrumb {
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+      font-size: var(--text-sm);
+      color: var(--color-text-muted);
+      margin-bottom: var(--space-3);
+      flex-wrap: wrap;
+    }
+
+    .banque-breadcrumb-item {
+      cursor: pointer;
+      color: var(--color-primary);
+      transition: color 0.15s ease;
+    }
+    .banque-breadcrumb-item:hover {
+      color: var(--color-primary-hover);
+      text-decoration: underline;
+    }
+    .banque-breadcrumb-separator {
+      color: var(--color-text-muted);
+      opacity: 0.5;
+    }
+    .banque-breadcrumb-current {
+      color: var(--color-text);
+      font-weight: 600;
+    }
+
+    .banque-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: var(--space-4);
+    }
+
+    .banque-item-card {
+      padding: var(--space-4);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      background: var(--color-bg-elevated);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-2);
+    }
+    .banque-item-card:hover {
+      border-color: var(--color-primary);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+    }
+    .banque-item-title {
+      font-size: var(--text-lg);
+      font-weight: 600;
+      color: var(--color-text);
+      margin: 0;
+    }
+    .banque-item-subtitle {
+      font-size: var(--text-sm);
+      color: var(--color-text-muted);
+    }
+
+    .level-badges {
+      display: flex;
+      gap: var(--space-1);
+      flex-wrap: wrap;
+    }
+    .level-badge {
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .level-badge--facile { background: rgba(34, 197, 94, 0.1); color: #16a34a; }
+    .level-badge--moyen { background: rgba(234, 179, 8, 0.1); color: #ca8a04; }
+    .level-badge--difficile { background: rgba(249, 115, 22, 0.1); color: #ea580c; }
+    .level-badge--expert { background: rgba(239, 68, 68, 0.1); color: #dc2626; }
+
+    .question-detail {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: var(--space-4);
+    }
+    @media (min-width: 1024px) {
+      .question-detail {
+        grid-template-columns: 2fr 1fr;
+      }
+    }
+
+    .question-enonce {
+      font-size: var(--text-lg);
+      line-height: 1.6;
+      color: var(--color-text);
+    }
+
+    .question-options {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-2);
+      margin-top: var(--space-3);
+    }
+    .question-option {
+      padding: var(--space-3);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      transition: all 0.15s ease;
+      display: flex;
+      gap: var(--space-3);
+      align-items: flex-start;
+    }
+    .question-option--correct {
+      border-color: #16a34a;
+      background: rgba(34, 197, 94, 0.08);
+    }
+    .question-option-letter {
+      font-weight: 700;
+      color: var(--color-primary);
+      flex-shrink: 0;
+      width: 28px;
+      height: 28px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      background: var(--color-primary-subtle);
+    }
+    .question-option--correct .question-option-letter {
+      background: #16a34a;
+      color: white;
+    }
+
+    .question-meta-section {
+      padding: var(--space-3);
+      background: var(--color-bg-subtle);
+      border-radius: var(--radius-md);
+      border-left: 3px solid var(--color-primary);
+      margin-bottom: var(--space-3);
+    }
+    .question-meta-title {
+      font-size: var(--text-sm);
+      font-weight: 600;
+      color: var(--color-text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin: 0 0 var(--space-2) 0;
+    }
+    .question-meta-content {
+      font-size: var(--text-sm);
+      line-height: 1.5;
+      color: var(--color-text);
+    }
+
+    .tags-list {
+      display: flex;
+      gap: var(--space-1);
+      flex-wrap: wrap;
+    }
+    .tag-chip {
+      padding: 2px 10px;
+      background: var(--color-bg-subtle);
+      border-radius: 999px;
+      font-size: 11px;
+      color: var(--color-text-muted);
+      border: 1px solid var(--color-border);
+    }
+
+    .tabs-container {
+      margin-top: var(--space-4);
+    }
+    .banque-tab-nav {
+      display: flex;
+      gap: var(--space-2);
+      border-bottom: 2px solid var(--color-border);
+      margin-bottom: var(--space-4);
+    }
+    .banque-tab-btn {
+      padding: var(--space-2) var(--space-3);
+      background: transparent;
+      border: none;
+      border-bottom: 2px solid transparent;
+      color: var(--color-text-muted);
+      cursor: pointer;
+      font-size: var(--text-sm);
+      font-weight: 500;
+      transition: all 0.15s ease;
+      margin-bottom: -2px;
+    }
+    .banque-tab-btn:hover {
+      color: var(--color-primary);
+    }
+    .banque-tab-btn.active {
+      color: var(--color-primary);
+      border-bottom-color: var(--color-primary);
+    }
+
+    /* KaTeX adjustments */
+    .katex { font-size: 1.05em; }
+    .katex-display { margin: 1em 0; }
+
+    .empty-illustration {
+      text-align: center;
+      padding: var(--space-6);
+      color: var(--color-text-muted);
+    }
+    .empty-illustration-icon {
+      font-size: 48px;
+      margin-bottom: var(--space-2);
+      opacity: 0.4;
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <!-- React 18 + Babel (dev mode pour JSX inline) -->
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <!-- KaTeX pour les formules -->
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+
+  <!-- Design system P2 -->
+  <script src="/assets/components-base.js" type="text/babel"></script>
+  <script src="/assets/components-advanced.js" type="text/babel"></script>
+  <script src="/assets/hooks.js" type="text/babel"></script>
+  <script src="/assets/layouts.js" type="text/babel"></script>
+
+  <!-- Page-specific scripts -->
+  <script src="/assets/banque-browser.jsx" type="text/babel"></script>
+  <script src="/assets/banque.jsx" type="text/babel"></script>
+</body>
+</html>

@@ -95,6 +95,7 @@ if ($assetsDir !== false && preg_match('#^/assets/(.+)$#', $requestPath, $m)) {
         $mimes = [
             'css'  => 'text/css; charset=utf-8',
             'js'   => 'application/javascript; charset=utf-8',
+            'jsx'  => 'application/javascript; charset=utf-8',
             'json' => 'application/json',
             'png'  => 'image/png',
             'jpg'  => 'image/jpeg', 'jpeg' => 'image/jpeg',
@@ -122,6 +123,23 @@ $frontendDir = realpath(EXAMENS_ROOT . '/../frontend/commun');
 if ($frontendDir !== false && preg_match('#^/([a-z0-9_-]+\.html)$#i', $requestPath, $m)) {
     $candidate = realpath($frontendDir . '/' . $m[1]);
     if ($candidate !== false && str_starts_with($candidate, $frontendDir . DIRECTORY_SEPARATOR)) {
+        header('Content-Type: text/html; charset=utf-8');
+        readfile($candidate);
+        exit;
+    }
+}
+
+// ============================================================================
+// Servir les pages HTML des sous-dossiers frontend (admin/, enseignant/, etc.)
+// /admin/banque.html → frontend/admin/banque.html
+// ============================================================================
+
+$frontendRoot = realpath(EXAMENS_ROOT . '/../frontend');
+if ($frontendRoot !== false && preg_match('#^/([a-z0-9_-]+)/([a-z0-9_-]+\.html)$#i', $requestPath, $m)) {
+    $subDir = $m[1]; // admin, enseignant, etc.
+    $fileName = $m[2];
+    $candidate = realpath($frontendRoot . '/' . $subDir . '/' . $fileName);
+    if ($candidate !== false && str_starts_with($candidate, $frontendRoot . DIRECTORY_SEPARATOR)) {
         header('Content-Type: text/html; charset=utf-8');
         readfile($candidate);
         exit;
