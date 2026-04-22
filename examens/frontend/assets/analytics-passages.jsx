@@ -181,6 +181,12 @@
     const [data, setData] = useState(null);
     const [error, setError] = useState(null);
 
+    // Tab actif : 'historique' | 'graphiques'
+    const [activeTab, setActiveTab] = useState('historique');
+
+    // Question sélectionnée pour distracteurs
+    const [selectedQuestionId, setSelectedQuestionId] = useState(null);
+
     // Filtres
     const [search, setSearch] = useState('');
     const debouncedSearch = useDebounce(search, 300);
@@ -272,7 +278,50 @@
         {/* KPIs */}
         <KPIBar overview={overview} />
 
-        {/* Table avec filtres */}
+        {/* TABS */}
+        <div className="analytics-tabs">
+          <button
+            className={`analytics-tab ${activeTab === 'historique' ? 'active' : ''}`}
+            onClick={() => setActiveTab('historique')}
+          >
+            📋 Historique des passages
+          </button>
+          <button
+            className={`analytics-tab ${activeTab === 'graphiques' ? 'active' : ''}`}
+            onClick={() => setActiveTab('graphiques')}
+          >
+            📊 Graphiques
+          </button>
+        </div>
+
+        {/* Contenu selon tab */}
+        {activeTab === 'graphiques' && (
+          <div>
+            {window.ScoreDistributionChart && (
+              <window.ScoreDistributionChart examenId={examenId} />
+            )}
+            {window.MentionsChart && (
+              <window.MentionsChart examenId={examenId} />
+            )}
+            {window.QuestionSuccessChart && (
+              <window.QuestionSuccessChart
+                examenId={examenId}
+                onQuestionClick={(qid) => setSelectedQuestionId(qid)}
+              />
+            )}
+            {window.DistractorsChart && (
+              <window.DistractorsChart
+                examenId={examenId}
+                questionId={selectedQuestionId}
+              />
+            )}
+            {window.TimelineChart && (
+              <window.TimelineChart examenId={examenId} />
+            )}
+          </div>
+        )}
+
+        {activeTab === 'historique' && (
         <div className="passage-table-wrap">
           <div className="passage-filters">
             <input
@@ -434,6 +483,7 @@
             </>
           ) : null}
         </div>
+        )}
       </div>
     );
   }
