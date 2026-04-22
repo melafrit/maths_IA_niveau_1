@@ -200,10 +200,17 @@
         )}
 
         {view === 'student' && selectedStudent && (
-          <StudentPlaceholder
-            email={selectedStudent}
-            onBack={handleBackToOverview}
-          />
+          window.AnalyticsStudent ? (
+            <window.AnalyticsStudent
+              email={selectedStudent}
+              onBack={handleBackToOverview}
+            />
+          ) : (
+            <StudentPlaceholder
+              email={selectedStudent}
+              onBack={handleBackToOverview}
+            />
+          )
         )}
 
         {/* Footer */}

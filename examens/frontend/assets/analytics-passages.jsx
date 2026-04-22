@@ -292,9 +292,19 @@
           >
             📊 Graphiques
           </button>
+          <button
+            className={`analytics-tab ${activeTab === 'distracteurs' ? 'active' : ''}`}
+            onClick={() => setActiveTab('distracteurs')}
+          >
+            🎯 Distracteurs
+          </button>
         </div>
 
         {/* Contenu selon tab */}
+        {activeTab === 'distracteurs' && window.AnalyticsDistractors && (
+          <window.AnalyticsDistractors examenId={examenId} />
+        )}
+
         {activeTab === 'graphiques' && (
           <div>
             {window.ScoreDistributionChart && (
