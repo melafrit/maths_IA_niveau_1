@@ -97,6 +97,56 @@ if (preg_match('#^/api/([a-z0-9_-]+)(?:/.*)?$#i', $requestPath, $matches)) {
         Response::notFound('Endpoint API introuvable');
     }
 
+    // ========================================================================
+    // Middleware : Rate limiting par rôle (P8.5)
+    // ========================================================================
+    // Exemptions : endpoints monitoring
+    $RATE_LIMIT_EXEMPT = ['health'];
+
+    if (!in_array($endpoint, $RATE_LIMIT_EXEMPT, true)) {
+        try {
+            \Examens\Lib\Session::start();
+            $auth = new \Examens\Lib\Auth();
+            $rl = new \Examens\Lib\RoleRateLimiter();
+
+            // Determiner role + identifier
+            if ($auth->isLoggedIn()) {
+                $user = $auth->getCurrentUser();
+                $role = $user['role'] ?? 'anonyme';
+                $identifier = 'user:' . ($user['id'] ?? $user['email'] ?? 'unknown');
+            } else {
+                $role = 'anonyme';
+                $identifier = 'ip:' . ($_SERVER['REMOTE_ADDR'] ?? 'unknown');
+            }
+
+            $check = $rl->check($role, $identifier);
+
+            // Ajouter les headers rate limit a toutes les reponses
+            foreach ($rl->headers($check) as $hName => $hValue) {
+                header("$hName: $hValue");
+            }
+
+            if (!$check['allowed']) {
+                http_response_code(429);
+                header('Content-Type: application/json; charset=utf-8');
+                echo json_encode([
+                    'ok' => false,
+                    'error' => [
+                        'code' => 'rate_limit_exceeded',
+                        'message' => 'Trop de requetes. Reessayez dans ' . $check['retry_after'] . 's.',
+                        'retry_after_sec' => $check['retry_after'],
+                        'limit' => $check['limit'],
+                    ],
+                ]);
+                exit;
+            }
+        } catch (\Throwable $e) {
+            // En cas d'erreur middleware, on laisse passer (fail-open)
+            // pour ne pas bloquer l'application
+            error_log('RateLimiter middleware error: ' . $e->getMessage());
+        }
+    }
+
     // Déléguer à l'endpoint
     require $endpointFile;
     exit;
