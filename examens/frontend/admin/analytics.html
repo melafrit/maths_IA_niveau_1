@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Analytics — IPSSI Examens</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+  <link rel="stylesheet" href="/assets/main.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+
+  <style>
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: var(--color-bg);
+    }
+
+    .analytics-container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: var(--space-4);
+    }
+
+    /* Breadcrumb */
+    .analytics-breadcrumb {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: var(--space-4);
+      font-size: 14px;
+      color: var(--color-text-muted);
+    }
+
+    .analytics-breadcrumb a {
+      color: var(--color-primary);
+      text-decoration: none;
+      cursor: pointer;
+    }
+    .analytics-breadcrumb a:hover { text-decoration: underline; }
+
+    .analytics-breadcrumb-sep {
+      color: var(--color-border);
+    }
+
+    /* KPI Cards grid */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+      margin-bottom: var(--space-4);
+    }
+
+    .kpi-card {
+      background: var(--color-bg-elevated);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      padding: var(--space-4);
+      display: flex;
+      gap: 16px;
+      align-items: flex-start;
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+    .kpi-card:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+    }
+
+    .kpi-icon {
+      font-size: 28px;
+      width: 52px;
+      height: 52px;
+      border-radius: 12px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--color-bg-subtle);
+      flex-shrink: 0;
+    }
+
+    .kpi-content { flex: 1; min-width: 0; }
+
+    .kpi-label {
+      font-size: 11px;
+      text-transform: uppercase;
+      color: var(--color-text-muted);
+      letter-spacing: 0.5px;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .kpi-value {
+      font-size: 28px;
+      font-weight: 800;
+      line-height: 1;
+      color: var(--color-text);
+    }
+
+    .kpi-sub {
+      font-size: 12px;
+      color: var(--color-text-muted);
+      margin-top: 4px;
+    }
+
+    .kpi-value.accent-blue { color: #3b82f6; }
+    .kpi-value.accent-green { color: #16a34a; }
+    .kpi-value.accent-orange { color: #d97706; }
+    .kpi-value.accent-red { color: #dc2626; }
+    .kpi-value.accent-purple { color: #8b5cf6; }
+
+    /* Examens cards */
+    .examen-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 16px;
+    }
+
+    .examen-card {
+      background: var(--color-bg-elevated);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      padding: var(--space-4);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .examen-card:hover {
+      border-color: var(--color-primary);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+    }
+
+    .examen-card-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .examen-card-title {
+      font-size: 15px;
+      font-weight: 700;
+      line-height: 1.3;
+      color: var(--color-text);
+      margin: 0;
+      flex: 1;
+    }
+
+    .status-badge {
+      padding: 2px 10px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      flex-shrink: 0;
+    }
+    .status-draft { background: #f1f5f9; color: #64748b; }
+    .status-published { background: #dbeafe; color: #1e40af; }
+    .status-closed { background: #fef3c7; color: #92400e; }
+    .status-archived { background: #e5e7eb; color: #374151; }
+
+    .examen-card-stats {
+      display: flex;
+      gap: 16px;
+      padding-top: 12px;
+      border-top: 1px solid var(--color-border);
+      margin-top: 12px;
+    }
+
+    .examen-stat {
+      flex: 1;
+    }
+    .examen-stat-val {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--color-primary);
+    }
+    .examen-stat-label {
+      font-size: 10px;
+      text-transform: uppercase;
+      color: var(--color-text-muted);
+      letter-spacing: 0.5px;
+    }
+
+    /* Tabs */
+    .analytics-tabs {
+      display: flex;
+      gap: 4px;
+      padding: 4px;
+      background: var(--color-bg-subtle);
+      border-radius: var(--radius-md);
+      margin-bottom: var(--space-4);
+    }
+
+    .analytics-tab {
+      flex: 1;
+      padding: 10px 16px;
+      background: transparent;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--color-text-muted);
+      transition: all 0.15s;
+    }
+    .analytics-tab:hover { color: var(--color-text); }
+    .analytics-tab.active {
+      background: var(--color-bg-elevated);
+      color: var(--color-primary);
+      font-weight: 600;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Passage table */
+    .passage-table-wrap {
+      background: var(--color-bg-elevated);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+    }
+
+    .passage-filters {
+      padding: var(--space-3);
+      background: var(--color-bg-subtle);
+      border-bottom: 1px solid var(--color-border);
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .passage-search {
+      flex: 1;
+      min-width: 200px;
+      padding: 8px 12px;
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      font-size: 13px;
+      background: var(--color-bg-elevated);
+      color: var(--color-text);
+    }
+
+    .passage-select {
+      padding: 8px 12px;
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      font-size: 13px;
+      background: var(--color-bg-elevated);
+      color: var(--color-text);
+      cursor: pointer;
+    }
+
+    .passage-checkbox-wrap {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+      color: var(--color-text);
+      cursor: pointer;
+    }
+
+    .passage-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .passage-table thead th {
+      padding: 12px 14px;
+      text-align: left;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--color-text-muted);
+      font-weight: 700;
+      background: var(--color-bg-subtle);
+      border-bottom: 2px solid var(--color-border);
+      cursor: pointer;
+      user-select: none;
+    }
+    .passage-table thead th:hover {
+      background: var(--color-border);
+    }
+    .passage-table thead th .sort-arrow {
+      display: inline-block;
+      margin-left: 4px;
+      color: var(--color-primary);
+      font-weight: 900;
+    }
+
+    .passage-table tbody td {
+      padding: 12px 14px;
+      font-size: 13px;
+      color: var(--color-text);
+      border-bottom: 1px solid var(--color-border);
+    }
+    .passage-table tbody tr {
+      transition: background 0.1s;
+      cursor: pointer;
+    }
+    .passage-table tbody tr:hover {
+      background: var(--color-bg-subtle);
+    }
+    .passage-table tbody tr:last-child td {
+      border-bottom: none;
+    }
+
+    .score-pill {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 999px;
+      font-weight: 700;
+      font-size: 12px;
+    }
+    .score-pill.excellent { background: #dcfce7; color: #14532d; }
+    .score-pill.good { background: #dbeafe; color: #1e40af; }
+    .score-pill.medium { background: #fef3c7; color: #78350f; }
+    .score-pill.bad { background: #fee2e2; color: #7f1d1d; }
+
+    .anomaly-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 2px 8px;
+      border-radius: 6px;
+      background: #fee2e2;
+      color: #991b1b;
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    .passage-table-footer {
+      padding: var(--space-3);
+      background: var(--color-bg-subtle);
+      border-top: 1px solid var(--color-border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 13px;
+      color: var(--color-text-muted);
+    }
+
+    .pagination-controls {
+      display: flex;
+      gap: 6px;
+    }
+
+    .page-btn {
+      padding: 6px 12px;
+      border: 1px solid var(--color-border);
+      background: var(--color-bg-elevated);
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 12px;
+      color: var(--color-text);
+    }
+    .page-btn:hover:not(:disabled) {
+      border-color: var(--color-primary);
+      color: var(--color-primary);
+    }
+    .page-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    /* Empty state */
+    .empty-state {
+      text-align: center;
+      padding: var(--space-6);
+      color: var(--color-text-muted);
+    }
+    .empty-state-icon { font-size: 48px; margin-bottom: 12px; }
+
+    /* Loading */
+    .loading-wrap {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 300px;
+    }
+
+    @media (max-width: 768px) {
+      .passage-table thead { display: none; }
+      .passage-table, .passage-table tbody, .passage-table tr, .passage-table td {
+        display: block;
+        width: 100%;
+      }
+      .passage-table tr {
+        border: 1px solid var(--color-border);
+        border-radius: 8px;
+        margin-bottom: 8px;
+        padding: 8px;
+      }
+      .passage-table tbody td {
+        border-bottom: 1px dashed var(--color-border);
+        padding: 6px 8px;
+      }
+      .passage-table tbody td:last-child { border-bottom: none; }
+      .passage-table tbody td:before {
+        content: attr(data-label);
+        display: inline-block;
+        width: 100px;
+        font-size: 10px;
+        text-transform: uppercase;
+        color: var(--color-text-muted);
+        font-weight: 700;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+
+  <script src="/assets/components-base.js" type="text/babel"></script>
+  <script src="/assets/components-advanced.js" type="text/babel"></script>
+  <script src="/assets/hooks.js" type="text/babel"></script>
+
+  <!-- Composants analytics -->
+  <script src="/assets/analytics-overview.jsx" type="text/babel"></script>
+  <script src="/assets/analytics-passages.jsx" type="text/babel"></script>
+  <script src="/assets/analytics.jsx" type="text/babel"></script>
+</body>
+</html>
