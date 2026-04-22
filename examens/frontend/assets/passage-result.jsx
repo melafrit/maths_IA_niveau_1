@@ -144,10 +144,24 @@
               <span style={{ fontSize: 18 }}>✅</span>
               <strong>Correction détaillée disponible</strong>
             </div>
-            <p style={{ margin: 0, fontSize: 13, color: 'var(--color-text-muted)' }}>
-              La correction sera accessible dans une prochaine mise à jour (P6.7).
-              Pour l'instant, vous pouvez consulter votre score ci-dessus.
+            <p style={{ margin: '0 0 12px 0', fontSize: 13, color: 'var(--color-text-muted)' }}>
+              Consultez la correction avec les bonnes réponses et les explications pour chaque question.
             </p>
+            <Button
+              variant="primary"
+              onClick={() => {
+                const token = (function() {
+                  try { return localStorage.getItem('last_submitted_token'); } catch { return null; }
+                })();
+                const url = token
+                  ? `/etudiant/correction.html?token=${encodeURIComponent(token)}`
+                  : '/etudiant/correction.html';
+                window.location.href = url;
+              }}
+              style={{ padding: '8px 16px' }}
+            >
+              📖 Voir la correction détaillée
+            </Button>
           </div>
         ) : (
           <div style={{

@@ -377,8 +377,12 @@
       setConfirmSubmit(false);
 
       if (res.ok) {
-        try { localStorage.removeItem('passage_token'); } catch {}
-        try { localStorage.removeItem('passage_examen_id'); } catch {}
+        // Sauvegarder le token pour acceder a la correction plus tard
+        try {
+          localStorage.setItem('last_submitted_token', token);
+          localStorage.removeItem('passage_token');
+          localStorage.removeItem('passage_examen_id');
+        } catch {}
         onSubmitted(res.data);
       } else {
         toast({
