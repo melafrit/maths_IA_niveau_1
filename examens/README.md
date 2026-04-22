@@ -3,9 +3,12 @@
 > Plateforme web complète d'examens en ligne avec banque de questions évolutive,
 > génération IA, anti-triche avancé, analytics approfondies et design professionnel.
 
+[![Tests](https://github.com/melafrit/maths_IA_niveau_1/actions/workflows/tests.yml/badge.svg)](https://github.com/melafrit/maths_IA_niveau_1/actions/workflows/tests.yml)
+[![Lint](https://github.com/melafrit/maths_IA_niveau_1/actions/workflows/lint.yml/badge.svg)](https://github.com/melafrit/maths_IA_niveau_1/actions/workflows/lint.yml)
 [![License: CC BY-NC-SA 4.0](https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-lightgrey.svg)](https://creativecommons.org/licenses/by-nc-sa/4.0/)
-[![Status](https://img.shields.io/badge/status-Phase%20P2%20%E2%9C%85%20%E2%80%94%20Design%20system%20livr%C3%A9-success)]()
-[![Version](https://img.shields.io/badge/version-0.2.0-blue)]()
+[![Status](https://img.shields.io/badge/status-Phase%20P8%20%E2%9C%85%20%E2%80%94%20CI%2FCD%20livr%C3%A9-success)]()
+[![Tests](https://img.shields.io/badge/tests-389%2F389%20%E2%9C%85-success)]()
+[![Version](https://img.shields.io/badge/version-0.8.0-blue)]()
 
 ---
 
