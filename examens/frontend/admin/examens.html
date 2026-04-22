@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Examens — Plateforme d'examens IPSSI</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+  <link rel="stylesheet" href="/assets/main.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+
+  <style>
+    .examens-container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: var(--space-4);
+    }
+
+    .examens-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: var(--space-5);
+      padding-bottom: var(--space-4);
+      border-bottom: 1px solid var(--color-border);
+    }
+
+    .examens-tab-nav {
+      display: flex;
+      gap: var(--space-2);
+      border-bottom: 2px solid var(--color-border);
+      margin-bottom: var(--space-4);
+    }
+
+    .examens-tab-btn {
+      padding: var(--space-2) var(--space-3);
+      background: transparent;
+      border: none;
+      border-bottom: 2px solid transparent;
+      color: var(--color-text-muted);
+      cursor: pointer;
+      font-size: var(--text-sm);
+      font-weight: 500;
+      transition: all 0.15s ease;
+      margin-bottom: -2px;
+    }
+    .examens-tab-btn:hover { color: var(--color-primary); }
+    .examens-tab-btn.active {
+      color: var(--color-primary);
+      border-bottom-color: var(--color-primary);
+    }
+
+    /* Table des examens */
+    .examens-table {
+      width: 100%;
+      border-collapse: collapse;
+      background: var(--color-bg-elevated);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+    }
+    .examens-table th,
+    .examens-table td {
+      padding: var(--space-2) var(--space-3);
+      text-align: left;
+      border-bottom: 1px solid var(--color-border);
+      font-size: var(--text-sm);
+    }
+    .examens-table th {
+      background: var(--color-bg-subtle);
+      font-weight: 600;
+      color: var(--color-text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      font-size: 11px;
+    }
+    .examens-table tr:last-child td { border-bottom: none; }
+    .examens-table tr:hover td { background: var(--color-bg-subtle); }
+
+    /* Status badges */
+    .status-badge {
+      padding: 2px 10px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .status-badge--draft {
+      background: rgba(100, 116, 139, 0.1);
+      color: #64748b;
+    }
+    .status-badge--published {
+      background: rgba(34, 197, 94, 0.1);
+      color: #16a34a;
+    }
+    .status-badge--closed {
+      background: rgba(245, 158, 11, 0.1);
+      color: #d97706;
+    }
+    .status-badge--archived {
+      background: rgba(168, 85, 247, 0.1);
+      color: #9333ea;
+    }
+
+    /* Access code mise en valeur */
+    .access-code {
+      font-family: var(--font-mono);
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--color-primary), #8b5cf6);
+      color: white;
+      padding: 2px 10px;
+      border-radius: 4px;
+      font-size: 12px;
+      cursor: pointer;
+      user-select: all;
+    }
+
+    /* Form sections */
+    .form-section {
+      padding: var(--space-4);
+      background: var(--color-bg-elevated);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      margin-bottom: var(--space-4);
+    }
+    .form-section-title {
+      font-size: var(--text-sm);
+      font-weight: 600;
+      color: var(--color-text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin: 0 0 var(--space-3) 0;
+      padding-bottom: var(--space-2);
+      border-bottom: 1px solid var(--color-border);
+    }
+
+    /* Questions picker */
+    .question-picker-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      padding: 8px 12px;
+      background: var(--color-bg-subtle);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      margin-bottom: 6px;
+    }
+    .question-picker-item.selected {
+      background: rgba(var(--color-primary-rgb, 59, 130, 246), 0.1);
+      border-color: var(--color-primary);
+    }
+
+    /* Action buttons row */
+    .table-actions {
+      display: flex;
+      gap: 4px;
+      flex-wrap: wrap;
+    }
+    .table-action-btn {
+      padding: 3px 8px;
+      font-size: 11px;
+      border-radius: 4px;
+      cursor: pointer;
+      border: 1px solid var(--color-border);
+      background: var(--color-bg-elevated);
+      transition: all 0.15s;
+    }
+    .table-action-btn:hover {
+      background: var(--color-bg-subtle);
+    }
+    .table-action-btn.primary {
+      background: var(--color-primary);
+      color: white;
+      border-color: var(--color-primary);
+    }
+    .table-action-btn.danger {
+      color: #dc2626;
+      border-color: #fecaca;
+    }
+    .table-action-btn.danger:hover { background: #fef2f2; }
+
+    .katex { font-size: 1.05em; }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+
+  <script src="/assets/components-base.js" type="text/babel"></script>
+  <script src="/assets/components-advanced.js" type="text/babel"></script>
+  <script src="/assets/hooks.js" type="text/babel"></script>
+  <script src="/assets/layouts.js" type="text/babel"></script>
+
+  <!-- Réutilisation des helpers du frontend banque pour KaTeX -->
+  <script src="/assets/banque-browser.jsx" type="text/babel"></script>
+
+  <!-- Composants spécifiques aux examens -->
+  <script src="/assets/examens-list.jsx" type="text/babel"></script>
+  <script src="/assets/examens-create.jsx" type="text/babel"></script>
+  <script src="/assets/examens-stats.jsx" type="text/babel"></script>
+  <script src="/assets/examens.jsx" type="text/babel"></script>
+</body>
+</html>
