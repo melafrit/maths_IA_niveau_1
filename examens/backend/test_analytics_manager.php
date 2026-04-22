@@ -123,7 +123,7 @@ echo "  Examen 2 : {$exam2['id']}\n";
 
 // 10 passages avec scores variés sur exam1
 echo "  Creation 10 passages sur exam1...\n";
-$p1 = createSubmittedPassage($em, $pm, $banque, $exam['id'], 'alice@test.fr',
+$p1 = createSubmittedPassage($em, $pm, $banque, $exam['id'], 'alice_p7m@test.fr',
     ['correct', 'correct', 'correct', 'correct']); // 4/4 = 100%
 $createdPassages[] = $p1['id'];
 
@@ -156,7 +156,7 @@ $p6 = createSubmittedPassage($em, $pm, $banque, $exam['id'], 'suspect@test.fr',
 $createdPassages[] = $p6['id'];
 
 // 2 passages sur exam2 pour alice (multi-examens history)
-$p7 = createSubmittedPassage($em, $pm, $banque, $exam2['id'], 'alice@test.fr',
+$p7 = createSubmittedPassage($em, $pm, $banque, $exam2['id'], 'alice_p7m@test.fr',
     ['correct', 'correct', 'wrong', 'correct']); // 3/4 = 75%
 $createdPassages[] = $p7['id'];
 
@@ -360,17 +360,17 @@ test('QuestionStats avec withFullDetails=true : inclut enonce', function() use (
 echo "\n👤 STUDENT HISTORY\n";
 
 test('StudentHistory : alice a 2 passages (exam1 + exam2)', function() use ($am) {
-    $hist = $am->getStudentHistory('alice@test.fr');
+    $hist = $am->getStudentHistory('alice_p7m@test.fr');
     return $hist['nb_passages'] === 2;
 });
 
 test('StudentHistory : best_score_pct = 100', function() use ($am) {
-    $hist = $am->getStudentHistory('alice@test.fr');
+    $hist = $am->getStudentHistory('alice_p7m@test.fr');
     return $hist['best_score_pct'] == 100;
 });
 
 test('StudentHistory : passages incluent examen_titre', function() use ($am) {
-    $hist = $am->getStudentHistory('alice@test.fr');
+    $hist = $am->getStudentHistory('alice_p7m@test.fr');
     foreach ($hist['passages'] as $p) {
         if (empty($p['examen_titre'])) return 'examen_titre manquant';
     }
@@ -378,13 +378,13 @@ test('StudentHistory : passages incluent examen_titre', function() use ($am) {
 });
 
 test('StudentHistory : tri par date desc', function() use ($am) {
-    $hist = $am->getStudentHistory('alice@test.fr');
+    $hist = $am->getStudentHistory('alice_p7m@test.fr');
     if (count($hist['passages']) < 2) return true;
     return strcmp($hist['passages'][0]['start_time'], $hist['passages'][1]['start_time']) >= 0;
 });
 
 test('StudentHistory : total_time_sec >= 0 (calcule)', function() use ($am) {
-    $hist = $am->getStudentHistory('alice@test.fr');
+    $hist = $am->getStudentHistory('alice_p7m@test.fr');
     return is_int($hist['total_time_sec']) && $hist['total_time_sec'] >= 0;
 });
 
