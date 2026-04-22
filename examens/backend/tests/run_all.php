@@ -48,6 +48,9 @@ $ALL_SUITES = [
     'security_auth'        => ['file' => 'tests/test_security_auth.php', 'category' => 'security'],
     'security_xss'         => ['file' => 'tests/test_security_xss.php', 'category' => 'security'],
     'security_injection'   => ['file' => 'tests/test_security_injection.php', 'category' => 'security'],
+
+    // E2E (P8.2)
+    'e2e_workflow'         => ['file' => 'tests/test_e2e_workflow.php', 'category' => 'e2e'],
 ];
 
 // ============================================================================
@@ -170,6 +173,7 @@ foreach ($selectedSuites as $name => $config) {
         'unit' => 'blue',
         'integration' => 'magenta',
         'security' => 'yellow',
+        'e2e' => 'green',
     ][$config['category']] ?? 'cyan';
 
     echo color("[$catLabel]", $catColor) . " " . bold(str_pad($name, 22));
