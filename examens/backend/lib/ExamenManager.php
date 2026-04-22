@@ -319,8 +319,66 @@ class ExamenManager
             throw new \InvalidArgumentException('Impossible de publier : ' . json_encode($errors));
         }
 
-        return $this->update($id, ['status' => self::STATUS_PUBLISHED]);
+        $updated = $this->update($id, ['status' => self::STATUS_PUBLISHED]);
+
+        // Hook email : notifier le prof
+        $this->sendPublishEmail($updated);
+
+        return $updated;
     }
+
+    /**
+     * Hook email apres publication (notifie le prof createur).
+     */
+    private function sendPublishEmail(array $examen): void
+    {
+        try {
+            $creatorId = $examen['created_by'] ?? null;
+            if (!$creatorId) return;
+
+            // Charger le prof
+            $profData = $this->loadProfData($creatorId);
+            if ($profData === null || empty($profData['email'])) return;
+
+            $mailer = new Mailer($this->logger);
+            if ($mailer->getMode() === Mailer::MODE_DISABLED) return;
+
+            $tpl = new EmailTemplate();
+            $adminUrl = defined('BASE_URL') ? BASE_URL . '/admin/examens.html' : '/admin/examens.html';
+
+            $rendered = $tpl->render('prof_examen_cree', [
+                'profName' => $profData['nom'] ?? $profData['email'],
+                'examTitle' => $examen['titre'],
+                'examId' => $examen['id'],
+                'accessCode' => $examen['access_code'],
+                'nbQuestions' => count($examen['questions']),
+                'dureeSec' => $examen['duree_sec'],
+                'maxPassages' => $examen['max_passages'] ?? 1,
+                'dateOuverture' => $examen['date_ouverture'],
+                'dateCloture' => $examen['date_cloture'],
+                'adminUrl' => $adminUrl,
+            ]);
+
+            $mailer->send($profData['email'], $rendered['subject'], $rendered['html']);
+        } catch (\Throwable $e) {
+            // Ne pas faire echouer la publication sur erreur email
+            $this->logger->error('Hook email publish failed', ['error' => $e->getMessage()]);
+        }
+    }
+
+    /**
+     * Charger les infos d'un prof depuis le compte.
+     */
+    private function loadProfData(string $profId): ?array
+    {
+        $comptePath = function_exists('data_path')
+            ? data_path('comptes') . '/' . $profId . '.json'
+            : __DIR__ . '/../../data/comptes/' . $profId . '.json';
+
+        if (!file_exists($comptePath)) return null;
+        return $this->storage->read($comptePath);
+    }
+
 
     /**
      * Clôturer un examen (published → closed).

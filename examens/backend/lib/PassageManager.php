@@ -382,7 +382,99 @@ class PassageManager
             'duration_sec' => $duration,
         ]);
 
+        // Hooks email : confirmation etudiant + notif prof si premier passage
+        $this->sendSubmissionEmails($passage);
+
         return $passage;
+    }
+
+    /**
+     * Hooks emails apres soumission :
+     *   - Etudiant : confirmation avec score
+     *   - Prof : premier passage uniquement (pas de spam)
+     */
+    private function sendSubmissionEmails(array $passage): void
+    {
+        try {
+            $mailer = new Mailer($this->logger);
+            if ($mailer->getMode() === Mailer::MODE_DISABLED) return;
+
+            $tpl = new EmailTemplate();
+            $examen = $this->examens->get($passage['examen_id']);
+            if ($examen === null) return;
+
+            // 1. Email etudiant (toujours)
+            $studentEmail = $passage['student_info']['email'] ?? null;
+            if ($studentEmail) {
+                $correctionUrl = null;
+                $correctionDelay = null;
+                if ($examen['show_correction_after'] ?? true) {
+                    $delayMin = (int) ($examen['correction_delay_min'] ?? 0);
+                    if ($delayMin === 0) {
+                        $base = defined('BASE_URL') ? BASE_URL : '';
+                        $correctionUrl = $base . '/etudiant/correction.html?token=' . urlencode($passage['token']);
+                    } else {
+                        $correctionDelay = $delayMin;
+                    }
+                }
+
+                $rendered = $tpl->render('etudiant_submission', [
+                    'studentName' => trim(($passage['student_info']['prenom'] ?? '') . ' ' . ($passage['student_info']['nom'] ?? '')),
+                    'examTitle' => $examen['titre'],
+                    'scoreBrut' => $passage['score_brut'],
+                    'scoreMax' => $passage['score_max'],
+                    'scorePct' => $passage['score_pct'],
+                    'durationSec' => $passage['duration_sec'],
+                    'submittedAt' => $passage['end_time'],
+                    'correctionUrl' => $correctionUrl,
+                    'correctionDelay' => $correctionDelay,
+                ]);
+
+                $mailer->send($studentEmail, $rendered['subject'], $rendered['html']);
+            }
+
+            // 2. Email prof : seulement si c'est le PREMIER passage de cet examen
+            $passagesCount = count($this->list([
+                'examen_id' => $examen['id'],
+                'status' => [self::STATUS_SUBMITTED, self::STATUS_EXPIRED],
+            ]));
+
+            if ($passagesCount === 1) {
+                $profData = $this->loadProfData($examen['created_by'] ?? '');
+                if ($profData && !empty($profData['email'])) {
+                    $studentName = trim(($passage['student_info']['prenom'] ?? '') . ' ' . ($passage['student_info']['nom'] ?? ''));
+                    $adminUrl = defined('BASE_URL') ? BASE_URL . '/admin/examens.html' : '/admin/examens.html';
+
+                    $rendered = $tpl->render('prof_premier_passage', [
+                        'profName' => $profData['nom'] ?? $profData['email'],
+                        'examTitle' => $examen['titre'],
+                        'studentName' => $studentName,
+                        'scoreBrut' => $passage['score_brut'],
+                        'scoreMax' => $passage['score_max'],
+                        'scorePct' => $passage['score_pct'],
+                        'adminUrl' => $adminUrl,
+                    ]);
+
+                    $mailer->send($profData['email'], $rendered['subject'], $rendered['html']);
+                }
+            }
+        } catch (\Throwable $e) {
+            $this->logger->error('Hook email submit failed', ['error' => $e->getMessage()]);
+        }
+    }
+
+    /**
+     * Charger les infos d'un prof depuis le compte.
+     */
+    private function loadProfData(string $profId): ?array
+    {
+        if (empty($profId)) return null;
+        $comptePath = function_exists('data_path')
+            ? data_path('comptes') . '/' . $profId . '.json'
+            : __DIR__ . '/../../data/comptes/' . $profId . '.json';
+
+        if (!file_exists($comptePath)) return null;
+        return $this->storage->read($comptePath);
     }
 
     /**
