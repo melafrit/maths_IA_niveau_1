@@ -333,7 +333,7 @@
         const data = await res.json();
         if (data.ok && data.data.authenticated) {
           // Déjà connecté → redirection
-          window.location.href = '/dashboard_temp.html';
+          window.location.href = '/admin/examens.html';
         }
       } catch (e) {
         // Pas grave, l'utilisateur peut se connecter manuellement
@@ -370,7 +370,7 @@
         if (data.ok) {
           showAlert('Connexion réussie. Redirection…', 'success');
           setTimeout(() => {
-            window.location.href = '/dashboard_temp.html';
+            window.location.href = '/admin/examens.html';
           }, 600);
         } else {
           const msg = data.error?.message || 'Erreur de connexion.';

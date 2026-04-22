@@ -196,7 +196,7 @@ if ($assetsDir !== false && preg_match('#^/assets/(.+)$#', $requestPath, $m)) {
 // ============================================================================
 
 $frontendDir = realpath(EXAMENS_ROOT . '/../frontend/commun');
-if ($frontendDir !== false && preg_match('#^/([a-z0-9_-]+\.html)$#i', $requestPath, $m)) {
+if ($frontendDir !== false && preg_match('#^/([a-z0-9_.-]+\.html)$#i', $requestPath, $m)) {
     $candidate = realpath($frontendDir . '/' . $m[1]);
     if ($candidate !== false && str_starts_with($candidate, $frontendDir . DIRECTORY_SEPARATOR)) {
         header('Content-Type: text/html; charset=utf-8');

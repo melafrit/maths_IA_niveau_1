@@ -42,7 +42,7 @@
 
       useEffect(() => {
         if (!loading && isAuthenticated) {
-          window.location.href = '/dashboard_temp.html';
+          window.location.href = '/admin/examens.html';
         }
       }, [loading, isAuthenticated]);
 
@@ -79,7 +79,7 @@
           if (result.ok) {
             toast.success(`${t('auth.success.login')} ${t('auth.welcome_back', { name: result.user.prenom })}`);
             setTimeout(() => {
-              window.location.href = '/dashboard_temp.html';
+              window.location.href = '/admin/examens.html';
             }, 600);
           } else {
             const msg = result.error?.message || t('auth.error.invalid_credentials');

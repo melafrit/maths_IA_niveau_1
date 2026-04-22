@@ -335,7 +335,7 @@
      Usage :
        const [search, setSearch] = useState('');
        const debouncedSearch = useDebounce(search, 300);
-       useEffect(() => { /* fetch... */ }, [debouncedSearch]);
+       useEffect(() => { fetch(...) }, [debouncedSearch]);
      ========================================================================== */
 
   function useDebounce(value, delayMs = 300) {

@@ -182,13 +182,10 @@
     );
   }
 
-  // Mount
-  document.addEventListener('DOMContentLoaded', () => {
-    const rootElement = document.getElementById('root');
-    if (rootElement) {
-      const reactRoot = ReactDOM.createRoot(rootElement);
-      reactRoot.render(<ExamensApp />);
-    }
-  });
+  // Mount (immediate — Babel Standalone runs after DOMContentLoaded)
+  const rootElement = document.getElementById('root');
+  if (rootElement) {
+    ReactDOM.createRoot(rootElement).render(<ExamensApp />);
+  }
 
 })(window);
