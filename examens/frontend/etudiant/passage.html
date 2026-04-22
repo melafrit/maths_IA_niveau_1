@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Passage d'examen — IPSSI</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+  <link rel="stylesheet" href="/assets/main.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+
+  <style>
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: linear-gradient(135deg, #f0f4f8 0%, #e0eafc 100%);
+    }
+
+    .passage-container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: var(--space-4);
+    }
+
+    /* Timer fixe haut de page */
+    .passage-timer {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: var(--color-bg-elevated);
+      border-bottom: 2px solid var(--color-border);
+      padding: var(--space-3) var(--space-4);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+      margin: calc(-1 * var(--space-4)) calc(-1 * var(--space-4)) var(--space-4) calc(-1 * var(--space-4));
+    }
+
+    .timer-value {
+      font-family: var(--font-mono);
+      font-size: 24px;
+      font-weight: 800;
+      letter-spacing: 1px;
+    }
+
+    .timer-safe { color: #16a34a; }
+    .timer-warning { color: #d97706; }
+    .timer-danger { color: #dc2626; animation: pulse 1s ease-in-out infinite; }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    /* Progress bar */
+    .passage-progress {
+      width: 100%;
+      height: 4px;
+      background: var(--color-bg-subtle);
+      border-radius: 2px;
+      overflow: hidden;
+      margin-top: var(--space-2);
+    }
+    .passage-progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--color-primary), #8b5cf6);
+      border-radius: 2px;
+      transition: width 0.3s ease;
+    }
+
+    /* Carte question */
+    .question-card {
+      background: var(--color-bg-elevated);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      padding: var(--space-5);
+      margin-bottom: var(--space-4);
+      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+    }
+
+    .question-number {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--color-primary), #8b5cf6);
+      color: white;
+      font-weight: 800;
+      font-size: 16px;
+    }
+
+    .question-enonce {
+      font-size: var(--text-lg);
+      line-height: 1.6;
+      margin: var(--space-3) 0 var(--space-4) 0;
+    }
+
+    /* Options */
+    .option-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 14px 18px;
+      border: 2px solid var(--color-border);
+      border-radius: var(--radius-md);
+      margin-bottom: 10px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      background: var(--color-bg-elevated);
+    }
+    .option-item:hover {
+      border-color: var(--color-primary);
+      background: var(--color-bg-subtle);
+    }
+    .option-item.selected {
+      border-color: var(--color-primary);
+      background: rgba(59, 130, 246, 0.08);
+    }
+
+    .option-letter {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: var(--color-bg-subtle);
+      color: var(--color-text);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 14px;
+      flex-shrink: 0;
+    }
+    .option-item.selected .option-letter {
+      background: var(--color-primary);
+      color: white;
+    }
+
+    .option-text {
+      flex: 1;
+      font-size: var(--text-base);
+      line-height: 1.5;
+    }
+
+    /* Navigation questions */
+    .passage-nav {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin: var(--space-3) 0;
+      padding: var(--space-3);
+      background: var(--color-bg-subtle);
+      border-radius: var(--radius-md);
+    }
+
+    .nav-dot {
+      width: 32px;
+      height: 32px;
+      border-radius: 6px;
+      border: 1px solid var(--color-border);
+      background: var(--color-bg-elevated);
+      color: var(--color-text);
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 600;
+      transition: all 0.15s;
+    }
+    .nav-dot:hover { transform: translateY(-1px); }
+    .nav-dot.current {
+      background: var(--color-primary);
+      color: white;
+      border-color: var(--color-primary);
+    }
+    .nav-dot.answered {
+      background: #16a34a20;
+      color: #16a34a;
+      border-color: #16a34a;
+    }
+    .nav-dot.answered.current {
+      background: #16a34a;
+      color: white;
+    }
+
+    /* Welcome screen */
+    .welcome-card {
+      max-width: 600px;
+      margin: 60px auto;
+      background: var(--color-bg-elevated);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      padding: var(--space-6);
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+    }
+
+    .welcome-icon {
+      font-size: 64px;
+      text-align: center;
+      margin-bottom: var(--space-4);
+    }
+
+    .welcome-title {
+      text-align: center;
+      font-size: var(--text-2xl);
+      font-weight: 800;
+      margin: 0 0 var(--space-2) 0;
+    }
+
+    .welcome-subtitle {
+      text-align: center;
+      color: var(--color-text-muted);
+      margin-bottom: var(--space-5);
+    }
+
+    /* Exam info panel */
+    .exam-info-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      padding: var(--space-3);
+      background: var(--color-bg-subtle);
+      border-radius: var(--radius-md);
+      margin-bottom: var(--space-4);
+    }
+
+    .exam-info-item {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .exam-info-label {
+      font-size: 11px;
+      text-transform: uppercase;
+      color: var(--color-text-muted);
+      font-weight: 600;
+      letter-spacing: 0.5px;
+    }
+
+    .exam-info-value {
+      font-size: var(--text-base);
+      font-weight: 600;
+      margin-top: 2px;
+    }
+
+    /* Result screen */
+    .result-score {
+      text-align: center;
+      padding: var(--space-5);
+    }
+
+    .score-number {
+      font-size: 72px;
+      font-weight: 900;
+      background: linear-gradient(135deg, var(--color-primary), #8b5cf6);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      line-height: 1;
+    }
+
+    .score-max {
+      font-size: 24px;
+      color: var(--color-text-muted);
+    }
+
+    .score-pct {
+      font-size: var(--text-3xl);
+      font-weight: 700;
+      margin-top: var(--space-3);
+    }
+
+    /* Warning banner */
+    .warning-banner {
+      background: #fef3c7;
+      border-left: 4px solid #f59e0b;
+      color: #92400e;
+      padding: var(--space-3) var(--space-4);
+      border-radius: var(--radius-md);
+      margin-bottom: var(--space-3);
+      font-size: var(--text-sm);
+    }
+
+    .warning-banner.danger {
+      background: #fee2e2;
+      border-left-color: #dc2626;
+      color: #991b1b;
+    }
+
+    /* KaTeX alignment */
+    .katex { font-size: 1.05em; }
+
+    /* Disable selection/copy for exam content */
+    .no-select {
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    @media (max-width: 640px) {
+      .welcome-card { margin: 20px auto; padding: var(--space-4); }
+      .score-number { font-size: 56px; }
+      .exam-info-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+
+  <script src="/assets/components-base.js" type="text/babel"></script>
+  <script src="/assets/components-advanced.js" type="text/babel"></script>
+  <script src="/assets/hooks.js" type="text/babel"></script>
+
+  <!-- Réutilisation helper KaTeX -->
+  <script src="/assets/banque-browser.jsx" type="text/babel"></script>
+
+  <!-- Composants passage -->
+  <script src="/assets/passage-welcome.jsx" type="text/babel"></script>
+  <script src="/assets/passage-exam.jsx" type="text/babel"></script>
+  <script src="/assets/passage-result.jsx" type="text/babel"></script>
+  <script src="/assets/passage.jsx" type="text/babel"></script>
+</body>
+</html>
