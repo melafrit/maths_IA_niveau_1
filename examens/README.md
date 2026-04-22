@@ -6,9 +6,10 @@
 [![Tests](https://github.com/melafrit/maths_IA_niveau_1/actions/workflows/tests.yml/badge.svg)](https://github.com/melafrit/maths_IA_niveau_1/actions/workflows/tests.yml)
 [![Lint](https://github.com/melafrit/maths_IA_niveau_1/actions/workflows/lint.yml/badge.svg)](https://github.com/melafrit/maths_IA_niveau_1/actions/workflows/lint.yml)
 [![License: CC BY-NC-SA 4.0](https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-lightgrey.svg)](https://creativecommons.org/licenses/by-nc-sa/4.0/)
-[![Status](https://img.shields.io/badge/status-Phase%20P8%20%E2%9C%85%20%E2%80%94%20CI%2FCD%20livr%C3%A9-success)]()
+[![Status](https://img.shields.io/badge/status-%F0%9F%8E%89%20Projet%20Termin%C3%A9%20%E2%80%94%20Production%20Ready-success)]()
 [![Tests](https://img.shields.io/badge/tests-389%2F389%20%E2%9C%85-success)]()
-[![Version](https://img.shields.io/badge/version-0.8.0-blue)]()
+[![Docs](https://img.shields.io/badge/docs-4818%20lignes-blue)]()
+[![Version](https://img.shields.io/badge/version-1.0.0-blue)]()
 
 ---
 
@@ -190,35 +191,62 @@ php scripts/init_comptes.php
 
 ## 📚 Documentation
 
+### Pour démarrer
+
 | Document | Description |
 |---|---|
 | [NOTE_CADRAGE.md](./NOTE_CADRAGE.md) | **Cadrage détaillé** (20 décisions + justifications) |
 | [ROADMAP.md](./ROADMAP.md) | Plan de livraison en 9 phases |
 | [CONVENTIONS.md](./CONVENTIONS.md) | Conventions de code, commit, branches |
 | [CHANGELOG.md](./CHANGELOG.md) | Historique des versions |
-| [docs/GUIDE_UTILISATION_PROF.md](./docs/GUIDE_UTILISATION_PROF.md) | Guide enseignant *(Phase P9)* |
-| [docs/GUIDE_UTILISATION_ETUDIANT.md](./docs/GUIDE_UTILISATION_ETUDIANT.md) | Guide étudiant *(Phase P9)* |
-| [docs/GUIDE_DEPLOIEMENT_OVH.md](./docs/GUIDE_DEPLOIEMENT_OVH.md) | Installation OVH pas-à-pas *(Phase P9)* |
-| [docs/GUIDE_MIGRATION_V2.md](./docs/GUIDE_MIGRATION_V2.md) | Migration fichiers → MySQL *(v2)* |
+
+### 🎯 Guides utilisateurs (Phase P9 ✅)
+
+| Document | Public | Contenu |
+|---|---|---|
+| [**docs/GUIDE_ADMIN.md**](./docs/GUIDE_ADMIN.md) | Administrateurs | Dashboard, users, monitoring, backups, 5 scénarios complets |
+| [**docs/GUIDE_PROFESSEUR.md**](./docs/GUIDE_PROFESSEUR.md) | Enseignants | Workflow création examen → analyse, 4 scénarios pédagogiques |
+| [**docs/GUIDE_ETUDIANT.md**](./docs/GUIDE_ETUDIANT.md) | Étudiants | Passage d'examen, correction, FAQ, dépannage |
+
+### 🛠️ Guides techniques (Phase P9 ✅)
+
+| Document | Contenu |
+|---|---|
+| [**docs/ARCHITECTURE.md**](./docs/ARCHITECTURE.md) | Vue système, composants, API REST, sécurité, modèle données |
+| [**docs/INSTALLATION.md**](./docs/INSTALLATION.md) | Installation locale Windows / Mac / Linux — 0 à fonctionnel |
+| [**docs/DEPLOIEMENT_OVH.md**](./docs/DEPLOIEMENT_OVH.md) | Déploiement production OVH (mutualisé + VPS) |
+
+### 📐 Références spécialisées
+
+| Document | Sujet |
+|---|---|
+| [docs/BACKUPS.md](./docs/BACKUPS.md) | Système de backups automatiques |
+| [docs/RATE_LIMITING.md](./docs/RATE_LIMITING.md) | Rate limiting API par rôle |
+| [docs/TESTING.md](./docs/TESTING.md) | Harness de tests et stratégie |
+| [docs/CI_CD.md](./docs/CI_CD.md) | Pipeline GitHub Actions |
+| [docs/EMAILS.md](./docs/EMAILS.md) | Configuration emails SMTP |
+| [docs/API_ANALYTICS.md](./docs/API_ANALYTICS.md) | API analytics complète |
 
 ---
 
 ## 📅 Statut du projet
 
-**Phase actuelle : P2 — Design system** ✅ **Terminée**
+**🎉 Projet terminé — Production-ready !**
 
 | Phase | Description | Statut |
 |:-:|---|:-:|
 | P0 | Cadrage + structure repo | ✅ Livrée |
 | P1 | Fondations backend (auth, comptes, API) | ✅ Livrée |
-| P2 | Design system + frontend commun | ✅ **Livrée** |
-| P3 | Banque de questions (CRUD + Import/Export) | 🟡 À venir |
-| P4 | Génération IA + Migration J1-J2 | ⏳ |
-| P5 | Création examen + Passage étudiant + Focus-lock | ⏳ |
-| P6 | Correction étudiant + PDF + Notifications | ⏳ |
-| P7 | Historique prof + Analytics approfondies | ⏳ |
-| P8 | Tests + CI/CD + Backups | ⏳ |
-| P9 | Documentation finale + Soft launch | ⏳ |
+| P2 | Design system + frontend commun | ✅ Livrée |
+| P3 | Banque de questions (CRUD + Import/Export) | ✅ Livrée |
+| P4 | Génération IA + Migration J1-J2 | ✅ Livrée |
+| P5 | Création examen + Passage étudiant | ✅ Livrée |
+| P6 | Correction étudiant + PDF + Notifications | ✅ Livrée (147 tests) |
+| P7 | Historique prof + Analytics approfondies | ✅ Livrée (55 tests) |
+| P8 | Tests + CI/CD + Backups | ✅ Livrée (187 tests) |
+| P9 | **Documentation finale + Soft launch** | ✅ **Livrée (4818 lignes)** |
+
+**Total tests backend : 389/389 ✅ (100%)**
 
 Voir [ROADMAP.md](./ROADMAP.md) pour le détail.
 
