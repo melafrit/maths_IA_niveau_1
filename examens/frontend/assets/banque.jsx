@@ -31,8 +31,8 @@
   // Layouts
   const { AdminLayout } = window.UILayouts;
 
-  // Composants Phases P5.1 et P5.2
-  const { BanqueBrowser, BanqueEditor } = window;
+  // Composants Phases P5.1, P5.2 et P5.3
+  const { BanqueBrowser, BanqueEditor, BanqueGenerator } = window;
 
   // ==========================================================================
   // Contenu principal (tabs)
@@ -44,7 +44,7 @@
     const tabs = [
       { id: 'browser', label: '🔍 Navigateur', component: BanqueBrowser, enabled: true },
       { id: 'editor', label: '✏️ Éditeur', component: BanqueEditor, enabled: true },
-      { id: 'generator', label: '🎲 Générateur d\'examens', enabled: false, tooltip: 'Phase P5.3' },
+      { id: 'generator', label: '🎲 Générateur d\'examens', component: BanqueGenerator, enabled: true },
       { id: 'search', label: '🔎 Recherche avancée', enabled: false, tooltip: 'Phase P5.4' },
       { id: 'stats', label: '📊 Statistiques', enabled: false, tooltip: 'Phase P5.5' },
     ];
