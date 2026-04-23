@@ -147,7 +147,7 @@
           </label>
           <Select
             value={scope.module || ''}
-            onChange={e => setScope({ module: e.target.value, chapitre: null, themes: [] })}
+            onChange={val => setScope({ module: val, chapitre: null, themes: [] })}
             options={[
               { value: '', label: '— Tous les modules —' },
               ...availableModules.map(m => ({ value: m, label: m })),
@@ -163,7 +163,7 @@
             </label>
             <Select
               value={scope.chapitre || ''}
-              onChange={e => setScope({ ...scope, chapitre: e.target.value, themes: [] })}
+              onChange={val => setScope({ ...scope, chapitre: val, themes: [] })}
               options={[
                 { value: '', label: '— Tous les chapitres —' },
                 ...availableChapitres.map(c => ({ value: c, label: c })),
@@ -777,7 +777,7 @@
                   min={1}
                   max={100}
                   value={nEquitable}
-                  onChange={e => setNEquitable(Math.max(1, Math.min(100, parseInt(e.target.value) || 1)))}
+                  onChange={val => setNEquitable(Math.max(1, Math.min(100, parseInt(val) || 1)))}
                 />
                 <div style={{ marginTop: 8, fontSize: 11, color: 'var(--color-text-muted)' }}>
                   Répartition auto : {Math.floor(nEquitable / 4)} par niveau (+ arrondis si %4 ≠ 0)
@@ -798,7 +798,7 @@
               <Input
                 type="number"
                 value={seed}
-                onChange={e => setSeed(e.target.value)}
+                onChange={val => setSeed(val)}
                 placeholder="Ex: 42 (pour reproductibilité)"
               />
               <div style={{ marginTop: 4, fontSize: 11, color: 'var(--color-text-muted)' }}>

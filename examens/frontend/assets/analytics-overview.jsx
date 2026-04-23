@@ -184,7 +184,7 @@
             type="email"
             placeholder="Rechercher un étudiant par email..."
             value={searchEmail}
-            onChange={e => setSearchEmail(e.target.value)}
+            onChange={val => setSearchEmail(val)}
             onKeyDown={e => {
               if (e.key === 'Enter') handleSearchStudent();
             }}

@@ -95,13 +95,17 @@
 
     async function loadExamens() {
       setLoading(true);
-      const qs = new URLSearchParams();
-      if (filters.status) qs.set('status', filters.status);
-      const res = await api.request('GET', `/api/examens?${qs.toString()}`);
-      if (res.ok) {
-        setExamens(res.data?.examens || []);
-      } else {
-        toast({ title: 'Erreur', message: res.error?.message || 'Chargement impossible', type: 'error' });
+      try {
+        const qs = new URLSearchParams();
+        if (filters.status) qs.set('status', filters.status);
+        const res = await api.request('GET', `/api/examens?${qs.toString()}`);
+        if (res.ok) {
+          setExamens(res.data?.examens || []);
+        } else {
+          toast({ title: 'Erreur', message: res.error?.message || 'Chargement impossible', type: 'error' });
+        }
+      } catch (err) {
+        toast({ title: 'Erreur inattendue', message: err.message || 'Chargement impossible', type: 'error' });
       }
       setLoading(false);
     }
@@ -142,38 +146,48 @@
 
     async function doTransition(examen, action) {
       setTransitioning(true);
-      const res = await api.request('POST', `/api/examens/${examen.id}/${action}`);
-      setTransitioning(false);
-      setConfirmTransition(null);
+      try {
+        const res = await api.request('POST', `/api/examens/${examen.id}/${action}`);
+        setTransitioning(false);
+        setConfirmTransition(null);
 
-      if (res.ok) {
-        toast({
-          title: 'Transition OK',
-          message: `${examen.titre} → ${res.data?.new_status}`,
-          type: 'success',
-        });
-        loadExamens();
-      } else {
-        toast({
-          title: 'Erreur transition',
-          message: res.error?.message || 'Impossible',
-          type: 'error',
-        });
+        if (res.ok) {
+          toast({
+            title: 'Transition OK',
+            message: `${examen.titre} → ${res.data?.new_status}`,
+            type: 'success',
+          });
+          loadExamens();
+        } else {
+          toast({
+            title: 'Erreur transition',
+            message: res.error?.message || 'Impossible',
+            type: 'error',
+          });
+        }
+      } catch (err) {
+        setTransitioning(false);
+        setConfirmTransition(null);
+        toast({ title: 'Erreur inattendue', message: err.message || 'Erreur transition', type: 'error' });
       }
     }
 
     async function doDelete(examen) {
       setConfirmDelete(null);
-      const res = await api.request('DELETE', `/api/examens/${examen.id}`);
-      if (res.ok) {
-        toast({ title: 'Supprimé', message: examen.titre, type: 'success' });
-        loadExamens();
-      } else {
-        toast({
-          title: 'Erreur suppression',
-          message: res.error?.message || 'Impossible',
-          type: 'error',
-        });
+      try {
+        const res = await api.request('DELETE', `/api/examens/${examen.id}`);
+        if (res.ok) {
+          toast({ title: 'Supprimé', message: examen.titre, type: 'success' });
+          loadExamens();
+        } else {
+          toast({
+            title: 'Erreur suppression',
+            message: res.error?.message || 'Impossible',
+            type: 'error',
+          });
+        }
+      } catch (err) {
+        toast({ title: 'Erreur inattendue', message: err.message || 'Erreur suppression', type: 'error' });
       }
     }
 
@@ -203,14 +217,14 @@
           <div style={{ flex: 1, minWidth: 200 }}>
             <Input
               value={filters.search}
-              onChange={e => setFilters(f => ({ ...f, search: e.target.value }))}
+              onChange={val => setFilters(f => ({ ...f, search: val }))}
               placeholder="🔍 Rechercher par titre, ID, code..."
             />
           </div>
 
           <Select
             value={filters.status}
-            onChange={e => setFilters(f => ({ ...f, status: e.target.value }))}
+            onChange={val => setFilters(f => ({ ...f, status: val }))}
             options={[
               { value: '', label: '— Tous les status —' },
               { value: 'draft', label: '📝 Brouillon' },
@@ -223,7 +237,7 @@
 
           <Select
             value={sortBy}
-            onChange={e => setSortBy(e.target.value)}
+            onChange={val => setSortBy(val)}
             options={[
               { value: 'date_ouverture_desc', label: '📅 Date ↓' },
               { value: 'date_ouverture_asc', label: '📅 Date ↑' },
@@ -390,7 +404,7 @@
 
         {/* Modal confirmation delete */}
         <Modal
-          isOpen={!!confirmDelete}
+          open={!!confirmDelete}
           onClose={() => setConfirmDelete(null)}
           title="⚠️ Supprimer cet examen ?"
         >
@@ -421,7 +435,7 @@
 
         {/* Modal confirmation transition */}
         <Modal
-          isOpen={!!confirmTransition}
+          open={!!confirmTransition}
           onClose={() => setConfirmTransition(null)}
           title={
             confirmTransition?.action === 'publish' ? '🚀 Publier cet examen ?' :

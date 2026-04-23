@@ -39,8 +39,23 @@
     }
   }
 
+  // Style natif pour les inputs (même pattern que login.html)
+  const nativeInputStyle = {
+    width: '100%',
+    padding: '8px 12px',
+    fontSize: 'var(--text-base)',
+    fontFamily: 'var(--font-sans)',
+    color: 'var(--color-text)',
+    background: 'var(--color-bg-input)',
+    border: '1px solid var(--color-border)',
+    borderRadius: 'var(--radius-md)',
+    outline: 'none',
+    height: '40px',
+    boxSizing: 'border-box',
+  };
+
   function PassageWelcome({ onStarted }) {
-    const { Button, Input, Box } = root.UI;
+    const { Button, Box } = root.UI;
     const { useApi } = root.UIHooks;
     const api = useApi();
 
@@ -175,22 +190,23 @@
             }}>
               Code d'accès
             </label>
-            <Input
+            <input
+              type="text"
               value={code}
-              onChange={e => setCode(e.target.value.toUpperCase())}
+              onChange={function(e) { setCode(e.target.value.toUpperCase()); }}
               placeholder="EX. ABC123"
-              style={{
+              maxLength={10}
+              autoFocus
+              onKeyDown={function(e) {
+                if (e.key === 'Enter' && code.trim() && !checking) checkCode();
+              }}
+              style={Object.assign({}, nativeInputStyle, {
                 fontFamily: 'var(--font-mono)',
                 fontSize: 22,
                 letterSpacing: 4,
                 textAlign: 'center',
                 fontWeight: 700,
-              }}
-              maxLength={10}
-              autoFocus
-              onKeyDown={e => {
-                if (e.key === 'Enter' && code.trim() && !checking) checkCode();
-              }}
+              })}
             />
             {codeError && (
               <Box type="error" style={{ marginTop: 8 }}>⚠️ {codeError}</Box>
@@ -265,21 +281,25 @@
             <label style={{ fontSize: 12, fontWeight: 600, display: 'block', marginBottom: 4 }}>
               Prénom <span style={{ color: '#dc2626' }}>*</span>
             </label>
-            <Input
+            <input
+              type="text"
               value={studentInfo.prenom}
-              onChange={e => setStudentInfo(s => ({ ...s, prenom: e.target.value }))}
+              onChange={function(e) { setStudentInfo(function(s) { return Object.assign({}, s, { prenom: e.target.value }); }); }}
               placeholder="Jean"
               autoFocus
+              style={nativeInputStyle}
             />
           </div>
           <div>
             <label style={{ fontSize: 12, fontWeight: 600, display: 'block', marginBottom: 4 }}>
               Nom <span style={{ color: '#dc2626' }}>*</span>
             </label>
-            <Input
+            <input
+              type="text"
               value={studentInfo.nom}
-              onChange={e => setStudentInfo(s => ({ ...s, nom: e.target.value }))}
+              onChange={function(e) { setStudentInfo(function(s) { return Object.assign({}, s, { nom: e.target.value }); }); }}
               placeholder="Dupont"
+              style={nativeInputStyle}
             />
           </div>
         </div>
@@ -288,11 +308,12 @@
           <label style={{ fontSize: 12, fontWeight: 600, display: 'block', marginBottom: 4 }}>
             Email <span style={{ color: '#dc2626' }}>*</span>
           </label>
-          <Input
+          <input
             type="email"
             value={studentInfo.email}
-            onChange={e => setStudentInfo(s => ({ ...s, email: e.target.value }))}
+            onChange={function(e) { setStudentInfo(function(s) { return Object.assign({}, s, { email: e.target.value }); }); }}
             placeholder="jean.dupont@etu.ipssi.net"
+            style={nativeInputStyle}
           />
           <div style={{ fontSize: 11, color: 'var(--color-text-muted)', marginTop: 2 }}>
             Ne sera utilisé que pour la correction. Aucun spam.

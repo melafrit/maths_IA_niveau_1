@@ -439,7 +439,7 @@
                 <Input
                   placeholder="ex: vec-faci-01"
                   value={loadId}
-                  onChange={e => setLoadId(e.target.value)}
+                  onChange={val => setLoadId(val)}
                   onKeyDown={e => { if (e.key === 'Enter') loadQuestion(); }}
                 />
               </div>
@@ -491,14 +491,14 @@
                 <Field label="Module" required>
                   <Input
                     value={location.module}
-                    onChange={e => setLocation(l => ({ ...l, module: e.target.value }))}
+                    onChange={val => setLocation(l => ({ ...l, module: val }))}
                   />
                 </Field>
 
                 <Field label="Chapitre" required hint={availableChapitres.length ? `Disponibles : ${availableChapitres.join(', ')}` : null}>
                   <Select
                     value={location.chapitre}
-                    onChange={e => setLocation(l => ({ ...l, chapitre: e.target.value }))}
+                    onChange={val => setLocation(l => ({ ...l, chapitre: val }))}
                     options={availableChapitres.map(c => ({ value: c, label: c }))}
                   />
                 </Field>
@@ -506,7 +506,7 @@
                 <Field label="Thème" required>
                   <Select
                     value={location.theme}
-                    onChange={e => setLocation(l => ({ ...l, theme: e.target.value }))}
+                    onChange={val => setLocation(l => ({ ...l, theme: val }))}
                     options={availableThemes.map(t => ({ value: t, label: t }))}
                   />
                 </Field>
@@ -522,7 +522,7 @@
             >
               <Input
                 value={question.id}
-                onChange={e => setField('id', e.target.value.toLowerCase())}
+                onChange={val => setField('id', val.toLowerCase())}
                 disabled={isEdit} // ID immuable en mode edit
                 placeholder="vec-faci-01"
               />
@@ -538,7 +538,7 @@
               <Textarea
                 rows={4}
                 value={question.enonce}
-                onChange={e => setField('enonce', e.target.value)}
+                onChange={val => setField('enonce', val)}
                 placeholder="Énoncé complet de la question..."
               />
             </Field>
@@ -586,7 +586,7 @@
                     <Textarea
                       rows={2}
                       value={opt}
-                      onChange={e => setOption(i, e.target.value)}
+                      onChange={val => setOption(i, val)}
                       placeholder={`Option ${letters[i]}`}
                       style={{ flex: 1 }}
                     />
@@ -600,7 +600,7 @@
               <Field label="Difficulté" required error={errors.difficulte}>
                 <Select
                   value={question.difficulte}
-                  onChange={e => setField('difficulte', e.target.value)}
+                  onChange={val => setField('difficulte', val)}
                   options={LEVELS.map(l => ({ value: l, label: l }))}
                 />
               </Field>
@@ -608,7 +608,7 @@
               <Field label="Type" required error={errors.type}>
                 <Select
                   value={question.type}
-                  onChange={e => setField('type', e.target.value)}
+                  onChange={val => setField('type', val)}
                   options={TYPES.map(t => ({ value: t, label: t }))}
                 />
               </Field>
@@ -624,7 +624,7 @@
                 <Input
                   placeholder="ex: vecteurs, calcul, fil-rouge"
                   value={tagInput}
-                  onChange={e => setTagInput(e.target.value)}
+                  onChange={val => setTagInput(val)}
                   onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addTag(); } }}
                 />
                 <Button variant="secondary" size="sm" onClick={addTag} type="button">
@@ -674,7 +674,7 @@
               <Textarea
                 rows={2}
                 value={question.hint}
-                onChange={e => setField('hint', e.target.value)}
+                onChange={val => setField('hint', val)}
                 placeholder="Petit indice pour guider l'étudiant..."
               />
             </Field>
@@ -683,7 +683,7 @@
               <Textarea
                 rows={6}
                 value={question.explanation}
-                onChange={e => setField('explanation', e.target.value)}
+                onChange={val => setField('explanation', val)}
                 placeholder="Explication complète avec formules, étapes, etc."
               />
             </Field>
@@ -692,7 +692,7 @@
               <Textarea
                 rows={3}
                 value={question.traps}
-                onChange={e => setField('traps', e.target.value)}
+                onChange={val => setField('traps', val)}
                 placeholder="Erreurs classiques et pièges à éviter..."
               />
             </Field>
@@ -700,7 +700,7 @@
             <Field label="📚 Référence au cours" required error={errors.references}>
               <Input
                 value={question.references}
-                onChange={e => setField('references', e.target.value)}
+                onChange={val => setField('references', val)}
                 placeholder="ex: Cours J1, section 1.2 Vecteurs"
               />
             </Field>
@@ -872,7 +872,7 @@
 
         {/* Modal de confirmation suppression */}
         <Modal
-          isOpen={deleteModalOpen}
+          open={deleteModalOpen}
           onClose={() => setDeleteModalOpen(false)}
           title="⚠️ Supprimer cette question ?"
         >

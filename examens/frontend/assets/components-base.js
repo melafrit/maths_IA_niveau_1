@@ -144,6 +144,11 @@
     } = props;
 
     const inputId = id || `input-${Math.random().toString(36).slice(2, 8)}`;
+    const inputRef = useRef(null);
+
+    // Garantir que value est toujours un string pour le controlled input
+    var safeValue = typeof value === 'string' ? value : (value != null ? '' + value : '');
+    if (safeValue === '[object Object]') safeValue = '';
 
     const wrapperStyle = {
       width: fullWidth ? '100%' : 'auto',
@@ -203,17 +208,29 @@
         <div style={inputWrapperStyle}>
           {icon && <span style={iconStyle}>{icon}</span>}
           <input
+            ref={inputRef}
             id={inputId}
             type={type}
-            value={value}
-            onChange={(e) => onChange && onChange(e.target.value, e)}
+            value={safeValue}
+            onChange={function(e) {
+              if (!onChange) return;
+              // e.target.value fonctionne sur les <input> natifs (prouvé par login.html)
+              // Fallback sur ref si e.target est indisponible
+              var val;
+              try { val = e.target.value; } catch(ex) {}
+              if (typeof val !== 'string') {
+                try { val = inputRef.current ? inputRef.current.value : ''; } catch(ex2) {}
+              }
+              if (typeof val !== 'string') val = '';
+              onChange(val, e);
+            }}
             placeholder={placeholder}
             required={required}
             disabled={disabled}
             autoComplete={autoComplete}
             autoFocus={autoFocus}
-            onFocus={() => setFocused(true)}
-            onBlur={() => setFocused(false)}
+            onFocus={function() { setFocused(true); }}
+            onBlur={function() { setFocused(false); }}
             style={inputStyle}
             {...rest}
           />
@@ -253,7 +270,11 @@
     } = props;
 
     const inputId = id || `textarea-${Math.random().toString(36).slice(2, 8)}`;
+    const textareaRef = useRef(null);
     const [focused, setFocused] = useState(false);
+
+    var safeValue = typeof value === 'string' ? value : (value != null ? '' + value : '');
+    if (safeValue === '[object Object]') safeValue = '';
 
     const wrapperStyle = { width: fullWidth ? '100%' : 'auto', marginBottom: 'var(--space-1)' };
     const labelStyle = {
@@ -280,15 +301,25 @@
           </label>
         )}
         <textarea
+          ref={textareaRef}
           id={inputId}
-          value={value}
-          onChange={(e) => onChange && onChange(e.target.value, e)}
+          value={safeValue}
+          onChange={function(e) {
+            if (!onChange) return;
+            var val;
+            try { val = e.target.value; } catch(ex) {}
+            if (typeof val !== 'string') {
+              try { val = textareaRef.current ? textareaRef.current.value : ''; } catch(ex2) {}
+            }
+            if (typeof val !== 'string') val = '';
+            onChange(val, e);
+          }}
           placeholder={placeholder}
           rows={rows}
           required={required}
           disabled={disabled}
-          onFocus={() => setFocused(true)}
-          onBlur={() => setFocused(false)}
+          onFocus={function() { setFocused(true); }}
+          onBlur={function() { setFocused(false); }}
           style={textareaStyle}
           {...rest}
         />
@@ -320,7 +351,10 @@
     } = props;
 
     const selectId = id || `select-${Math.random().toString(36).slice(2, 8)}`;
+    const selectRef = useRef(null);
     const [focused, setFocused] = useState(false);
+
+    var safeValue = typeof value === 'string' ? value : (value != null ? '' + value : '');
 
     const selectStyle = {
       width: '100%', padding: '8px 32px 8px 12px', fontSize: 'var(--text-base)',
@@ -347,13 +381,23 @@
           </label>
         )}
         <select
+          ref={selectRef}
           id={selectId}
-          value={value}
-          onChange={(e) => onChange && onChange(e.target.value, e)}
+          value={safeValue}
+          onChange={function(e) {
+            if (!onChange) return;
+            var val;
+            try { val = e.target.value; } catch(ex) {}
+            if (typeof val !== 'string') {
+              try { val = selectRef.current ? selectRef.current.value : ''; } catch(ex2) {}
+            }
+            if (typeof val !== 'string') val = '';
+            onChange(val, e);
+          }}
           required={required}
           disabled={disabled}
-          onFocus={() => setFocused(true)}
-          onBlur={() => setFocused(false)}
+          onFocus={function() { setFocused(true); }}
+          onBlur={function() { setFocused(false); }}
           style={selectStyle}
           {...rest}
         >
@@ -818,12 +862,19 @@
       setToasts((prev) => prev.filter(t => t.id !== id));
     }, []);
 
-    const toast = {
-      success: (msg, dur) => add(msg, 'success', dur),
-      error:   (msg, dur) => add(msg, 'error', dur),
-      warning: (msg, dur) => add(msg, 'warning', dur),
-      info:    (msg, dur) => add(msg, 'info', dur),
+    // toast est CALLABLE en tant que fonction ET a des méthodes .success/.error/etc.
+    // Supporte les deux patterns : toast.success('msg') ET toast({message:'msg', type:'error'})
+    var toast = function(opts) {
+      if (typeof opts === 'string') {
+        add(opts, 'info');
+      } else if (opts && typeof opts === 'object') {
+        add(opts.message || opts.title || '', opts.type || 'info', opts.duration);
+      }
     };
+    toast.success = function(msg, dur) { return add(msg, 'success', dur); };
+    toast.error   = function(msg, dur) { return add(msg, 'error', dur); };
+    toast.warning = function(msg, dur) { return add(msg, 'warning', dur); };
+    toast.info    = function(msg, dur) { return add(msg, 'info', dur); };
 
     return (
       <ToastContext.Provider value={{ toast, remove }}>
@@ -875,7 +926,12 @@
     const ctx = useContext(ToastContext);
     if (!ctx) {
       console.warn('useToast() utilisé hors d\'un <ToastProvider>. Les toasts ne s\'afficheront pas.');
-      return { toast: { success: () => {}, error: () => {}, warning: () => {}, info: () => {} }, remove: () => {} };
+      var noop = function() {};
+      noop.success = function() {};
+      noop.error = function() {};
+      noop.warning = function() {};
+      noop.info = function() {};
+      return { toast: noop, remove: function() {} };
     }
     return ctx;
   }
@@ -922,6 +978,72 @@
   }
 
   /* ==========================================================================
+     17. ERROR BOUNDARY
+     Attrape les erreurs de rendu React et affiche un message d'erreur
+     au lieu d'une page blanche.
+     Usage :
+       <ErrorBoundary>
+         <App />
+       </ErrorBoundary>
+     ========================================================================== */
+
+  class ErrorBoundary extends React.Component {
+    constructor(props) {
+      super(props);
+      this.state = { hasError: false, error: null };
+    }
+
+    static getDerivedStateFromError(error) {
+      return { hasError: true, error: error };
+    }
+
+    componentDidCatch(error, info) {
+      console.error('[ErrorBoundary] Erreur attrapée :', error, info);
+    }
+
+    render() {
+      if (this.state.hasError) {
+        return React.createElement('div', {
+          style: {
+            maxWidth: '600px',
+            margin: '80px auto',
+            padding: '32px',
+            textAlign: 'center',
+            background: 'var(--color-bg-elevated, #fff)',
+            border: '1px solid var(--color-border, #e5e7eb)',
+            borderRadius: '12px',
+            fontFamily: 'system-ui, sans-serif',
+          },
+        },
+          React.createElement('div', {
+            style: { fontSize: '48px', marginBottom: '16px', opacity: 0.5 },
+          }, '\u26A0\uFE0F'),
+          React.createElement('h2', {
+            style: { margin: '0 0 8px 0', fontSize: '20px', color: '#dc2626' },
+          }, 'Une erreur est survenue'),
+          React.createElement('p', {
+            style: { margin: '0 0 16px 0', fontSize: '14px', color: '#6b7280' },
+          }, this.state.error ? String(this.state.error.message || this.state.error) : 'Erreur inattendue'),
+          React.createElement('button', {
+            onClick: function () { window.location.reload(); },
+            style: {
+              padding: '8px 24px',
+              fontSize: '14px',
+              fontWeight: 600,
+              background: 'var(--color-primary, #3b82f6)',
+              color: 'white',
+              border: 'none',
+              borderRadius: '6px',
+              cursor: 'pointer',
+            },
+          }, 'Recharger la page')
+        );
+      }
+      return this.props.children;
+    }
+  }
+
+  /* ==========================================================================
      EXPORTS
      ========================================================================== */
 
@@ -931,6 +1053,7 @@
     Modal, Tooltip,
     ToastProvider, useToast,
     Spinner, Skeleton, ProgressBar,
+    ErrorBoundary,
   };
 
 })(window);

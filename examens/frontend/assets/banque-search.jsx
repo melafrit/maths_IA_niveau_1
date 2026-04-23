@@ -179,7 +179,7 @@
     const letters = ['A', 'B', 'C', 'D'];
 
     return (
-      <Modal isOpen={isOpen} onClose={onClose} title={`Question : ${question.id}`} size="lg">
+      <Modal open={isOpen} onClose={onClose} title={`Question : ${question.id}`} size="lg">
         <div style={{ maxHeight: '70vh', overflow: 'auto', paddingRight: 8 }}>
           <div style={{ display: 'flex', gap: 8, marginBottom: 'var(--space-3)', flexWrap: 'wrap' }}>
             <LevelBadge level={question.difficulte} />
@@ -514,7 +514,7 @@
             <div style={{ flex: 1, position: 'relative' }}>
               <Input
                 value={query}
-                onChange={e => setQuery(e.target.value)}
+                onChange={val => setQuery(val)}
                 placeholder="🔍 Rechercher dans les énoncés, tags, explications... (min 2 caractères)"
                 autoFocus
               />
@@ -617,7 +617,7 @@
               <label style={{ fontSize: 11, fontWeight: 600, display: 'block', marginBottom: 4 }}>Module</label>
               <Select
                 value={filters.module}
-                onChange={e => setFilters(f => ({ ...f, module: e.target.value, chapitre: '', theme: '' }))}
+                onChange={val => setFilters(f => ({ ...f, module: val, chapitre: '', theme: '' }))}
                 options={[
                   { value: '', label: '— Tous —' },
                   ...availableModules.map(m => ({ value: m, label: m })),
@@ -628,7 +628,7 @@
               <label style={{ fontSize: 11, fontWeight: 600, display: 'block', marginBottom: 4 }}>Chapitre</label>
               <Select
                 value={filters.chapitre}
-                onChange={e => setFilters(f => ({ ...f, chapitre: e.target.value, theme: '' }))}
+                onChange={val => setFilters(f => ({ ...f, chapitre: val, theme: '' }))}
                 options={[
                   { value: '', label: '— Tous —' },
                   ...availableChapitres.map(c => ({ value: c, label: c })),
@@ -640,7 +640,7 @@
               <label style={{ fontSize: 11, fontWeight: 600, display: 'block', marginBottom: 4 }}>Thème</label>
               <Select
                 value={filters.theme}
-                onChange={e => setFilters(f => ({ ...f, theme: e.target.value }))}
+                onChange={val => setFilters(f => ({ ...f, theme: val }))}
                 options={[
                   { value: '', label: '— Tous —' },
                   ...availableThemes.map(t => ({ value: t, label: t })),
@@ -674,7 +674,7 @@
             <div style={{ display: 'flex', gap: 6, marginBottom: 6 }}>
               <Input
                 value={tagInput}
-                onChange={e => setTagInput(e.target.value)}
+                onChange={val => setTagInput(val)}
                 placeholder="ex: vecteurs, gradient, fil-rouge"
                 onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addTagFilter(); } }}
               />
@@ -754,7 +754,7 @@
                 <span style={{ fontSize: 12, color: 'var(--color-text-muted)' }}>Trier :</span>
                 <Select
                   value={sortBy}
-                  onChange={e => setSortBy(e.target.value)}
+                  onChange={val => setSortBy(val)}
                   options={[
                     { value: 'score', label: '⭐ Pertinence' },
                     { value: 'id', label: '🔤 ID' },

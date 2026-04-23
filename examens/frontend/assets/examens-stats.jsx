@@ -161,15 +161,19 @@
 
     async function loadStats() {
       setLoading(true);
-      const res = await api.request('GET', '/api/examens/stats');
-      if (res.ok) {
-        setStats(res.data);
-      } else {
-        toast({
-          title: 'Erreur',
-          message: res.error?.message || 'Impossible de charger les stats',
-          type: 'error',
-        });
+      try {
+        const res = await api.request('GET', '/api/examens/stats');
+        if (res.ok) {
+          setStats(res.data);
+        } else {
+          toast({
+            title: 'Erreur',
+            message: res.error?.message || 'Impossible de charger les stats',
+            type: 'error',
+          });
+        }
+      } catch (err) {
+        toast({ title: 'Erreur inattendue', message: err.message || 'Erreur stats', type: 'error' });
       }
       setLoading(false);
     }

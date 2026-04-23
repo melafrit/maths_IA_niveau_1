@@ -372,24 +372,31 @@
       submittedRef.current = true;
 
       setSubmitting(true);
-      const res = await api.request('POST', `/api/passages/${token}/submit`);
-      setSubmitting(false);
-      setConfirmSubmit(false);
+      try {
+        const res = await api.request('POST', `/api/passages/${token}/submit`);
+        setSubmitting(false);
+        setConfirmSubmit(false);
 
-      if (res.ok) {
-        // Sauvegarder le token pour acceder a la correction plus tard
-        try {
-          localStorage.setItem('last_submitted_token', token);
-          localStorage.removeItem('passage_token');
-          localStorage.removeItem('passage_examen_id');
-        } catch {}
-        onSubmitted(res.data);
-      } else {
-        toast({
-          title: 'Erreur soumission',
-          message: res.error?.message || 'Impossible de soumettre',
-          type: 'error',
-        });
+        if (res.ok) {
+          // Sauvegarder le token pour acceder a la correction plus tard
+          try {
+            localStorage.setItem('last_submitted_token', token);
+            localStorage.removeItem('passage_token');
+            localStorage.removeItem('passage_examen_id');
+          } catch {}
+          onSubmitted(res.data);
+        } else {
+          toast({
+            title: 'Erreur soumission',
+            message: res.error?.message || 'Impossible de soumettre',
+            type: 'error',
+          });
+          submittedRef.current = false;
+        }
+      } catch (err) {
+        setSubmitting(false);
+        setConfirmSubmit(false);
+        toast({ title: 'Erreur inattendue', message: err.message || 'Erreur soumission', type: 'error' });
         submittedRef.current = false;
       }
     }
@@ -512,7 +519,7 @@
 
         {/* Modal confirmation soumission */}
         <Modal
-          isOpen={confirmSubmit}
+          open={confirmSubmit}
           onClose={() => !submitting && setConfirmSubmit(false)}
           title="🎯 Confirmer la soumission"
         >

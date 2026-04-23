@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tableau de bord — Plateforme d'examens IPSSI</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="/assets/main.css">
+
+  <style>
+    .dashboard-container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    .dashboard-stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: var(--space-4);
+      margin-bottom: var(--space-6);
+    }
+    .dashboard-quicklinks {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: var(--space-4);
+      margin-bottom: var(--space-6);
+    }
+    .quicklink-card {
+      padding: var(--space-5);
+      background: var(--color-bg-card);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      cursor: pointer;
+      transition: all var(--transition-fast);
+      text-decoration: none;
+      color: inherit;
+      display: block;
+    }
+    .quicklink-card:hover {
+      border-color: var(--color-primary);
+      box-shadow: var(--shadow-md);
+      transform: translateY(-2px);
+    }
+    .quicklink-icon {
+      font-size: 2rem;
+      margin-bottom: var(--space-2);
+    }
+    .quicklink-title {
+      font-size: var(--text-base);
+      font-weight: var(--font-semibold);
+      font-family: var(--font-heading);
+      margin-bottom: var(--space-1);
+    }
+    .quicklink-desc {
+      font-size: var(--text-sm);
+      color: var(--color-text-muted);
+      line-height: var(--leading-relaxed);
+    }
+    .system-status {
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+      padding: var(--space-3) var(--space-4);
+      border-radius: var(--radius-md);
+      font-size: var(--text-sm);
+      margin-bottom: var(--space-6);
+    }
+    .system-status.ok { background: var(--color-success-soft); color: var(--c-success-700); }
+    .system-status.warning { background: var(--color-warning-soft); color: var(--c-warning-700); }
+    .system-status.error { background: var(--color-danger-soft); color: var(--c-danger-700); }
+    .system-status.loading { background: var(--color-bg-subtle); color: var(--color-text-muted); }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <script src="/assets/components-base.js?v=14" type="text/babel"></script>
+  <script src="/assets/components-advanced.js?v=14" type="text/babel"></script>
+  <script src="/assets/hooks.js?v=14" type="text/babel"></script>
+  <script src="/assets/layouts.js?v=14" type="text/babel"></script>
+
+  <script type="text/babel">
+    const { useState, useEffect } = React;
+    const {
+      Button, Card, Box, Badge, Stat,
+      Spinner, ToastProvider, useToast, ErrorBoundary,
+    } = window.UI;
+    const { useAuth, useApi, useTranslation } = window.UIHooks;
+    const { ProfLayout } = window.UILayouts;
+
+    function DashboardContent() {
+      const { t } = useTranslation();
+      const { user, isAuthenticated, loading: authLoading } = useAuth();
+      const api = useApi();
+      const { toast } = useToast();
+
+      const [stats, setStats] = useState(null);
+      const [health, setHealth] = useState(null);
+      const [loadingData, setLoadingData] = useState(true);
+
+      useEffect(function() {
+        if (!authLoading && !isAuthenticated) {
+          window.location.href = '/login.html';
+        }
+      }, [authLoading, isAuthenticated]);
+
+      useEffect(function() {
+        if (!user) return;
+
+        Promise.all([
+          api.request('GET', '/api/health?detailed=1').catch(function() { return { ok: false }; }),
+          api.request('GET', '/api/banque/questions?limit=1').catch(function() { return { ok: false }; }),
+          api.request('GET', '/api/examens').catch(function() { return { ok: false }; }),
+        ]).then(function(results) {
+          var healthRes = results[0];
+          var banqueRes = results[1];
+          var examensRes = results[2];
+
+          if (healthRes.ok) {
+            setHealth(healthRes.data || healthRes);
+          }
+
+          var counters = (healthRes.data || healthRes)?.checks?.counters?.counts || {};
+          setStats({
+            examens: counters.examens_total || (examensRes.ok && examensRes.data?.examens ? examensRes.data.examens.length : 0),
+            questions: counters.questions_total || (banqueRes.ok && banqueRes.data?.pagination ? banqueRes.data.pagination.total : 0),
+            passages: counters.passages_total || 0,
+            enseignants: counters.enseignants_active || 0,
+          });
+          setLoadingData(false);
+        }).catch(function() {
+          setLoadingData(false);
+        });
+      }, [user]);
+
+      if (authLoading || !user) {
+        return (
+          <div style={{
+            minHeight: '100vh',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            background: 'var(--color-bg)',
+          }}>
+            <div style={{ textAlign: 'center' }}>
+              <Spinner />
+              <p style={{ color: 'var(--color-text-muted)', marginTop: 'var(--space-3)' }}>
+                Chargement...
+              </p>
+            </div>
+          </div>
+        );
+      }
+
+      if (user.role !== 'admin' && user.role !== 'enseignant') {
+        return (
+          <div style={{ padding: 'var(--space-6)', textAlign: 'center' }}>
+            <h2>Acc&egrave;s r&eacute;serv&eacute; aux enseignants</h2>
+            <Button variant="primary" onClick={function() { window.location.href = '/login.html'; }}>
+              Se connecter
+            </Button>
+          </div>
+        );
+      }
+
+      var isAdmin = user.role === 'admin';
+
+      var healthStatus = health?.status || 'loading';
+
+      return (
+        <ProfLayout
+          user={user}
+          activeRoute="/admin/dashboard.html"
+          title={'Bienvenue, ' + user.prenom + ' !'}
+          subtitle={isAdmin ? 'Tableau de bord administrateur' : 'Tableau de bord enseignant'}
+          breadcrumbs={[
+            { label: 'Accueil' },
+          ]}
+        >
+          <div className="dashboard-container">
+
+            {/* Statut systeme */}
+            <div className={'system-status ' + healthStatus}>
+              <span>
+                {healthStatus === 'ok' && '✅'}
+                {healthStatus === 'warning' && '⚠️'}
+                {healthStatus === 'error' && '🚨'}
+                {healthStatus === 'loading' && '⏳'}
+              </span>
+              <span>
+                {healthStatus === 'ok' && 'Tous les syst\u00e8mes fonctionnent normalement'}
+                {healthStatus === 'warning' && 'Avertissements syst\u00e8me d\u00e9tect\u00e9s'}
+                {healthStatus === 'error' && 'Erreurs syst\u00e8me d\u00e9tect\u00e9es'}
+                {healthStatus === 'loading' && 'V\u00e9rification du syst\u00e8me...'}
+              </span>
+              {healthStatus !== 'loading' && (
+                <a href="/admin/monitoring.html" style={{
+                  marginLeft: 'auto', color: 'inherit', fontSize: 'var(--text-xs)',
+                }}>
+                  D&eacute;tails &rarr;
+                </a>
+              )}
+            </div>
+
+            {/* Statistiques */}
+            <h2 style={{
+              margin: '0 0 var(--space-3) 0',
+              fontSize: 'var(--text-lg)',
+              fontWeight: 'var(--font-semibold)',
+              fontFamily: 'var(--font-heading)',
+            }}>
+              Vue d'ensemble
+            </h2>
+
+            <div className="dashboard-stats">
+              <Stat
+                label="Examens"
+                value={loadingData ? '...' : String(stats?.examens || 0)}
+                icon="📝"
+                color="var(--color-primary)"
+              />
+              <Stat
+                label="Questions en banque"
+                value={loadingData ? '...' : String(stats?.questions || 0)}
+                icon="📚"
+                color="var(--c-box-intuition)"
+              />
+              <Stat
+                label="Passages \u00e9tudiants"
+                value={loadingData ? '...' : String(stats?.passages || 0)}
+                icon="👥"
+                color="var(--c-success-500)"
+              />
+              <Stat
+                label="Enseignants"
+                value={loadingData ? '...' : String(stats?.enseignants || 0)}
+                icon="👨‍🏫"
+                color="var(--c-info-500)"
+              />
+            </div>
+
+            {/* Acces rapides */}
+            <h2 style={{
+              margin: '0 0 var(--space-3) 0',
+              fontSize: 'var(--text-lg)',
+              fontWeight: 'var(--font-semibold)',
+              fontFamily: 'var(--font-heading)',
+            }}>
+              Acc&egrave;s rapides
+            </h2>
+
+            <div className="dashboard-quicklinks">
+              <a href="/admin/examens.html" className="quicklink-card">
+                <div className="quicklink-icon">📝</div>
+                <div className="quicklink-title">G&eacute;rer les examens</div>
+                <div className="quicklink-desc">
+                  Cr&eacute;er, modifier, publier et suivre vos examens.
+                </div>
+              </a>
+
+              <a href="/admin/banque.html" className="quicklink-card">
+                <div className="quicklink-icon">📚</div>
+                <div className="quicklink-title">Banque de questions</div>
+                <div className="quicklink-desc">
+                  Naviguer, cr&eacute;er et organiser les questions par chapitre.
+                </div>
+              </a>
+
+              <a href="/admin/analytics.html" className="quicklink-card">
+                <div className="quicklink-icon">📊</div>
+                <div className="quicklink-title">Analytics</div>
+                <div className="quicklink-desc">
+                  Statistiques de passages, r&eacute;sultats et tendances.
+                </div>
+              </a>
+
+              {isAdmin && (
+                <a href="/admin/monitoring.html" className="quicklink-card">
+                  <div className="quicklink-icon">🩺</div>
+                  <div className="quicklink-title">Monitoring syst&egrave;me</div>
+                  <div className="quicklink-desc">
+                    Sant&eacute; du serveur, disque, m&eacute;moire, backups et logs.
+                  </div>
+                </a>
+              )}
+            </div>
+
+            {/* Info version */}
+            <Box type="retenir" title="Plateforme d'examens IPSSI">
+              <div style={{ display: 'flex', gap: 'var(--space-2)', flexWrap: 'wrap' }}>
+                <Badge variant="success">{health?.version || 'v?'}</Badge>
+                <Badge variant="primary">PHP {health?.php || '?'}</Badge>
+                <Badge variant="primary">React 18</Badge>
+                <Badge variant="primary">Phase P8+</Badge>
+              </div>
+            </Box>
+
+          </div>
+        </ProfLayout>
+      );
+    }
+
+    function App() {
+      return (
+        <ToastProvider>
+          <ErrorBoundary>
+            <DashboardContent />
+          </ErrorBoundary>
+        </ToastProvider>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+  </script>
+</body>
+</html>

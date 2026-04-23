@@ -19,11 +19,13 @@
   const { PassageWelcome, PassageExam, PassageResult } = window;
 
   function PassageApp() {
-    const { ToastProvider, useToast, Button, Spinner } = root.UI;
+    const { ToastProvider, ErrorBoundary } = root.UI;
 
     return (
       <ToastProvider>
-        <PassageAppInner />
+        <ErrorBoundary>
+          <PassageAppInner />
+        </ErrorBoundary>
       </ToastProvider>
     );
   }

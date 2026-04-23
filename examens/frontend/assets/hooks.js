@@ -164,14 +164,32 @@
 
   /* ==========================================================================
      3. useApi - Wrapper fetch avec gestion auth + erreurs
+     CSRF token is GLOBAL (shared by all useApi instances).
+     When useAuth sets it, all components can use it immediately.
      Usage :
        const api = useApi();
        const { ok, data, error } = await api.get('/api/auth/me');
        const res = await api.post('/api/auth/login', { email, password });
      ========================================================================== */
 
+  // Global CSRF token — shared across all useApi() instances
+  let _csrfToken = null;
+  const _csrfListeners = new Set();
+
+  function _setCsrfGlobal(token) {
+    _csrfToken = token;
+    _csrfListeners.forEach(function (fn) { fn(); });
+  }
+
   function useApi(baseUrl = '') {
-    const [csrfToken, setCsrfToken] = useState(null);
+    const [, _forceUpdate] = useState(0);
+
+    // Subscribe to global CSRF token changes
+    useEffect(function () {
+      var listener = function () { _forceUpdate(function (n) { return n + 1; }); };
+      _csrfListeners.add(listener);
+      return function () { _csrfListeners.delete(listener); };
+    }, []);
 
     const request = useCallback(async (method, path, body = null, opts = {}) => {
       const url = (baseUrl + path).replace(/\/+/g, '/').replace(':/', '://');
@@ -183,8 +201,8 @@
 
       // Ajouter automatiquement le CSRF token sur les méthodes mutantes
       const needsCsrf = ['POST', 'PUT', 'PATCH', 'DELETE'].includes(method.toUpperCase());
-      if (needsCsrf && csrfToken) {
-        headers['X-CSRF-Token'] = csrfToken;
+      if (needsCsrf && _csrfToken) {
+        headers['X-CSRF-Token'] = _csrfToken;
       }
 
       try {
@@ -238,27 +256,28 @@
           data: null,
         };
       }
-    }, [baseUrl, csrfToken]);
+    }, [baseUrl, _csrfToken]);
 
     // Récupérer le CSRF token au montage
     const refreshCsrf = useCallback(async () => {
       const r = await request('GET', '/api/auth/csrf-token');
       if (r.ok && r.data?.token) {
-        setCsrfToken(r.data.token);
+        _setCsrfGlobal(r.data.token);
       }
       return r.data?.token || null;
     }, [request]);
 
     return useMemo(() => ({
+      request,
       get:    (path, opts) => request('GET', path, null, opts),
       post:   (path, body, opts) => request('POST', path, body, opts),
       put:    (path, body, opts) => request('PUT', path, body, opts),
       patch:  (path, body, opts) => request('PATCH', path, body, opts),
       delete: (path, body, opts) => request('DELETE', path, body, opts),
       refreshCsrf,
-      csrfToken,
-      setCsrfToken,
-    }), [request, refreshCsrf, csrfToken]);
+      csrfToken: _csrfToken,
+      setCsrfToken: _setCsrfGlobal,
+    }), [request, refreshCsrf, _csrfToken]);
   }
 
   /* ==========================================================================

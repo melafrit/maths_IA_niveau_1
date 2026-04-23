@@ -186,10 +186,12 @@
   // ==========================================================================
 
   function CorrectionApp() {
-    const { ToastProvider } = root.UI;
+    const { ToastProvider, ErrorBoundary } = root.UI;
     return (
       <ToastProvider>
-        <CorrectionAppInner />
+        <ErrorBoundary>
+          <CorrectionAppInner />
+        </ErrorBoundary>
       </ToastProvider>
     );
   }

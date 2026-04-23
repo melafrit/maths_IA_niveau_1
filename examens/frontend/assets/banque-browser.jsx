@@ -15,7 +15,8 @@
    Dépendances :
      - React 18
      - window.UI (components-base + advanced)
-     - window.UIHooks (useApi, useToast)
+     - window.UIHooks (useApi)
+     - window.UI (useToast)
      - KaTeX (pour rendu formules)
 
    © 2026 Mohamed EL AFRIT — IPSSI — CC BY-NC-SA 4.0
@@ -428,7 +429,8 @@
   // ==========================================================================
 
   function BanqueBrowser() {
-    const { useApi, useToast } = window.UIHooks;
+    const { useApi } = window.UIHooks;
+    const { useToast } = window.UI;
     const api = useApi();
     const { toast } = useToast();
 

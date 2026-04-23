@@ -184,8 +184,13 @@ if ($assetsDir !== false && preg_match('#^/assets/(.+)$#', $requestPath, $m)) {
         ];
         $mime = $mimes[$ext] ?? 'application/octet-stream';
         header('Content-Type: ' . $mime);
-        // Cache 1h en dev, à augmenter en prod via .htaccess
-        header('Cache-Control: public, max-age=3600');
+        // Pas de cache en dev pour éviter les JS obsolètes
+        if (config('debug', false)) {
+            header('Cache-Control: no-cache, no-store, must-revalidate');
+            header('Pragma: no-cache');
+        } else {
+            header('Cache-Control: public, max-age=3600');
+        }
         readfile($candidate);
         exit;
     }
@@ -200,6 +205,7 @@ if ($frontendDir !== false && preg_match('#^/([a-z0-9_.-]+\.html)$#i', $requestP
     $candidate = realpath($frontendDir . '/' . $m[1]);
     if ($candidate !== false && str_starts_with($candidate, $frontendDir . DIRECTORY_SEPARATOR)) {
         header('Content-Type: text/html; charset=utf-8');
+        header('Cache-Control: no-cache, no-store, must-revalidate');
         readfile($candidate);
         exit;
     }
@@ -217,13 +223,14 @@ if ($frontendRoot !== false && preg_match('#^/([a-z0-9_-]+)/([a-z0-9_-]+\.html)$
     $candidate = realpath($frontendRoot . '/' . $subDir . '/' . $fileName);
     if ($candidate !== false && str_starts_with($candidate, $frontendRoot . DIRECTORY_SEPARATOR)) {
         header('Content-Type: text/html; charset=utf-8');
+        header('Cache-Control: no-cache, no-store, must-revalidate');
         readfile($candidate);
         exit;
     }
 }
 
-// Redirection : / → /login.html (si pas connecté) ou page d'accueil placeholder
-if ($requestPath === '/' && file_exists(EXAMENS_ROOT . '/../frontend/commun/login.html')) {
+// Redirection : / → /login.html (page React moderne)
+if ($requestPath === '/') {
     header('Location: /login.html', true, 302);
     exit;
 }

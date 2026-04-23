@@ -29,7 +29,7 @@
   const { useAuth, useApi, useTranslation, useTheme } = window.UIHooks;
 
   // Layouts
-  const { AdminLayout } = window.UILayouts;
+  const { ProfLayout } = window.UILayouts;
 
   // Composants Phases P5.1 à P5.5 (COMPLETS !)
   const { BanqueBrowser, BanqueEditor, BanqueGenerator, BanqueSearch, BanqueStats } = window;
@@ -116,13 +116,13 @@
     const { t } = useTranslation();
     const { user, isAuthenticated, loading } = useAuth();
 
-    // Redirect si pas authentifié ou pas admin
+    // Redirect si pas authentifié ou pas admin/enseignant
     useEffect(() => {
       if (!loading) {
         if (!isAuthenticated) {
           window.location.href = '/login.html';
-        } else if (user && user.role !== 'admin') {
-          window.location.href = '/dashboard_temp.html';
+        } else if (user && user.role !== 'admin' && user.role !== 'enseignant') {
+          window.location.href = '/admin/dashboard.html';
         }
       }
     }, [loading, isAuthenticated, user]);
@@ -142,19 +142,19 @@
       );
     }
 
-    if (user.role !== 'admin') {
+    if (user.role !== 'admin' && user.role !== 'enseignant') {
       return (
         <div style={{ padding: 'var(--space-6)', textAlign: 'center' }}>
           <h2>⛔ Accès refusé</h2>
-          <p>Cette page est réservée aux administrateurs.</p>
+          <p>Cette page est réservée aux enseignants et administrateurs.</p>
         </div>
       );
     }
 
     return (
-      <AdminLayout user={user} activeRoute="/admin/banque.html">
+      <ProfLayout user={user} activeRoute="/admin/banque.html">
         <BanqueContent />
-      </AdminLayout>
+      </ProfLayout>
     );
   }
 
@@ -162,10 +162,14 @@
   // Mount
   // ==========================================================================
 
+  const { ErrorBoundary } = window.UI;
+
   function App() {
     return (
       <ToastProvider>
-        <BanquePage />
+        <ErrorBoundary>
+          <BanquePage />
+        </ErrorBoundary>
       </ToastProvider>
     );
   }

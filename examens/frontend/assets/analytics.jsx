@@ -21,10 +21,12 @@
   const { AnalyticsOverview, AnalyticsPassages } = window;
 
   function AnalyticsApp() {
-    const { ToastProvider } = root.UI;
+    const { ToastProvider, ErrorBoundary } = root.UI;
     return (
       <ToastProvider>
-        <AnalyticsAppInner />
+        <ErrorBoundary>
+          <AnalyticsAppInner />
+        </ErrorBoundary>
       </ToastProvider>
     );
   }
@@ -32,16 +34,14 @@
   function AnalyticsAppInner() {
     const { Button, Spinner, Box } = root.UI;
     const { useAuth } = root.UIHooks;
+    const { ProfLayout } = root.UILayouts;
     const auth = useAuth();
 
     const [view, setView] = useState('overview');
     const [selectedExamen, setSelectedExamen] = useState(null);
     const [selectedStudent, setSelectedStudent] = useState(null);
 
-    // ----- Auth check -----
-    useEffect(() => {
-      auth.fetchMe();
-    }, []);
+    // Auth check is automatic via useAuth() — no manual fetchMe needed
 
     // ----- URL hash routing -----
     useEffect(() => {
@@ -106,7 +106,7 @@
             <p>Vous devez être connecté pour accéder à cette page.</p>
             <Button
               variant="primary"
-              onClick={() => window.location.href = '/admin/login.html'}
+              onClick={() => window.location.href = '/login.html'}
             >
               Se connecter
             </Button>
@@ -148,88 +148,52 @@
 
     // ----- Render -----
     return (
-      <div className="analytics-container">
-        {/* Top nav */}
-        <div style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          marginBottom: 'var(--space-3)',
-        }}>
-          <div>
-            <h1 style={{ margin: 0, fontSize: 'var(--text-xl)' }}>
-              📊 Dashboard Analytics
-            </h1>
-            <div style={{ fontSize: 13, color: 'var(--color-text-muted)' }}>
-              {auth.user.nom || auth.user.email} · {auth.user.role}
-            </div>
-          </div>
-          <div style={{ display: 'flex', gap: 8 }}>
-            <Button
-              variant="ghost"
-              onClick={() => window.location.href = '/admin/examens.html'}
-            >
-              ← Examens
-            </Button>
-            <Button
-              variant="ghost"
-              onClick={() => window.location.href = '/admin/banque.html'}
-            >
-              📚 Banque
-            </Button>
-          </div>
-        </div>
+      <ProfLayout
+        user={auth.user}
+        activeRoute="/admin/analytics.html"
+        title="Dashboard Analytics"
+        subtitle="Statistiques de passages, résultats et tendances."
+      >
+        <div className="analytics-container">
+          {breadcrumb}
 
-        {breadcrumb}
-
-        {/* Content */}
-        {view === 'overview' && (
-          <AnalyticsOverview
-            onExamenSelect={handleExamenSelect}
-            onStudentSelect={handleStudentSelect}
-          />
-        )}
-
-        {view === 'examen' && selectedExamen && (
-          <AnalyticsPassages
-            examenId={selectedExamen.id}
-            examenTitre={selectedExamen.titre}
-            onBack={handleBackToOverview}
-            onPassageSelect={handlePassageSelect}
-          />
-        )}
-
-        {view === 'student' && selectedStudent && (
-          window.AnalyticsStudent ? (
-            <window.AnalyticsStudent
-              email={selectedStudent}
-              onBack={handleBackToOverview}
+          {/* Content */}
+          {view === 'overview' && (
+            <AnalyticsOverview
+              onExamenSelect={handleExamenSelect}
+              onStudentSelect={handleStudentSelect}
             />
-          ) : (
-            <StudentPlaceholder
-              email={selectedStudent}
+          )}
+
+          {view === 'examen' && selectedExamen && (
+            <AnalyticsPassages
+              examenId={selectedExamen.id}
+              examenTitre={selectedExamen.titre}
               onBack={handleBackToOverview}
+              onPassageSelect={handlePassageSelect}
             />
-          )
-        )}
+          )}
 
-        {/* Footer */}
-        <div style={{
-          textAlign: 'center',
-          marginTop: 'var(--space-5)',
-          paddingTop: 'var(--space-3)',
-          borderTop: '1px solid var(--color-border)',
-          fontSize: 11,
-          color: 'var(--color-text-muted)',
-        }}>
-          © 2026 Mohamed EL AFRIT — IPSSI · CC BY-NC-SA 4.0
-        </div>
+          {view === 'student' && selectedStudent && (
+            window.AnalyticsStudent ? (
+              <window.AnalyticsStudent
+                email={selectedStudent}
+                onBack={handleBackToOverview}
+              />
+            ) : (
+              <StudentPlaceholder
+                email={selectedStudent}
+                onBack={handleBackToOverview}
+              />
+            )
+          )}
 
-        {/* Print footer (visible uniquement en impression) */}
-        <div className="print-footer print-only">
-          © 2026 Mohamed EL AFRIT — IPSSI · CC BY-NC-SA 4.0 · {new Date().toLocaleString('fr-FR')}
+          {/* Print footer (visible uniquement en impression) */}
+          <div className="print-footer print-only">
+            © 2026 Mohamed EL AFRIT — IPSSI · CC BY-NC-SA 4.0 · {new Date().toLocaleString('fr-FR')}
+          </div>
         </div>
-      </div>
+      </ProfLayout>
     );
   }
 

@@ -70,10 +70,41 @@
     } catch { return ''; }
   }
 
+  // Style natif pour les inputs (même pattern que login.html qui fonctionne)
+  const nativeInputStyle = {
+    width: '100%',
+    padding: '8px 12px',
+    fontSize: 'var(--text-base)',
+    fontFamily: 'var(--font-sans)',
+    color: 'var(--color-text)',
+    background: 'var(--color-bg-input)',
+    border: '1px solid var(--color-border)',
+    borderRadius: 'var(--radius-md)',
+    outline: 'none',
+    height: '40px',
+    boxSizing: 'border-box',
+  };
+
+  const nativeTextareaStyle = {
+    width: '100%',
+    padding: '8px 12px',
+    fontSize: 'var(--text-base)',
+    fontFamily: 'var(--font-sans)',
+    color: 'var(--color-text)',
+    background: 'var(--color-bg-input)',
+    border: '1px solid var(--color-border)',
+    borderRadius: 'var(--radius-md)',
+    outline: 'none',
+    resize: 'vertical',
+    minHeight: '80px',
+    boxSizing: 'border-box',
+  };
+
   function validateExam(exam) {
     const errors = {};
-    if (!exam.titre?.trim()) errors.titre = 'Titre obligatoire';
-    if (exam.titre && exam.titre.length > 200) errors.titre = 'Max 200 caractères';
+    var titre = String(exam.titre || '');
+    if (!titre.trim()) errors.titre = 'Titre obligatoire';
+    if (titre.length > 200) errors.titre = 'Max 200 caractères';
 
     if (!exam.questions || exam.questions.length === 0) {
       errors.questions = 'Au moins 1 question requise';
@@ -105,7 +136,7 @@
   // ==========================================================================
 
   function QuestionSelector({ selectedIds, onChange, onClose }) {
-    const { Button, Input, Select, Modal } = root.UI;
+    const { Button, Modal } = root.UI;
     const { useApi } = root.UIHooks;
     const api = useApi();
 
@@ -114,16 +145,33 @@
     const [filters, setFilters] = useState({ chapitre: '', difficulte: '', type: '', search: '' });
     const [availableChapitres, setAvailableChapitres] = useState([]);
 
-    useEffect(() => {
-      (async () => {
-        setLoading(true);
-        const res = await api.request('GET', '/api/banque/maths-ia/chapitres');
-        if (res.ok) setAvailableChapitres(res.data?.chapitres || []);
+    const [loadError, setLoadError] = useState('');
 
-        const res2 = await api.request('GET', '/api/banque/questions?limit=1000');
-        if (res2.ok) setAllQuestions(res2.data?.questions || []);
-        setLoading(false);
-      })();
+    useEffect(function() {
+      setLoading(true);
+      setLoadError('');
+
+      fetch('/api/banque/maths-ia/chapitres', { credentials: 'same-origin' })
+        .then(function(r) { return r.json(); })
+        .then(function(d) {
+          if (d.ok) setAvailableChapitres(d.data && d.data.chapitres ? d.data.chapitres : []);
+        })
+        .catch(function() {});
+
+      fetch('/api/banque/questions?limit=1000', { credentials: 'same-origin' })
+        .then(function(r) { return r.json(); })
+        .then(function(d) {
+          if (d.ok && d.data && d.data.questions) {
+            setAllQuestions(d.data.questions);
+          } else {
+            setLoadError('API: ' + (d.error ? d.error.message : 'no data'));
+          }
+          setLoading(false);
+        })
+        .catch(function(err) {
+          setLoadError('Fetch error: ' + err.message);
+          setLoading(false);
+        });
     }, []);
 
     const filtered = useMemo(() => {
@@ -149,7 +197,7 @@
     }
 
     return (
-      <Modal isOpen={true} onClose={onClose} title="📚 Sélectionner des questions" size="lg">
+      <Modal open={true} onClose={onClose} title="📚 Sélectionner des questions" size="lg">
         {/* Filtres */}
         <div style={{
           padding: 'var(--space-3)',
@@ -160,42 +208,59 @@
           gridTemplateColumns: 'repeat(4, 1fr)',
           gap: 8,
         }}>
-          <Input
-            placeholder="🔍 Recherche..."
+          <input
+            type="text"
+            placeholder="Recherche..."
             value={filters.search}
-            onChange={e => setFilters(f => ({ ...f, search: e.target.value }))}
+            onChange={function(e) { setFilters(function(f) { return Object.assign({}, f, { search: e.target.value }); }); }}
+            style={nativeInputStyle}
           />
-          <Select
+          <select
             value={filters.chapitre}
-            onChange={e => setFilters(f => ({ ...f, chapitre: e.target.value }))}
-            options={[
-              { value: '', label: '— Tous chapitres —' },
-              ...availableChapitres.map(c => ({ value: c, label: c })),
-            ]}
-          />
-          <Select
+            onChange={function(e) { setFilters(function(f) { return Object.assign({}, f, { chapitre: e.target.value }); }); }}
+            style={nativeInputStyle}
+          >
+            <option value="">— Tous chapitres —</option>
+            {availableChapitres.map(function(c) { return <option key={c} value={c}>{c}</option>; })}
+          </select>
+          <select
             value={filters.difficulte}
-            onChange={e => setFilters(f => ({ ...f, difficulte: e.target.value }))}
-            options={[
-              { value: '', label: '— Toutes difficultés —' },
-              { value: 'facile', label: '🟢 Facile' },
-              { value: 'moyen', label: '🟡 Moyen' },
-              { value: 'difficile', label: '🟠 Difficile' },
-              { value: 'expert', label: '🔴 Expert' },
-            ]}
-          />
-          <Select
+            onChange={function(e) { setFilters(function(f) { return Object.assign({}, f, { difficulte: e.target.value }); }); }}
+            style={nativeInputStyle}
+          >
+            <option value="">— Toutes difficultés —</option>
+            <option value="facile">Facile</option>
+            <option value="moyen">Moyen</option>
+            <option value="difficile">Difficile</option>
+            <option value="expert">Expert</option>
+          </select>
+          <select
             value={filters.type}
-            onChange={e => setFilters(f => ({ ...f, type: e.target.value }))}
-            options={[
-              { value: '', label: '— Tous types —' },
-              { value: 'conceptuel', label: 'conceptuel' },
-              { value: 'calcul', label: 'calcul' },
-              { value: 'code', label: 'code' },
-              { value: 'formule', label: 'formule' },
-            ]}
-          />
+            onChange={function(e) { setFilters(function(f) { return Object.assign({}, f, { type: e.target.value }); }); }}
+            style={nativeInputStyle}
+          >
+            <option value="">— Tous types —</option>
+            <option value="conceptuel">conceptuel</option>
+            <option value="calcul">calcul</option>
+            <option value="code">code</option>
+            <option value="formule">formule</option>
+          </select>
         </div>
+
+        {/* Erreur de chargement */}
+        {loadError && (
+          <div style={{
+            padding: '8px 12px',
+            marginBottom: 8,
+            background: '#fef2f2',
+            color: '#dc2626',
+            border: '1px solid #fecaca',
+            borderRadius: 6,
+            fontSize: 12,
+          }}>
+            Erreur chargement banque : {loadError}
+          </div>
+        )}
 
         {/* Info */}
         <div style={{
@@ -297,7 +362,7 @@
   // ==========================================================================
 
   function ExamensCreate({ editingExamen, onSaved, onCancel }) {
-    const { Button, Input, Textarea, Select, Checkbox, Box, useToast } = root.UI;
+    const { Button, Box, useToast } = root.UI;
     const { useApi } = root.UIHooks;
     const api = useApi();
     const { toast } = useToast();
@@ -325,9 +390,29 @@
         if (saved) {
           const d = JSON.parse(saved);
           const age = (Date.now() - new Date(d.savedAt).getTime()) / 60000;
-          if (age < 60) return d.exam;
+          if (age < 60 && d.exam) {
+            // Vérifier que les champs texte sont des vrais strings
+            var titre = d.exam.titre;
+            var description = d.exam.description;
+            if (typeof titre !== 'string' || titre.indexOf('[object') !== -1) titre = '';
+            if (typeof description !== 'string' || description.indexOf('[object') !== -1) description = '';
+            const base = emptyExam();
+            return {
+              ...base,
+              ...d.exam,
+              titre: titre,
+              description: description,
+              questions: Array.isArray(d.exam.questions) ? d.exam.questions : [],
+            };
+          } else {
+            // Draft trop vieux : supprimer
+            localStorage.removeItem(DRAFT_KEY);
+          }
         }
-      } catch {}
+      } catch {
+        // Draft corrompu : supprimer
+        try { localStorage.removeItem(DRAFT_KEY); } catch(ex) {}
+      }
       return emptyExam();
     });
 
@@ -339,35 +424,45 @@
     const isValid = Object.keys(errors).length === 0;
     const isEdit = !!editingExamen;
 
-    // Auto-save draft (create mode only)
-    useEffect(() => {
+    // Auto-save draft (create mode only) — vérifier les types avant de sauver
+    useEffect(function() {
       if (isEdit) return;
-      if (!exam.titre) return;
+      if (!exam.titre || typeof exam.titre !== 'string') return;
+      if (exam.titre.indexOf('[object') !== -1) return; // Ne pas sauver de draft corrompu
       try {
-        localStorage.setItem(DRAFT_KEY, JSON.stringify({ exam, savedAt: new Date().toISOString() }));
-      } catch {}
+        localStorage.setItem(DRAFT_KEY, JSON.stringify({ exam: exam, savedAt: new Date().toISOString() }));
+      } catch(ex) {}
     }, [exam, isEdit]);
 
     // Charger les données complètes des questions sélectionnées
     useEffect(() => {
       (async () => {
-        if (exam.questions.length === 0) {
-          setSelectedQuestionsData([]);
-          return;
-        }
-        const fetched = [];
-        for (const qId of exam.questions) {
-          const res = await api.request('GET', `/api/banque/questions/${qId}`);
-          if (res.ok && res.data?.question) {
-            fetched.push(res.data.question);
+        try {
+          if (exam.questions.length === 0) {
+            setSelectedQuestionsData([]);
+            return;
           }
+          const fetched = [];
+          for (const qId of exam.questions) {
+            const res = await api.request('GET', `/api/banque/questions/${qId}`);
+            if (res.ok && res.data?.question) {
+              fetched.push(res.data.question);
+            }
+          }
+          setSelectedQuestionsData(fetched);
+        } catch (err) {
+          console.warn('[ExamensCreate] Erreur chargement questions:', err);
         }
-        setSelectedQuestionsData(fetched);
       })();
     }, [exam.questions.join(',')]);
 
     function setField(key, value) {
-      setExam(e => ({ ...e, [key]: value }));
+      // Défense contre SES corruption : garantir que les champs texte restent des strings
+      var safe = value;
+      if (key === 'titre' || key === 'description') {
+        safe = typeof value === 'string' ? value : '';
+      }
+      setExam(function(prev) { return Object.assign({}, prev, { [key]: safe }); });
     }
 
     function removeQuestion(qId) {
@@ -382,43 +477,52 @@
 
       setSubmitting(true);
 
-      const payload = {
-        titre: exam.titre.trim(),
-        description: exam.description.trim(),
-        questions: exam.questions,
-        duree_sec: parseInt(exam.duree_sec, 10),
-        date_ouverture: toISO(exam.date_ouverture),
-        date_cloture: toISO(exam.date_cloture),
-        max_passages: parseInt(exam.max_passages, 10),
-        shuffle_questions: !!exam.shuffle_questions,
-        shuffle_options: !!exam.shuffle_options,
-        show_correction_after: !!exam.show_correction_after,
-        correction_delay_min: parseInt(exam.correction_delay_min, 10) || 0,
-      };
+      try {
+        const payload = {
+          titre: String(exam.titre || '').trim(),
+          description: String(exam.description || '').trim(),
+          questions: exam.questions,
+          duree_sec: parseInt(exam.duree_sec, 10),
+          date_ouverture: toISO(exam.date_ouverture),
+          date_cloture: toISO(exam.date_cloture),
+          max_passages: parseInt(exam.max_passages, 10),
+          shuffle_questions: !!exam.shuffle_questions,
+          shuffle_options: !!exam.shuffle_options,
+          show_correction_after: !!exam.show_correction_after,
+          correction_delay_min: parseInt(exam.correction_delay_min, 10) || 0,
+        };
 
-      let res;
-      if (isEdit) {
-        res = await api.request('PUT', `/api/examens/${editingExamen.id}`, { updates: payload });
-      } else {
-        res = await api.request('POST', '/api/examens', payload);
-      }
-
-      setSubmitting(false);
-
-      if (res.ok) {
-        toast({
-          title: isEdit ? 'Examen modifié' : 'Examen créé',
-          message: res.data?.examen?.titre || '',
-          type: 'success',
-        });
-        if (!isEdit) {
-          try { localStorage.removeItem(DRAFT_KEY); } catch {}
+        let res;
+        if (isEdit) {
+          res = await api.request('PUT', `/api/examens/${editingExamen.id}`, { updates: payload });
+        } else {
+          res = await api.request('POST', '/api/examens', payload);
         }
-        if (onSaved) onSaved(res.data?.examen);
-      } else {
+
+        setSubmitting(false);
+
+        if (res.ok) {
+          toast({
+            title: isEdit ? 'Examen modifié' : 'Examen créé',
+            message: res.data?.examen?.titre || '',
+            type: 'success',
+          });
+          if (!isEdit) {
+            try { localStorage.removeItem(DRAFT_KEY); } catch {}
+          }
+          if (onSaved) onSaved(res.data?.examen);
+        } else {
+          toast({
+            title: 'Erreur',
+            message: res.error?.message || 'Impossible de sauvegarder',
+            type: 'error',
+          });
+        }
+      } catch (err) {
+        setSubmitting(false);
         toast({
-          title: 'Erreur',
-          message: res.error?.message || 'Impossible de sauvegarder',
+          title: 'Erreur inattendue',
+          message: err.message || 'Erreur lors de la sauvegarde',
           type: 'error',
         });
       }
@@ -449,19 +553,22 @@
           <h4 className="form-section-title">📝 Informations générales</h4>
 
           <Field label="Titre" required error={errors.titre}>
-            <Input
+            <input
+              type="text"
               value={exam.titre}
-              onChange={e => setField('titre', e.target.value)}
+              onChange={function(e) { setField('titre', e.target.value); }}
               placeholder="ex: Contrôle continu Maths IA - Printemps 2026"
+              style={nativeInputStyle}
             />
           </Field>
 
           <Field label="Description" hint="Instructions pour les étudiants (optionnel)">
-            <Textarea
+            <textarea
               value={exam.description}
-              onChange={e => setField('description', e.target.value)}
+              onChange={function(e) { setField('description', e.target.value); }}
               rows={3}
               placeholder="Description de l'examen, consignes particulières..."
+              style={nativeTextareaStyle}
             />
           </Field>
         </div>
@@ -529,13 +636,13 @@
 
           <Field label="Durée" required error={errors.duree_sec} hint="En minutes (entre 1 et 240)">
             <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 8 }}>
-              <Input
+              <input
                 type="number"
                 value={Math.floor(exam.duree_sec / 60)}
-                onChange={e => setField('duree_sec', (parseInt(e.target.value) || 0) * 60)}
+                onChange={function(e) { setField('duree_sec', (parseInt(e.target.value) || 0) * 60); }}
                 min={1}
                 max={240}
-                style={{ width: 100 }}
+                style={Object.assign({}, nativeInputStyle, { width: 100 })}
               />
               <span style={{ color: 'var(--color-text-muted)' }}>minutes</span>
               <div style={{ display: 'flex', gap: 4, marginLeft: 8 }}>
@@ -560,18 +667,20 @@
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
             <Field label="Date d'ouverture" required error={errors.date_ouverture}>
-              <Input
+              <input
                 type="datetime-local"
                 value={exam.date_ouverture}
-                onChange={e => setField('date_ouverture', e.target.value)}
+                onChange={function(e) { setField('date_ouverture', e.target.value); }}
+                style={nativeInputStyle}
               />
             </Field>
 
             <Field label="Date de clôture" required error={errors.date_cloture}>
-              <Input
+              <input
                 type="datetime-local"
                 value={exam.date_cloture}
-                onChange={e => setField('date_cloture', e.target.value)}
+                onChange={function(e) { setField('date_cloture', e.target.value); }}
+                style={nativeInputStyle}
               />
             </Field>
           </div>
@@ -583,22 +692,24 @@
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
             <Field label="Passages max par étudiant" error={errors.max_passages}>
-              <Input
+              <input
                 type="number"
                 value={exam.max_passages}
-                onChange={e => setField('max_passages', parseInt(e.target.value) || 1)}
+                onChange={function(e) { setField('max_passages', parseInt(e.target.value) || 1); }}
                 min={1}
                 max={10}
+                style={nativeInputStyle}
               />
             </Field>
 
             <Field label="Délai avant correction (min)" hint="0 = immédiat après soumission">
-              <Input
+              <input
                 type="number"
                 value={exam.correction_delay_min}
-                onChange={e => setField('correction_delay_min', parseInt(e.target.value) || 0)}
+                onChange={function(e) { setField('correction_delay_min', parseInt(e.target.value) || 0); }}
                 min={0}
                 max={10080}
+                style={nativeInputStyle}
               />
             </Field>
           </div>

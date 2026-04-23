@@ -192,10 +192,12 @@
   // ========================================================================
 
   function MonitoringApp() {
-    const { Button, Spinner, Box, ToastProvider } = root.UI;
+    const { Button, Spinner, Box, ToastProvider, ErrorBoundary } = root.UI;
     return (
       <ToastProvider>
-        <MonitoringInner />
+        <ErrorBoundary>
+          <MonitoringInner />
+        </ErrorBoundary>
       </ToastProvider>
     );
   }
@@ -203,6 +205,7 @@
   function MonitoringInner() {
     const { Button, Spinner, Box } = root.UI;
     const { useApi, useAuth } = root.UIHooks;
+    const { AdminLayout } = root.UILayouts;
     const api = useApi();
     const auth = useAuth();
 
@@ -213,7 +216,7 @@
     const [lastUpdate, setLastUpdate] = useState(null);
     const intervalRef = useRef(null);
 
-    useEffect(() => { auth.fetchMe(); }, []);
+    // Auth check is automatic via useAuth() — no manual fetchMe needed
 
     async function fetchHealth() {
       setError(null);
@@ -277,7 +280,7 @@
         <div className="monitoring-container">
           <Box type="error" style={{ maxWidth: 500, margin: '80px auto', textAlign: 'center' }}>
             <h2>🔒 Connexion requise</h2>
-            <Button variant="primary" onClick={() => window.location.href = '/admin/login.html'}>
+            <Button variant="primary" onClick={() => window.location.href = '/login.html'}>
               Se connecter
             </Button>
           </Box>
@@ -302,72 +305,64 @@
     const checks = report.checks || {};
 
     return (
-      <div className="monitoring-container">
-        {/* Top */}
-        <div className="monitoring-top">
-          <div>
-            <h1 style={{ margin: 0, fontSize: 24 }}>🩺 Monitoring système</h1>
-            <div style={{ fontSize: 13, color: 'var(--color-text-muted)', marginTop: 4 }}>
-              Version : {report.version || '?'} ·
-              PHP {report.php} ·
-              Dernière MAJ : {lastUpdate ? lastUpdate.toLocaleTimeString('fr-FR') : '—'}
+      <AdminLayout
+        user={auth.user}
+        activeRoute="/admin/monitoring.html"
+        title="Monitoring système"
+        subtitle={'Version ' + (report.version || '?') + ' · PHP ' + report.php}
+      >
+        <div className="monitoring-container">
+          {/* Top controls */}
+          <div className="monitoring-top">
+            <div>
+              <div style={{ fontSize: 13, color: 'var(--color-text-muted)' }}>
+                Dernière MAJ : {lastUpdate ? lastUpdate.toLocaleTimeString('fr-FR') : '—'}
+              </div>
+            </div>
+            <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+              <label className="auto-refresh">
+                <input
+                  type="checkbox"
+                  checked={autoRefresh}
+                  onChange={e => setAutoRefresh(e.target.checked)}
+                />
+                Auto-refresh 30s
+              </label>
+              <button
+                className="refresh-btn"
+                onClick={fetchHealth}
+                disabled={loading}
+              >
+                🔄 {loading ? 'Actualisation...' : 'Actualiser'}
+              </button>
             </div>
           </div>
-          <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
-            <label className="auto-refresh">
-              <input
-                type="checkbox"
-                checked={autoRefresh}
-                onChange={e => setAutoRefresh(e.target.checked)}
-              />
-              Auto-refresh 30s
-            </label>
-            <button
-              className="refresh-btn"
-              onClick={fetchHealth}
-              disabled={loading}
-            >
-              🔄 {loading ? 'Actualisation...' : 'Actualiser'}
-            </button>
-          </div>
-        </div>
 
-        {/* Status banner */}
-        <div className={`status-banner ${status}`}>
-          <div className="status-banner-icon">{statusIcon(status)}</div>
-          <div className="status-banner-text">
-            <h2 className="status-banner-title">{statusMessage(status)}</h2>
-            <div className="status-banner-meta">
-              {Object.keys(checks).length} vérifications ·
-              Durée : {report.check_duration_ms || report.duration_ms || 0}ms ·
-              Uptime : {Math.round(report.uptime_sec || 0)}s
+          {/* Status banner */}
+          <div className={`status-banner ${status}`}>
+            <div className="status-banner-icon">{statusIcon(status)}</div>
+            <div className="status-banner-text">
+              <h2 className="status-banner-title">{statusMessage(status)}</h2>
+              <div className="status-banner-meta">
+                {Object.keys(checks).length} vérifications ·
+                Durée : {report.check_duration_ms || report.duration_ms || 0}ms ·
+                Uptime : {Math.round(report.uptime_sec || 0)}s
+              </div>
             </div>
           </div>
-        </div>
 
-        {/* Checks grid */}
-        <div className="checks-grid">
-          {checks.disk && <DiskCard data={checks.disk} />}
-          {checks.memory && <MemoryCard data={checks.memory} />}
-          {checks.filesystem && <FilesystemCard data={checks.filesystem} />}
-          {checks.counters && <CountersCard data={checks.counters} />}
-          {checks.backups && <BackupsCard data={checks.backups} />}
-          {checks.logs && <LogsCard data={checks.logs} />}
-          {checks.php && <PhpCard data={checks.php} />}
+          {/* Checks grid */}
+          <div className="checks-grid">
+            {checks.disk && <DiskCard data={checks.disk} />}
+            {checks.memory && <MemoryCard data={checks.memory} />}
+            {checks.filesystem && <FilesystemCard data={checks.filesystem} />}
+            {checks.counters && <CountersCard data={checks.counters} />}
+            {checks.backups && <BackupsCard data={checks.backups} />}
+            {checks.logs && <LogsCard data={checks.logs} />}
+            {checks.php && <PhpCard data={checks.php} />}
+          </div>
         </div>
-
-        {/* Footer */}
-        <div style={{
-          textAlign: 'center',
-          marginTop: 'var(--space-5)',
-          paddingTop: 'var(--space-3)',
-          borderTop: '1px solid var(--color-border)',
-          fontSize: 11,
-          color: 'var(--color-text-muted)',
-        }}>
-          © 2026 Mohamed EL AFRIT — IPSSI · CC BY-NC-SA 4.0
-        </div>
-      </div>
+      </AdminLayout>
     );
   }
 

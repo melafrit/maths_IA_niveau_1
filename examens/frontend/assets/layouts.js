@@ -127,15 +127,12 @@
 
     // Sidebar items par défaut (override possible via prop)
     const defaultSidebarItems = [
-      { key: 'dashboard',  label: t('nav.dashboard'),  icon: '🏠', href: '/dashboard.html' },
-      { key: 'examens',    label: t('nav.examens'),    icon: '📝', href: '/examens.html' },
-      { key: 'banque',     label: t('nav.banque'),     icon: '📚', href: '/banque.html' },
-      { key: 'creer',      label: t('nav.creer'),      icon: '➕', href: '/examen-creer.html' },
-      { key: 'analytics',  label: t('nav.analytics'),  icon: '📊', href: '/analytics.html' },
+      { key: 'dashboard',  label: t('nav.dashboard'),  icon: '🏠', href: '/admin/dashboard.html' },
+      { key: 'examens',    label: t('nav.examens'),    icon: '📝', href: '/admin/examens.html' },
+      { key: 'banque',     label: t('nav.banque'),     icon: '📚', href: '/admin/banque.html' },
+      { key: 'analytics',  label: t('nav.analytics'),  icon: '📊', href: '/admin/analytics.html' },
       { key: 'separator', divider: true },
-      ...(isAdmin ? [{ key: 'comptes', label: t('nav.comptes'), icon: '👥', href: '/comptes.html' }] : []),
-      { key: 'parametres', label: t('nav.parametres'), icon: '⚙️', href: '/parametres.html' },
-      { key: 'aide',       label: t('nav.aide'),       icon: '❓', href: '/aide.html' },
+      ...(isAdmin ? [{ key: 'monitoring', label: 'Monitoring', icon: '🩺', href: '/admin/monitoring.html' }] : []),
     ];
 
     const items = sidebarItems || defaultSidebarItems;
@@ -414,23 +411,23 @@
                           {user.email}
                         </div>
                       </div>
-                      <a href="/profil.html" style={{
+                      <a href="/admin/dashboard.html" style={{
                         display: 'block', padding: 'var(--space-2) var(--space-3)',
                         fontSize: 'var(--text-sm)', color: 'var(--color-text)',
                         textDecoration: 'none', borderRadius: 'var(--radius-sm)',
                       }}
                          onMouseEnter={(e) => e.currentTarget.style.background = 'var(--color-bg-subtle)'}
                          onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}>
-                        👤 {t('user.profile')}
+                        👤 Tableau de bord
                       </a>
-                      <a href="/parametres.html" style={{
+                      <a href="/admin/monitoring.html" style={{
                         display: 'block', padding: 'var(--space-2) var(--space-3)',
                         fontSize: 'var(--text-sm)', color: 'var(--color-text)',
                         textDecoration: 'none', borderRadius: 'var(--radius-sm)',
                       }}
                          onMouseEnter={(e) => e.currentTarget.style.background = 'var(--color-bg-subtle)'}
                          onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}>
-                        ⚙️ {t('nav.parametres')}
+                        🩺 Monitoring
                       </a>
                       <div style={{
                         height: 1, background: 'var(--color-border)',
@@ -572,15 +569,12 @@
   function AdminLayout(props) {
     const { t } = useTranslation();
     const adminSidebar = [
-      { key: 'dashboard',  label: t('nav.dashboard'),  icon: '🏠', href: '/dashboard.html' },
-      { key: 'comptes',    label: t('nav.comptes'),    icon: '👥', href: '/comptes.html' },
-      { key: 'examens',    label: 'Tous les examens',  icon: '📝', href: '/examens.html' },
-      { key: 'banque',     label: t('nav.banque'),     icon: '📚', href: '/banque.html' },
-      { key: 'analytics',  label: 'Analytics globales', icon: '📊', href: '/analytics-global.html' },
+      { key: 'dashboard',  label: t('nav.dashboard'),    icon: '🏠', href: '/admin/dashboard.html' },
+      { key: 'examens',    label: t('nav.examens'),       icon: '📝', href: '/admin/examens.html' },
+      { key: 'banque',     label: t('nav.banque'),        icon: '📚', href: '/admin/banque.html' },
+      { key: 'analytics',  label: t('nav.analytics'),     icon: '📊', href: '/admin/analytics.html' },
       { key: 'separator', divider: true },
-      { key: 'logs',       label: 'Audit logs',         icon: '📋', href: '/audit.html' },
-      { key: 'backup',     label: 'Sauvegardes',        icon: '💾', href: '/backups.html' },
-      { key: 'config',     label: 'Configuration',      icon: '⚙️', href: '/config.html' },
+      { key: 'monitoring', label: 'Monitoring',           icon: '🩺', href: '/admin/monitoring.html' },
     ];
     return <ProfLayout {...props} sidebarItems={adminSidebar} />;
   }
