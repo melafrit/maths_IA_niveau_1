@@ -1,0 +1,261 @@
+{
+    "id": "PSG-ALPY-R5AX",
+    "examen_id": "EXM-EPX9-NFK7",
+    "token": "df0f0657-4448-4245-a6a7-d4202a5bba9a",
+    "access_code_used": "W328Y5",
+    "student_info": {
+        "nom": "Amine",
+        "prenom": "Mohamed",
+        "email": "afrit_mohamed@yahoo.fr"
+    },
+    "question_order": [
+        "mat-diff-02",
+        "mat-faci-05",
+        "mat-faci-03",
+        "mat-faci-02",
+        "mat-faci-04",
+        "mat-diff-01",
+        "psc-faci-01",
+        "mat-faci-01",
+        "mat-expe-03",
+        "mat-expe-05",
+        "mat-expe-04"
+    ],
+    "option_shuffle_maps": {
+        "mat-diff-02": [
+            3,
+            0,
+            2,
+            1
+        ],
+        "mat-faci-05": [
+            0,
+            2,
+            3,
+            1
+        ],
+        "mat-faci-03": [
+            0,
+            3,
+            1,
+            2
+        ],
+        "mat-faci-02": [
+            1,
+            3,
+            2,
+            0
+        ],
+        "mat-faci-04": [
+            1,
+            0,
+            2,
+            3
+        ],
+        "mat-diff-01": [
+            3,
+            1,
+            0,
+            2
+        ],
+        "psc-faci-01": [
+            3,
+            1,
+            0,
+            2
+        ],
+        "mat-faci-01": [
+            2,
+            0,
+            3,
+            1
+        ],
+        "mat-expe-03": [
+            1,
+            0,
+            3,
+            2
+        ],
+        "mat-expe-05": [
+            1,
+            0,
+            2,
+            3
+        ],
+        "mat-expe-04": [
+            0,
+            1,
+            3,
+            2
+        ]
+    },
+    "answers": {
+        "mat-diff-02": {
+            "answer_index": 0,
+            "timestamp": "2026-04-24T00:22:31+02:00"
+        },
+        "mat-faci-05": {
+            "answer_index": 1,
+            "timestamp": "2026-04-24T00:22:33+02:00"
+        },
+        "mat-faci-03": {
+            "answer_index": 0,
+            "timestamp": "2026-04-24T00:22:34+02:00"
+        },
+        "mat-faci-02": {
+            "answer_index": 2,
+            "timestamp": "2026-04-24T00:22:36+02:00"
+        },
+        "mat-faci-04": {
+            "answer_index": 1,
+            "timestamp": "2026-04-24T00:22:37+02:00"
+        },
+        "mat-diff-01": {
+            "answer_index": 2,
+            "timestamp": "2026-04-24T00:22:40+02:00"
+        },
+        "psc-faci-01": {
+            "answer_index": 0,
+            "timestamp": "2026-04-24T00:22:41+02:00"
+        },
+        "mat-faci-01": {
+            "answer_index": 2,
+            "timestamp": "2026-04-24T00:22:43+02:00"
+        },
+        "mat-expe-03": {
+            "answer_index": 1,
+            "timestamp": "2026-04-24T00:22:44+02:00"
+        },
+        "mat-expe-05": {
+            "answer_index": 2,
+            "timestamp": "2026-04-24T00:22:46+02:00"
+        },
+        "mat-expe-04": {
+            "answer_index": 1,
+            "timestamp": "2026-04-24T00:22:48+02:00"
+        }
+    },
+    "start_time": "2026-04-24T00:22:21+02:00",
+    "end_time": "2026-04-24T00:23:00+02:00",
+    "duration_sec": 39,
+    "status": "submitted",
+    "score_brut": 5,
+    "score_max": 11,
+    "score_pct": 45.45,
+    "signature_sha256": "c893ce59e2e1e5d9f9cad2ef6df020362b21164610b4060431144d282d904640",
+    "focus_events": [],
+    "created_at": "2026-04-24T00:22:21+02:00",
+    "updated_at": "2026-04-24T00:23:00+02:00",
+    "score_details": [
+        {
+            "question_id": "mat-diff-02",
+            "difficulte": "difficile",
+            "type": "conceptuel",
+            "user_answer": 0,
+            "user_answer_original": 3,
+            "good_answer_original": 0,
+            "correct": false,
+            "status": "answered"
+        },
+        {
+            "question_id": "mat-faci-05",
+            "difficulte": "facile",
+            "type": "conceptuel",
+            "user_answer": 1,
+            "user_answer_original": 2,
+            "good_answer_original": 2,
+            "correct": true,
+            "status": "answered"
+        },
+        {
+            "question_id": "mat-faci-03",
+            "difficulte": "facile",
+            "type": "calcul",
+            "user_answer": 0,
+            "user_answer_original": 0,
+            "good_answer_original": 0,
+            "correct": true,
+            "status": "answered"
+        },
+        {
+            "question_id": "mat-faci-02",
+            "difficulte": "facile",
+            "type": "conceptuel",
+            "user_answer": 2,
+            "user_answer_original": 2,
+            "good_answer_original": 1,
+            "correct": false,
+            "status": "answered"
+        },
+        {
+            "question_id": "mat-faci-04",
+            "difficulte": "facile",
+            "type": "calcul",
+            "user_answer": 1,
+            "user_answer_original": 0,
+            "good_answer_original": 1,
+            "correct": false,
+            "status": "answered"
+        },
+        {
+            "question_id": "mat-diff-01",
+            "difficulte": "difficile",
+            "type": "calcul",
+            "user_answer": 2,
+            "user_answer_original": 0,
+            "good_answer_original": 0,
+            "correct": true,
+            "status": "answered"
+        },
+        {
+            "question_id": "psc-faci-01",
+            "difficulte": "facile",
+            "type": "formule",
+            "user_answer": 0,
+            "user_answer_original": 3,
+            "good_answer_original": 1,
+            "correct": false,
+            "status": "answered"
+        },
+        {
+            "question_id": "mat-faci-01",
+            "difficulte": "facile",
+            "type": "conceptuel",
+            "user_answer": 2,
+            "user_answer_original": 3,
+            "good_answer_original": 1,
+            "correct": false,
+            "status": "answered"
+        },
+        {
+            "question_id": "mat-expe-03",
+            "difficulte": "expert",
+            "type": "conceptuel",
+            "user_answer": 1,
+            "user_answer_original": 0,
+            "good_answer_original": 1,
+            "correct": false,
+            "status": "answered"
+        },
+        {
+            "question_id": "mat-expe-05",
+            "difficulte": "expert",
+            "type": "conceptuel",
+            "user_answer": 2,
+            "user_answer_original": 2,
+            "good_answer_original": 2,
+            "correct": true,
+            "status": "answered"
+        },
+        {
+            "question_id": "mat-expe-04",
+            "difficulte": "expert",
+            "type": "conceptuel",
+            "user_answer": 1,
+            "user_answer_original": 1,
+            "good_answer_original": 1,
+            "correct": true,
+            "status": "answered"
+        }
+    ]
+}
