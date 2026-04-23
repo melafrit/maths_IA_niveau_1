@@ -1,0 +1,406 @@
+{
+  "_meta": {
+    "module": "maths-ia",
+    "chapitre": "j3-classification",
+    "theme": "probabilites",
+    "module_label": "Mathématiques appliquées à l'IA",
+    "chapitre_label": "Jour 3 — Classification",
+    "theme_label": "Probabilités",
+    "version": "1.0.0",
+    "created_at": "2026-04-21T13:00:00+02:00",
+    "created_by": "system",
+    "license": "CC BY-NC-SA 4.0 — Mohamed EL AFRIT — IPSSI",
+    "total_questions": 20,
+    "difficulty_distribution": {
+      "facile": 5,
+      "moyen": 5,
+      "difficile": 5,
+      "expert": 5
+    },
+    "comment": "Premier thème du Jour 3 (Classification). Introduction aux probabilités pour le ML. Pont entre le Jour 2 (régression numérique) et la classification. Focus sur les intuitions et applications plutôt que sur le formalisme mesuré. Prépare la sigmoïde/logistique, le perceptron, et la frontière de décision."
+  },
+
+  "questions": [
+
+    {
+      "id": "prb-faci-01",
+      "enonce": "Quelle est la **plage de valeurs** possibles pour une probabilité $P(A)$ ?",
+      "options": [
+        "$P(A) \\in [0, 1]$",
+        "$P(A) \\in [-1, 1]$",
+        "$P(A) \\in [0, 100]$",
+        "$P(A) \\in \\mathbb{R}$ (tout nombre réel)"
+      ],
+      "correct": 0,
+      "difficulte": "facile",
+      "type": "conceptuel",
+      "tags": ["definition", "probabilite", "bornes"],
+      "hint": "Une probabilité de 0 = événement impossible. Une probabilité de 1 = événement certain. Aucune autre valeur n'a de sens.",
+      "explanation": "Une probabilité est toujours dans $[0, 1]$ : **$P(A) = 0$** = événement impossible, **$P(A) = 1$** = événement certain, **$P(A) = 0.5$** = pile au milieu (aucune préférence). Les valeurs extérieures n'ont PAS de sens probabiliste. En pourcentage, on multiplie par 100 : $P(A) = 0.3$ ↔ 30% de chance. **En ML** : la sortie d'un classifieur binaire (sigmoïde) est toujours dans $[0, 1]$ — c'est bien une probabilité.",
+      "traps": "Probabilité négative : aucun sens (option B). 100 au lieu de 1 (option C) : confusion avec le pourcentage. $\\mathbb{R}$ : trop large (option D).",
+      "references": "Cours J3, section 3.1 Définition d'une probabilité"
+    },
+
+    {
+      "id": "prb-faci-02",
+      "enonce": "On lance une pièce ÉQUILIBRÉE. Quelle est la probabilité d'obtenir 'Pile' ?",
+      "options": [
+        "$P(\\text{Pile}) = 0$",
+        "$P(\\text{Pile}) = 0.5$",
+        "$P(\\text{Pile}) = 1$",
+        "$P(\\text{Pile}) = 2$"
+      ],
+      "correct": 1,
+      "difficulte": "facile",
+      "type": "calcul",
+      "tags": ["exemple-classique", "equiprobabilite", "bernoulli"],
+      "hint": "'Équilibrée' = aucun biais. Deux issues équiprobables : Pile ou Face. Quelle fraction de cas est favorable ?",
+      "explanation": "Une pièce équilibrée a 2 issues équiprobables (Pile et Face), donc $P(\\text{Pile}) = 1/2 = 0.5$. **Formule générale** : pour des issues équiprobables, $P = \\frac{\\text{nombre cas favorables}}{\\text{nombre cas possibles}}$. **En ML** : une prédiction $P(y=1) = 0.5$ signifie que le modèle est indécis — c'est souvent le seuil de décision en classification binaire.",
+      "traps": "$P = 0$ (impossible) : faux, c'est bien possible. $P = 1$ (certain) : faux, pas garanti. $P = 2$ : hors plage $[0, 1]$, aberrant.",
+      "references": "Cours J3, section 3.1 Exemples de base"
+    },
+
+    {
+      "id": "prb-faci-03",
+      "enonce": "Quelle est la somme de TOUTES les probabilités des issues possibles d'une expérience ?",
+      "options": [
+        "0",
+        "0.5",
+        "1",
+        "$\\infty$"
+      ],
+      "correct": 2,
+      "difficulte": "facile",
+      "type": "conceptuel",
+      "tags": ["axiome", "normalisation", "somme"],
+      "hint": "'Toutes les issues possibles' = quelque chose DOIT arriver, avec certitude.",
+      "explanation": "**Axiome fondamental** : la somme des probabilités de toutes les issues possibles d'une expérience est **1**. C'est la **condition de normalisation**. Exemple : lancer un dé à 6 faces, $\\sum_{i=1}^6 P(i) = 1/6 \\times 6 = 1$. **En ML** : (1) La softmax garantit $\\sum_k P(y=k) = 1$ pour la classification multi-classe. (2) Une distribution mal normalisée (somme ≠ 1) n'est PAS une distribution de probabilité.",
+      "traps": "0 : contraire de la certitude (rien n'arrive). 0.5 : pas spécial. $\\infty$ : impossible dans $[0, 1]$.",
+      "references": "Cours J3, section 3.1 Axiomes de Kolmogorov"
+    },
+
+    {
+      "id": "prb-faci-04",
+      "enonce": "Soit deux événements disjoints (incompatibles) $A$ et $B$ avec $P(A) = 0.3$ et $P(B) = 0.4$. Que vaut $P(A \\cup B)$ (probabilité de 'A OU B') ?",
+      "options": [
+        "$P(A \\cup B) = 0.12$",
+        "$P(A \\cup B) = 0.7$",
+        "$P(A \\cup B) = 0.1$",
+        "$P(A \\cup B) = 1$"
+      ],
+      "correct": 1,
+      "difficulte": "facile",
+      "type": "calcul",
+      "tags": ["union", "disjoints", "addition"],
+      "hint": "Pour des événements DISJOINTS (qui ne peuvent pas arriver en même temps), les probabilités s'ADDITIONNENT.",
+      "explanation": "Pour des événements **disjoints** (incompatibles, $A \\cap B = \\emptyset$) : $P(A \\cup B) = P(A) + P(B) = 0.3 + 0.4 = 0.7$. **Remarque générale** : pour des événements QUELCONQUES (pas forcément disjoints), la formule est $P(A \\cup B) = P(A) + P(B) - P(A \\cap B)$. Pour des événements disjoints, $P(A \\cap B) = 0$, donc on retrouve l'addition simple.",
+      "traps": "$0.12 = 0.3 \\times 0.4$ serait la probabilité d'INTERSECTION $P(A \\cap B)$ pour des événements INDÉPENDANTS (mais ici ils sont DISJOINTS, pas indépendants ! pour des disjoints, $P(A \\cap B) = 0$). $0.1 = 0.4 - 0.3$ : aucun sens. $1$ : faux.",
+      "references": "Cours J3, section 3.1 Règle d'addition"
+    },
+
+    {
+      "id": "prb-faci-05",
+      "enonce": "Pour un événement $A$, que représente la **probabilité complémentaire** $P(\\bar{A}) = P(\\text{non } A)$ ?",
+      "options": [
+        "$P(\\bar{A}) = P(A)$",
+        "$P(\\bar{A}) = 1 - P(A)$",
+        "$P(\\bar{A}) = -P(A)$",
+        "$P(\\bar{A}) = 1$"
+      ],
+      "correct": 1,
+      "difficulte": "facile",
+      "type": "formule",
+      "tags": ["complementaire", "negation", "formule"],
+      "hint": "Un événement arrive OU n'arrive pas. Ces deux options sont complémentaires et couvrent toutes les possibilités.",
+      "explanation": "$P(\\bar{A}) = 1 - P(A)$ : c'est la **règle du complémentaire**. Intuitivement : la somme des probabilités de 'arrive' et 'n'arrive pas' doit valoir 1 (certitude), donc $P(A) + P(\\bar{A}) = 1$, d'où $P(\\bar{A}) = 1 - P(A)$. **En classification binaire** : si $P(y=1 | \\mathbf{x}) = 0.7$, alors $P(y=0 | \\mathbf{x}) = 0.3$. Très utilisé pour la sigmoïde : $1 - \\sigma(z) = \\sigma(-z)$.",
+      "traps": "$P(\\bar{A}) = P(A)$ : faux, sauf cas trivial $P(A) = 0.5$. Probabilité négative (option C) : aberrant. $P(\\bar{A}) = 1$ : seulement si $P(A) = 0$.",
+      "references": "Cours J3, section 3.1 Événement complémentaire"
+    },
+
+    {
+      "id": "prb-moye-01",
+      "enonce": "On lance deux dés ÉQUILIBRÉS à 6 faces, indépendants. Quelle est la probabilité d'obtenir **un double 6** ?",
+      "options": [
+        "$P = 1/6$",
+        "$P = 1/12$",
+        "$P = 1/36$",
+        "$P = 2/6$"
+      ],
+      "correct": 2,
+      "difficulte": "moyen",
+      "type": "calcul",
+      "tags": ["independance", "multiplication", "exemple"],
+      "hint": "Pour des événements INDÉPENDANTS, la probabilité de l'intersection = produit des probabilités individuelles.",
+      "explanation": "Pour des événements **indépendants** : $P(A \\cap B) = P(A) \\cdot P(B)$. Ici $P(\\text{dé 1} = 6) = P(\\text{dé 2} = 6) = 1/6$, donc $P(\\text{double 6}) = 1/6 \\times 1/6 = 1/36 \\approx 0.028$. **Vérification** : sur 36 combinaisons possibles de 2 dés, 1 seule est (6,6). **En ML** : l'indépendance simplifie les calculs (ex : **Naive Bayes** suppose l'indépendance conditionnelle des features).",
+      "traps": "$1/6$ : c'est pour UN dé. $1/12$ : $1/6 + 1/6 / 2$, aucun sens. $2/6$ : addition aberrante.",
+      "references": "Cours J3, section 3.2 Indépendance"
+    },
+
+    {
+      "id": "prb-moye-02",
+      "enonce": "La **probabilité conditionnelle** $P(A | B)$ (probabilité de $A$ SACHANT $B$) se lit 'probabilité de $A$ sachant $B$'. Sa formule est :",
+      "options": [
+        "$P(A | B) = P(A) \\cdot P(B)$",
+        "$P(A | B) = \\frac{P(A \\cap B)}{P(B)}$ (quand $P(B) > 0$)",
+        "$P(A | B) = P(A) + P(B)$",
+        "$P(A | B) = \\frac{P(A)}{P(B)}$"
+      ],
+      "correct": 1,
+      "difficulte": "moyen",
+      "type": "formule",
+      "tags": ["conditionnelle", "bayes", "formule"],
+      "hint": "Définition : parmi les cas où $B$ arrive, quelle PROPORTION sont aussi des cas où $A$ arrive ?",
+      "explanation": "**Définition** : $P(A | B) = \\frac{P(A \\cap B)}{P(B)}$. Intuition : on 'restreint' l'univers aux cas où $B$ est vrai, puis on calcule la fraction où $A$ l'est aussi. **Exemple** : soit $A$ = 'score > 45k€' et $B$ = 'a > 5 ans d'expérience'. Alors $P(A | B)$ = 'probabilité de gagner > 45k€ SACHANT qu'on a > 5 ans d'expérience'. **En ML** : un classifieur calcule $P(y | \\mathbf{x})$ — la probabilité de la classe $y$ SACHANT les features $\\mathbf{x}$. C'est LE concept central de la classification probabiliste.",
+      "traps": "Option A : c'est la formule pour DES ÉVÉNEMENTS INDÉPENDANTS ($P(A \\cap B) = P(A) \\cdot P(B)$), pas la conditionnelle générale. Option C : addition n'a pas de sens. Option D : oublie $P(A \\cap B)$.",
+      "references": "Cours J3, section 3.2 Probabilité conditionnelle"
+    },
+
+    {
+      "id": "prb-moye-03",
+      "enonce": "Deux événements $A$ et $B$ sont dits **indépendants** si :",
+      "options": [
+        "$P(A | B) = P(A)$ (la connaissance de $B$ ne change pas la probabilité de $A$)",
+        "$P(A) = P(B)$",
+        "$A$ et $B$ sont disjoints",
+        "$P(A) + P(B) = 1$"
+      ],
+      "correct": 0,
+      "difficulte": "moyen",
+      "type": "conceptuel",
+      "tags": ["independance", "conditionnelle", "definition"],
+      "hint": "'Indépendant' = l'un ne donne aucune information sur l'autre. Savoir que $B$ s'est produit ne modifie pas notre estimation de $P(A)$.",
+      "explanation": "**Définition de l'indépendance** : $A$ et $B$ sont indépendants ssi $P(A | B) = P(A)$ (équivalent : $P(A \\cap B) = P(A) P(B)$). Intuition : savoir que $B$ arrive ne change rien sur $A$. **Exemples** : lancers de dés successifs (indépendants), mais météo et humeur (PAS indépendants, il y a une corrélation). **À NE PAS CONFONDRE avec disjoints** : des événements disjoints (incompatibles) NE peuvent PAS être indépendants (sauf cas triviaux) — l'information que $B$ arrive DÉTERMINE que $A$ n'arrive pas, donc ils sont très liés !",
+      "traps": "$P(A) = P(B)$ (option B) : n'a rien à voir avec l'indépendance. Disjoints (option C) : ERREUR CLASSIQUE — disjoints et indépendants sont des notions DIFFÉRENTES et souvent opposées ! $P(A)+P(B)=1$ (option D) : complémentarité, pas indépendance.",
+      "references": "Cours J3, section 3.2 Indépendance ≠ disjonction"
+    },
+
+    {
+      "id": "prb-moye-04",
+      "enonce": "Pour le dataset fil rouge (30 développeurs), on observe : parmi les 10 développeurs avec > 5 ans d'expérience, 8 gagnent > 45k€. Quelle est $P(\\text{salaire} > 45 | \\text{exp} > 5)$ ?",
+      "options": [
+        "$0.8$",
+        "$0.4$",
+        "$10/30$",
+        "$8/30$"
+      ],
+      "correct": 0,
+      "difficulte": "moyen",
+      "type": "calcul",
+      "tags": ["conditionnelle", "application-ml", "fil-rouge"],
+      "hint": "On 'restreint' le calcul aux seuls développeurs avec > 5 ans (= 10). Parmi ceux-là, combien gagnent > 45k€ (= 8) ?",
+      "explanation": "$P(\\text{salaire} > 45 | \\text{exp} > 5) = \\frac{\\text{nb dev avec exp>5 ET salaire>45}}{\\text{nb dev avec exp>5}} = \\frac{8}{10} = 0.8$. Attention : on divise par 10 (univers conditionné), pas par 30 (univers total). **Interprétation métier** : 'si un développeur a plus de 5 ans d'expérience, il y a 80% de chances qu'il gagne plus de 45k€'. C'est une **information très actionnable** pour un classifieur binaire (salaire > 45k€ : oui/non).",
+      "traps": "$0.4$ correspond à $4/10$, faux. $10/30 = 1/3$ est $P(\\text{exp} > 5)$, la probabilité marginale. $8/30$ est $P(\\text{salaire} > 45 \\cap \\text{exp} > 5)$, la probabilité jointe, pas la conditionnelle.",
+      "references": "Cours J3, section 3.2 Probabilité conditionnelle appliquée"
+    },
+
+    {
+      "id": "prb-moye-05",
+      "enonce": "En code Python (NumPy), on a un tableau `p_classes = np.array([0.3, 0.5, 0.2])` donnant les probabilités de 3 classes. Comment vérifier que c'est une distribution VALIDE ?",
+      "options": [
+        "Vérifier `np.sum(p_classes) == 1` ET `np.all(p_classes >= 0)`",
+        "Vérifier `np.max(p_classes) == 1`",
+        "Vérifier `len(p_classes) == 3`",
+        "Vérifier `np.min(p_classes) == 0`"
+      ],
+      "correct": 0,
+      "difficulte": "moyen",
+      "type": "code",
+      "tags": ["python", "code", "verification", "distribution"],
+      "hint": "Une distribution valide doit satisfaire 2 axiomes : (1) somme des probabilités = 1, (2) toutes les probabilités ≥ 0.",
+      "explanation": "**Deux conditions** : (1) `np.sum(p_classes) == 1` (condition de normalisation), (2) `np.all(p_classes >= 0)` (non-négativité). Ici : somme = 1.0 ✓ et toutes ≥ 0 ✓, donc valide. **Attention aux float** : en pratique, utiliser `np.isclose(np.sum(p_classes), 1.0)` à cause des erreurs d'arrondi flottant. **En ML** : après une softmax, la sortie est automatiquement une distribution valide. Mais si on construit `p` manuellement, il faut vérifier/normaliser.",
+      "traps": "Max = 1 (option B) : pas nécessaire (ex : $(0.3, 0.5, 0.2)$ a max = 0.5). Longueur = 3 (option C) : simple taille, pas une condition probabiliste. Min = 0 (option D) : n'est pas requis (ex : $(0.3, 0.5, 0.2)$ a min > 0, valide).",
+      "references": "Cours J3, section 3.1 Vérification Python"
+    },
+
+    {
+      "id": "prb-diff-01",
+      "enonce": "Le **théorème de Bayes** permet d'inverser une probabilité conditionnelle : $P(A | B) = \\frac{P(B | A) \\cdot P(A)}{P(B)}$. Quel est son intérêt principal en machine learning ?",
+      "options": [
+        "Calculer des probabilités d'événements toujours indépendants",
+        "Passer de $P(\\text{features} | \\text{classe})$ (facile à estimer sur les données) à $P(\\text{classe} | \\text{features})$ (ce qu'on veut pour classifier)",
+        "Garantir que toutes les probabilités sont égales",
+        "Remplacer la descente de gradient"
+      ],
+      "correct": 1,
+      "difficulte": "difficile",
+      "type": "conceptuel",
+      "tags": ["bayes", "classification", "naive-bayes"],
+      "hint": "En classification, on VEUT $P(\\text{classe}|\\text{features})$ mais on ESTIME souvent $P(\\text{features}|\\text{classe})$. Bayes fait le pont.",
+      "explanation": "**Théorème de Bayes** (Révérend Bayes, 18e siècle) : $P(A | B) = \\frac{P(B | A) P(A)}{P(B)}$. **En classification** : on veut $P(y | \\mathbf{x})$ (la classe sachant les features), mais on peut facilement estimer $P(\\mathbf{x} | y)$ (la distribution des features PAR CLASSE, à partir du dataset d'entraînement). Bayes fait le pont : $P(y | \\mathbf{x}) = \\frac{P(\\mathbf{x} | y) P(y)}{P(\\mathbf{x})}$. **Naive Bayes** : classifieur qui suppose l'indépendance des features sachant la classe, ce qui simplifie drastiquement les calculs. Très utilisé en spam filtering, classification de texte. **Perspective bayésienne** : $P(y)$ = prior (croyance a priori), $P(\\mathbf{x}|y)$ = vraisemblance, $P(y|\\mathbf{x})$ = posterior.",
+      "traps": "Bayes n'a rien à voir avec l'indépendance (option A). Il ne garantit aucune égalité (option C). Il n'est pas une alternative à la descente de gradient (option D).",
+      "references": "Cours J3, section 3.3 Théorème de Bayes"
+    },
+
+    {
+      "id": "prb-diff-02",
+      "enonce": "On teste un dépistage médical : la maladie touche 1% de la population (prévalence). Le test a une sensibilité de 99% (vrais positifs) et spécificité de 99% (vrais négatifs). Si le test est positif, quelle est la probabilité réelle d'être malade ?",
+      "options": [
+        "99% (sensibilité du test)",
+        "Environ 50% (par Bayes : prévalence faible contre-balance la spécificité)",
+        "100% (test toujours fiable)",
+        "1% (prévalence de la maladie)"
+      ],
+      "correct": 1,
+      "difficulte": "difficile",
+      "type": "calcul",
+      "tags": ["bayes", "paradoxe", "application-medecine"],
+      "hint": "Avec Bayes : $P(\\text{malade} | +) = \\frac{P(+ | \\text{malade}) \\cdot P(\\text{malade})}{P(+)}$. Calculez $P(+) = P(+|\\text{malade}) P(\\text{malade}) + P(+|\\text{sain}) P(\\text{sain}) = 0.99 \\times 0.01 + 0.01 \\times 0.99$.",
+      "explanation": "Calcul Bayes : $P(\\text{malade} | +) = \\frac{0.99 \\times 0.01}{0.99 \\times 0.01 + 0.01 \\times 0.99} = \\frac{0.0099}{0.0099 + 0.0099} = 0.5 = 50\\%$. **Paradoxe médical classique** : malgré un test ultra-précis (99%), la faible prévalence (1%) fait qu'il y a AUTANT de faux positifs que de vrais positifs. Un test positif augmente la probabilité de maladie de 1% à 50% seulement. **Leçon** : on ne peut pas se fier uniquement à la sensibilité d'un test, il faut intégrer la prévalence (prior). Ce paradoxe est massivement mal compris par les médecins et le grand public.",
+      "traps": "99% (option A) : erreur classique (prior-neglect, la prévalence est oubliée). 100% : impossible avec un test imparfait. 1% : la prévalence n'est qu'un élément du calcul.",
+      "references": "Cours J3, section 3.3 Paradoxe bayésien"
+    },
+
+    {
+      "id": "prb-diff-03",
+      "enonce": "L'**espérance** $E[X]$ d'une variable aléatoire discrète $X$ avec valeurs $x_1, \\ldots, x_n$ et probabilités $p_1, \\ldots, p_n$ est :",
+      "options": [
+        "$E[X] = \\max_i x_i$",
+        "$E[X] = \\sum_{i=1}^n x_i p_i$ (moyenne pondérée par les probabilités)",
+        "$E[X] = \\frac{1}{n} \\sum_{i=1}^n x_i$ (moyenne simple)",
+        "$E[X] = \\prod_i x_i$"
+      ],
+      "correct": 1,
+      "difficulte": "difficile",
+      "type": "formule",
+      "tags": ["esperance", "moyenne-ponderee", "formule"],
+      "hint": "Chaque valeur $x_i$ est pondérée par sa probabilité d'occurrence. C'est la 'valeur moyenne attendue'.",
+      "explanation": "**Espérance (mean / expected value)** : $E[X] = \\sum_i x_i p_i$. Interprétation : si on répète l'expérience un grand nombre de fois, la moyenne des observations tend vers $E[X]$ (loi des grands nombres). **Exemple** : espérance d'un dé équilibré : $E[X] = \\sum_{i=1}^6 i \\cdot \\frac{1}{6} = \\frac{21}{6} = 3.5$. **En ML** : l'**Empirical Risk Minimization (ERM)** estime $E[L(y, \\hat{y})]$ (risque théorique) par la moyenne empirique (loss sur le dataset). L'espérance est aussi au cœur de l'**optimisation stochastique** (SGD estime l'espérance du gradient).",
+      "traps": "Max (option A) : pas la moyenne. Moyenne simple (option C) : seulement si les $p_i$ sont tous égaux à $1/n$. Produit (option D) : aucun sens probabiliste.",
+      "references": "Cours J3, section 3.4 Espérance"
+    },
+
+    {
+      "id": "prb-diff-04",
+      "enonce": "La loi **Bernoulli** de paramètre $p$ (succès/échec, ex : pile ou face biaisé) est la base de la classification binaire. Sa loi est : $P(X=1) = p$ et $P(X=0) = 1 - p$. Quelle est son **espérance** ?",
+      "options": [
+        "$E[X] = p$",
+        "$E[X] = 1$",
+        "$E[X] = p \\cdot (1-p)$ (c'est la variance)",
+        "$E[X] = 0.5$"
+      ],
+      "correct": 0,
+      "difficulte": "difficile",
+      "type": "calcul",
+      "tags": ["bernoulli", "loi-discrete", "classification-binaire"],
+      "hint": "Appliquez la formule : $E[X] = 1 \\cdot P(X=1) + 0 \\cdot P(X=0) = 1 \\cdot p + 0 \\cdot (1-p)$.",
+      "explanation": "$E[X] = 1 \\cdot p + 0 \\cdot (1-p) = p$. **Intuition** : l'espérance est égale à la probabilité de succès. Pour une pièce équilibrée ($p = 0.5$), $E = 0.5$. Pour un tirage très biaisé ($p = 0.9$), $E = 0.9$. **En ML** : en classification binaire, la sortie du modèle $\\hat{y} = \\sigma(\\mathbf{w}^T \\mathbf{x})$ représente $P(y=1 | \\mathbf{x})$, c'est-à-dire l'espérance de la classe pour cet exemple (la classe réelle $y$ suit une Bernoulli de paramètre $\\hat{y}$). **Variance** : $\\text{Var}(X) = p(1-p)$ — maximum à $p = 0.5$ (incertitude maximale).",
+      "traps": "$E = 1$ : c'est la valeur MAXIMALE de $X$. $E = p(1-p)$ : c'est la VARIANCE, pas l'espérance. $E = 0.5$ : spécifique au cas équilibré seulement.",
+      "references": "Cours J3, section 3.4 Loi de Bernoulli"
+    },
+
+    {
+      "id": "prb-diff-05",
+      "enonce": "Pour un **tirage aléatoire uniforme** sur l'intervalle continu $[0, 1]$, la **loi uniforme** a une densité de probabilité $f(x) = 1$ sur $[0, 1]$ et $0$ ailleurs. Que vaut $P(X = 0.5)$ (probabilité d'obtenir exactement 0.5) ?",
+      "options": [
+        "$P(X = 0.5) = 1$",
+        "$P(X = 0.5) = 0.5$",
+        "$P(X = 0.5) = 0$",
+        "$P(X = 0.5) = \\infty$"
+      ],
+      "correct": 2,
+      "difficulte": "difficile",
+      "type": "conceptuel",
+      "tags": ["loi-continue", "densite", "probabilite-ponctuelle"],
+      "hint": "Pour une variable CONTINUE, la probabilité d'une valeur SPÉCIFIQUE est toujours... ?",
+      "explanation": "Pour une variable aléatoire **continue**, $P(X = a) = 0$ pour tout $a$ ! Seules les probabilités d'INTERVALLES sont non nulles : $P(X \\in [0.4, 0.6]) = 0.2$ par exemple. **Paradoxe apparent** : $X$ doit prendre UNE valeur, mais chaque valeur spécifique a probabilité 0. Résolution : on passe de probabilités à DENSITÉS de probabilité, et on intègre sur un intervalle. $P(a \\leq X \\leq b) = \\int_a^b f(x) dx$. **En ML** : la sortie d'un modèle de régression est traitée comme continue, donc on ne demande jamais $P(\\hat{y} = y)$ (toujours 0), mais plutôt $P(|\\hat{y} - y| < \\epsilon)$.",
+      "traps": "1 (option A) : confusion densité/probabilité (la densité peut être 1, mais pas la proba). 0.5 (option B) : prise de la valeur directement. $\\infty$ : aucun sens probabiliste.",
+      "references": "Cours J3, section 3.4 Lois continues"
+    },
+
+    {
+      "id": "prb-expe-01",
+      "enonce": "La **distribution gaussienne (normale)** $\\mathcal{N}(\\mu, \\sigma^2)$ est la loi la plus utilisée en ML. Sa densité est $f(x) = \\frac{1}{\\sqrt{2\\pi\\sigma^2}} \\exp(-\\frac{(x-\\mu)^2}{2\\sigma^2})$. Pourquoi est-elle si centrale ?",
+      "options": [
+        "Elle est la seule loi de probabilité qui existe mathématiquement",
+        "Le **théorème central limite** (TCL) : la somme normalisée de variables indépendantes tend vers une gaussienne, quelle que soit leur loi initiale",
+        "Elle est obligatoire pour tous les algorithmes de ML",
+        "Elle ne peut prendre que des valeurs positives"
+      ],
+      "correct": 1,
+      "difficulte": "expert",
+      "type": "conceptuel",
+      "tags": ["gaussienne", "tcl", "theoreme-central-limite"],
+      "hint": "Pensez à la raison pour laquelle tant de phénomènes naturels (tailles, tests, erreurs de mesure) suivent une loi normale.",
+      "explanation": "**Théorème Central Limite (TCL)** : si $X_1, X_2, \\ldots, X_n$ sont indépendantes et identiquement distribuées (IID) avec espérance $\\mu$ et variance $\\sigma^2$, alors $\\frac{1}{n}\\sum X_i$ converge en loi vers $\\mathcal{N}(\\mu, \\sigma^2/n)$. **Conséquence** : les 'sommes/moyennes de nombreux effets aléatoires' tendent à être gaussiennes, même si les effets individuels ne le sont pas. **Exemples de phénomènes ~gaussiens** : tailles humaines (beaucoup de facteurs génétiques/environnementaux additifs), erreurs de mesure, notes d'étudiants, etc. **En ML** : initialisation des poids (He, Xavier) utilise souvent des gaussiennes. Les GAN (Generative Adversarial Networks) partent souvent d'un bruit gaussien. La MSE correspond à une hypothèse de bruit gaussien (cf. fct-expe-04).",
+      "traps": "Option A : faux, beaucoup d'autres lois existent (Bernoulli, Poisson, Gamma...). Option C : exagéré (certains modèles n'utilisent pas de gaussienne). Option D : faux, la gaussienne a un support sur $\\mathbb{R}$ entier (valeurs négatives possibles).",
+      "references": "Cours J3, section 3.5 Gaussienne et TCL"
+    },
+
+    {
+      "id": "prb-expe-02",
+      "enonce": "Le **classifieur Naive Bayes** applique le théorème de Bayes avec une hypothèse simplificatrice : l'indépendance conditionnelle des features sachant la classe. Quelle est la formule utilisée pour classifier ?",
+      "options": [
+        "$\\hat{y} = \\arg\\max_k P(y = k | \\mathbf{x}) \\propto P(y=k) \\prod_{j=1}^p P(x_j | y=k)$",
+        "$\\hat{y} = \\arg\\max_k \\sum_{j=1}^p x_j$",
+        "$\\hat{y} = \\arg\\max_k P(y = k)$ (ignore les features)",
+        "$\\hat{y} = \\sum_k P(y = k | \\mathbf{x})$"
+      ],
+      "correct": 0,
+      "difficulte": "expert",
+      "type": "formule",
+      "tags": ["naive-bayes", "classification", "bayes"],
+      "hint": "Naive Bayes = Bayes + indépendance conditionnelle des features : $P(\\mathbf{x} | y) = \\prod_j P(x_j | y)$.",
+      "explanation": "**Naive Bayes** : (1) Appliquer Bayes : $P(y | \\mathbf{x}) = \\frac{P(\\mathbf{x} | y) P(y)}{P(\\mathbf{x})}$. (2) Supposer l'indépendance conditionnelle ('naïve') : $P(\\mathbf{x} | y) = \\prod_j P(x_j | y)$. (3) Classer selon $\\arg\\max_k$ (le dénominateur $P(\\mathbf{x})$ est constant en $k$, on l'ignore). Donc $\\hat{y} = \\arg\\max_k P(y=k) \\prod_j P(x_j | y=k)$. **Malgré son hypothèse 'naïve'** souvent fausse (les features sont rarement indépendantes), ce classifieur fonctionne TRÈS bien en pratique, surtout en **classification de texte** (email spam, sentiment analysis). C'est le classifieur probabiliste le plus simple et rapide.",
+      "traps": "Option B : somme arbitraire, pas de rapport avec Bayes. Option C : ignore les features (juste le prior, classifieur trivial). Option D : somme au lieu d'argmax.",
+      "references": "Cours J3, section 3.5 Classifieur Naive Bayes (référence avancée)"
+    },
+
+    {
+      "id": "prb-expe-03",
+      "enonce": "La **divergence de Kullback-Leibler (KL)** mesure la 'distance' entre deux distributions $p$ et $q$ : $D_{KL}(p \\| q) = \\sum_x p(x) \\log \\frac{p(x)}{q(x)}$. Quelle propriété est FAUSSE ?",
+      "options": [
+        "$D_{KL}(p \\| q) \\geq 0$ toujours",
+        "$D_{KL}(p \\| q) = 0$ ssi $p = q$",
+        "$D_{KL}(p \\| q) = D_{KL}(q \\| p)$ (symétrie)",
+        "$D_{KL}$ est utilisée pour définir la cross-entropy"
+      ],
+      "correct": 2,
+      "difficulte": "expert",
+      "type": "conceptuel",
+      "tags": ["kl-divergence", "entropy", "cross-entropy", "information-theory"],
+      "hint": "Une 'vraie' distance serait symétrique. La KL divergence... ne l'est pas !",
+      "explanation": "La KL **n'est PAS symétrique** : $D_{KL}(p \\| q) \\neq D_{KL}(q \\| p)$ en général. C'est pourquoi on parle de DIVERGENCE et non de distance. **Propriétés correctes** : (1) $D_{KL} \\geq 0$ (Jensen + log concave). (2) $D_{KL}(p \\| q) = 0$ ssi $p = q$ presque partout. (3) **Lien cross-entropy** : $D_{KL}(p \\| q) = H(p, q) - H(p)$, où $H$ est l'entropie. Minimiser la cross-entropy (loss de classification) = minimiser la KL (à $H(p)$ constant). **Utilisations en ML** : (1) Loss dans les VAE, GAN. (2) Variational inference. (3) Distillation de modèles (teacher → student).",
+      "traps": "Options A, B, D sont VRAIES (pièges car on veut la FAUSSE). Ne pas confondre 'divergence' (terme technique) et 'distance' (notion mathématique avec axiomes, dont la symétrie).",
+      "references": "Cours J3, section 3.6 Divergence KL (référence avancée)"
+    },
+
+    {
+      "id": "prb-expe-04",
+      "enonce": "La **softmax** transforme un vecteur $\\mathbf{z} \\in \\mathbb{R}^K$ en une distribution de probabilité sur $K$ classes : $\\text{softmax}(z_k) = \\frac{e^{z_k}}{\\sum_{j=1}^K e^{z_j}}$. Quel est son rôle dans les réseaux de neurones ?",
+      "options": [
+        "Régulariser les poids",
+        "Transformer les 'logits' (scores bruts) en probabilités de classes dans la dernière couche d'un classifieur multi-classes",
+        "Calculer le gradient",
+        "Initialiser les poids"
+      ],
+      "correct": 1,
+      "difficulte": "expert",
+      "type": "conceptuel",
+      "tags": ["softmax", "multi-classe", "reseaux-neurones", "j4-anticipation"],
+      "hint": "La softmax est utilisée à la SORTIE d'un classifieur multi-classes (ex : CIFAR-10, ImageNet) pour obtenir $P(y = k | \\mathbf{x})$ pour chaque classe $k$.",
+      "explanation": "**Softmax** : convertit un vecteur de 'logits' (scores bruts, $\\mathbb{R}^K$) en distribution de probabilités sur $K$ classes. **Propriétés** : (1) Somme à 1 : $\\sum_k \\text{softmax}(z_k) = 1$ ✓. (2) Monotone : classe avec plus grand $z_k$ a plus grande probabilité. (3) Exponentielle : amplifie les différences (un $z_k$ un peu plus grand que les autres donne une probabilité BEAUCOUP plus grande). **Utilisation** : dernière couche d'un classifieur multi-classes (ImageNet : 1000 classes, BERT : prédiction du mot suivant parmi 30k). **Lien avec cross-entropy** : combinées, softmax + cross-entropy donnent un gradient très simple : $\\nabla = \\hat{\\mathbf{p}} - \\mathbf{y}_{\\text{one-hot}}$, ce qui facilite l'implémentation. **Binaire** : si $K = 2$, la softmax se réduit à la SIGMOÏDE.",
+      "traps": "Régularisation (option A) : fait par weight decay, dropout, etc. Gradient (option C) : calculé par autodiff, pas par softmax. Initialisation (option D) : fait par Xavier, He, etc.",
+      "references": "Cours J3 puis J4, section 3.5-4.4 Softmax"
+    },
+
+    {
+      "id": "prb-expe-05",
+      "enonce": "En **estimation de densité** par Maximum de Vraisemblance (MLE), étant donné un dataset $\\mathcal{D} = \\{x_1, \\ldots, x_n\\}$ supposé IID d'une loi paramétrée $p_\\theta$, on cherche :",
+      "options": [
+        "$\\hat{\\theta} = \\arg\\min_\\theta \\prod_i p_\\theta(x_i)$",
+        "$\\hat{\\theta} = \\arg\\max_\\theta \\prod_i p_\\theta(x_i) = \\arg\\max_\\theta \\sum_i \\log p_\\theta(x_i)$",
+        "$\\hat{\\theta} = \\frac{1}{n} \\sum_i x_i$",
+        "$\\hat{\\theta} = \\arg\\min_\\theta \\sum_i x_i^2$"
+      ],
+      "correct": 1,
+      "difficulte": "expert",
+      "type": "formule",
+      "tags": ["mle", "maximum-vraisemblance", "estimation"],
+      "hint": "MLE = 'quel paramètre MAXIMISE la probabilité d'observer les données que j'ai vues'. Produit des probabilités (car IID) ou somme des log-probabilités (pour éviter le underflow).",
+      "explanation": "**MLE (Maximum Likelihood Estimation)** : $\\hat{\\theta} = \\arg\\max_\\theta \\prod_i p_\\theta(x_i)$ (vraisemblance), ou équivalemment $\\arg\\max_\\theta \\sum_i \\log p_\\theta(x_i)$ (log-vraisemblance, plus stable numériquement). **Lien avec ML** : (1) Pour la régression linéaire, MLE sous hypothèse gaussienne = minimisation de la MSE (cf. fct-expe-04). (2) Pour la classification binaire (Bernoulli), MLE = minimisation de la log-loss. (3) C'est le CADRE THÉORIQUE qui justifie la plupart des fonctions de coût en ML. **Avantages** : (i) non biaisé asymptotiquement, (ii) variance minimale (Cramér-Rao), (iii) invariant par transformation.",
+      "traps": "Option A : on MAXIMISE (pas minimise) la vraisemblance. Option C : moyenne empirique, cas particulier pour estimer $\\mu$ d'une gaussienne. Option D : méthode des moindres carrés (lié mais pas équivalent).",
+      "references": "Cours J3, section 3.6 MLE (référence avancée)"
+    }
+
+  ]
+}

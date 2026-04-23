@@ -1,0 +1,356 @@
+{
+  "_meta": {
+    "module": "maths-ia",
+    "chapitre": "j1-representation",
+    "theme": "vecteurs",
+    "module_label": "Mathématiques appliquées à l'IA",
+    "chapitre_label": "Jour 1 — Représentation",
+    "theme_label": "Vecteurs",
+    "version": "1.0.0",
+    "created_at": "2026-04-21T12:00:00+02:00",
+    "created_by": "system",
+    "license": "CC BY-NC-SA 4.0 — Mohamed EL AFRIT — IPSSI",
+    "total_questions": 20,
+    "difficulty_distribution": {
+      "facile": 5,
+      "moyen": 5,
+      "difficile": 5,
+      "expert": 5
+    },
+    "comment": "Questions QCM à choix unique (4 propositions, 1 seule correcte). LaTeX inline avec $...$ et display avec $$...$$. Le champ 'correct' est l'index 0-3 de la bonne réponse."
+  },
+
+  "questions": [
+
+    {
+      "id": "vec-faci-01",
+      "enonce": "Soit le vecteur $\\mathbf{x} = (3, 4) \\in \\mathbb{R}^2$. Quelle est sa norme euclidienne $\\|\\mathbf{x}\\|$ ?",
+      "options": ["$5$", "$7$", "$25$", "$\\sqrt{7}$"],
+      "correct": 0,
+      "difficulte": "facile",
+      "type": "calcul",
+      "tags": ["norme", "vecteur", "pythagore"],
+      "hint": "La norme euclidienne se calcule via une racine carrée d'une somme de carrés (théorème de Pythagore).",
+      "explanation": "$\\|\\mathbf{x}\\| = \\sqrt{x_1^2 + x_2^2} = \\sqrt{3^2 + 4^2} = \\sqrt{9 + 16} = \\sqrt{25} = 5$. C'est le célèbre triangle 3-4-5.",
+      "traps": "Ne pas confondre la norme avec la somme des composantes ($3+4=7$, mauvaise réponse). Ne pas oublier la racine carrée ($25$ est le carré de la norme, pas la norme).",
+      "references": "Cours J1, section 1.2 Vecteurs et normes"
+    },
+
+    {
+      "id": "vec-faci-02",
+      "enonce": "Dans le contexte du fil rouge (prédiction de salaire), un développeur est représenté par un vecteur $\\mathbf{x} = (5, 3, 2)$ correspondant à (années d'expérience, langages maîtrisés, niveau d'études). Quelle est la dimension de cet espace ?",
+      "options": ["$2$", "$3$", "$5$", "$10$"],
+      "correct": 1,
+      "difficulte": "facile",
+      "type": "conceptuel",
+      "tags": ["dimension", "feature", "vecteur"],
+      "hint": "La dimension d'un espace vectoriel correspond au nombre de coordonnées (features) nécessaires pour décrire un point.",
+      "explanation": "Le vecteur a 3 composantes (5, 3, 2), donc l'espace est de dimension 3. On note $\\mathbf{x} \\in \\mathbb{R}^3$. En machine learning, chaque composante est appelée une 'feature'.",
+      "traps": "La dimension n'est pas la valeur de la première composante (5), ni le nombre maximum dans le vecteur. C'est le nombre de composantes.",
+      "references": "Cours J1, section 1.1 Représentation des données"
+    },
+
+    {
+      "id": "vec-faci-03",
+      "enonce": "Soit deux vecteurs $\\mathbf{u} = (1, 2)$ et $\\mathbf{v} = (3, 4)$. Quelle est la somme $\\mathbf{u} + \\mathbf{v}$ ?",
+      "options": ["$(4, 6)$", "$(3, 8)$", "$(4, 4)$", "$10$"],
+      "correct": 0,
+      "difficulte": "facile",
+      "type": "calcul",
+      "tags": ["addition", "vecteur", "operation"],
+      "hint": "L'addition de vecteurs se fait composante par composante.",
+      "explanation": "$\\mathbf{u} + \\mathbf{v} = (1+3, 2+4) = (4, 6)$. L'addition vectorielle est commutative et associative.",
+      "traps": "Ne pas multiplier les composantes ($(3, 8)$). Ne pas calculer un produit scalaire ($1 \\cdot 3 + 2 \\cdot 4 = 11$, pas $10$ d'ailleurs).",
+      "references": "Cours J1, section 1.3 Opérations sur les vecteurs"
+    },
+
+    {
+      "id": "vec-faci-04",
+      "enonce": "Soit le vecteur $\\mathbf{x} = (2, -3, 6)$. Quelle est la valeur de la norme $\\|\\mathbf{x}\\|$ ?",
+      "options": ["$5$", "$7$", "$11$", "$\\sqrt{11}$"],
+      "correct": 1,
+      "difficulte": "facile",
+      "type": "calcul",
+      "tags": ["norme", "vecteur", "dimension-3"],
+      "hint": "La formule de la norme s'étend à toutes les dimensions : $\\|\\mathbf{x}\\| = \\sqrt{\\sum_i x_i^2}$.",
+      "explanation": "$\\|\\mathbf{x}\\| = \\sqrt{2^2 + (-3)^2 + 6^2} = \\sqrt{4 + 9 + 36} = \\sqrt{49} = 7$. Attention au signe négatif : $(-3)^2 = +9$.",
+      "traps": "Ne pas oublier d'élever au carré (le signe négatif disparaît). Ne pas confondre la somme des valeurs absolues ($2+3+6=11$, mauvaise réponse).",
+      "references": "Cours J1, section 1.2 Vecteurs et normes"
+    },
+
+    {
+      "id": "vec-faci-05",
+      "enonce": "Quelle notation mathématique est traditionnellement utilisée pour représenter un vecteur en gras minuscule ?",
+      "options": ["$\\mathbf{X}$", "$\\mathbf{x}$", "$x$", "$\\vec{X}$"],
+      "correct": 1,
+      "difficulte": "facile",
+      "type": "conceptuel",
+      "tags": ["notation", "convention", "vecteur"],
+      "hint": "La convention en machine learning suit une règle stricte : minuscule pour vecteur, majuscule pour matrice.",
+      "explanation": "La convention est : vecteurs en **gras minuscule** ($\\mathbf{x}$), matrices en **gras majuscule** ($\\mathbf{X}$), scalaires en italique simple ($n$, $\\alpha$). Cette convention est universellement adoptée en ML.",
+      "traps": "$\\mathbf{X}$ (majuscule) désigne une matrice, pas un vecteur. $\\vec{X}$ est la notation physicien, peu utilisée en ML.",
+      "references": "Cours J1, section 1.0 Conventions de notation"
+    },
+
+    {
+      "id": "vec-moye-01",
+      "enonce": "Soit deux vecteurs $\\mathbf{u} = (2, 1)$ et $\\mathbf{v} = (1, 3)$. Quelle est la valeur du produit scalaire $\\langle \\mathbf{u}, \\mathbf{v} \\rangle$ ?",
+      "options": ["$3$", "$5$", "$7$", "$2$"],
+      "correct": 1,
+      "difficulte": "moyen",
+      "type": "calcul",
+      "tags": ["produit-scalaire", "vecteur", "operation"],
+      "hint": "Le produit scalaire est la somme des produits composante par composante : $\\sum_i u_i v_i$.",
+      "explanation": "$\\langle \\mathbf{u}, \\mathbf{v} \\rangle = u_1 v_1 + u_2 v_2 = 2 \\cdot 1 + 1 \\cdot 3 = 2 + 3 = 5$. Le résultat est un scalaire (pas un vecteur).",
+      "traps": "Ne pas confondre avec l'addition $(3, 4)$ ou la multiplication composante par composante $(2, 3)$. Le produit scalaire produit un nombre, pas un vecteur.",
+      "references": "Cours J1, section 1.4 Produit scalaire"
+    },
+
+    {
+      "id": "vec-moye-02",
+      "enonce": "Pour la régression linéaire $\\hat{y} = \\mathbf{w}^T \\mathbf{x} + b$, avec $\\mathbf{w} = (2, -1, 3)$, $\\mathbf{x} = (1, 4, 2)$ et $b = 5$, quelle est la valeur prédite $\\hat{y}$ ?",
+      "options": ["$9$", "$12$", "$14$", "$4$"],
+      "correct": 0,
+      "difficulte": "moyen",
+      "type": "calcul",
+      "tags": ["regression", "produit-scalaire", "prediction"],
+      "hint": "Calculez d'abord le produit scalaire $\\mathbf{w}^T \\mathbf{x}$, puis ajoutez le biais $b$.",
+      "explanation": "$\\mathbf{w}^T \\mathbf{x} = 2 \\cdot 1 + (-1) \\cdot 4 + 3 \\cdot 2 = 2 - 4 + 6 = 4$. Donc $\\hat{y} = 4 + 5 = 9$. Le biais $b$ est ajouté APRÈS le produit scalaire.",
+      "traps": "Ne pas oublier le signe négatif de $w_2 = -1$. Ne pas multiplier par $b$ (le biais s'ajoute, ne se multiplie pas). Ne pas confondre $\\mathbf{w}^T \\mathbf{x}$ (=4) avec le résultat final.",
+      "references": "Cours J1, section 1.5 Régression linéaire"
+    },
+
+    {
+      "id": "vec-moye-03",
+      "enonce": "Soit deux vecteurs $\\mathbf{u}$ et $\\mathbf{v}$ tels que $\\langle \\mathbf{u}, \\mathbf{v} \\rangle = 0$. Que peut-on dire de ces deux vecteurs ?",
+      "options": [
+        "Ils sont colinéaires (parallèles)",
+        "Ils sont orthogonaux (perpendiculaires)",
+        "Ils sont égaux",
+        "L'un d'entre eux est nul nécessairement"
+      ],
+      "correct": 1,
+      "difficulte": "moyen",
+      "type": "conceptuel",
+      "tags": ["produit-scalaire", "orthogonalite", "geometrie"],
+      "hint": "Souvenez-vous de la formule $\\langle \\mathbf{u}, \\mathbf{v} \\rangle = \\|\\mathbf{u}\\| \\cdot \\|\\mathbf{v}\\| \\cdot \\cos(\\theta)$.",
+      "explanation": "Si $\\langle \\mathbf{u}, \\mathbf{v} \\rangle = 0$ avec $\\mathbf{u}$ et $\\mathbf{v}$ non nuls, alors $\\cos(\\theta) = 0$, donc $\\theta = 90°$ : les vecteurs sont **orthogonaux**. C'est une notion fondamentale en ML (par exemple, les composantes principales en PCA sont orthogonales).",
+      "traps": "Le produit scalaire nul n'implique PAS qu'un vecteur soit nul (deux vecteurs non nuls peuvent être perpendiculaires). Colinéaires correspondrait à $\\cos(\\theta) = \\pm 1$, donc produit scalaire = $\\pm \\|\\mathbf{u}\\| \\|\\mathbf{v}\\|$.",
+      "references": "Cours J1, section 1.4 Produit scalaire et géométrie"
+    },
+
+    {
+      "id": "vec-moye-04",
+      "enonce": "On normalise un vecteur $\\mathbf{x} = (3, 4)$ pour obtenir un vecteur unitaire $\\mathbf{u}$ de même direction. Quelles sont les composantes de $\\mathbf{u}$ ?",
+      "options": [
+        "$(3/5, 4/5)$",
+        "$(0.3, 0.4)$",
+        "$(3, 4)/7$",
+        "$(1, 1)$"
+      ],
+      "correct": 0,
+      "difficulte": "moyen",
+      "type": "calcul",
+      "tags": ["normalisation", "vecteur-unitaire", "norme"],
+      "hint": "Normaliser un vecteur signifie le diviser par sa norme : $\\mathbf{u} = \\mathbf{x} / \\|\\mathbf{x}\\|$.",
+      "explanation": "$\\|\\mathbf{x}\\| = \\sqrt{9+16} = 5$. Donc $\\mathbf{u} = (3/5, 4/5) = (0.6, 0.8)$. Vérification : $\\|\\mathbf{u}\\| = \\sqrt{0.36 + 0.64} = \\sqrt{1} = 1$. ✓",
+      "traps": "Diviser par la dimension (2) ou par une coordonnée (3 ou 4) au lieu de la norme. $(0.3, 0.4)$ correspondrait à une division par 10, pas par la norme 5.",
+      "references": "Cours J1, section 1.2 Vecteurs et normes"
+    },
+
+    {
+      "id": "vec-moye-05",
+      "enonce": "Dans le dataset fil rouge, on a 30 développeurs et chacun est décrit par 5 features (expérience, langages, études, taille entreprise, % télétravail). Quelles sont les dimensions des objets mathématiques manipulés ?",
+      "options": [
+        "Chaque développeur est un vecteur $\\in \\mathbb{R}^{30}$",
+        "Chaque développeur est un vecteur $\\in \\mathbb{R}^{5}$, le dataset complet est une matrice $30 \\times 5$",
+        "Le dataset est un vecteur $\\in \\mathbb{R}^{150}$",
+        "Chaque feature est un vecteur $\\in \\mathbb{R}^{5}$"
+      ],
+      "correct": 1,
+      "difficulte": "moyen",
+      "type": "conceptuel",
+      "tags": ["dataset", "dimension", "matrice", "fil-rouge"],
+      "hint": "En ML, on parle de $n$ observations (lignes) et $p$ features (colonnes). Chaque ligne est un vecteur, l'ensemble est une matrice.",
+      "explanation": "Chaque développeur est représenté par un vecteur $\\mathbf{x}_i \\in \\mathbb{R}^5$ (5 features). Le dataset complet $\\mathbf{X}$ est une matrice de dimensions $n \\times p = 30 \\times 5$ (30 lignes pour les développeurs, 5 colonnes pour les features). C'est la convention standard en ML.",
+      "traps": "Ne pas inverser : les développeurs sont les LIGNES (n=30), pas les colonnes. La dimension d'un vecteur-développeur n'est pas 30 (le nombre d'observations) mais 5 (le nombre de features).",
+      "references": "Cours J1, section 1.5 Du vecteur au dataset"
+    },
+
+    {
+      "id": "vec-diff-01",
+      "enonce": "Soit deux vecteurs $\\mathbf{u} = (1, 1)$ et $\\mathbf{v} = (1, -1)$. Quel est l'angle $\\theta$ entre ces deux vecteurs ?",
+      "options": ["$0°$", "$45°$", "$90°$", "$180°$"],
+      "correct": 2,
+      "difficulte": "difficile",
+      "type": "calcul",
+      "tags": ["angle", "produit-scalaire", "orthogonalite"],
+      "hint": "Utilisez la formule $\\cos(\\theta) = \\frac{\\langle \\mathbf{u}, \\mathbf{v} \\rangle}{\\|\\mathbf{u}\\| \\cdot \\|\\mathbf{v}\\|}$ et déduisez $\\theta$.",
+      "explanation": "$\\langle \\mathbf{u}, \\mathbf{v} \\rangle = 1 \\cdot 1 + 1 \\cdot (-1) = 0$. Comme $\\|\\mathbf{u}\\| = \\|\\mathbf{v}\\| = \\sqrt{2}$, on a $\\cos(\\theta) = 0/(2) = 0$. Donc $\\theta = 90°$ : les vecteurs sont **orthogonaux**.",
+      "traps": "Ne pas se fier à l'apparence des composantes : même si les vecteurs ont des coordonnées 'voisines', leur produit scalaire est nul, ce qui les rend perpendiculaires. Visualisez géométriquement : $(1,1)$ pointe en haut-droite, $(1,-1)$ en bas-droite — angle de 90° entre eux.",
+      "references": "Cours J1, section 1.4 Produit scalaire et angle"
+    },
+
+    {
+      "id": "vec-diff-02",
+      "enonce": "On souhaite calculer la **distance euclidienne** entre deux développeurs $\\mathbf{x}_1 = (3, 5)$ et $\\mathbf{x}_2 = (6, 9)$ (en années d'expérience et langages). Quelle est cette distance ?",
+      "options": ["$5$", "$7$", "$25$", "$\\sqrt{7}$"],
+      "correct": 0,
+      "difficulte": "difficile",
+      "type": "calcul",
+      "tags": ["distance", "norme", "fil-rouge", "knn"],
+      "hint": "La distance euclidienne entre deux vecteurs est la norme de leur différence : $d(\\mathbf{x}_1, \\mathbf{x}_2) = \\|\\mathbf{x}_1 - \\mathbf{x}_2\\|$.",
+      "explanation": "Différence : $\\mathbf{x}_1 - \\mathbf{x}_2 = (3-6, 5-9) = (-3, -4)$. Norme : $\\|(-3, -4)\\| = \\sqrt{9+16} = \\sqrt{25} = 5$. La distance est donc 5. Cette notion est fondamentale pour l'algorithme **k-NN** (k-Nearest Neighbors).",
+      "traps": "Ne pas oublier d'élever les composantes au carré (le signe négatif disparaît). Ne pas confondre avec la somme des différences absolues ($3+4=7$, qui serait la distance de Manhattan/L1).",
+      "references": "Cours J1, section 1.6 Distances en ML"
+    },
+
+    {
+      "id": "vec-diff-03",
+      "enonce": "Soit le vecteur de poids du modèle de régression $\\mathbf{w} = (2.07, 0.5, -0.3)$ pour les features (expérience, langages, % télétravail). L'interprétation du coefficient $w_3 = -0.3$ est :",
+      "options": [
+        "Une augmentation de 1 % de télétravail diminue le salaire de 0.3 k€ (toutes choses égales par ailleurs)",
+        "Une augmentation de 0.3 % de télétravail augmente le salaire de 1 k€",
+        "Le télétravail explique 30 % du salaire",
+        "Le télétravail n'a aucun effet (signe négligeable)"
+      ],
+      "correct": 0,
+      "difficulte": "difficile",
+      "type": "conceptuel",
+      "tags": ["interpretation", "regression", "coefficient", "fil-rouge"],
+      "hint": "Dans une régression linéaire $\\hat{y} = w_1 x_1 + w_2 x_2 + w_3 x_3 + b$, chaque coefficient $w_i$ représente l'impact d'une variation unitaire de $x_i$ sur $\\hat{y}$.",
+      "explanation": "Le coefficient $w_3 = -0.3$ signifie : 'lorsque $x_3$ (% télétravail) augmente de 1 unité, $\\hat{y}$ (salaire) diminue de 0.3 k€, à condition que les autres features restent constantes' (clause **ceteris paribus**). Le signe négatif indique une corrélation négative.",
+      "traps": "Ne pas inverser le sens (augmentation/diminution selon le signe). Le coefficient n'est pas un pourcentage d'explication (qui serait le $R^2$). On ne peut pas dire 'aucun effet' : -0.3 est un effet réel, certes modeste.",
+      "references": "Cours J1, section 1.5 Interprétation des coefficients"
+    },
+
+    {
+      "id": "vec-diff-04",
+      "enonce": "On standardise un vecteur de features $\\mathbf{x} = (10, 50, 200)$ en utilisant la moyenne $\\boldsymbol{\\mu} = (5, 40, 150)$ et l'écart-type $\\boldsymbol{\\sigma} = (5, 10, 50)$. Quel est le vecteur standardisé $\\mathbf{x}_{std}$ ?",
+      "options": [
+        "$(1, 1, 1)$",
+        "$(2, 5, 4)$",
+        "$(5, 10, 50)$",
+        "$(15, 90, 350)$"
+      ],
+      "correct": 0,
+      "difficulte": "difficile",
+      "type": "calcul",
+      "tags": ["standardisation", "preprocessing", "z-score"],
+      "hint": "La standardisation (z-score) consiste à appliquer composante par composante : $x_{std,i} = (x_i - \\mu_i) / \\sigma_i$.",
+      "explanation": "Composante 1 : $(10-5)/5 = 1$. Composante 2 : $(50-40)/10 = 1$. Composante 3 : $(200-150)/50 = 1$. Donc $\\mathbf{x}_{std} = (1, 1, 1)$. Cette transformation est **essentielle** quand les features ont des échelles très différentes (sinon les features de grande échelle dominent l'apprentissage).",
+      "traps": "Ne pas oublier de soustraire la moyenne avant de diviser. Ne pas additionner ($\\mu + \\sigma$) ou multiplier — c'est bien $(x-\\mu)/\\sigma$.",
+      "references": "Cours J1, section 1.7 Préparation des données"
+    },
+
+    {
+      "id": "vec-diff-05",
+      "enonce": "Soit la projection orthogonale d'un vecteur $\\mathbf{x} = (4, 3)$ sur l'axe horizontal (direction $\\mathbf{e}_1 = (1, 0)$). Quel est le vecteur projeté ?",
+      "options": [
+        "$(4, 0)$",
+        "$(0, 3)$",
+        "$(4, 3)$",
+        "$(1, 0)$"
+      ],
+      "correct": 0,
+      "difficulte": "difficile",
+      "type": "calcul",
+      "tags": ["projection", "geometrie", "vecteur-unitaire"],
+      "hint": "La projection de $\\mathbf{x}$ sur un vecteur unitaire $\\mathbf{u}$ est $(\\mathbf{x}^T \\mathbf{u}) \\cdot \\mathbf{u}$.",
+      "explanation": "$\\mathbf{x}^T \\mathbf{e}_1 = 4 \\cdot 1 + 3 \\cdot 0 = 4$. Donc la projection est $4 \\cdot (1, 0) = (4, 0)$. Géométriquement, on 'écrase' le vecteur sur l'axe horizontal en gardant uniquement sa composante x. Cette opération est centrale en **PCA** et en réduction de dimension.",
+      "traps": "$(0, 3)$ serait la projection sur l'axe vertical, pas horizontal. $(4, 3)$ serait la non-projection (le vecteur original). Ne pas confondre projection (un vecteur) avec produit scalaire (un scalaire).",
+      "references": "Cours J1, section 1.6 Projections et PCA (introduction)"
+    },
+
+    {
+      "id": "vec-expe-01",
+      "enonce": "Soit deux vecteurs $\\mathbf{u}, \\mathbf{v} \\in \\mathbb{R}^n$ avec $\\|\\mathbf{u}\\| = 3$ et $\\|\\mathbf{v}\\| = 4$. Quelle est la **valeur maximale** que peut atteindre $|\\langle \\mathbf{u}, \\mathbf{v} \\rangle|$ ?",
+      "options": ["$3$", "$7$", "$12$", "$25$"],
+      "correct": 2,
+      "difficulte": "expert",
+      "type": "conceptuel",
+      "tags": ["cauchy-schwarz", "produit-scalaire", "inegalite"],
+      "hint": "Inégalité de Cauchy-Schwarz : $|\\langle \\mathbf{u}, \\mathbf{v} \\rangle| \\leq \\|\\mathbf{u}\\| \\cdot \\|\\mathbf{v}\\|$, avec égalité ssi les vecteurs sont colinéaires.",
+      "explanation": "L'inégalité de **Cauchy-Schwarz** stipule que $|\\langle \\mathbf{u}, \\mathbf{v} \\rangle| \\leq \\|\\mathbf{u}\\| \\cdot \\|\\mathbf{v}\\| = 3 \\cdot 4 = 12$. La valeur maximale (12) est atteinte lorsque $\\mathbf{u}$ et $\\mathbf{v}$ sont colinéaires de même sens. Géométriquement : $\\langle \\mathbf{u}, \\mathbf{v} \\rangle = \\|\\mathbf{u}\\|\\|\\mathbf{v}\\|\\cos\\theta$, et $|\\cos\\theta| \\leq 1$.",
+      "traps": "Ne pas additionner les normes (3+4=7) ni élever au carré (25). Ne pas oublier la valeur absolue : sans elle, le minimum serait $-12$.",
+      "references": "Cours J1, section 1.4 Inégalité de Cauchy-Schwarz"
+    },
+
+    {
+      "id": "vec-expe-02",
+      "enonce": "On dispose de $n$ vecteurs orthogonaux deux à deux dans $\\mathbb{R}^p$ (avec $n \\leq p$). Que peut-on garantir sur ces vecteurs s'ils sont également non nuls ?",
+      "options": [
+        "Ils sont nécessairement de même norme",
+        "Ils forment une famille linéairement indépendante",
+        "Leur somme est nulle",
+        "Au moins deux d'entre eux sont colinéaires"
+      ],
+      "correct": 1,
+      "difficulte": "expert",
+      "type": "conceptuel",
+      "tags": ["independance-lineaire", "orthogonalite", "base"],
+      "hint": "L'orthogonalité est une condition forte. Que se passe-t-il si on suppose une combinaison linéaire nulle $\\sum \\alpha_i \\mathbf{v}_i = \\mathbf{0}$ et qu'on prend le produit scalaire avec $\\mathbf{v}_j$ ?",
+      "explanation": "Soit $\\sum_i \\alpha_i \\mathbf{v}_i = \\mathbf{0}$. En prenant le produit scalaire avec $\\mathbf{v}_j$ : $\\sum_i \\alpha_i \\langle \\mathbf{v}_i, \\mathbf{v}_j \\rangle = 0$. Tous les termes s'annulent sauf $i=j$, donc $\\alpha_j \\|\\mathbf{v}_j\\|^2 = 0$. Comme $\\mathbf{v}_j \\neq \\mathbf{0}$, on a $\\alpha_j = 0$. Ceci pour tout $j$, donc la famille est **linéairement indépendante**. C'est la base de l'analyse en composantes principales (**PCA**).",
+      "traps": "Orthogonalité ≠ même norme (vecteurs $(1,0)$ et $(0,5)$ orthogonaux mais de normes différentes). Orthogonalité ≠ somme nulle. Vecteurs orthogonaux non nuls ne peuvent pas être colinéaires (ce serait contradictoire).",
+      "references": "Cours J1, section 1.6 Indépendance et bases orthogonales"
+    },
+
+    {
+      "id": "vec-expe-03",
+      "enonce": "En machine learning, la **similarité cosinus** entre deux vecteurs $\\mathbf{u}$ et $\\mathbf{v}$ est définie par $\\text{sim}(\\mathbf{u}, \\mathbf{v}) = \\frac{\\langle \\mathbf{u}, \\mathbf{v} \\rangle}{\\|\\mathbf{u}\\| \\cdot \\|\\mathbf{v}\\|}$. Quelles valeurs peut-elle prendre, et que signifie -1 ?",
+      "options": [
+        "$\\in [0, 1]$ ; -1 est impossible (la similarité est toujours positive)",
+        "$\\in [-1, 1]$ ; -1 signifie que les vecteurs pointent dans des directions opposées",
+        "$\\in \\mathbb{R}^+$ ; -1 signifie une distance maximale",
+        "$\\in [0, \\infty)$ ; -1 indique une erreur de calcul"
+      ],
+      "correct": 1,
+      "difficulte": "expert",
+      "type": "conceptuel",
+      "tags": ["similarite", "cosinus", "nlp", "embeddings"],
+      "hint": "La similarité cosinus correspond à $\\cos(\\theta)$ entre les deux vecteurs. Quel est l'intervalle de valeurs possible pour un cosinus ?",
+      "explanation": "$\\text{sim}(\\mathbf{u}, \\mathbf{v}) = \\cos(\\theta)$, et le cosinus prend des valeurs dans $[-1, 1]$. **+1** : vecteurs colinéaires de même sens (similarité maximale). **0** : vecteurs orthogonaux (sans rapport). **-1** : vecteurs colinéaires de sens opposé (anti-similarité maximale). Cette mesure est ultra-utilisée en **NLP** pour comparer des word embeddings (Word2Vec, BERT, etc.) car elle est invariante à l'échelle des vecteurs.",
+      "traps": "La similarité cosinus PEUT être négative. Pour les TF-IDF (vecteurs à composantes positives), elle reste dans $[0, 1]$, mais pour des embeddings denses (Word2Vec), elle peut être négative. Ne pas confondre similarité (cosinus) et distance (1 - cosinus, ou euclidienne).",
+      "references": "Cours J1, section 1.8 Similarité cosinus en ML"
+    },
+
+    {
+      "id": "vec-expe-04",
+      "enonce": "On considère un vecteur $\\mathbf{x} \\in \\mathbb{R}^p$. La **norme L1** (Manhattan) est $\\|\\mathbf{x}\\|_1 = \\sum_i |x_i|$, la **norme L2** (euclidienne) est $\\|\\mathbf{x}\\|_2 = \\sqrt{\\sum_i x_i^2}$. Pourquoi la régularisation **L1** (Lasso) tend-elle à produire des vecteurs de poids **creux** (sparse) ?",
+      "options": [
+        "La norme L1 est plus petite que la norme L2, donc les coefficients sont écrasés",
+        "L'isocourbe de la norme L1 est un losange à pointes : la solution optimale tombe souvent sur un sommet (où certaines coordonnées sont nulles)",
+        "La norme L1 force tous les coefficients à 0",
+        "C'est dû à la convexité de la fonction de coût"
+      ],
+      "correct": 1,
+      "difficulte": "expert",
+      "type": "conceptuel",
+      "tags": ["regularisation", "lasso", "ridge", "sparsity", "norme"],
+      "hint": "Pensez géométriquement : le lieu des points où $\\|\\mathbf{w}\\|_1 = c$ (constante) forme un losange en 2D, alors que $\\|\\mathbf{w}\\|_2 = c$ forme un cercle. Où se trouve l'intersection avec une ellipse représentant la fonction de coût ?",
+      "explanation": "L'isocourbe de la norme L1 en 2D est un **losange** (carré à 45°) avec des **pointes** sur les axes. Lorsqu'on cherche la solution optimale (minimisant la fonction de coût convexe sous la contrainte $\\|\\mathbf{w}\\|_1 \\leq c$), l'ellipse de niveau de la fonction de coût rencontre fréquemment le losange sur **un sommet** (= sur un axe), où certaines coordonnées sont nulles. C'est pourquoi le **Lasso fait de la sélection de features** automatique. La norme L2 (cercle) ne crée pas cet effet.",
+      "traps": "La norme L1 n'est PAS toujours plus petite que L2 (en fait, $\\|\\mathbf{x}\\|_1 \\geq \\|\\mathbf{x}\\|_2$). La régularisation ne force pas tout à 0 (sinon le modèle serait inutilisable), elle pousse SEULEMENT certains coefficients à 0. La convexité ne suffit pas (Ridge est aussi convexe et ne produit pas de sparsity).",
+      "references": "Cours J2, section 2.5 Régularisation L1/L2 (référence avancée)"
+    },
+
+    {
+      "id": "vec-expe-05",
+      "enonce": "Soit deux vecteurs orthonormaux $\\mathbf{u}, \\mathbf{v} \\in \\mathbb{R}^p$ (orthogonaux et de norme 1), et un vecteur arbitraire $\\mathbf{x}$. La **projection orthogonale** de $\\mathbf{x}$ sur le plan engendré par $\\mathbf{u}$ et $\\mathbf{v}$ est :",
+      "options": [
+        "$\\mathbf{x} \\cdot (\\mathbf{u} + \\mathbf{v})$",
+        "$(\\mathbf{x}^T \\mathbf{u}) \\cdot \\mathbf{u} + (\\mathbf{x}^T \\mathbf{v}) \\cdot \\mathbf{v}$",
+        "$\\frac{\\mathbf{x}^T \\mathbf{u}}{\\|\\mathbf{u}\\|^2} \\cdot \\mathbf{u} + \\frac{\\mathbf{x}^T \\mathbf{v}}{\\|\\mathbf{v}\\|^2} \\cdot \\mathbf{v}$",
+        "$(\\mathbf{u} + \\mathbf{v})^T \\mathbf{x}$"
+      ],
+      "correct": 1,
+      "difficulte": "expert",
+      "type": "formule",
+      "tags": ["projection", "pca", "base-orthonormale", "geometrie"],
+      "hint": "Quand les vecteurs $\\mathbf{u}$ et $\\mathbf{v}$ sont **unitaires** ($\\|\\mathbf{u}\\| = \\|\\mathbf{v}\\| = 1$), la formule de projection se simplifie. De plus, l'orthogonalité permet de projeter sur chaque vecteur indépendamment.",
+      "explanation": "La projection orthogonale sur un sous-espace engendré par une **base orthonormale** $(\\mathbf{u}, \\mathbf{v})$ est la somme des projections sur chaque vecteur : $\\text{proj}(\\mathbf{x}) = (\\mathbf{x}^T \\mathbf{u}) \\mathbf{u} + (\\mathbf{x}^T \\mathbf{v}) \\mathbf{v}$. Les coefficients $\\mathbf{x}^T \\mathbf{u}$ et $\\mathbf{x}^T \\mathbf{v}$ sont les **coordonnées de $\\mathbf{x}$ dans la base $(\\mathbf{u}, \\mathbf{v})$**. C'est exactement ce que fait la **PCA** : projeter les données sur les composantes principales (vecteurs propres orthonormaux).",
+      "traps": "L'option C avec $\\|\\mathbf{u}\\|^2$ au dénominateur serait correcte pour des vecteurs orthogonaux quelconques (non nécessairement unitaires), mais ici les vecteurs sont **orthonormés** donc $\\|\\mathbf{u}\\|^2 = 1$ : on peut simplifier. L'option A multiplie un scalaire par un vecteur (notation incorrecte). L'option D donne un scalaire, pas un vecteur (ce n'est pas une projection).",
+      "references": "Cours J1, section 1.6 Projections et PCA (référence avancée)"
+    }
+
+  ]
+}

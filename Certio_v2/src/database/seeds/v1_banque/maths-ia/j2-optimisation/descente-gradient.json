@@ -1,0 +1,406 @@
+{
+  "_meta": {
+    "module": "maths-ia",
+    "chapitre": "j2-optimisation",
+    "theme": "descente-gradient",
+    "module_label": "Mathématiques appliquées à l'IA",
+    "chapitre_label": "Jour 2 — Optimisation",
+    "theme_label": "Descente de gradient",
+    "version": "1.0.0",
+    "created_at": "2026-04-21T13:00:00+02:00",
+    "created_by": "system",
+    "license": "CC BY-NC-SA 4.0 — Mohamed EL AFRIT — IPSSI",
+    "total_questions": 20,
+    "difficulty_distribution": {
+      "facile": 5,
+      "moyen": 5,
+      "difficile": 5,
+      "expert": 5
+    },
+    "comment": "Algorithme phare du Jour 2 : la descente de gradient. Couvre l'intuition (montagne les yeux bandés), la formule de mise à jour, une itération concrète sur le fil rouge, les variantes (batch/SGD/mini-batch), la convergence, et les optimiseurs modernes (momentum, Adam). Prépare J3 (classification avec perceptron) et J4 (backpropagation, entraînement de réseaux)."
+  },
+
+  "questions": [
+
+    {
+      "id": "dgd-faci-01",
+      "enonce": "Quelle est l'**intuition** centrale de la descente de gradient ? (Analogie classique du cours)",
+      "options": [
+        "Calculer la dérivée puis résoudre $f'(x) = 0$ analytiquement",
+        "Descendre une montagne les yeux bandés, en palpant la pente autour de soi et en faisant des petits pas dans la direction de la plus forte descente",
+        "Essayer aléatoirement des valeurs de $\\mathbf{w}$ et garder la meilleure",
+        "Tirer au sort les paramètres selon une loi gaussienne"
+      ],
+      "correct": 1,
+      "difficulte": "facile",
+      "type": "conceptuel",
+      "tags": ["intuition", "analogie", "descente"],
+      "hint": "L'analogie classique : imaginez-vous en haut d'une montagne, brouillard épais (vous ne voyez rien au loin), et vous voulez atteindre le point le plus bas. Comment faire ?",
+      "explanation": "La descente de gradient imite un randonneur qui veut descendre une montagne dans le brouillard. À chaque pas : (1) il **sent la pente** autour de lui (= calcul du gradient localement) ; (2) il fait un **petit pas dans la direction de la plus forte descente** (= $-\\nabla J$) ; (3) il répète. C'est un algorithme **itératif** et **local** (on utilise uniquement l'information locale du gradient). Pas besoin de résoudre analytiquement (souvent impossible en grande dimension ou avec des fonctions complexes).",
+      "traps": "Option A est l'approche analytique (équations normales) — elle marche pour la régression linéaire simple, mais devient INFAISABLE en deep learning (millions de paramètres). Les options C et D (tirage aléatoire) sont trop inefficaces : la descente de gradient est INFINIMENT plus rapide en pratique.",
+      "references": "Cours J2, section 2.5 Intuition de la descente de gradient"
+    },
+
+    {
+      "id": "dgd-faci-02",
+      "enonce": "Quelle est la **formule de mise à jour** des paramètres dans la descente de gradient ?",
+      "options": [
+        "$\\boldsymbol{\\theta} \\leftarrow \\boldsymbol{\\theta} + \\alpha \\nabla J(\\boldsymbol{\\theta})$",
+        "$\\boldsymbol{\\theta} \\leftarrow \\boldsymbol{\\theta} - \\alpha \\nabla J(\\boldsymbol{\\theta})$",
+        "$\\boldsymbol{\\theta} \\leftarrow \\alpha \\cdot \\boldsymbol{\\theta}$",
+        "$\\boldsymbol{\\theta} \\leftarrow \\nabla J(\\boldsymbol{\\theta})$"
+      ],
+      "correct": 1,
+      "difficulte": "facile",
+      "type": "formule",
+      "tags": ["formule", "mise-a-jour", "algorithme"],
+      "hint": "Le gradient pointe vers la plus forte CROISSANCE. Pour DIMINUER la fonction de coût, on va dans la direction OPPOSÉE. D'où le signe ?",
+      "explanation": "$\\boldsymbol{\\theta} \\leftarrow \\boldsymbol{\\theta} - \\alpha \\nabla J(\\boldsymbol{\\theta})$. Le **signe négatif** est CRUCIAL : il indique qu'on va dans la direction OPPOSÉE au gradient (qui pointe vers la plus forte croissance), donc dans la direction de plus forte DÉCROISSANCE de $J$. $\\alpha > 0$ est le **taux d'apprentissage** (learning rate, à régler avec soin, thème suivant).",
+      "traps": "L'option A (signe $+$) ferait de la **montée** de gradient : $J$ augmenterait ! Erreur FATALE qui ferait diverger l'algorithme. Option C ne fait aucun sens dimensionnel. Option D ignore l'état actuel $\\boldsymbol{\\theta}$.",
+      "references": "Cours J2, section 2.5 Formule de mise à jour"
+    },
+
+    {
+      "id": "dgd-faci-03",
+      "enonce": "Dans la formule $\\boldsymbol{\\theta} \\leftarrow \\boldsymbol{\\theta} - \\alpha \\nabla J$, que représente $\\alpha$ (alpha) ?",
+      "options": [
+        "Le nombre d'itérations maximum",
+        "Le **taux d'apprentissage** (learning rate), un hyperparamètre qui contrôle la taille des pas",
+        "La précision de convergence",
+        "Le nombre de paramètres à optimiser"
+      ],
+      "correct": 1,
+      "difficulte": "facile",
+      "type": "conceptuel",
+      "tags": ["learning-rate", "hyperparametre", "alpha"],
+      "hint": "Plus $\\alpha$ est grand, plus les pas sont grands (et risque d'osciller) ; plus $\\alpha$ est petit, plus on est prudent (mais lent).",
+      "explanation": "$\\alpha$ est le **taux d'apprentissage** (learning rate), un **hyperparamètre** (à régler manuellement, pas appris). Typiquement $\\alpha \\in [10^{-5}, 10^{-1}]$ selon le problème. Intuition : $\\alpha$ contrôle la **taille des pas** du randonneur. Trop grand → il peut sauter par-dessus le fond du bol (divergence). Trop petit → il met une éternité à arriver en bas (convergence lente). Le choix de $\\alpha$ est étudié en détail dans le thème suivant.",
+      "traps": "Le nombre d'itérations est un AUTRE hyperparamètre (souvent noté `num_epochs` ou `max_iter`). La précision est un critère d'arrêt. Le nombre de paramètres est fixé par le modèle, pas un hyperparamètre d'optimisation.",
+      "references": "Cours J2, section 2.5 Taux d'apprentissage alpha"
+    },
+
+    {
+      "id": "dgd-faci-04",
+      "enonce": "Dans quel **ordre** doivent se faire les opérations lors d'UNE itération de descente de gradient ?",
+      "options": [
+        "1) Mettre à jour $\\boldsymbol{\\theta}$ ; 2) Calculer le gradient",
+        "1) Calculer le gradient $\\nabla J(\\boldsymbol{\\theta})$ ; 2) Mettre à jour $\\boldsymbol{\\theta}$ avec la formule",
+        "1) Calculer la fonction de coût ; 2) Diviser par le nombre d'itérations",
+        "1) Tirer un $\\boldsymbol{\\theta}$ au hasard ; 2) Vérifier s'il est bon"
+      ],
+      "correct": 1,
+      "difficulte": "facile",
+      "type": "conceptuel",
+      "tags": ["algorithme", "ordre", "iteration"],
+      "hint": "Logique : il faut d'abord SAVOIR dans quelle direction aller (gradient), puis FAIRE le pas.",
+      "explanation": "**Ordre d'une itération** : (1) Calculer le gradient $\\nabla J$ au point courant $\\boldsymbol{\\theta}$ ; (2) Mettre à jour : $\\boldsymbol{\\theta} \\leftarrow \\boldsymbol{\\theta} - \\alpha \\nabla J$. On répète jusqu'à convergence (gradient proche de zéro, ou coût qui ne diminue plus). Pseudo-code :\n```\nwhile not converged:\n    grad = compute_gradient(J, theta)\n    theta = theta - alpha * grad\n```",
+      "traps": "Inverser l'ordre (option A) n'a pas de sens : on a besoin du gradient AU POINT COURANT pour savoir comment se déplacer. La fonction de coût seule (option C) ne suffit pas pour la mise à jour. Le tirage aléatoire (option D) n'est pas la descente de gradient.",
+      "references": "Cours J2, section 2.5 Algorithme pas à pas"
+    },
+
+    {
+      "id": "dgd-faci-05",
+      "enonce": "Pour la régression linéaire simple $\\hat{y} = wx + b$, on a calculé le gradient au point $(w = 2, b = 5)$ : $\\nabla J = (-40, -10)$. Avec $\\alpha = 0.01$, quelles sont les **nouvelles valeurs** de $(w, b)$ après UNE itération ?",
+      "options": [
+        "$(w, b) = (1.6, 4.9)$",
+        "$(w, b) = (2.4, 5.1)$",
+        "$(w, b) = (2 + 0.4, 5 + 0.1) = (2.4, 5.1)$",
+        "$(w, b) = (-38, -5)$"
+      ],
+      "correct": 1,
+      "difficulte": "facile",
+      "type": "calcul",
+      "tags": ["calcul-numerique", "mise-a-jour", "fil-rouge"],
+      "hint": "Appliquer la formule : $w \\leftarrow w - \\alpha \\cdot \\frac{\\partial J}{\\partial w}$ et pareil pour $b$. Attention au DOUBLE signe négatif ($-\\alpha \\times \\text{grad\\_negatif} = +$).",
+      "explanation": "Nouveau $w$ : $2 - 0.01 \\times (-40) = 2 + 0.4 = 2.4$. Nouveau $b$ : $5 - 0.01 \\times (-10) = 5 + 0.1 = 5.1$. Donc $(w, b) = (2.4, 5.1)$. **Intuition** : le gradient est négatif, donc on AUGMENTE les paramètres (double négatif = positif). Physiquement : le gradient négatif dit 'augmenter $w$ et $b$ va diminuer $J$', ce qui est cohérent.",
+      "traps": "L'option A ($(1.6, 4.9)$) correspond à $w - \\alpha \\cdot |gradient|$ (oubli du signe du gradient). L'option C est une réponse TROMPEUSE : calculs corrects mais écriture redondante. L'option D ($-38$) correspond à $w - \\alpha \\cdot \\nabla J$ avec oubli du facteur $\\alpha$.",
+      "references": "Cours J2, section 2.5 Exemple d'itération"
+    },
+
+    {
+      "id": "dgd-moye-01",
+      "enonce": "Pour la régression linéaire 1D, les formules de mise à jour détaillées sont $w \\leftarrow w - \\alpha \\cdot \\frac{\\partial J}{\\partial w}$ et $b \\leftarrow b - \\alpha \\cdot \\frac{\\partial J}{\\partial b}$. Avec MSE, quelles sont les expressions des gradients ?",
+      "options": [
+        "$\\frac{\\partial J}{\\partial w} = \\frac{2}{n}\\sum_i (\\hat{y}_i - y_i) x_i$ et $\\frac{\\partial J}{\\partial b} = \\frac{2}{n}\\sum_i (\\hat{y}_i - y_i)$",
+        "$\\frac{\\partial J}{\\partial w} = \\frac{\\partial J}{\\partial b} = 2 \\cdot \\text{MSE}$",
+        "$\\frac{\\partial J}{\\partial w} = \\text{MSE}$ et $\\frac{\\partial J}{\\partial b} = 0$",
+        "$\\frac{\\partial J}{\\partial w} = w$ et $\\frac{\\partial J}{\\partial b} = b$"
+      ],
+      "correct": 0,
+      "difficulte": "moyen",
+      "type": "formule",
+      "tags": ["mse", "gradient", "regression", "formule"],
+      "hint": "Dérivez $J = \\frac{1}{n}\\sum_i (y_i - \\hat{y}_i)^2$. Par la chain rule, $\\frac{\\partial}{\\partial w}(y_i - wx_i - b)^2 = 2(y_i - wx_i - b) \\cdot (-x_i)$, qu'on réécrit $-2(y_i - \\hat{y}_i) \\cdot x_i = 2(\\hat{y}_i - y_i) \\cdot x_i$.",
+      "explanation": "En dérivant la MSE : $\\frac{\\partial J}{\\partial w} = \\frac{2}{n}\\sum_i (\\hat{y}_i - y_i) x_i$ (pondéré par $x_i$ car $\\hat{y}_i$ dépend de $w$ via $w \\cdot x_i$) ; $\\frac{\\partial J}{\\partial b} = \\frac{2}{n}\\sum_i (\\hat{y}_i - y_i)$ (pas de $x_i$ car $\\frac{\\partial \\hat{y}_i}{\\partial b} = 1$). **Remarque** : on utilise souvent la convention $(\\hat{y}_i - y_i)$ plutôt que $-(y_i - \\hat{y}_i)$ pour faire disparaître le signe négatif.",
+      "traps": "Les gradients NE sont PAS égaux à la MSE elle-même. Ne pas oublier le facteur $x_i$ dans $\\partial J/\\partial w$ (vient de la dérivée interne). Option C : $\\partial J/\\partial b \\neq 0$ en général — c'est justement ce qui permet d'ajuster $b$.",
+      "references": "Cours J2, section 2.5 Gradients pour la régression"
+    },
+
+    {
+      "id": "dgd-moye-02",
+      "enonce": "Combien d'**itérations** la descente de gradient nécessite-t-elle typiquement pour converger pour la régression linéaire simple ?",
+      "options": [
+        "Toujours exactement 1 itération",
+        "Quelques dizaines à quelques milliers d'itérations (selon $\\alpha$ et la précision voulue)",
+        "Toujours plus de 1 million",
+        "Impossible à déterminer à l'avance"
+      ],
+      "correct": 1,
+      "difficulte": "moyen",
+      "type": "conceptuel",
+      "tags": ["convergence", "iterations", "pratique"],
+      "hint": "Pour la régression linéaire (problème convexe simple), la convergence est rapide. Mais pas instantanée (pas 1 pas, sauf méthode de Newton).",
+      "explanation": "Pour la régression linéaire, la descente de gradient converge en typiquement **quelques centaines à quelques milliers d'itérations** (ordre de grandeur $10^2$ à $10^4$), selon $\\alpha$ et le critère d'arrêt. En comparaison : (1) **1 itération** serait trop optimiste (seule la méthode de Newton peut faire cela pour du quadratique, en théorie). (2) **1 million** serait trop pessimiste pour un problème convexe simple (typique pour entraîner des grands réseaux de neurones, pas de la régression linéaire). (3) **Critère d'arrêt** en pratique : variation relative du coût < seuil, ou norme du gradient < seuil, ou nombre max d'itérations atteint.",
+      "traps": "1 itération suffit UNIQUEMENT si on démarre déjà au minimum (cas dégénéré). 1 million est excessif pour un problème aussi simple. La convergence est prédictible (pas indéterminée) pour les fonctions convexes.",
+      "references": "Cours J2, section 2.5 Convergence en pratique"
+    },
+
+    {
+      "id": "dgd-moye-03",
+      "enonce": "On distingue 3 variantes de la descente de gradient : **batch**, **stochastique (SGD)** et **mini-batch**. Quelle est la différence principale ?",
+      "options": [
+        "La valeur de $\\alpha$ utilisée",
+        "Le nombre d'exemples utilisés pour calculer le gradient à chaque itération : batch = TOUT le dataset, SGD = 1 seul exemple, mini-batch = un petit lot (ex : 32)",
+        "La fonction de coût utilisée",
+        "Le langage de programmation"
+      ],
+      "correct": 1,
+      "difficulte": "moyen",
+      "type": "conceptuel",
+      "tags": ["variantes", "batch", "sgd", "mini-batch"],
+      "hint": "Le nom 'stochastique' vient de 'randomness' : on choisit 1 exemple AU HASARD à chaque itération pour estimer le gradient.",
+      "explanation": "**(1) Batch gradient descent** : calcule $\\nabla J$ sur TOUT le dataset à chaque itération. Coût par itération : $O(n)$. Peu de variance mais très lent si $n$ est grand. **(2) SGD (stochastique)** : utilise 1 seul exemple aléatoire. Coût par itération : $O(1)$. Très rapide mais gradient bruité (oscillations). **(3) Mini-batch** : utilise un lot de taille $B$ (typiquement 32, 64, 128). Coût : $O(B)$. **Compromis idéal** : suffisamment rapide, gradient moins bruité, exploite le parallélisme GPU. En deep learning, on utilise presque TOUJOURS du mini-batch.",
+      "traps": "$\\alpha$ est le learning rate, orthogonal aux variantes. La fonction de coût peut être la même pour toutes les variantes. Le langage n'a rien à voir.",
+      "references": "Cours J2, section 2.5 Variantes de la descente de gradient"
+    },
+
+    {
+      "id": "dgd-moye-04",
+      "enonce": "Pour implémenter la descente de gradient **from scratch** en Python (régression linéaire simple), quel squelette de code est correct ?",
+      "options": [
+        "```python\nfor _ in range(num_iter):\n    y_pred = w * X + b\n    dw = (2/n) * np.sum((y_pred - y) * X)\n    db = (2/n) * np.sum(y_pred - y)\n    w -= alpha * dw\n    b -= alpha * db\n```",
+        "```python\nw = np.linalg.inv(X.T @ X) @ X.T @ y\n```",
+        "```python\nfor _ in range(num_iter):\n    w += alpha * np.sum(X)\n    b += alpha * np.sum(y)\n```",
+        "```python\nfor _ in range(num_iter):\n    dw = gradient_aleatoire()\n    w -= alpha * dw\n```"
+      ],
+      "correct": 0,
+      "difficulte": "moyen",
+      "type": "code",
+      "tags": ["python", "implementation", "code", "from-scratch"],
+      "hint": "L'algorithme : pour chaque itération, calculer les prédictions, calculer les gradients de MSE par rapport à $w$ et $b$, puis mettre à jour avec $-\\alpha \\cdot$ gradient.",
+      "explanation": "Le code correct suit exactement l'algorithme : (1) calcul des prédictions `y_pred = w * X + b`, (2) calcul des gradients selon les formules dérivées (dgd-moye-01), (3) mise à jour avec signe négatif. Boucle `for _ in range(num_iter)`. **Optimisations possibles** (pour aller plus loin) : utiliser `np.mean()` au lieu de `np.sum() / n`, utiliser des vecteurs pour la régression multiple, ajouter un critère d'arrêt basé sur la variation de $J$.",
+      "traps": "L'option B est la solution ANALYTIQUE (équations normales), pas la descente de gradient. L'option C utilise de mauvaises formules (pas de calcul de gradient, utilise `np.sum(X)` sans erreur). L'option D utilise un gradient aléatoire (aberrant).",
+      "references": "Cours J2, section 2.5 Implémentation Python from scratch"
+    },
+
+    {
+      "id": "dgd-moye-05",
+      "enonce": "On trace la **courbe d'apprentissage** : évolution de $J(\\boldsymbol{\\theta})$ au fil des itérations. Quelle forme attend-on si tout va bien (convexe + bon $\\alpha$) ?",
+      "options": [
+        "Courbe croissante (la fonction de coût augmente)",
+        "Courbe décroissante qui tend vers un palier (plateau = convergence)",
+        "Courbe qui oscille indéfiniment sans tendance",
+        "Courbe constante (rien ne change)"
+      ],
+      "correct": 1,
+      "difficulte": "moyen",
+      "type": "conceptuel",
+      "tags": ["courbe-apprentissage", "convergence", "diagnostic"],
+      "hint": "La descente de gradient fait DIMINUER $J$ à chaque itération (théoriquement pour un $\\alpha$ bien choisi). Elle approche asymptotiquement le minimum.",
+      "explanation": "**Courbe type 'exponentielle décroissante qui converge vers un palier'** : $J$ décroît rapidement au début (grandes valeurs de gradient), puis ralentit (gradient plus petit près du minimum) et tend vers la valeur optimale $J^*$. Cette courbe est l'**outil de diagnostic** principal : (1) Croissante → divergence ($\\alpha$ trop grand). (2) Oscille → $\\alpha$ encore trop grand. (3) Décroît mais trop lentement → $\\alpha$ trop petit. (4) Décroît en plateau → OK, convergence. Une règle de pouce : on trace $J$ sur une échelle LOG pour mieux voir la convergence finale.",
+      "traps": "Une courbe croissante indique une DIVERGENCE (option A : faux, signe de problème). Oscillations = $\\alpha$ mal choisi (problème à diagnostiquer). Constante = l'algorithme ne fait rien (souvent $\\alpha = 0$ ou bug).",
+      "references": "Cours J2, section 2.5 Diagnostic par courbe d'apprentissage"
+    },
+
+    {
+      "id": "dgd-diff-01",
+      "enonce": "On exécute une descente de gradient avec $\\alpha = 0.1$ sur $J(w) = w^2 + 4w + 3$, en partant de $w_0 = 0$. Que vaut $w$ après UNE itération ?",
+      "options": [
+        "$w_1 = -0.4$",
+        "$w_1 = +0.4$",
+        "$w_1 = -2$",
+        "$w_1 = 0$"
+      ],
+      "correct": 0,
+      "difficulte": "difficile",
+      "type": "calcul",
+      "tags": ["calcul-numerique", "iteration", "descente-1d"],
+      "hint": "Calculez $J'(w) = 2w + 4$, évaluez en $w_0 = 0$ (= 4), puis appliquez $w_1 = w_0 - \\alpha \\cdot J'(w_0)$.",
+      "explanation": "Étape 1 : $J'(w) = 2w + 4$. Étape 2 : $J'(0) = 4$. Étape 3 : $w_1 = 0 - 0.1 \\times 4 = -0.4$. **Vérification** : la fonction $J(w) = w^2 + 4w + 3 = (w+2)^2 - 1$ a son minimum en $w^* = -2$. Partant de $w_0 = 0$, on se déplace vers $w_1 = -0.4$, dans la BONNE direction (vers $-2$). Cohérent ! Après plusieurs itérations, on convergera vers $-2$.",
+      "traps": "L'option B ($+0.4$) oublie le signe négatif dans la formule (problème de montée de gradient). L'option C ($-2$) serait le minimum exact (atteint après beaucoup d'itérations, pas une seule). L'option D ($0$) ne bouge pas (faux car $J'(0) \\neq 0$).",
+      "references": "Cours J2, section 2.5 Calcul d'une itération 1D"
+    },
+
+    {
+      "id": "dgd-diff-02",
+      "enonce": "Pour le fil rouge avec $w = 2.07$, $b = 31.27$ et 30 développeurs, on calcule le gradient batch sur TOUT le dataset : $\\nabla J = (0.003, 0.001)$ (très petit !). Que conclure ?",
+      "options": [
+        "Il y a un bug dans le calcul",
+        "Le modèle a déjà (presque) convergé : les paramètres sont proches de l'optimum",
+        "Il faut augmenter $\\alpha$ drastiquement",
+        "Le gradient devrait être constant, c'est anormal"
+      ],
+      "correct": 1,
+      "difficulte": "difficile",
+      "type": "conceptuel",
+      "tags": ["convergence", "fil-rouge", "diagnostic", "gradient-petit"],
+      "hint": "Au minimum, la condition nécessaire est $\\nabla J \\approx 0$. Ici les gradients sont très proches de zéro. Que cela signifie-t-il ?",
+      "explanation": "Un gradient **très proche de zéro** signifie que l'on est **proche d'un point critique** (idéalement le minimum, puisque la régression est convexe). Interprétation : les paramètres $w = 2.07, b = 31.27$ sont ceux (presque) optimaux — ce sont d'ailleurs les valeurs annoncées pour le fil rouge, compatibles avec les équations normales. **Critère d'arrêt** typique : $\\|\\nabla J\\| < \\epsilon$ (ex : $\\epsilon = 10^{-4}$). Ici les gradients ~0.001-0.003 sont bien sous cette tolérance.",
+      "traps": "Pas de bug : un petit gradient est le signe ATTENDU de convergence. Augmenter $\\alpha$ risque de FAIRE SORTIR du minimum. Le gradient DIMINUE au cours de la descente (il n'est pas constant, sauf cas linéaire dégénéré).",
+      "references": "Cours J2, section 2.5 Critère de convergence"
+    },
+
+    {
+      "id": "dgd-diff-03",
+      "enonce": "Soit un graphique de la fonction de coût $J(\\boldsymbol{\\theta})$ en fonction du nombre d'itérations, avec une courbe qui OSCILLE (monte et descend alternativement). Quel est le diagnostic probable ?",
+      "options": [
+        "$\\alpha$ est trop petit",
+        "$\\alpha$ est trop grand : les pas sont si larges qu'on 'saute par-dessus' le minimum",
+        "Le modèle a trop peu de paramètres",
+        "Le dataset est trop petit"
+      ],
+      "correct": 1,
+      "difficulte": "difficile",
+      "type": "conceptuel",
+      "tags": ["learning-rate", "diagnostic", "oscillations", "divergence"],
+      "hint": "Imaginez un bol : si vous faites des pas ÉNORMES, vous ricochez d'un côté à l'autre du bol sans descendre. C'est l'image des oscillations.",
+      "explanation": "**Oscillations = $\\alpha$ trop grand**. Les pas sont si larges qu'à chaque itération, on passe par-dessus le minimum et on 'ricochet' de l'autre côté du bol. Diagnostic visuel : la courbe 'zigzague'. **Solution** : diviser $\\alpha$ par 2, 3 ou 10 et relancer. Règle empirique : partir de $\\alpha = 10^{-3}$ ou $10^{-2}$ et ajuster. **Cas extrême** : si $\\alpha$ est ENCORE plus grand, on peut même observer une DIVERGENCE (coût qui augmente systématiquement).",
+      "traps": "$\\alpha$ trop petit → courbe lente mais MONOTONE (pas d'oscillations). Le nombre de paramètres et la taille du dataset sont des choix de modèle, sans rapport direct avec les oscillations.",
+      "references": "Cours J2, section 2.5 Diagnostic du learning rate"
+    },
+
+    {
+      "id": "dgd-diff-04",
+      "enonce": "Pourquoi le **SGD (Stochastic Gradient Descent)** est-il parfois meilleur que le batch gradient descent, même s'il utilise une estimation bruitée du gradient ?",
+      "options": [
+        "Le bruit fait que SGD converge toujours au minimum global, même pour les fonctions non convexes",
+        "Le bruit injecté peut aider à ÉCHAPPER aux minima locaux peu profonds, et chaque itération est bien plus rapide ($O(1)$ vs $O(n)$)",
+        "SGD utilise moins de mémoire",
+        "SGD donne exactement la même solution que le batch, mais plus vite"
+      ],
+      "correct": 1,
+      "difficulte": "difficile",
+      "type": "conceptuel",
+      "tags": ["sgd", "convergence", "bruit", "minima-locaux"],
+      "hint": "En optimisation non convexe (deep learning), les minima locaux sont un problème. Le bruit de SGD peut 'secouer' l'optimisation pour s'échapper des mauvais minima locaux.",
+      "explanation": "**Avantages du SGD** : (1) **Échappe aux minima locaux peu profonds** : le bruit du gradient sur 1 exemple peut 'pousser' l'optimisation hors d'un mauvais minimum. (2) **Rapidité par itération** : $O(1)$ au lieu de $O(n)$ du batch. Sur un gros dataset ($n = 10^6$), on peut faire 1 million d'updates pour le coût d'un seul update batch. (3) **Exploration** : en deep learning, les fonctions de coût sont non convexes et le SGD explore mieux. **Inconvénient** : oscillations autour du minimum (on n'atteint jamais le minimum exact, on 'tourne autour'). Compromis résolu par mini-batch.",
+      "traps": "SGD NE garantit PAS la convergence au minimum global (c'est même parfois l'inverse, avec la stochasticité). La mémoire utilisée est similaire. SGD et batch NE donnent PAS la même solution (trajectoires et convergences différentes).",
+      "references": "Cours J2, section 2.5 Pourquoi SGD marche en pratique"
+    },
+
+    {
+      "id": "dgd-diff-05",
+      "enonce": "On dit que la **complexité computationnelle** de la descente de gradient par itération est $O(np)$ pour la régression linéaire. Pourquoi est-ce beaucoup mieux que la solution analytique $O(np^2 + p^3)$ en grande dimension ?",
+      "options": [
+        "Ce n'est pas mieux, au contraire",
+        "Quand $p$ est grand ($10^5$+), le terme $p^3$ explose : $10^{15}$ opérations sont infaisables. Le $O(np)$ reste gérable",
+        "Parce que la descente de gradient n'utilise pas de multiplications",
+        "Parce que la descente de gradient est exacte, pas approximative"
+      ],
+      "correct": 1,
+      "difficulte": "difficile",
+      "type": "conceptuel",
+      "tags": ["complexite", "scalabilite", "grande-dimension", "comparaison"],
+      "hint": "Comparez $O(np^2 + p^3)$ et $O(np)$ pour $n = 10^4$, $p = 10^5$. Que vaut chaque terme ?",
+      "explanation": "Pour $n = 10^4$, $p = 10^5$ : (1) **Analytique** : $np^2 = 10^{14}$, $p^3 = 10^{15}$ → TOTAL $\\sim 10^{15}$ opérations (infaisable). (2) **Descente de gradient** : $np = 10^9$ opérations par itération. Même avec 1000 itérations : $10^{12}$, soit **1000× moins** que l'analytique. Encore plus frappant : en batch pour $p = 10^6$ (texte / image), seule la descente de gradient est utilisable. **Moralité** : la descente de gradient est l'outil CROSS-ROUTE du ML moderne, précisément parce qu'elle passe à l'échelle.",
+      "traps": "Option A : l'inverse, c'est BEAUCOUP mieux en grande dimension. Option C : la descente de gradient utilise bien des multiplications (dans le calcul du gradient). Option D : les deux méthodes convergent vers la MÊME solution asymptotiquement, à précision donnée.",
+      "references": "Cours J2, section 2.6 Pourquoi la descente de gradient est indispensable"
+    },
+
+    {
+      "id": "dgd-expe-01",
+      "enonce": "L'optimiseur **Momentum** modifie la mise à jour classique en ajoutant une 'inertie'. La règle devient : $\\mathbf{v}_{t+1} = \\beta \\mathbf{v}_t + \\nabla J(\\boldsymbol{\\theta}_t)$ puis $\\boldsymbol{\\theta}_{t+1} = \\boldsymbol{\\theta}_t - \\alpha \\mathbf{v}_{t+1}$ (avec $\\beta \\in [0.9, 0.99]$). Quel est l'avantage principal ?",
+      "options": [
+        "Rend l'algorithme stochastique",
+        "Accélère la convergence dans les directions constantes et amortit les oscillations dans les directions changeantes (comme une boule qui roule avec inertie)",
+        "Garantit la convergence vers le minimum global",
+        "Réduit le nombre de paramètres du modèle"
+      ],
+      "correct": 1,
+      "difficulte": "expert",
+      "type": "conceptuel",
+      "tags": ["momentum", "optimiseur", "convergence", "j4-anticipation"],
+      "hint": "Pensez à une boule qui descend un terrain vallonné : l'inertie l'aide à traverser les zones plates et à ne pas s'arrêter sur des petits bosses.",
+      "explanation": "**Momentum = inertie** : $\\mathbf{v}$ accumule les gradients passés pondérés exponentiellement. **Effets** : (1) **Accélération dans les directions constantes** : si le gradient pointe toujours dans la même direction, $\\mathbf{v}$ grandit et les pas s'allongent. (2) **Amortissement des oscillations** : si le gradient change de signe (oscillations), les contributions s'annulent. (3) **Sortie de plateaux** : sur les zones peu pentues, l'inertie continue à pousser. Avec $\\beta = 0.9$, on donne un 'poids' de 90% au passé. **Variante populaire** : Nesterov momentum (encore plus rapide).",
+      "traps": "Le momentum NE rend PAS l'algo stochastique (orthogonal). Il ne GARANTIT PAS le minimum global (toujours dépendant de la convexité). Il ne touche pas aux paramètres du modèle (c'est une méthode d'optimisation).",
+      "references": "Cours J4, section 4.5 Momentum (référence avancée)"
+    },
+
+    {
+      "id": "dgd-expe-02",
+      "enonce": "L'optimiseur **Adam** combine Momentum et RMSprop. Il maintient deux moyennes mobiles : $\\mathbf{m}_t$ (1er moment, moyenne) et $\\mathbf{v}_t$ (2e moment, variance), et met à jour selon $\\boldsymbol{\\theta}_{t+1} = \\boldsymbol{\\theta}_t - \\alpha \\frac{\\hat{\\mathbf{m}}_t}{\\sqrt{\\hat{\\mathbf{v}}_t} + \\epsilon}$. Pourquoi Adam est-il si populaire en deep learning ?",
+      "options": [
+        "Il garantit la convergence en 1 itération",
+        "Il adapte automatiquement le taux d'apprentissage PAR PARAMÈTRE et combine inertie et normalisation, ce qui le rend robuste à des mauvais choix d'$\\alpha$",
+        "Il divise par deux le nombre de paramètres",
+        "Il remplace la fonction de coût par une plus simple"
+      ],
+      "correct": 1,
+      "difficulte": "expert",
+      "type": "conceptuel",
+      "tags": ["adam", "rmsprop", "optimiseur-adaptatif", "j4-anticipation"],
+      "hint": "La division par $\\sqrt{\\mathbf{v}_t}$ (variance) normalise le pas POUR CHAQUE PARAMÈTRE individuellement. Paramètre à fort gradient récent → pas plus petit. Paramètre à faible gradient → pas plus grand.",
+      "explanation": "**Adam (Adaptive Moment Estimation)** est le plus populaire en deep learning car : (1) **Adaptatif par paramètre** : chaque dimension a son propre 'effective learning rate' en fonction de l'historique récent des gradients. (2) **Inertie** (via $\\mathbf{m}_t$) qui amortit les oscillations. (3) **Normalisation** (via $\\sqrt{\\mathbf{v}_t}$) qui gère les features d'échelles différentes. (4) **Robuste** : fonctionne souvent 'out of the box' avec $\\alpha = 10^{-3}$, $\\beta_1 = 0.9$, $\\beta_2 = 0.999$. Introduit par Kingma & Ba (2014) — l'article est l'un des plus cités en IA ! **Limite** : parfois moins bonne généralisation que SGD pur avec learning rate schedule.",
+      "traps": "Adam ne converge JAMAIS en 1 itération (pas de magie). Il ne touche pas aux paramètres du modèle. Il utilise la même fonction de coût que la descente classique.",
+      "references": "Cours J4, section 4.5 Adam (référence avancée)"
+    },
+
+    {
+      "id": "dgd-expe-03",
+      "enonce": "En PyTorch, la boucle d'entraînement classique contient 4 opérations principales : (1) forward pass, (2) computation de la loss, (3) backward pass, (4) update des poids. Quel est le code correct ?",
+      "options": [
+        "```python\nfor batch in dataloader:\n    preds = model(batch.x)\n    loss = criterion(preds, batch.y)\n    loss.backward()\n    optimizer.step()\n    optimizer.zero_grad()\n```",
+        "```python\nfor batch in dataloader:\n    loss = criterion(batch.x, batch.y)\n    optimizer.step()\n```",
+        "```python\nfor batch in dataloader:\n    preds = model(batch.x)\n    loss = criterion(preds, batch.y)\n    optimizer.step()  # Sans backward !\n```",
+        "```python\nmodel.train_all(dataloader)\n```"
+      ],
+      "correct": 0,
+      "difficulte": "expert",
+      "type": "code",
+      "tags": ["pytorch", "code", "deep-learning", "j4-anticipation"],
+      "hint": "L'ordre est CRUCIAL : (1) prédictions, (2) loss, (3) gradients via backward, (4) step de l'optimiseur, (5) reset des gradients pour la prochaine itération.",
+      "explanation": "**Boucle PyTorch standard** :\n```python\nfor batch in dataloader:\n    optimizer.zero_grad()           # Reset gradients\n    preds = model(batch.x)          # Forward\n    loss = criterion(preds, batch.y) # Loss\n    loss.backward()                  # Backward (autodiff)\n    optimizer.step()                 # Update\n```\nOrdre : reset → forward → loss → backward → step. Le `zero_grad()` est crucial sinon les gradients s'accumulent entre batches (bug silencieux). `loss.backward()` calcule les gradients via autodiff reverse-mode (cf. der-expe-04).",
+      "traps": "Option B : aucun forward, aucun backward (la loss ne peut pas être calculée sans prédictions). Option C : pas de backward avant step (les gradients sont vides ou obsolètes, l'optimiseur ne fait rien d'utile). Option D : imaginaire (pas de méthode `train_all`).",
+      "references": "Cours J4, section 4.5 Boucle d'entraînement PyTorch"
+    },
+
+    {
+      "id": "dgd-expe-04",
+      "enonce": "Soit une descente de gradient sur une fonction **NON convexe** (typique en deep learning). Que se passe-t-il si le point de départ est **mal choisi** ?",
+      "options": [
+        "L'algorithme ne démarre pas",
+        "L'algorithme peut converger vers un minimum LOCAL sous-optimal, sans jamais atteindre le minimum global",
+        "L'algorithme converge toujours vers le minimum global, indépendamment du départ",
+        "Le gradient devient complexe (nombres complexes)"
+      ],
+      "correct": 1,
+      "difficulte": "expert",
+      "type": "conceptuel",
+      "tags": ["non-convexe", "minima-locaux", "initialisation", "j4-anticipation"],
+      "hint": "Une fonction non convexe a plusieurs 'bols' (minima locaux). Si on démarre dans le 'bol' d'un minimum local, la descente peut rester bloquée là, même si un autre bol plus profond existe ailleurs.",
+      "explanation": "En optimisation **non convexe** (réseaux de neurones profonds), la descente de gradient est un algo **local** : elle suit la pente depuis le point de départ et converge vers le PLUS PROCHE minimum local. Si celui-ci est sous-optimal, on reste coincé. **Solutions pratiques** : (1) **Plusieurs essais** avec des seeds différentes. (2) **Bonne initialisation** (Xavier, He) qui cible des zones 'saines' du paysage. (3) **Optimiseurs bruités** (SGD, Adam avec dropout) qui explorent. (4) **Restart** : relancer avec $\\alpha$ plus élevé. **Fait étonnant** : dans les réseaux over-parameterized (trop de paramètres), la plupart des minima locaux sont presque aussi bons que le minimum global. Ce fait empirique a aidé le deep learning à décoller.",
+      "traps": "L'algo démarre normalement (option A : faux). Aucune garantie de minimum global pour du non-convexe (option C : faux — c'est tout l'enjeu !). Les gradients restent réels (option D).",
+      "references": "Cours J4, section 4.5 Optimisation non convexe (référence avancée)"
+    },
+
+    {
+      "id": "dgd-expe-05",
+      "enonce": "Le **learning rate schedule** consiste à faire VARIER $\\alpha$ pendant l'entraînement (ex : le diviser par 10 tous les 30 epochs). Quelle est l'intuition derrière cette technique ?",
+      "options": [
+        "Économiser l'électricité du GPU",
+        "Au début : grand $\\alpha$ pour explorer rapidement. À la fin : petit $\\alpha$ pour affiner près du minimum sans sauter par-dessus",
+        "Compenser un bug de PyTorch",
+        "Augmenter la taille du dataset"
+      ],
+      "correct": 1,
+      "difficulte": "expert",
+      "type": "conceptuel",
+      "tags": ["learning-rate-schedule", "convergence-fine", "deep-learning", "j4-anticipation"],
+      "hint": "Comme un randonneur qui fait de grands pas sur le plat et de petits pas près du but pour ne pas le dépasser.",
+      "explanation": "**Learning rate schedule** : on varie $\\alpha$ au cours de l'entraînement. **Schemas classiques** : (1) **Step decay** : diviser $\\alpha$ par 10 tous les $K$ epochs. (2) **Exponential decay** : $\\alpha_t = \\alpha_0 \\cdot e^{-kt}$. (3) **Cosine annealing** : oscillation cosinus + décroissance. (4) **Cyclical LR** : alterner high-low. **Intuition** : Au début, on fait des pas larges pour explorer rapidement (la loss est loin du min, gradients grands). À la fin, on fait des petits pas pour affiner la convergence sans osciller ni sauter par-dessus le minimum. **En pratique** : TRÈS important pour obtenir de bons modèles en deep learning. Souvent le LR schedule fait 1-2% de différence en accuracy.",
+      "traps": "L'économie d'énergie GPU (option A) n'est PAS l'objectif (bien qu'un effet secondaire). PyTorch fonctionne parfaitement sans schedule (pas de bug à compenser). La taille du dataset est orthogonale.",
+      "references": "Cours J4, section 4.5 Learning rate scheduling (référence avancée)"
+    }
+
+  ]
+}

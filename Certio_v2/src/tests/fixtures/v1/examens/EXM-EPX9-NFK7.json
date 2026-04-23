@@ -1,0 +1,31 @@
+{
+    "id": "EXM-EPX9-NFK7",
+    "titre": "examen2",
+    "description": "",
+    "created_by": "FCB7-A7DN-VW46",
+    "status": "published",
+    "questions": [
+        "mat-faci-02",
+        "mat-faci-03",
+        "mat-faci-04",
+        "mat-faci-05",
+        "mat-faci-01",
+        "mat-diff-01",
+        "mat-diff-02",
+        "mat-expe-04",
+        "mat-expe-03",
+        "mat-expe-05",
+        "psc-faci-01"
+    ],
+    "duree_sec": 3600,
+    "date_ouverture": "2026-04-23T16:00:00.000Z",
+    "date_cloture": "2026-04-25T09:00:00.000Z",
+    "max_passages": 1,
+    "shuffle_questions": true,
+    "shuffle_options": true,
+    "show_correction_after": true,
+    "correction_delay_min": 0,
+    "access_code": "W328Y5",
+    "created_at": "2026-04-24T00:21:02+02:00",
+    "updated_at": "2026-04-24T00:21:15+02:00"
+}

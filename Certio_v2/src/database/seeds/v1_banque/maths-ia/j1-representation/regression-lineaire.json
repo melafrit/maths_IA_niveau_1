@@ -1,0 +1,402 @@
+{
+  "_meta": {
+    "module": "maths-ia",
+    "chapitre": "j1-representation",
+    "theme": "regression-lineaire",
+    "module_label": "Mathématiques appliquées à l'IA",
+    "chapitre_label": "Jour 1 — Représentation",
+    "theme_label": "Régression linéaire",
+    "version": "1.0.0",
+    "created_at": "2026-04-21T12:00:00+02:00",
+    "created_by": "system",
+    "license": "CC BY-NC-SA 4.0 — Mohamed EL AFRIT — IPSSI",
+    "total_questions": 20,
+    "difficulty_distribution": {
+      "facile": 5,
+      "moyen": 5,
+      "difficile": 5,
+      "expert": 5
+    },
+    "comment": "Questions QCM à choix unique (4 propositions, 1 seule correcte). Fil rouge : prédiction de salaire de développeurs (n=30, w=2.07, b=31.27, MSE=20.46). Anticipe J2 (descente de gradient) et prépare la transition vers les concepts de classification (J3) et réseaux (J4).",
+    "fil_rouge": {
+      "description": "Dataset de 30 développeurs : prédiction du salaire (k€) à partir de features (expérience, langages, etc.)",
+      "modele_simple": "salaire ≈ 2.07 × experience + 31.27",
+      "mse": 20.46,
+      "unite_mse": "(k€)²"
+    }
+  },
+
+  "questions": [
+
+    {
+      "id": "rgl-faci-01",
+      "enonce": "La régression linéaire **simple** (1 feature) cherche à modéliser la relation entre une variable explicative $x$ et une variable cible $y$ par une équation. Laquelle ?",
+      "options": [
+        "$\\hat{y} = w \\cdot x + b$",
+        "$\\hat{y} = w \\cdot x^2 + b$",
+        "$\\hat{y} = e^{wx} + b$",
+        "$\\hat{y} = \\sin(wx + b)$"
+      ],
+      "correct": 0,
+      "difficulte": "facile",
+      "type": "conceptuel",
+      "tags": ["definition", "modele", "lineaire"],
+      "hint": "Le mot 'linéaire' signifie que la prédiction est une fonction LINÉAIRE des paramètres et des features (pas de carré, pas d'exponentielle).",
+      "explanation": "La régression linéaire simple cherche la meilleure droite $\\hat{y} = w \\cdot x + b$ qui approxime les points $(x_i, y_i)$ du dataset. $w$ est la **pente** et $b$ le **biais** (ou intercept). Pour le fil rouge : $\\hat{\\text{salaire}} = 2.07 \\times \\text{experience} + 31.27$.",
+      "traps": "Les autres options correspondent à des modèles NON linéaires (quadratique, exponentiel, sinusoïdal). Le mot 'linéaire' est essentiel : il garantit la simplicité d'optimisation et l'interprétabilité.",
+      "references": "Cours J1, section 1.5 Régression linéaire — Modèle"
+    },
+
+    {
+      "id": "rgl-faci-02",
+      "enonce": "Pour le fil rouge (prédiction de salaire), on a trouvé $w = 2.07$ et $b = 31.27$ (en k€). Quel est le salaire **prédit** pour un développeur avec 6 ans d'expérience ?",
+      "options": ["43,69 k€", "37,27 k€", "12,42 k€", "62,54 k€"],
+      "correct": 0,
+      "difficulte": "facile",
+      "type": "calcul",
+      "tags": ["prediction", "fil-rouge", "calcul-numerique"],
+      "hint": "Appliquez la formule $\\hat{y} = 2.07 \\times x + 31.27$ avec $x = 6$.",
+      "explanation": "$\\hat{y} = 2.07 \\times 6 + 31.27 = 12.42 + 31.27 = 43.69$ k€. Le développeur avec 6 ans d'expérience est prédit à environ **43 690 €** de salaire annuel.",
+      "traps": "Ne pas oublier d'AJOUTER le biais $b = 31.27$ (option C donne juste $w \\times x = 12.42$, oubli classique). Ne pas multiplier par 2 par accident (option D). L'option B correspond au biais SEUL, sans tenir compte de l'expérience.",
+      "references": "Cours J1, section 1.5 Application au fil rouge"
+    },
+
+    {
+      "id": "rgl-faci-03",
+      "enonce": "Dans le modèle $\\hat{y} = w \\cdot x + b$, quelle est l'**unité** du paramètre $w$ pour le fil rouge (où $x$ est en années et $y$ en k€) ?",
+      "options": [
+        "k€/an (variation de salaire par année d'expérience)",
+        "années (durée d'apprentissage)",
+        "Sans unité (constante)",
+        "k€ × an (produit)"
+      ],
+      "correct": 0,
+      "difficulte": "facile",
+      "type": "conceptuel",
+      "tags": ["interpretation", "unite", "fil-rouge"],
+      "hint": "Pour que $w \\cdot x$ ait l'unité de $y$ (k€), quelle doit être l'unité de $w$ ?",
+      "explanation": "$w$ doit avoir l'unité **k€/an** pour que le produit $w \\cdot x$ (k€/an × an) donne bien des k€. Avec $w = 2.07$ k€/an, l'interprétation est : 'chaque année d'expérience supplémentaire ajoute en moyenne 2 070 € au salaire prédit'. C'est l'analyse dimensionnelle, fondamentale pour interpréter un modèle.",
+      "traps": "Toujours vérifier la cohérence des unités ! $w$ en années n'aurait aucun sens (le résultat serait en années²). Sans unité = on ne peut pas l'interpréter physiquement.",
+      "references": "Cours J1, section 1.5 Interprétation des coefficients"
+    },
+
+    {
+      "id": "rgl-faci-04",
+      "enonce": "Le **biais** $b$ (ou 'intercept') dans $\\hat{y} = w \\cdot x + b$ correspond à :",
+      "options": [
+        "La pente de la droite",
+        "La valeur prédite quand $x = 0$",
+        "L'erreur moyenne du modèle",
+        "Le nombre de points du dataset"
+      ],
+      "correct": 1,
+      "difficulte": "facile",
+      "type": "conceptuel",
+      "tags": ["biais", "intercept", "interpretation"],
+      "hint": "Substituez $x = 0$ dans l'équation $\\hat{y} = w \\cdot x + b$. Que reste-t-il ?",
+      "explanation": "Quand $x = 0$, $\\hat{y} = w \\cdot 0 + b = b$. Donc $b$ est la valeur prédite **à l'origine**. Pour le fil rouge : $b = 31.27$ k€ correspond au salaire prédit pour un développeur avec **0 année d'expérience** (un junior débutant). Géométriquement, c'est le point où la droite coupe l'axe des ordonnées.",
+      "traps": "La pente est $w$, pas $b$. L'erreur moyenne est calculée par la fonction de coût (MSE), pas par $b$. Le nombre de points du dataset est une dimension du problème, sans rapport avec le biais.",
+      "references": "Cours J1, section 1.5 Pente et biais"
+    },
+
+    {
+      "id": "rgl-faci-05",
+      "enonce": "Comment appelle-t-on l'**erreur de prédiction** sur un exemple, c'est-à-dire la différence $y_i - \\hat{y}_i$ ?",
+      "options": [
+        "Le résidu",
+        "Le coefficient",
+        "La pente",
+        "Le poids"
+      ],
+      "correct": 0,
+      "difficulte": "facile",
+      "type": "conceptuel",
+      "tags": ["residu", "erreur", "vocabulaire"],
+      "hint": "Le terme exact en statistique est lié à 'ce qui reste' après prédiction.",
+      "explanation": "Le **résidu** $r_i = y_i - \\hat{y}_i$ est l'écart entre la vraie valeur et la prédiction du modèle. Si $r_i > 0$ : le modèle sous-estime ; si $r_i < 0$ : le modèle surestime. La fonction de coût MSE est essentiellement la **moyenne des résidus au carré** : $\\text{MSE} = \\frac{1}{n}\\sum_i r_i^2$.",
+      "traps": "Le coefficient est une autre notion (un paramètre du modèle, $w$ ou $b$). La pente est $w$ spécifiquement. Le poids est synonyme de 'paramètre' (souvent utilisé en deep learning).",
+      "references": "Cours J1, section 1.5 Résidus et erreurs"
+    },
+
+    {
+      "id": "rgl-moye-01",
+      "enonce": "On passe à la régression linéaire **multiple** (plusieurs features). Pour le fil rouge avec 5 features (expérience, langages, niveau études, taille entreprise, % télétravail), le modèle s'écrit :",
+      "options": [
+        "$\\hat{y} = w_1 x_1 + w_2 x_2 + w_3 x_3 + w_4 x_4 + w_5 x_5 + b$",
+        "$\\hat{y} = (w_1 x_1) \\cdot (w_2 x_2) \\cdots (w_5 x_5)$",
+        "$\\hat{y} = w \\cdot (x_1 + x_2 + x_3 + x_4 + x_5) + b$",
+        "$\\hat{y} = w \\cdot \\max(x_1, x_2, x_3, x_4, x_5) + b$"
+      ],
+      "correct": 0,
+      "difficulte": "moyen",
+      "type": "formule",
+      "tags": ["multiple", "formule", "fil-rouge"],
+      "hint": "Chaque feature a son PROPRE coefficient (poids), et on additionne toutes les contributions.",
+      "explanation": "La régression linéaire multiple ajoute **une combinaison linéaire** des features : chaque $x_j$ a son propre poids $w_j$. Forme matricielle : $\\hat{y} = \\mathbf{w}^T \\mathbf{x} + b$ où $\\mathbf{w} = (w_1, \\ldots, w_p)$ et $\\mathbf{x} = (x_1, \\ldots, x_p)$. Pour le fil rouge à 5 features, on a 5 poids + 1 biais = **6 paramètres** à apprendre.",
+      "traps": "L'option B utilise un PRODUIT de tous les termes (modèle multiplicatif, NON linéaire). L'option C n'a qu'un seul $w$ commun (ne peut pas distinguer l'importance des features). L'option D utilise un max (fonction non linéaire, perd l'info des autres features).",
+      "references": "Cours J1, section 1.5 Régression multiple"
+    },
+
+    {
+      "id": "rgl-moye-02",
+      "enonce": "On a entraîné un modèle sur le fil rouge et obtenu $\\mathbf{w} = (2.0, 1.5, -0.3)$ pour les features (expérience, langages, % télétravail) et $b = 30$. Quel est le salaire prédit pour un développeur avec 5 ans d'expérience, 4 langages et 50% de télétravail ?",
+      "options": ["31 k€", "46 k€", "61 k€", "27 k€"],
+      "correct": 0,
+      "difficulte": "moyen",
+      "type": "calcul",
+      "tags": ["multiple", "prediction", "fil-rouge", "calcul-numerique"],
+      "hint": "$\\hat{y} = w_1 x_1 + w_2 x_2 + w_3 x_3 + b$. Attention au signe de $w_3$ et au % télétravail (50, pas 0.5).",
+      "explanation": "$\\hat{y} = 2.0 \\times 5 + 1.5 \\times 4 + (-0.3) \\times 50 + 30 = 10 + 6 - 15 + 30 = 31$ k€. Le télétravail tire le salaire vers le bas (-15 k€) car $w_3 < 0$, mais le total reste positif grâce aux autres contributions.",
+      "traps": "Ne pas oublier le signe NÉGATIF de $w_3 = -0.3$. Ne pas confondre 50% avec 0.5 (le % télétravail est codé comme 50, pas comme une fraction). Ne pas oublier le biais $b = 30$.",
+      "references": "Cours J1, section 1.5 Calcul d'une prédiction"
+    },
+
+    {
+      "id": "rgl-moye-03",
+      "enonce": "La **fonction de coût MSE** (Mean Squared Error) pour la régression linéaire est :",
+      "options": [
+        "$\\text{MSE} = \\frac{1}{n}\\sum_{i=1}^n (y_i - \\hat{y}_i)$",
+        "$\\text{MSE} = \\frac{1}{n}\\sum_{i=1}^n (y_i - \\hat{y}_i)^2$",
+        "$\\text{MSE} = \\frac{1}{n}\\sum_{i=1}^n |y_i - \\hat{y}_i|$",
+        "$\\text{MSE} = \\sum_{i=1}^n (y_i - \\hat{y}_i)^2$"
+      ],
+      "correct": 1,
+      "difficulte": "moyen",
+      "type": "formule",
+      "tags": ["mse", "fonction-cout", "formule"],
+      "hint": "MSE = Mean (moyenne) Squared (au carré) Error (erreur). Lisez le sigle : trois mots-clés.",
+      "explanation": "La MSE est la **moyenne** des **erreurs au carré** : $\\text{MSE} = \\frac{1}{n}\\sum_{i=1}^n (y_i - \\hat{y}_i)^2$. Le **carré** garantit (1) que les erreurs positives et négatives ne se compensent pas, (2) que les grosses erreurs sont fortement pénalisées (dérivable, contrairement à la valeur absolue). Pour le fil rouge : MSE ≈ 20.46 (k€)², soit une erreur RMSE ≈ √20.46 ≈ 4.5 k€.",
+      "traps": "L'option A (sans le carré) donnerait toujours 0 (les erreurs positives et négatives se compensent à l'optimum). L'option C est la MAE (Mean Absolute Error), différente. L'option D oublie la division par n (donc somme, pas moyenne — appelée SSE, Sum of Squared Errors).",
+      "references": "Cours J1, section 1.5 Fonction de coût MSE"
+    },
+
+    {
+      "id": "rgl-moye-04",
+      "enonce": "En NumPy, on dispose de `X` (matrice $n \\times p$), `y` (vecteur $n$) et `w` (vecteur $p$). Quelle expression calcule le **vecteur des prédictions** ?",
+      "options": [
+        "`y_pred = X * w`",
+        "`y_pred = X @ w`",
+        "`y_pred = np.sum(X) * np.sum(w)`",
+        "`y_pred = X.T @ w`"
+      ],
+      "correct": 1,
+      "difficulte": "moyen",
+      "type": "code",
+      "tags": ["python", "numpy", "code", "vectorisation"],
+      "hint": "Pour un produit matriciel en NumPy, on utilise `@` (Python 3.5+) ou `np.dot()`. L'opérateur `*` est le produit Hadamard (composante par composante).",
+      "explanation": "`X @ w` calcule le produit matriciel $\\mathbf{X} \\mathbf{w}$ : matrice $(n, p)$ × vecteur $(p,)$ = vecteur $(n,)$ contenant les $n$ prédictions. C'est l'équivalent vectorisé de `[w @ X[i] for i in range(n)]`. NumPy le fait des centaines de fois plus vite grâce aux optimisations BLAS.",
+      "traps": "`X * w` fait du **broadcasting** Hadamard composante par composante (résultat de dimension $n \\times p$, FAUX !). `np.sum(X) * np.sum(w)` calcule juste deux sommes scalaires multipliées (sans signification). `X.T @ w` aurait des dimensions incompatibles ($p \\times n$ × vecteur $p$, ne marche pas).",
+      "references": "Cours J1, section 1.5 Vectorisation NumPy"
+    },
+
+    {
+      "id": "rgl-moye-05",
+      "enonce": "Pour notre modèle fil rouge, la MSE vaut 20.46 (k€)². Que vaut le **RMSE** (Root Mean Squared Error) et comment l'interpréter ?",
+      "options": [
+        "RMSE ≈ 4.5 k€ : l'erreur moyenne du modèle est d'environ 4 500 €",
+        "RMSE ≈ 20.46 k€ : c'est la même valeur que la MSE",
+        "RMSE ≈ 4.5 (k€)² : unité au carré",
+        "RMSE = MSE / n"
+      ],
+      "correct": 0,
+      "difficulte": "moyen",
+      "type": "calcul",
+      "tags": ["rmse", "mse", "interpretation", "fil-rouge"],
+      "hint": "RMSE = √MSE. Quel est l'intérêt de prendre la racine ?",
+      "explanation": "$\\text{RMSE} = \\sqrt{\\text{MSE}} = \\sqrt{20.46} \\approx 4.52$ k€. Le RMSE a la **même unité que la cible** $y$ (k€), contrairement à la MSE qui est en (k€)². Interprétation pratique : 'en moyenne, les prédictions du modèle s'écartent d'environ 4 500 € de la vraie valeur'. C'est beaucoup plus parlant pour communiquer avec des non-techniciens.",
+      "traps": "RMSE ≠ MSE (sans la racine, l'unité est au carré, peu interprétable). L'option C garde l'unité au carré (faux). RMSE n'est pas MSE/n (ce serait un calcul aberrant).",
+      "references": "Cours J1, section 1.5 RMSE et interprétation"
+    },
+
+    {
+      "id": "rgl-diff-01",
+      "enonce": "La **solution analytique** (équations normales) de la régression linéaire est $\\mathbf{w}^* = (\\mathbf{X}^T \\mathbf{X})^{-1} \\mathbf{X}^T \\mathbf{y}$. À quelle condition cette formule est-elle utilisable ?",
+      "options": [
+        "$\\mathbf{X}$ doit être carrée ($n = p$)",
+        "$\\mathbf{X}^T \\mathbf{X}$ doit être inversible (rang plein, $n \\geq p$ et features indépendantes)",
+        "$\\mathbf{X}$ doit contenir uniquement des valeurs positives",
+        "$n$ doit être un nombre premier"
+      ],
+      "correct": 1,
+      "difficulte": "difficile",
+      "type": "conceptuel",
+      "tags": ["equations-normales", "inversibilite", "rang", "fil-rouge"],
+      "hint": "Pour qu'une matrice soit inversible, son déterminant doit être non nul, ce qui équivaut à un rang plein.",
+      "explanation": "La formule $(\\mathbf{X}^T \\mathbf{X})^{-1}$ requiert que $\\mathbf{X}^T \\mathbf{X}$ soit inversible. Conditions : (1) $n \\geq p$ (au moins autant d'observations que de features) ; (2) les colonnes de $\\mathbf{X}$ sont **linéairement indépendantes** (pas de **multicolinéarité parfaite**). Pour le fil rouge ($n=30$, $p=5$), on a bien $n \\gg p$ et tant que les features ne sont pas redondantes (ex : 'âge en années' et 'âge en mois'), ça marche.",
+      "traps": "Pas besoin de $\\mathbf{X}$ carrée ($n=p$). Les valeurs négatives sont parfaitement OK (la régression accepte n'importe quelles valeurs réelles). $n$ premier n'a aucun lien avec l'algèbre linéaire.",
+      "references": "Cours J1, section 1.5 Conditions des équations normales"
+    },
+
+    {
+      "id": "rgl-diff-02",
+      "enonce": "Sur le dataset fil rouge ($n=30$ développeurs), on entraîne deux modèles : (A) régression linéaire simple sur l'expérience, (B) régression linéaire multiple sur **30 features** (toutes connues). Que peut-on prédire pour la MSE sur le **train set** ?",
+      "options": [
+        "MSE(A) < MSE(B) : le modèle simple est meilleur",
+        "MSE(A) = MSE(B) : pas de différence",
+        "MSE(A) ≥ MSE(B), avec MSE(B) potentiellement = 0 (interpolation parfaite)",
+        "Les deux MSE sont nécessairement égales à 20.46"
+      ],
+      "correct": 2,
+      "difficulte": "difficile",
+      "type": "conceptuel",
+      "tags": ["surapprentissage", "overfitting", "interpolation", "fil-rouge"],
+      "hint": "Avec autant de paramètres ($p$) que d'observations ($n$), on peut faire passer un modèle EXACTEMENT par tous les points. Que se passe-t-il alors sur le test set ?",
+      "explanation": "Avec $p = n = 30$ paramètres, le modèle a juste assez de degrés de liberté pour passer **exactement** par tous les points (interpolation), donc MSE(B) = 0 sur le train. C'est le **surapprentissage** (overfitting) extrême : le modèle a mémorisé le train mais sera CATASTROPHIQUE sur le test (généralisation nulle). Plus généralement : ajouter des features réduit toujours la MSE train mais peut détériorer la MSE test. C'est pourquoi on utilise des techniques de **régularisation** (Lasso, Ridge) et de **validation croisée**.",
+      "traps": "L'option A inverse la relation (sur le TRAIN, plus de paramètres = MSE plus basse). L'option B est fausse (B est strictement meilleure sur le train). L'option D ignore que ces sont des modèles DIFFÉRENTS, dont les MSE n'ont aucune raison d'être égales.",
+      "references": "Cours J1, section 1.5 Surapprentissage et limites"
+    },
+
+    {
+      "id": "rgl-diff-03",
+      "enonce": "Pour le fil rouge, on a obtenu $\\mathbf{w} = (2.0, 1.5, -0.3, 0.1, 0.05)$ pour 5 features (expérience, langages, niveau études, taille entreprise, % télétravail). Quelle feature a le **plus grand impact en valeur absolue** par unité ?",
+      "options": [
+        "L'expérience (w=2.0)",
+        "Les langages (w=1.5)",
+        "Les études (w=-0.3)",
+        "Impossible à dire sans connaître les UNITÉS et ÉCHELLES des features"
+      ],
+      "correct": 3,
+      "difficulte": "difficile",
+      "type": "conceptuel",
+      "tags": ["interpretation", "standardisation", "comparaison-features", "fil-rouge"],
+      "hint": "Si une feature varie de 0 à 1 et une autre de 0 à 10000, leurs coefficients ne sont pas directement comparables. Que faut-il faire avant de comparer ?",
+      "explanation": "Comparer $w_i$ directement N'A DE SENS que si les features ont la **même échelle**. Exemple : expérience (0-15 ans) vs % télétravail (0-100). Un coefficient de 2.0 sur l'expérience pèse 'plus' qu'un 0.05 sur le télétravail seulement parce que les valeurs absolues sont du même ordre. **Solution** : standardiser les features ($\\mathbf{x}_{std} = (\\mathbf{x} - \\boldsymbol{\\mu})/\\boldsymbol{\\sigma}$) AVANT l'entraînement. Alors les coefficients deviennent comparables (impact d'1 écart-type sur la cible).",
+      "traps": "Erreur classique : conclure que 'l'expérience est la feature la plus importante' juste parce que w=2.0 est le plus grand. C'est faux SANS standardisation préalable. Cette confusion mène à des conclusions abusives en analyse de modèle.",
+      "references": "Cours J1, section 1.7 Standardisation pour comparer les features"
+    },
+
+    {
+      "id": "rgl-diff-04",
+      "enonce": "Pour minimiser la MSE, on calcule sa **dérivée par rapport à $\\mathbf{w}$** et on l'annule. Quelle est l'expression du gradient de la MSE pour la régression linéaire ?",
+      "options": [
+        "$\\nabla_{\\mathbf{w}} \\text{MSE} = \\frac{2}{n} \\mathbf{X}^T (\\mathbf{X} \\mathbf{w} - \\mathbf{y})$",
+        "$\\nabla_{\\mathbf{w}} \\text{MSE} = \\mathbf{w} - \\mathbf{y}$",
+        "$\\nabla_{\\mathbf{w}} \\text{MSE} = \\mathbf{X}^T \\mathbf{y}$",
+        "$\\nabla_{\\mathbf{w}} \\text{MSE} = (\\mathbf{X} \\mathbf{w})^2$"
+      ],
+      "correct": 0,
+      "difficulte": "difficile",
+      "type": "formule",
+      "tags": ["gradient", "mse", "optimisation", "transition-j2"],
+      "hint": "Dérivez $\\text{MSE} = \\frac{1}{n}\\|\\mathbf{X}\\mathbf{w} - \\mathbf{y}\\|^2$ par rapport à $\\mathbf{w}$. Pensez à dériver $\\|\\cdot\\|^2$.",
+      "explanation": "$\\text{MSE}(\\mathbf{w}) = \\frac{1}{n} \\|\\mathbf{X}\\mathbf{w} - \\mathbf{y}\\|^2 = \\frac{1}{n}(\\mathbf{X}\\mathbf{w} - \\mathbf{y})^T(\\mathbf{X}\\mathbf{w} - \\mathbf{y})$. En dérivant : $\\nabla_{\\mathbf{w}} \\text{MSE} = \\frac{2}{n} \\mathbf{X}^T (\\mathbf{X}\\mathbf{w} - \\mathbf{y})$. En annulant ($\\nabla = 0$) : $\\mathbf{X}^T \\mathbf{X} \\mathbf{w} = \\mathbf{X}^T \\mathbf{y}$, ce qui donne $\\mathbf{w}^* = (\\mathbf{X}^T \\mathbf{X})^{-1} \\mathbf{X}^T \\mathbf{y}$ : les **équations normales** ! Cette formule du gradient est aussi la base de la **descente de gradient** (J2).",
+      "traps": "L'option B est trop simple, mauvaise dimension. L'option C est seulement un terme (sans $\\mathbf{X}^T \\mathbf{X} \\mathbf{w}$). L'option D donne un vecteur (pas un scalaire au carré dérivé), aberrant.",
+      "references": "Cours J1, section 1.5 Dérivation MSE → équations normales (transition J2)"
+    },
+
+    {
+      "id": "rgl-diff-05",
+      "enonce": "Le **coefficient de détermination** $R^2$ est défini par $R^2 = 1 - \\frac{\\sum(y_i - \\hat{y}_i)^2}{\\sum(y_i - \\bar{y})^2}$. Que vaut-il dans le cas idéal d'un modèle parfait, et que vaut-il pour un modèle qui prédit toujours la moyenne ?",
+      "options": [
+        "Modèle parfait : $R^2 = 0$ ; modèle moyenne : $R^2 = 1$",
+        "Modèle parfait : $R^2 = 1$ ; modèle moyenne : $R^2 = 0$",
+        "Modèle parfait : $R^2 = \\infty$ ; modèle moyenne : $R^2 = 0.5$",
+        "Modèle parfait : $R^2 = 100$ ; modèle moyenne : $R^2 = 0$"
+      ],
+      "correct": 1,
+      "difficulte": "difficile",
+      "type": "formule",
+      "tags": ["r-squared", "metrique", "interpretation"],
+      "hint": "Modèle parfait : $\\hat{y}_i = y_i$, donc $\\sum(y_i - \\hat{y}_i)^2 = 0$. Modèle moyenne : $\\hat{y}_i = \\bar{y}$, donc le numérateur EGAL le dénominateur.",
+      "explanation": "**Modèle parfait** : $\\hat{y}_i = y_i$ ⇒ numérateur = 0 ⇒ $R^2 = 1 - 0 = 1$. **Modèle 'baseline' (moyenne)** : $\\hat{y}_i = \\bar{y}$ ⇒ numérateur = dénominateur ⇒ $R^2 = 1 - 1 = 0$. Le $R^2$ s'interprète comme la **proportion de variance expliquée** par le modèle. Pour le fil rouge, un $R^2 \\approx 0.7$ signifie '70% de la variance des salaires est expliquée par les features utilisées'. Le $R^2$ peut être négatif si le modèle est PIRE que la baseline (ne pas confondre avec la corrélation au carré, qui est positive).",
+      "traps": "Inversion classique des bornes (parfait = 1, baseline = 0, pas l'inverse). Le $R^2$ n'est pas en pourcentage (sauf à le multiplier par 100 pour la communication). Le $R^2$ peut DESCENDRE en dessous de 0 si le modèle est moins bon que la moyenne.",
+      "references": "Cours J1, section 1.5 Coefficient de détermination R²"
+    },
+
+    {
+      "id": "rgl-expe-01",
+      "enonce": "On compare deux modèles sur le fil rouge : (A) régression linéaire simple, (B) régression polynomiale d'ordre 5 (avec termes $x, x^2, \\ldots, x^5$). Lequel est SUSCEPTIBLE de mieux généraliser sur des nouvelles données, et pourquoi ?",
+      "options": [
+        "Le modèle B (polynomial) est toujours meilleur car plus expressif",
+        "Le modèle A (simple) car le rasoir d'Occam favorise les modèles simples qui éviter le surapprentissage",
+        "Le modèle B grâce à son train MSE plus bas",
+        "Les deux modèles généralisent identiquement"
+      ],
+      "correct": 1,
+      "difficulte": "expert",
+      "type": "conceptuel",
+      "tags": ["bias-variance", "overfitting", "occam", "generalisation"],
+      "hint": "Pensez au compromis biais-variance. Plus de paramètres = moins de biais MAIS plus de variance.",
+      "explanation": "Le **rasoir d'Occam** : 'à performances égales, le modèle le plus simple généralise mieux'. Avec seulement 30 développeurs, un modèle polynomial d'ordre 5 capture le **bruit** du dataset (overfitting) — il aura une MSE train très basse mais une MSE test médiocre. Le modèle linéaire simple, plus contraint, est plus robuste. C'est le **compromis biais-variance** : modèle simple = haut biais / faible variance, modèle complexe = faible biais / haute variance. La meilleure généralisation est souvent à l'intersection (validation croisée).",
+      "traps": "Plus expressif ≠ meilleure généralisation (option A : faux, c'est l'origine du surapprentissage). Train MSE bas n'implique PAS test MSE bas (option C : confusion classique). Les deux modèles ne généralisent JAMAIS identiquement (option D).",
+      "references": "Cours J1, section 1.5 Compromis biais-variance (référence avancée)"
+    },
+
+    {
+      "id": "rgl-expe-02",
+      "enonce": "On entraîne une régression linéaire sur le fil rouge en incluant les features (expérience en années, expérience en mois). Quel problème va-t-on rencontrer avec les équations normales ?",
+      "options": [
+        "Le modèle convergera plus vite (redondance utile)",
+        "Multicolinéarité parfaite : $\\mathbf{X}^T \\mathbf{X}$ devient singulière, l'inverse N'EXISTE PAS",
+        "Le modèle sera plus précis car il a deux fois plus d'information sur l'expérience",
+        "L'expérience aura un coefficient nul"
+      ],
+      "correct": 1,
+      "difficulte": "expert",
+      "type": "conceptuel",
+      "tags": ["multicolinearite", "rang", "singularite", "fil-rouge"],
+      "hint": "L'expérience en mois est exactement 12 fois l'expérience en années. Que se passe-t-il pour les colonnes de $\\mathbf{X}$ ?",
+      "explanation": "Les deux colonnes sont **linéairement dépendantes** : exp_mois = 12 × exp_années. Donc le rang de $\\mathbf{X}$ est insuffisant, et $\\mathbf{X}^T \\mathbf{X}$ est **singulière** (déterminant = 0, non inversible). La formule $\\mathbf{w}^* = (\\mathbf{X}^T \\mathbf{X})^{-1} \\mathbf{X}^T \\mathbf{y}$ EXPLOSE. **Solutions** : (1) supprimer une des deux features, (2) utiliser la régularisation Ridge ($+ \\lambda \\mathbf{I}$ rend la matrice inversible), (3) utiliser la pseudo-inverse de Moore-Penrose. C'est pourquoi en pratique, on TOUJOURS vérifie la corrélation entre features avant l'entraînement.",
+      "traps": "La redondance n'aide PAS, elle CASSE le modèle (option A). Plus de features ne signifie pas plus précis si elles sont redondantes (option C). Le coefficient ne sera pas nul, il sera INDÉTERMINÉ (multiples solutions équivalentes).",
+      "references": "Cours J1, section 1.7 Multicolinéarité (référence avancée)"
+    },
+
+    {
+      "id": "rgl-expe-03",
+      "enonce": "En **scikit-learn**, le code `LinearRegression().fit(X, y)` utilise une variante des équations normales (en réalité une décomposition SVD pour la stabilité). Quelle est la **complexité algorithmique** dominante de cet appel ?",
+      "options": [
+        "$O(n)$ — linéaire en nombre d'observations",
+        "$O(np)$ — linéaire en taille du dataset",
+        "$O(np^2 + p^3)$ — coût SVD/équations normales",
+        "$O(n^3)$ — cubique en observations"
+      ],
+      "correct": 2,
+      "difficulte": "expert",
+      "type": "conceptuel",
+      "tags": ["complexite", "scikit-learn", "svd", "scalabilite"],
+      "hint": "Décomposez : $\\mathbf{X}^T \\mathbf{X}$ coûte $O(np^2)$, son inversion coûte $O(p^3)$. Quel est le total ?",
+      "explanation": "$\\mathbf{X}^T \\mathbf{X}$ : produit matriciel de matrices $p \\times n$ et $n \\times p$, coût $O(p \\cdot n \\cdot p) = O(np^2)$. Inversion (ou SVD) de la matrice $p \\times p$ : $O(p^3)$. Total : $O(np^2 + p^3)$. **Conséquence pratique** : la régression linéaire est **rapide** quand $p$ est petit (qq centaines), mais devient prohibitive en très grande dimension ($p > 10^4$). Pour le fil rouge ($p=5$), c'est instantané. Pour des datasets type NLP ($p$ pouvant être $10^5$+), on utilise plutôt la **descente de gradient** ($O(np)$ par itération, scalable).",
+      "traps": "$O(n)$ est trop optimiste (négligerait l'inversion). $O(np)$ correspond au coût d'UNE itération de gradient, pas aux équations normales. $O(n^3)$ confondrait les rôles de $n$ et $p$ (c'est le coût d'inverser $\\mathbf{X}\\mathbf{X}^T$ qui est $n \\times n$, mais ce n'est pas la formule utilisée).",
+      "references": "Cours J1, section 1.5 Coût computationnel (référence avancée)"
+    },
+
+    {
+      "id": "rgl-expe-04",
+      "enonce": "**Géométriquement**, la régression linéaire $\\hat{\\mathbf{y}} = \\mathbf{X}\\mathbf{w}$ projette le vecteur cible $\\mathbf{y} \\in \\mathbb{R}^n$ sur quel sous-espace ?",
+      "options": [
+        "Le sous-espace engendré par les LIGNES de $\\mathbf{X}$ (dans $\\mathbb{R}^p$)",
+        "Le sous-espace engendré par les COLONNES de $\\mathbf{X}$ (dans $\\mathbb{R}^n$)",
+        "Le plan orthogonal à $\\mathbf{X}$",
+        "Le sous-espace propre de $\\mathbf{X}^T \\mathbf{X}$"
+      ],
+      "correct": 1,
+      "difficulte": "expert",
+      "type": "conceptuel",
+      "tags": ["geometrie", "projection", "image-matrice", "interpretation"],
+      "hint": "$\\hat{\\mathbf{y}} = \\mathbf{X}\\mathbf{w}$ est une combinaison linéaire des colonnes de $\\mathbf{X}$ (avec les coefficients $w_j$).",
+      "explanation": "$\\hat{\\mathbf{y}} = \\sum_{j=1}^p w_j \\mathbf{x}^{(j)}$ où $\\mathbf{x}^{(j)}$ est la $j$-ième colonne de $\\mathbf{X}$. Donc $\\hat{\\mathbf{y}}$ vit dans **l'image** (column space) de $\\mathbf{X}$, sous-espace de $\\mathbb{R}^n$ de dimension au plus $p$. La régression cherche le point de cet espace le plus proche de $\\mathbf{y}$ (au sens MSE = distance euclidienne au carré). Géométriquement : c'est la **projection orthogonale** de $\\mathbf{y}$ sur ce sous-espace. Le **résidu** $\\mathbf{r} = \\mathbf{y} - \\hat{\\mathbf{y}}$ est orthogonal à chaque colonne de $\\mathbf{X}$ : $\\mathbf{X}^T \\mathbf{r} = \\mathbf{0}$, ce qui donne directement les équations normales.",
+      "traps": "Le sous-espace engendré par les LIGNES vit dans $\\mathbb{R}^p$ (l'espace des features), pas dans $\\mathbb{R}^n$. Le 'plan orthogonal à $\\mathbf{X}$' n'a pas de sens (X n'est pas un vecteur). Le sous-espace propre est lié aux valeurs propres, pas à l'image directe.",
+      "references": "Cours J1, section 1.5 Interprétation géométrique de la régression"
+    },
+
+    {
+      "id": "rgl-expe-05",
+      "enonce": "Pour évaluer rigoureusement les performances de notre modèle fil rouge, on ne se contente pas du train MSE. Quelle est la **bonne pratique** scientifique pour estimer la performance de généralisation ?",
+      "options": [
+        "Tester directement sur le train set (rapide)",
+        "Tester sur 1 nouveau développeur (intuitif)",
+        "Validation croisée k-fold (k=5 ou 10) ou train/val/test split",
+        "Calculer le R² sur le train uniquement"
+      ],
+      "correct": 2,
+      "difficulte": "expert",
+      "type": "conceptuel",
+      "tags": ["validation-croisee", "evaluation", "generalisation", "methodologie"],
+      "hint": "Pour estimer la performance sur des données NON VUES, il faut simuler ce scénario en cachant une partie des données pendant l'entraînement.",
+      "explanation": "**Validation croisée k-fold** : on découpe le dataset en $k$ blocs ('folds'), on entraîne $k$ fois en utilisant à chaque fois 1 fold pour le test et $k-1$ pour l'entraînement, puis on moyenne les performances. Pour $k=5$ avec le fil rouge ($n=30$) : 5 blocs de 6 développeurs. C'est la méthode **standard** en ML pour estimer la généralisation. Variante simple : split train/val/test (typiquement 60%/20%/20% ou 70%/15%/15%). En **scikit-learn** : `cross_val_score(model, X, y, cv=5)`.",
+      "traps": "Tester sur le train est INVALIDE (mesure ajustement, pas généralisation). 1 seul exemple test n'a aucune valeur statistique. Le R² train ne dit rien sur la généralisation (peut être 1 en cas d'overfitting parfait sur le train).",
+      "references": "Cours J1, section 1.6 Validation croisée et évaluation (référence avancée)"
+    }
+
+  ]
+}
